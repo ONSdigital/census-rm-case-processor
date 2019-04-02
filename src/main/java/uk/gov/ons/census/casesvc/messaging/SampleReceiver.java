@@ -1,6 +1,5 @@
 package uk.gov.ons.census.casesvc.messaging;
 
-import java.util.Random;
 import java.util.UUID;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.integration.annotation.MessageEndpoint;
@@ -68,6 +67,7 @@ public class SampleReceiver {
 
     rabbitTemplate.convertAndSend("myfanout.exchange", "", caseCreatedEvent);
 
+    // Enable the code below to prove that the DB txn and the Rabbit txn are part of the same txn
 //    Random random = new Random();
 //    int randomNumber = random.nextInt(1000);
 //    if (randomNumber > 2) {

@@ -42,6 +42,7 @@ public class Application {
       Jackson2JsonMessageConverter producerJackson2MessageConverter) {
     RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
     rabbitTemplate.setMessageConverter(producerJackson2MessageConverter);
+    rabbitTemplate.setChannelTransacted(true);
     return rabbitTemplate;
   }
 
