@@ -1,10 +1,6 @@
-logging:
-  level:
-    org.postgresql.jdbc: none
-
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:6432/postgres
+    url: jdbc:postgresql://localhost:15432/postgres
     username: postgres
     password: postgres
     driverClassName: org.postgresql.Driver
@@ -15,11 +11,11 @@ spring:
       ddl-auto: create-drop
     properties:
       hibernate:
-        default_schema: casesvcv2
+        default_schema: public
 
   rabbitmq:
     username: guest
     password: guest
     host: localhost
-    port: 6672
+    port: 35672
     virtualhost: /

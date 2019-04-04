@@ -1,5 +1,6 @@
 package uk.gov.ons.census.casesvc.messaging;
 
+import java.util.Random;
 import java.util.UUID;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.integration.annotation.MessageEndpoint;

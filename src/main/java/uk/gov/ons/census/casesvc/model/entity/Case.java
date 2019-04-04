@@ -16,4 +16,7 @@ public class Case {
 
   @Column
   private String stuff;
+
+  @Column
+  private CaseStatus status;
 }

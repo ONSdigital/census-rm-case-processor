@@ -13,7 +13,8 @@ import org.springframework.context.annotation.Configuration;
 public class QueueSetterUpper {
   @Bean
   public Queue inboundQueue() {
-    return new Queue("exampleInboundQueue");
+    Queue queue = new Queue("exampleInboundQueue");
+    return queue;
   }
 
   @Bean
