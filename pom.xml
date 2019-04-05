@@ -139,7 +139,7 @@
         <artifactId>spring-boot-maven-plugin</artifactId>
         <configuration>
           <executable>true</executable>
-          <mainClass>uk.gov.ons.ctp.response.casesvc.Application</mainClass>
+          <mainClass>uk.gov.ons.census.casesvc.Application</mainClass>
         </configuration>
         <executions>
           <execution>
