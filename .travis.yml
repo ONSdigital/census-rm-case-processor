@@ -14,7 +14,7 @@ env:
 before_install:
   - mvn fmt:check
 
-script: travis_wait mvn verify cobertura:cobertura-integration-test
+script: travis_wait mvn verify jacoco:report
 
 after_success:
 - if [ "$TRAVIS_BRANCH" == "NOT-TODAY-SATAN" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
