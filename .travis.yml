@@ -1,0 +1,34 @@
+sudo: required
+
+services:
+- docker
+
+language: java
+jdk: openjdk11
+
+env:
+  global:
+  - SOURCE_IMAGE_NAME="census-rm-casesvc-v2"
+  - DESTINATION_IMAGE_NAME="$DOCKER_GCP_LOCATION/census-rm-casesvc-v2"
+
+before_install:
+  - cp .maven.settings.xml $HOME/.m2/settings.xml
+  - mvn fmt:check
+
+script: travis_wait mvn verify cobertura:cobertura-integration-test
+
+after_success:
+- if [ "$TRAVIS_BRANCH" == "NOT-TODAY-SATAN" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+  docker login -u "${DOCKER_GCP_USERNAME}" -p "${DOCKER_GCP_PASSWORD}" "${DOCKER_GCP_REGISTRY}";
+  docker tag "$SOURCE_IMAGE_NAME" "$DESTINATION_IMAGE_NAME";
+  docker push "$DESTINATION_IMAGE_NAME";
+  fi
+- bash <(curl -s https://codecov.io/bash)
+
+cache:
+  directories:
+  - $HOME/.m2
+
+branches:
+  only:
+  - master
