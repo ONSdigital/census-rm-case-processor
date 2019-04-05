@@ -34,13 +34,11 @@ public class QueueSetterUpper {
 
   @Bean
   public Binding bindingOne() {
-    return new Binding("myfanout.queue1", QUEUE,
-        "myfanout.exchange", "", null);
+    return new Binding("myfanout.queue1", QUEUE, "myfanout.exchange", "", null);
   }
 
   @Bean
   public Binding bindingTwo() {
-    return new Binding("myfanout.queue2", QUEUE,
-        "myfanout.exchange", "", null);
+    return new Binding("myfanout.queue2", QUEUE, "myfanout.exchange", "", null);
   }
 }

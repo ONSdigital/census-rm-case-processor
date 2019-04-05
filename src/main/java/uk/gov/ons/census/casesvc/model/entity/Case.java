@@ -11,12 +11,9 @@ import lombok.Data;
 @Entity
 @Table(name = "cases")
 public class Case {
-  @Id
-  private UUID id;
+  @Id private UUID id;
 
-  @Column
-  private String stuff;
+  @Column private String stuff;
 
-  @Column
-  private CaseStatus status;
+  @Column private CaseStatus status;
 }

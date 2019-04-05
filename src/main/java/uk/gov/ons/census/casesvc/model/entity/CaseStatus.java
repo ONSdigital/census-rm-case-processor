@@ -5,5 +5,4 @@ public enum CaseStatus {
   INPROGRESS,
   COMPLETE,
   REFUSED
-
 }

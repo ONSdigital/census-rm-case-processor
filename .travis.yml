@@ -12,7 +12,6 @@ env:
   - DESTINATION_IMAGE_NAME="$DOCKER_GCP_LOCATION/census-rm-casesvc-v2"
 
 before_install:
-  - cp .maven.settings.xml $HOME/.m2/settings.xml
   - mvn fmt:check
 
 script: travis_wait mvn verify cobertura:cobertura-integration-test

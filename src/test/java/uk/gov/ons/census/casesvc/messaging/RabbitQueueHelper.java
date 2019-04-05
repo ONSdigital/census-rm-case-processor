@@ -17,11 +17,9 @@ import org.springframework.test.context.ActiveProfiles;
 @EnableRetry
 public class RabbitQueueHelper {
 
-  @Autowired
-  ConnectionFactory connectionFactory;
+  @Autowired ConnectionFactory connectionFactory;
 
-  @Autowired
-  private RabbitTemplate rabbitTemplate;
+  @Autowired private RabbitTemplate rabbitTemplate;
 
   public BlockingQueue<String> listen(String queueName) {
     BlockingQueue<String> transfer = new ArrayBlockingQueue(50);
@@ -31,8 +29,8 @@ public class RabbitQueueHelper {
           String msgStr = new String(message.getBody());
           transfer.add(msgStr);
         };
-    SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(
-        connectionFactory);
+    SimpleMessageListenerContainer container =
+        new SimpleMessageListenerContainer(connectionFactory);
     container.setMessageListener(messageListener);
     container.setQueueNames(queueName);
     container.start();
@@ -40,10 +38,11 @@ public class RabbitQueueHelper {
     return transfer;
   }
 
-  @Retryable(value = {
-      java.io.IOException.class}, maxAttempts = 10, backoff = @Backoff(delay = 5000))
+  @Retryable(
+      value = {java.io.IOException.class},
+      maxAttempts = 10,
+      backoff = @Backoff(delay = 5000))
   public void sendMessage(String queueName, Object message) {
     rabbitTemplate.convertAndSend(queueName, message);
   }
-
 }

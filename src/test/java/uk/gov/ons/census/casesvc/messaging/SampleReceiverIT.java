@@ -28,39 +28,33 @@ import uk.gov.ons.census.casesvc.model.dto.FooBar;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class SampleReceiverIT {
 
-  @Autowired
-  MessageChannel amqpInputChannel;
+  @Autowired MessageChannel amqpInputChannel;
 
-  @Autowired
-  ConnectionFactory connectionFactory;
+  @Autowired ConnectionFactory connectionFactory;
 
-  @Autowired
-  RabbitQueueHelper rabbitQueueHelper;
+  @Autowired RabbitQueueHelper rabbitQueueHelper;
 
-  @Autowired
-  private AmqpAdmin amqpAdmin;
+  @Autowired private AmqpAdmin amqpAdmin;
 
-  @Autowired
-  private RabbitTemplate rabbitTemplate;
-
+  @Autowired private RabbitTemplate rabbitTemplate;
 
   @Before
   public void setUp() {
-//    while (!Application.allSetUp.get()) {
-//      try {
-//        Thread.sleep(1);
-//      } catch (InterruptedException e) {
-//        e.printStackTrace();
-//      }
-//    }
-//    try {
-//      Thread.sleep(5000);
-//    } catch (InterruptedException e) {
-//      e.printStackTrace();
-//    }
-//    amqpAdmin.purgeQueue("exampleInboundQueue", false);
-//    amqpAdmin.purgeQueue("myfanout.queue1", false);
-//    amqpAdmin.purgeQueue("myfanout.queue2", false);
+    //    while (!Application.allSetUp.get()) {
+    //      try {
+    //        Thread.sleep(1);
+    //      } catch (InterruptedException e) {
+    //        e.printStackTrace();
+    //      }
+    //    }
+    //    try {
+    //      Thread.sleep(5000);
+    //    } catch (InterruptedException e) {
+    //      e.printStackTrace();
+    //    }
+    //    amqpAdmin.purgeQueue("exampleInboundQueue", false);
+    //    amqpAdmin.purgeQueue("myfanout.queue1", false);
+    //    amqpAdmin.purgeQueue("myfanout.queue2", false);
   }
 
   @Test
@@ -77,7 +71,8 @@ public class SampleReceiverIT {
     ObjectMapper objectMapper = new ObjectMapper();
 
     String actualMessage = queue1.poll(30, TimeUnit.SECONDS);
-    CaseCreatedEvent caseCreatedEvent = objectMapper.readValue(actualMessage, CaseCreatedEvent.class);
+    CaseCreatedEvent caseCreatedEvent =
+        objectMapper.readValue(actualMessage, CaseCreatedEvent.class);
     assertNotNull(caseCreatedEvent);
     assertEquals("rm", caseCreatedEvent.getEvent().getChannel());
 
@@ -85,6 +80,5 @@ public class SampleReceiverIT {
     caseCreatedEvent = objectMapper.readValue(actualMessage, CaseCreatedEvent.class);
     assertNotNull(caseCreatedEvent);
     assertEquals("rm", caseCreatedEvent.getEvent().getChannel());
-
   }
 }

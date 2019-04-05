@@ -30,7 +30,8 @@ public class Application {
   }
 
   @Bean
-  public AmqpInboundChannelAdapter inbound(SimpleMessageListenerContainer listenerContainer,
+  public AmqpInboundChannelAdapter inbound(
+      SimpleMessageListenerContainer listenerContainer,
       @Qualifier("amqpInputChannel") MessageChannel channel) {
     AmqpInboundChannelAdapter adapter = new AmqpInboundChannelAdapter(listenerContainer);
     adapter.setOutputChannel(channel);
@@ -38,7 +39,8 @@ public class Application {
   }
 
   @Bean
-  public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory,
+  public RabbitTemplate rabbitTemplate(
+      ConnectionFactory connectionFactory,
       Jackson2JsonMessageConverter producerJackson2MessageConverter) {
     RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
     rabbitTemplate.setMessageConverter(producerJackson2MessageConverter);
