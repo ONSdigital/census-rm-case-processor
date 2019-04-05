@@ -22,3 +22,9 @@ spring:
     host: localhost
     port: 6672
     virtualhost: /
+
+queueconfig:
+  inbound-queue: exampleInboundQueue
+  emit-case-event-exchange: myfanout.exchange
+  emit-case-event-rh-queue: myfanout.rhqueue
+  emit-case-event-action-queue: myfanout.actionqueue

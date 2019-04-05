@@ -7,6 +7,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.amqp.inbound.AmqpInboundChannelAdapter;
@@ -15,6 +16,8 @@ import org.springframework.messaging.MessageChannel;
 
 @Configuration
 public class AppConfig {
+  @Value("${queueconfig.inbound-queue}")
+  private String inboundQueue;
 
   @Bean
   public MessageChannel amqpInputChannel() {
@@ -49,7 +52,7 @@ public class AppConfig {
   public SimpleMessageListenerContainer container(ConnectionFactory connectionFactory) {
     SimpleMessageListenerContainer container =
         new SimpleMessageListenerContainer(connectionFactory);
-    container.setQueueNames("exampleInboundQueue");
+    container.setQueueNames(inboundQueue);
     container.setConcurrentConsumers(1);
     return container;
   }

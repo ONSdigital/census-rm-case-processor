@@ -6,39 +6,51 @@ import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.Exchange;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class QueueSetterUpper {
+  @Value("${queueconfig.inbound-queue}")
+  private String inboundQueue;
+
+  @Value("${queueconfig.emit-case-event-exchange}")
+  private String emitCaseEventExchange;
+
+  @Value("${queueconfig.emit-case-event-rh-queue}")
+  private String emitCaseEventRhQueue;
+
+  @Value("${queueconfig.emit-case-event-action-queue}")
+  private String emitCaseEventActionQueue;
+
   @Bean
   public Queue inboundQueue() {
-    Queue queue = new Queue("exampleInboundQueue");
-    return queue;
+    return new Queue(inboundQueue, true);
   }
 
   @Bean
   public Queue fanoutOneQueue() {
-    return new Queue("myfanout.queue1", true);
+    return new Queue(emitCaseEventRhQueue, true);
   }
 
   @Bean
   public Queue fanoutTwoQueue() {
-    return new Queue("myfanout.queue2", true);
+    return new Queue(emitCaseEventActionQueue, true);
   }
 
   @Bean
   public Exchange myFanoutExchange() {
-    return new FanoutExchange("myfanout.exchange");
+    return new FanoutExchange(emitCaseEventExchange, true, false);
   }
 
   @Bean
   public Binding bindingOne() {
-    return new Binding("myfanout.queue1", QUEUE, "myfanout.exchange", "", null);
+    return new Binding(emitCaseEventRhQueue, QUEUE, emitCaseEventExchange, "", null);
   }
 
   @Bean
   public Binding bindingTwo() {
-    return new Binding("myfanout.queue2", QUEUE, "myfanout.exchange", "", null);
+    return new Binding(emitCaseEventActionQueue, QUEUE, emitCaseEventExchange, "", null);
   }
 }

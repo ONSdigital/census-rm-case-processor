@@ -2,6 +2,7 @@ package uk.gov.ons.census.casesvc.messaging;
 
 import java.util.UUID;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,12 +13,16 @@ import uk.gov.ons.census.casesvc.model.dto.Event;
 import uk.gov.ons.census.casesvc.model.dto.FooBar;
 import uk.gov.ons.census.casesvc.model.dto.Payload;
 import uk.gov.ons.census.casesvc.model.entity.Case;
+import uk.gov.ons.census.casesvc.model.entity.CaseStatus;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 
 @MessageEndpoint
 public class SampleReceiver {
   private CaseRepository caseRepository;
   private RabbitTemplate rabbitTemplate;
+
+  @Value("${queueconfig.emit-case-event-exchange}")
+  private String emitCaseEventExchange;
 
   public SampleReceiver(CaseRepository caseRepository, RabbitTemplate rabbitTemplate) {
     this.caseRepository = caseRepository;
@@ -31,6 +36,7 @@ public class SampleReceiver {
     Case caze = new Case();
     caze.setId(UUID.randomUUID());
     caze.setStuff(fooBar.getFoo());
+    caze.setStatus(CaseStatus.NOTSTARTED);
     caseRepository.save(caze);
 
     Event event = new Event();
@@ -65,7 +71,7 @@ public class SampleReceiver {
     caseCreatedEvent.setEvent(event);
     caseCreatedEvent.setPayload(payload);
 
-    rabbitTemplate.convertAndSend("myfanout.exchange", "", caseCreatedEvent);
+    rabbitTemplate.convertAndSend(emitCaseEventExchange, "", caseCreatedEvent);
 
     // Enable the code below to prove that the DB txn and the Rabbit txn are part of the same txn
     //    Random random = new Random();
