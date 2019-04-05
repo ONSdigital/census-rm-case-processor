@@ -1,0 +1,12 @@
+/Users/nicholasgrant/Development/java/census-rm-case-service-v2-prototype/src/main/java/uk/gov/ons/census/casesvc/model/dto/Address.java
+/Users/nicholasgrant/Development/java/census-rm-case-service-v2-prototype/src/main/java/uk/gov/ons/census/casesvc/model/entity/CaseStatus.java
+/Users/nicholasgrant/Development/java/census-rm-case-service-v2-prototype/src/main/java/uk/gov/ons/census/casesvc/messaging/SampleReceiver.java
+/Users/nicholasgrant/Development/java/census-rm-case-service-v2-prototype/src/main/java/uk/gov/ons/census/casesvc/model/dto/CollectionCase.java
+/Users/nicholasgrant/Development/java/census-rm-case-service-v2-prototype/src/main/java/uk/gov/ons/census/casesvc/model/repository/CaseRepository.java
+/Users/nicholasgrant/Development/java/census-rm-case-service-v2-prototype/src/main/java/uk/gov/ons/census/casesvc/model/dto/FooBar.java
+/Users/nicholasgrant/Development/java/census-rm-case-service-v2-prototype/src/main/java/uk/gov/ons/census/casesvc/model/dto/Event.java
+/Users/nicholasgrant/Development/java/census-rm-case-service-v2-prototype/src/main/java/uk/gov/ons/census/casesvc/model/dto/Payload.java
+/Users/nicholasgrant/Development/java/census-rm-case-service-v2-prototype/src/main/java/uk/gov/ons/census/casesvc/model/dto/CaseCreatedEvent.java
+/Users/nicholasgrant/Development/java/census-rm-case-service-v2-prototype/src/main/java/uk/gov/ons/census/casesvc/Application.java
+/Users/nicholasgrant/Development/java/census-rm-case-service-v2-prototype/src/main/java/uk/gov/ons/census/casesvc/model/entity/Case.java
+/Users/nicholasgrant/Development/java/census-rm-case-service-v2-prototype/src/main/java/uk/gov/ons/census/casesvc/QueueSetterUpper.java

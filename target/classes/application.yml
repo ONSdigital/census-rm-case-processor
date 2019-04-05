@@ -1,0 +1,25 @@
+logging:
+  level:
+    org.postgresql.jdbc: none
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:6432/postgres
+    username: postgres
+    password: postgres
+    driverClassName: org.postgresql.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQL94Dialect
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        default_schema: casesvcv2
+
+  rabbitmq:
+    username: guest
+    password: guest
+    host: localhost
+    port: 6672
+    virtualhost: /
