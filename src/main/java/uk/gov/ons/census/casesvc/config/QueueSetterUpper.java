@@ -1,4 +1,4 @@
-package uk.gov.ons.census.casesvc;
+package uk.gov.ons.census.casesvc.config;
 
 import static org.springframework.amqp.core.Binding.DestinationType.QUEUE;
 
