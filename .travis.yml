@@ -4,7 +4,7 @@ services:
 - docker
 
 language: java
-jdk: openjdk11
+jdk: oraclejdk11
 
 env:
   global:
