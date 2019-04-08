@@ -4,6 +4,7 @@ spring:
     username: postgres
     password: postgres
     driverClassName: org.postgresql.Driver
+    initialization-mode: always
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQL94Dialect
