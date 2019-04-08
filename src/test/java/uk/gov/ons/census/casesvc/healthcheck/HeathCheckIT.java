@@ -30,8 +30,7 @@ public class HeathCheckIT {
       String fileLine = bufferedReader.readLine();
       String now = LocalDateTime.now().toString();
 
-      // This line checks down to the level of seconds, which might be too accurate
-      assertEquals(now.substring(0, 19), fileLine.substring(0, 19));
+      assertEquals(now.substring(0, 16), fileLine.substring(0, 16));
     }
   }
 
