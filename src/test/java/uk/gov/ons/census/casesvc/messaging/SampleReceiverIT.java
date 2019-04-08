@@ -19,9 +19,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.model.dto.CaseCreatedEvent;
-import uk.gov.ons.census.casesvc.model.dto.FooBar;
+import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
+import uk.gov.ons.census.casesvc.uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -55,12 +56,11 @@ public class SampleReceiverIT {
     BlockingQueue<String> queue1 = rabbitQueueHelper.listen(emitCaseEventRhQueue);
     BlockingQueue<String> queue2 = rabbitQueueHelper.listen(emitCaseEventActionQueue);
 
-    FooBar fooBar = new FooBar();
-    fooBar.setFoo("bar");
-    fooBar.setTest("noodles");
+    CreateCaseSample createCaseSample = new CreateCaseSample();
+    createCaseSample.setPostcode("ABC123");
 
     // WHEN
-    rabbitQueueHelper.sendMessage(inboundQueue, fooBar);
+    rabbitQueueHelper.sendMessage(inboundQueue, createCaseSample);
 
     // THEN
     ObjectMapper objectMapper = new ObjectMapper();
@@ -78,6 +78,6 @@ public class SampleReceiverIT {
 
     List<Case> caseList = caseRepository.findAll();
     assertEquals(1, caseList.size());
-    assertEquals("bar", caseList.get(0).getStuff());
+    assertEquals("ABC123", caseList.get(0).getPostcode());
   }
 }

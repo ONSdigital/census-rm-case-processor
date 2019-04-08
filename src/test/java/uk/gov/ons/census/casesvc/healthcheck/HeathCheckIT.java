@@ -26,12 +26,11 @@ public class HeathCheckIT {
   public void testHappyPath() throws IOException {
     Path path = Paths.get(fileName);
 
-    try(BufferedReader bufferedReader = Files.newBufferedReader(path)) {
+    try (BufferedReader bufferedReader = Files.newBufferedReader(path)) {
       String fileLine = bufferedReader.readLine();
       String now = LocalDateTime.now().toString();
 
       assertEquals(now.substring(0, 16), fileLine.substring(0, 16));
     }
   }
-
 }
