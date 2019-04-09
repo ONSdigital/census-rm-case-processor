@@ -132,8 +132,6 @@ public class SampleReceiver {
 
     rabbitTemplate.convertAndSend(emitCaseEventExchange, "", caseCreatedEvent);
 
-    System.out.println("STORED AND SENT");
-
     // Enable the code below to prove that the DB txn and the Rabbit txn are part of the same txn
     //    Random random = new Random();
     //    int randomNumber = random.nextInt(1000);
