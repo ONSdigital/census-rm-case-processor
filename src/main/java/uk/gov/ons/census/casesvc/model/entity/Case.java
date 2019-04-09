@@ -67,7 +67,9 @@ public class Case {
 
   @Column private String actionPlanId;
 
-  @Column @Enumerated(EnumType.STRING) private CaseState state;
+  @Column
+  @Enumerated(EnumType.STRING)
+  private CaseState state;
 
   @OneToMany(mappedBy = "caze")
   List<UacQidLink> uacQidLinks;

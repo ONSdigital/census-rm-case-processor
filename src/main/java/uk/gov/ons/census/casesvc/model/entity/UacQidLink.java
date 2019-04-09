@@ -20,6 +20,6 @@ public class UacQidLink {
 
   @ManyToOne private Case caze;
 
-  @OneToMany(mappedBy="uacQidLink")
+  @OneToMany(mappedBy = "uacQidLink")
   private List<Event> events;
 }

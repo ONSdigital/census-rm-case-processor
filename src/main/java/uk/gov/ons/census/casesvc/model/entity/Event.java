@@ -11,16 +11,11 @@ import lombok.Data;
 @Data
 @Entity
 public class Event {
-  @Id
-  private UUID id;
+  @Id private UUID id;
 
-  @ManyToOne
-  private UacQidLink uacQidLink;
+  @ManyToOne private UacQidLink uacQidLink;
 
-  @Column
-  private Date eventDate;
+  @Column private Date eventDate;
 
-  @Column
-  private String eventDescription;
-
+  @Column private String eventDescription;
 }
