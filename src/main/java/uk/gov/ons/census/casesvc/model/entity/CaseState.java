@@ -1,6 +1,7 @@
 package uk.gov.ons.census.casesvc.model.entity;
 
-public enum CaseStatus {
+public enum CaseState {
+  ACTIONABLE,
   NOTSTARTED,
   INPROGRESS,
   COMPLETE,

@@ -57,6 +57,7 @@ public class IacDispenser implements Runnable {
     } catch (Exception exception) {
       // This is more of a warning because it's recoverable but it can cause an error
       //      log.error("Unexpected exception when requesting IAC codes to top up pool", exception);
+      exception.printStackTrace();
     } finally {
       isFetchingIacCodes = false;
     }

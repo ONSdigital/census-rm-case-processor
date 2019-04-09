@@ -22,14 +22,14 @@ public class AppConfig {
   private String inboundQueue;
 
   @Bean
-  public MessageChannel amqpInputChannel() {
+  public MessageChannel caseSampleInputChannel() {
     return new DirectChannel();
   }
 
   @Bean
   public AmqpInboundChannelAdapter inbound(
       SimpleMessageListenerContainer listenerContainer,
-      @Qualifier("amqpInputChannel") MessageChannel channel) {
+      @Qualifier("caseSampleInputChannel") MessageChannel channel) {
     AmqpInboundChannelAdapter adapter = new AmqpInboundChannelAdapter(listenerContainer);
     adapter.setOutputChannel(channel);
     return adapter;
@@ -37,16 +37,15 @@ public class AppConfig {
 
   @Bean
   public RabbitTemplate rabbitTemplate(
-      ConnectionFactory connectionFactory,
-      Jackson2JsonMessageConverter producerJackson2MessageConverter) {
+      ConnectionFactory connectionFactory, Jackson2JsonMessageConverter messageConverter) {
     RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-    rabbitTemplate.setMessageConverter(producerJackson2MessageConverter);
+    rabbitTemplate.setMessageConverter(messageConverter);
     rabbitTemplate.setChannelTransacted(true);
     return rabbitTemplate;
   }
 
   @Bean
-  public Jackson2JsonMessageConverter producerJackson2MessageConverter() {
+  public Jackson2JsonMessageConverter messageConverter() {
     return new Jackson2JsonMessageConverter();
   }
 

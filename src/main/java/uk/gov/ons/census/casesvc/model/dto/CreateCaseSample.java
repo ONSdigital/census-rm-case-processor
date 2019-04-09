@@ -19,11 +19,11 @@ public class CreateCaseSample {
   String postcode;
   String latitude;
   String longitude;
-  String oa11cd;
-  String lsoa11cd;
-  String msoa11cd;
-  String lad18cd;
-  String rgn10cd;
+  String oa;
+  String lsoa;
+  String msoa;
+  String lad;
+  String rgn;
   String htcWillingness;
   String htcDigital;
   String treatmentCode;

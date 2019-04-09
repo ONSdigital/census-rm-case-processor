@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class Event {
   private String type;
+  private String source;
   private String channel;
   private String dateTime;
   private String transactionId;

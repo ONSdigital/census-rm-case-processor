@@ -4,3 +4,7 @@ spring:
 
   rabbitmq:
     port: 35672
+
+iacservice:
+  connection:
+    port: 18121

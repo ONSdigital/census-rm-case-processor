@@ -1,13 +1,13 @@
 version: '2.1'
 services:
  postgres:
-  container_name: postgres-action-it
+  container_name: postgres-case-it
   image: sdcplatform/ras-rm-docker-postgres
   ports:
    - "15432:5432"
 
  rabbitmq:
-  container_name: rabbitmq-action-it
+  container_name: rabbitmq-case-it
   image: rabbitmq:3.6.10-management
   ports:
     - "34369:4369"
@@ -16,3 +16,55 @@ services:
     - "35672:5672"
     - "46671:15671"
     - "46672:15672"
+
+ redis:
+  container_name: redis-case-it
+  image: redis:3.2.9
+  ports:
+  - "17379:6379"
+
+ iac:
+  container_name: iac-case-it
+  image: eu.gcr.io/census-rm-ci/rm/census-rm-iacsvc
+  ports:
+  - "18121:8121"
+  - "15121:5121"
+  - "18221:8221"
+  external_links:
+  - postgres-case-it
+  - rabbitmq-case-it
+  - redis-case-it
+  environment:
+  - SECURITY_BASIC_ENABLED=true
+  - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-case-it:5432/postgres?sslmode=disable
+  - LIQUIBASE_URL=jdbc:postgresql://postgres-case-it:5432/postgres
+  - RABBITMQ_HOST=rabbitmq-case-it
+  - RABBITMQ_PORT=5672
+  - REDIS_HOST=redis-case-it
+  - CASE_SVC_CONNECTION_CONFIG_HOST=foobar
+  - CASE_SVC_CONNECTION_CONFIG_PORT=666
+  - JAVA_OPTS=-Xmx128m -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5121
+  - LIQUIBASE_USER=postgres
+  - LIQUIBASE_PASSWORD=postgres
+  - SPRING_DATASOURCE_USERNAME=postgres
+  - SPRING_DATASOURCE_PASSWORD=postgres
+  - SPRING_ZIPKIN_ENABLED=true
+  - SPRING_ZIPKIN_BASEURL=http://foobar:666/
+  healthcheck:
+   test: ["CMD", "curl", "-f", "http://localhost:8121/info"]
+   interval: 30s
+   timeout: 10s
+   retries: 10
+
+ start_dependencies:
+  image: dadarek/wait-for-dependencies
+  depends_on:
+   iac:
+    condition: service_healthy
+
+# wait:
+#  image: waisbrot/wait
+#  links:
+#  - iac
+#  environment:
+#  - TARGETS=iac-case-it:8121

@@ -58,6 +58,7 @@ public class SampleReceiverIT {
 
     CreateCaseSample createCaseSample = new CreateCaseSample();
     createCaseSample.setPostcode("ABC123");
+    createCaseSample.setRgn("E12000009");
 
     // WHEN
     rabbitQueueHelper.sendMessage(inboundQueue, createCaseSample);

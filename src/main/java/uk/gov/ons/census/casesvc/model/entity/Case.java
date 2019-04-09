@@ -1,10 +1,13 @@
 package uk.gov.ons.census.casesvc.model.entity;
 
+import java.util.List;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Data;
 
@@ -44,15 +47,15 @@ public class Case {
 
   @Column private String longitude;
 
-  @Column private String oa11cd;
+  @Column private String oa;
 
-  @Column private String lsoa11cd;
+  @Column private String lsoa;
 
-  @Column private String msoa11cd;
+  @Column private String msoa;
 
-  @Column private String lad18cd;
+  @Column private String lad;
 
-  @Column private String rgn10cd;
+  @Column private String rgn;
 
   @Column private String htcWillingness;
 
@@ -64,7 +67,8 @@ public class Case {
 
   @Column private String actionPlanId;
 
-  @Column private String uacCode;
+  @Column @Enumerated(EnumType.STRING) private CaseState state;
 
-  @Column @Enumerated private CaseStatus status;
+  @OneToMany(mappedBy = "caze")
+  List<UacQidLink> uacQidLinks;
 }
