@@ -1,4 +1,4 @@
-package uk.gov.ons.census.casesvc.uk.gov.ons.census.casesvc.testutil;
+package uk.gov.ons.census.casesvc.testutil;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;

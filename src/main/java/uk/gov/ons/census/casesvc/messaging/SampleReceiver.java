@@ -3,6 +3,9 @@ package uk.gov.ons.census.casesvc.messaging;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
+import ma.glasnost.orika.MapperFacade;
+import ma.glasnost.orika.MapperFactory;
+import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.annotation.MessageEndpoint;
@@ -21,6 +24,7 @@ import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
+import uk.gov.ons.census.casesvc.utility.QidCreator;
 
 @MessageEndpoint
 public class SampleReceiver {
@@ -29,6 +33,7 @@ public class SampleReceiver {
   private EventRepository eventRepository;
   private RabbitTemplate rabbitTemplate;
   private IacDispenser iacDispenser;
+  private QidCreator qidCreator;
 
   @Value("${queueconfig.emit-case-event-exchange}")
   private String emitCaseEventExchange;
@@ -38,52 +43,47 @@ public class SampleReceiver {
       UacQidLinkRepository uacQidLinkRepository,
       EventRepository eventRepository,
       RabbitTemplate rabbitTemplate,
-      IacDispenser iacDispenser) {
+      IacDispenser iacDispenser,
+      QidCreator qidCreator) {
     this.caseRepository = caseRepository;
     this.rabbitTemplate = rabbitTemplate;
     this.iacDispenser = iacDispenser;
     this.uacQidLinkRepository = uacQidLinkRepository;
     this.eventRepository = eventRepository;
+    this.qidCreator = qidCreator;
   }
 
   @Transactional
   @ServiceActivator(inputChannel = "caseSampleInputChannel")
   public void receiveMessage(CreateCaseSample createCaseSample) {
-    Case caze = new Case();
-    caze.setId(UUID.randomUUID());
-    caze.setAbpCode(createCaseSample.getAbpCode());
-    caze.setActionPlanId(createCaseSample.getActionPlanId());
-    caze.setAddressLevel(createCaseSample.getAddressLevel());
-    caze.setAddressLine1(createCaseSample.getAddressLine1());
-    caze.setAddressLine2(createCaseSample.getAddressLine1());
-    caze.setAddressLine2(createCaseSample.getAddressLine1());
-    caze.setAddressType(createCaseSample.getAddressType());
-    caze.setArid(createCaseSample.getArid());
-    caze.setCollectionExerciseId(createCaseSample.getCollectionExerciseId());
-    caze.setEstabArid(createCaseSample.getEstabArid());
-    caze.setEstabType(createCaseSample.getEstabType());
-    caze.setHtcDigital(createCaseSample.getHtcDigital());
-    caze.setHtcWillingness(createCaseSample.getHtcWillingness());
-    caze.setLad(createCaseSample.getLad());
-    caze.setLatitude(createCaseSample.getLatitude());
-    caze.setLongitude(createCaseSample.getLongitude());
-    caze.setLsoa(createCaseSample.getLsoa());
-    caze.setMsoa(createCaseSample.getMsoa());
-    caze.setOa(createCaseSample.getOa());
-    caze.setOrganisationName(createCaseSample.getOrganisationName());
-    caze.setPostcode(createCaseSample.getPostcode());
-    caze.setRgn(createCaseSample.getRgn());
-    caze.setTownName(createCaseSample.getTownName());
-    caze.setTreatmentCode(createCaseSample.getTreatmentCode());
-    caze.setUprn(createCaseSample.getUprn());
+
+    Case caze = persistToDatabase(createCaseSample);
+
+    CaseCreatedEvent caseCreatedEvent = prepareEventToEmit(caze);
+
+    rabbitTemplate.convertAndSend(emitCaseEventExchange, "", caseCreatedEvent);
+  }
+
+  private Case persistToDatabase(CreateCaseSample createCaseSample) {
+    MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
+
+    MapperFacade mapperFacade = mapperFactory.getMapperFacade();
+
+    Case caze = mapperFacade.map(createCaseSample, Case.class);
+    caze.setCaseId(UUID.randomUUID());
     caze.setState(CaseState.ACTIONABLE);
-    caseRepository.save(caze);
+    caze = caseRepository.saveAndFlush(caze);
 
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setId(UUID.randomUUID());
     uacQidLink.setUac(iacDispenser.getIacCode());
-    uacQidLink.setQid(666L);
     uacQidLink.setCaze(caze);
+    uacQidLink = uacQidLinkRepository.saveAndFlush(uacQidLink);
+
+    int questionnaireType = 99;
+    int trancheIdentifier = 2;
+    uacQidLink.setQid(
+        qidCreator.createQid(questionnaireType, trancheIdentifier, uacQidLink.getUniqueNumber()));
     uacQidLinkRepository.save(uacQidLink);
 
     uk.gov.ons.census.casesvc.model.entity.Event loggedEvent =
@@ -94,6 +94,10 @@ public class SampleReceiver {
     loggedEvent.setUacQidLink(uacQidLink);
     eventRepository.save(loggedEvent);
 
+    return caze;
+  }
+
+  private CaseCreatedEvent prepareEventToEmit(Case caze) {
     LocalDateTime now = LocalDateTime.now();
 
     Event event = new Event();
@@ -103,23 +107,23 @@ public class SampleReceiver {
     event.setTransactionId(UUID.randomUUID().toString());
     event.setType("CaseCreated");
     Address address = new Address();
-    address.setAddressLine1(createCaseSample.getAddressLine1());
-    address.setAddressLine2(createCaseSample.getAddressLine2());
-    address.setAddressLine3(createCaseSample.getAddressLine3());
-    address.setAddressType(createCaseSample.getAddressType());
-    address.setArid(createCaseSample.getArid());
-    address.setCountry(createCaseSample.getRgn().substring(0, 1));
-    address.setEstabType(createCaseSample.getEstabType());
-    address.setLatitude(createCaseSample.getLatitude());
-    address.setLongitude(createCaseSample.getLongitude());
-    address.setPostcode(createCaseSample.getPostcode());
-    address.setTownName(createCaseSample.getTownName());
+    address.setAddressLine1(caze.getAddressLine1());
+    address.setAddressLine2(caze.getAddressLine2());
+    address.setAddressLine3(caze.getAddressLine3());
+    address.setAddressType(caze.getAddressType());
+    address.setArid(caze.getArid());
+    address.setCountry(caze.getRgn().substring(0, 1));
+    address.setEstabType(caze.getEstabType());
+    address.setLatitude(caze.getLatitude());
+    address.setLongitude(caze.getLongitude());
+    address.setPostcode(caze.getPostcode());
+    address.setTownName(caze.getTownName());
     CollectionCase collectionCase = new CollectionCase();
     collectionCase.setActionableFrom(now.toString());
     collectionCase.setAddress(address);
-    collectionCase.setCaseRef("10000000010");
+    collectionCase.setCaseRef(Long.toString(caze.getCaseRef()));
     collectionCase.setCollectionExerciseId(caze.getCollectionExerciseId());
-    collectionCase.setId(caze.getId().toString());
+    collectionCase.setId(caze.getCaseId().toString());
     collectionCase.setSampleUnitRef("");
     collectionCase.setState(caze.getState().toString());
     collectionCase.setSurvey("Census");
@@ -129,13 +133,6 @@ public class SampleReceiver {
     caseCreatedEvent.setEvent(event);
     caseCreatedEvent.setPayload(payload);
 
-    rabbitTemplate.convertAndSend(emitCaseEventExchange, "", caseCreatedEvent);
-
-    // Enable the code below to prove that the DB txn and the Rabbit txn are part of the same txn
-    //    Random random = new Random();
-    //    int randomNumber = random.nextInt(1000);
-    //    if (randomNumber > 2) {
-    //      throw new RuntimeException();
-    //    }
+    return caseCreatedEvent;
   }
 }

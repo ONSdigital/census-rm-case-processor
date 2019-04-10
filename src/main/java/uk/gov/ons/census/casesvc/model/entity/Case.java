@@ -6,8 +6,11 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import lombok.Data;
 
@@ -15,7 +18,13 @@ import lombok.Data;
 @Entity
 @Table(name = "cases")
 public class Case {
-  @Id private UUID id;
+
+  @Id
+  @SequenceGenerator(name = "caseRefGenerator", initialValue = 100000000)
+  @GeneratedValue(generator = "caseRefGenerator", strategy = GenerationType.SEQUENCE)
+  private Long caseRef;
+
+  @Column private UUID caseId;
 
   @Column private String arid;
 

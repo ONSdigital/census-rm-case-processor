@@ -54,6 +54,12 @@
       <artifactId>jackson-databind</artifactId>
     </dependency>
     <dependency>
+      <groupId>ma.glasnost.orika</groupId>
+      <artifactId>orika-core</artifactId>
+      <version>1.5.4</version>
+    </dependency>
+    <!--    Test Dependencies below this point -->
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>

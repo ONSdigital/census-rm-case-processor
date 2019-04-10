@@ -8,11 +8,17 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import lombok.Data;
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.GenerationTime;
 
 @Data
 @Entity
 public class UacQidLink {
   @Id private UUID id;
+
+  @Column(columnDefinition = "serial")
+  @Generated(GenerationTime.INSERT)
+  private Long uniqueNumber;
 
   @Column private Long qid;
 
