@@ -10,11 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 @RunWith(MockitoJUnitRunner.class)
 public class QidCreatorTest {
 
-  @Autowired private QidCreator underTest;
-
   @Test
   public void testValidQid() {
     // Given
+    QidCreator underTest = new QidCreator();
 
     // When
     long result = underTest.createQid(12, 2, 12345);
@@ -26,6 +25,7 @@ public class QidCreatorTest {
   @Test
   public void testValidCheckDigits() {
     // Given
+    QidCreator underTest = new QidCreator();
 
     // When
     long result = underTest.createQid(12, 2, 12345);
