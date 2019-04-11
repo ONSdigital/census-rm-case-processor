@@ -1,5 +1,8 @@
 package uk.gov.ons.census.casesvc.config;
 
+import ma.glasnost.orika.MapperFacade;
+import ma.glasnost.orika.MapperFactory;
+import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
@@ -62,5 +65,12 @@ public class AppConfig {
   public AmqpAdmin amqpAdmin(ConnectionFactory connectionFactory) {
     RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
     return rabbitAdmin;
+  }
+
+  @Bean
+  public MapperFacade mapperFacade() {
+    MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
+
+    return mapperFactory.getMapperFacade();
   }
 }

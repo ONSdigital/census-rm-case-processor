@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.ons.census.casesvc.iac.IacDispenser;
+import uk.gov.ons.census.casesvc.utility.IacDispenser;
 import uk.gov.ons.census.casesvc.model.dto.Address;
 import uk.gov.ons.census.casesvc.model.dto.CaseCreatedEvent;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
@@ -34,6 +34,7 @@ public class SampleReceiver {
   private RabbitTemplate rabbitTemplate;
   private IacDispenser iacDispenser;
   private QidCreator qidCreator;
+  private MapperFacade mapperFacade;
 
   @Value("${queueconfig.emit-case-event-exchange}")
   private String emitCaseEventExchange;
@@ -44,13 +45,15 @@ public class SampleReceiver {
       EventRepository eventRepository,
       RabbitTemplate rabbitTemplate,
       IacDispenser iacDispenser,
-      QidCreator qidCreator) {
+      QidCreator qidCreator,
+      MapperFacade mapperFacade) {
     this.caseRepository = caseRepository;
     this.rabbitTemplate = rabbitTemplate;
     this.iacDispenser = iacDispenser;
     this.uacQidLinkRepository = uacQidLinkRepository;
     this.eventRepository = eventRepository;
     this.qidCreator = qidCreator;
+    this.mapperFacade = mapperFacade;
   }
 
   @Transactional
