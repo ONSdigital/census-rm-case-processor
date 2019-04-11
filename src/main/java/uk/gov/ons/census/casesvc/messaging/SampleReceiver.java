@@ -68,10 +68,6 @@ public class SampleReceiver {
   }
 
   private Case persistToDatabase(CreateCaseSample createCaseSample) {
-    MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
-
-    MapperFacade mapperFacade = mapperFactory.getMapperFacade();
-
     Case caze = mapperFacade.map(createCaseSample, Case.class);
     caze.setCaseId(UUID.randomUUID());
     caze.setState(CaseState.ACTIONABLE);
@@ -115,7 +111,7 @@ public class SampleReceiver {
     address.setAddressLine3(caze.getAddressLine3());
     address.setAddressType(caze.getAddressType());
     address.setArid(caze.getArid());
-    address.setCountry(caze.getRgn().substring(0, 1));
+    address.setRegion(caze.getRgn().substring(0, 1));
     address.setEstabType(caze.getEstabType());
     address.setLatitude(caze.getLatitude());
     address.setLongitude(caze.getLongitude());

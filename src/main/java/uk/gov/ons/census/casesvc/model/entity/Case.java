@@ -20,7 +20,7 @@ import lombok.Data;
 public class Case {
 
   @Id
-  @SequenceGenerator(name = "caseRefGenerator", initialValue = 100000000)
+  @SequenceGenerator(name = "caseRefGenerator", initialValue = 10000000)
   @GeneratedValue(generator = "caseRefGenerator", strategy = GenerationType.SEQUENCE)
   private Long caseRef;
 

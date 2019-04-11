@@ -9,7 +9,7 @@ public class Address {
   private String addressLine3;
   private String townName;
   private String postcode;
-  private String country;
+  private String region;
   private String latitude;
   private String longitude;
   private String uprn;

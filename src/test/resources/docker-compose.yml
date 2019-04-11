@@ -61,10 +61,3 @@ services:
   depends_on:
    iac:
     condition: service_healthy
-
-# wait:
-#  image: waisbrot/wait
-#  links:
-#  - iac
-#  environment:
-#  - TARGETS=iac-case-it:8121
