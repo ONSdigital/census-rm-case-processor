@@ -17,7 +17,7 @@ before_install:
 script: travis_wait mvn verify jacoco:report
 
 after_success:
-- if [ "$TRAVIS_BRANCH" == "NOT-TODAY-SATAN" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+- if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   docker login -u "${DOCKER_GCP_USERNAME}" -p "${DOCKER_GCP_PASSWORD}" "${DOCKER_GCP_REGISTRY}";
   docker tag "$SOURCE_IMAGE_NAME" "$DESTINATION_IMAGE_NAME";
   docker push "$DESTINATION_IMAGE_NAME";

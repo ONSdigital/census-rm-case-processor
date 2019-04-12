@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>uk.gov.ons.census.casesvc</groupId>
-  <artifactId>census-rm-case-service-v2</artifactId>
+  <artifactId>census-rm-casesvc-v2</artifactId>
   <version>1.0-SNAPSHOT</version>
 
   <parent>
