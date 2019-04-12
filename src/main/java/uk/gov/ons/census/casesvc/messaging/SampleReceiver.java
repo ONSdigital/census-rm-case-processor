@@ -4,14 +4,11 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 import ma.glasnost.orika.MapperFacade;
-import ma.glasnost.orika.MapperFactory;
-import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.ons.census.casesvc.utility.IacDispenser;
 import uk.gov.ons.census.casesvc.model.dto.Address;
 import uk.gov.ons.census.casesvc.model.dto.CaseCreatedEvent;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
@@ -24,6 +21,7 @@ import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
+import uk.gov.ons.census.casesvc.utility.IacDispenser;
 import uk.gov.ons.census.casesvc.utility.QidCreator;
 
 @MessageEndpoint

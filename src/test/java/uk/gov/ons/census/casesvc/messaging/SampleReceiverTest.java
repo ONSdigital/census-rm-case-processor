@@ -1,14 +1,12 @@
 package uk.gov.ons.census.casesvc.messaging;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.model.entity.CaseState.ACTIONABLE;
@@ -25,7 +23,6 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
-import uk.gov.ons.census.casesvc.utility.IacDispenser;
 import uk.gov.ons.census.casesvc.model.dto.CaseCreatedEvent;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -34,26 +31,20 @@ import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
+import uk.gov.ons.census.casesvc.utility.IacDispenser;
 import uk.gov.ons.census.casesvc.utility.QidCreator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SampleReceiverTest {
 
-  @InjectMocks
-  private SampleReceiver underTest;
+  @InjectMocks private SampleReceiver underTest;
 
-  @Mock
-  private CaseRepository caseRepository;
-  @Mock
-  private UacQidLinkRepository uacQidLinkRepository;
-  @Mock
-  private EventRepository eventRepository;
-  @Mock
-  private RabbitTemplate rabbitTemplate;
-  @Mock
-  private IacDispenser iacDispenser;
-  @Mock
-  private QidCreator qidCreator;
+  @Mock private CaseRepository caseRepository;
+  @Mock private UacQidLinkRepository uacQidLinkRepository;
+  @Mock private EventRepository eventRepository;
+  @Mock private RabbitTemplate rabbitTemplate;
+  @Mock private IacDispenser iacDispenser;
+  @Mock private QidCreator qidCreator;
 
   @Spy
   private MapperFacade mapperFacade = new DefaultMapperFactory.Builder().build().getMapperFacade();
@@ -129,18 +120,14 @@ public class SampleReceiverTest {
     assertEquals("Case created", event.getEventDescription());
 
     // Check case is stored in the database
-    ArgumentCaptor<Case> caseArgumentCaptor =
-        ArgumentCaptor.forClass(Case.class);
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
     verify(caseRepository).saveAndFlush(caseArgumentCaptor.capture());
     Case caze = caseArgumentCaptor.getValue();
-    assertEquals(
-        "123 Fake Street",
-        caze.getAddressLine1());
+    assertEquals("123 Fake Street", caze.getAddressLine1());
     assertEquals(ACTIONABLE, caze.getState());
 
     // Check sample gets mapped to a case
     verify(mapperFacade).map(any(CreateCaseSample.class), eq(Case.class));
-
   }
 
   @Test(expected = RuntimeException.class)
@@ -149,8 +136,7 @@ public class SampleReceiverTest {
     CreateCaseSample createCaseSample = new CreateCaseSample();
     createCaseSample.setAddressLine1("123 Fake Street");
     createCaseSample.setRgn("E999");
-    when(uacQidLinkRepository.saveAndFlush(any()))
-        .thenThrow(new RuntimeException());
+    when(uacQidLinkRepository.saveAndFlush(any())).thenThrow(new RuntimeException());
 
     // When
     underTest.receiveMessage(createCaseSample);
@@ -191,12 +177,11 @@ public class SampleReceiverTest {
     long qid = 1234567891011125L;
     when(qidCreator.createQid(anyInt(), anyInt(), anyLong())).thenReturn(qid);
 
-    doThrow(new RuntimeException()).when(rabbitTemplate)
+    doThrow(new RuntimeException())
+        .when(rabbitTemplate)
         .convertAndSend(anyString(), anyString(), any(CaseCreatedEvent.class));
 
     // When
     underTest.receiveMessage(createCaseSample);
-
   }
-
 }
