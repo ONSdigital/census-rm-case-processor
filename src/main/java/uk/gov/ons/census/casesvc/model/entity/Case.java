@@ -22,7 +22,7 @@ public class Case {
   @Id
   @SequenceGenerator(name = "caseRefGenerator", initialValue = 10000000)
   @GeneratedValue(generator = "caseRefGenerator", strategy = GenerationType.SEQUENCE)
-  private Long caseRef;
+  private long caseRef;
 
   @Column private UUID caseId;
 

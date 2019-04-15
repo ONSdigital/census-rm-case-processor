@@ -1,5 +1,7 @@
 package uk.gov.ons.census.casesvc.messaging;
 
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
@@ -14,6 +16,7 @@ import uk.gov.ons.census.casesvc.model.dto.CaseCreatedEvent;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
 import uk.gov.ons.census.casesvc.model.dto.Event;
+import uk.gov.ons.census.casesvc.model.dto.EventType;
 import uk.gov.ons.census.casesvc.model.dto.Payload;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.CaseState;
@@ -26,6 +29,13 @@ import uk.gov.ons.census.casesvc.utility.QidCreator;
 
 @MessageEndpoint
 public class SampleReceiver {
+  private static final Logger log = LoggerFactory.getLogger(SampleReceiver.class);
+
+  private static final String EVENT_SOURCE = "CASE_SERVICE";
+  private static final String SURVEY = "CENSUS";
+  private static final String EVENT_CHANNEL = "RM";
+  private static final String EVENT_DESCRIPTION = "Case created";
+
   private CaseRepository caseRepository;
   private UacQidLinkRepository uacQidLinkRepository;
   private EventRepository eventRepository;
@@ -36,6 +46,9 @@ public class SampleReceiver {
 
   @Value("${queueconfig.emit-case-event-exchange}")
   private String emitCaseEventExchange;
+
+  @Value("${qid.tranche-identifier}")
+  private int trancheIdentifier;
 
   public SampleReceiver(
       CaseRepository caseRepository,
@@ -66,6 +79,7 @@ public class SampleReceiver {
   }
 
   private Case persistToDatabase(CreateCaseSample createCaseSample) {
+
     Case caze = mapperFacade.map(createCaseSample, Case.class);
     caze.setCaseId(UUID.randomUUID());
     caze.setState(CaseState.ACTIONABLE);
@@ -77,17 +91,17 @@ public class SampleReceiver {
     uacQidLink.setCaze(caze);
     uacQidLink = uacQidLinkRepository.saveAndFlush(uacQidLink);
 
-    int questionnaireType = 99;
-    int trancheIdentifier = 2;
-    uacQidLink.setQid(
-        qidCreator.createQid(questionnaireType, trancheIdentifier, uacQidLink.getUniqueNumber()));
+    String qid =
+        qidCreator.createQid(
+            createCaseSample.getTreatmentCode(), trancheIdentifier, uacQidLink.getUniqueNumber());
+    uacQidLink.setQid(qid);
     uacQidLinkRepository.save(uacQidLink);
 
     uk.gov.ons.census.casesvc.model.entity.Event loggedEvent =
         new uk.gov.ons.census.casesvc.model.entity.Event();
     loggedEvent.setId(UUID.randomUUID());
     loggedEvent.setEventDate(new Date());
-    loggedEvent.setEventDescription("Case created");
+    loggedEvent.setEventDescription(EVENT_DESCRIPTION);
     loggedEvent.setUacQidLink(uacQidLink);
     eventRepository.save(loggedEvent);
 
@@ -98,11 +112,11 @@ public class SampleReceiver {
     LocalDateTime now = LocalDateTime.now();
 
     Event event = new Event();
-    event.setChannel("rm");
-    event.setSource("CaseService");
+    event.setChannel(EVENT_CHANNEL);
+    event.setSource(EVENT_SOURCE);
     event.setDateTime(now.toString());
     event.setTransactionId(UUID.randomUUID().toString());
-    event.setType("CaseCreated");
+    event.setType(EventType.CASE_CREATED);
     Address address = new Address();
     address.setAddressLine1(caze.getAddressLine1());
     address.setAddressLine2(caze.getAddressLine2());
@@ -121,9 +135,8 @@ public class SampleReceiver {
     collectionCase.setCaseRef(Long.toString(caze.getCaseRef()));
     collectionCase.setCollectionExerciseId(caze.getCollectionExerciseId());
     collectionCase.setId(caze.getCaseId().toString());
-    collectionCase.setSampleUnitRef("");
     collectionCase.setState(caze.getState().toString());
-    collectionCase.setSurvey("Census");
+    collectionCase.setSurvey(SURVEY);
     Payload payload = new Payload();
     payload.setCollectionCase(collectionCase);
     CaseCreatedEvent caseCreatedEvent = new CaseCreatedEvent();

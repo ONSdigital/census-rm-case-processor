@@ -25,6 +25,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.ons.census.casesvc.model.dto.CaseCreatedEvent;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
+import uk.gov.ons.census.casesvc.model.dto.EventType;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
@@ -55,6 +56,7 @@ public class SampleReceiverTest {
     CreateCaseSample createCaseSample = new CreateCaseSample();
     createCaseSample.setAddressLine1("123 Fake Street");
     createCaseSample.setRgn("E999");
+    createCaseSample.setTreatmentCode("HH_LF3R2E");
     when(uacQidLinkRepository.saveAndFlush(any()))
         .then(
             obj -> {
@@ -78,8 +80,8 @@ public class SampleReceiverTest {
     String uac = "abcd-1234-xyza-4321";
     when(iacDispenser.getIacCode()).thenReturn(uac);
 
-    long qid = 1234567891011125L;
-    when(qidCreator.createQid(anyInt(), anyInt(), anyLong())).thenReturn(qid);
+    String qid = "1234567891011125";
+    when(qidCreator.createQid(eq("HH_LF3R2E"), anyInt(), anyLong())).thenReturn(qid);
 
     // When
     underTest.receiveMessage(createCaseSample);
@@ -97,9 +99,9 @@ public class SampleReceiverTest {
         caseCreatedEvent.getPayload().getCollectionCase().getAddress().getAddressLine1());
     assertEquals("E", caseCreatedEvent.getPayload().getCollectionCase().getAddress().getRegion());
     assertEquals("ACTIONABLE", caseCreatedEvent.getPayload().getCollectionCase().getState());
-    assertEquals("Census", caseCreatedEvent.getPayload().getCollectionCase().getSurvey());
-    assertEquals("rm", caseCreatedEvent.getEvent().getChannel());
-    assertEquals("CaseCreated", caseCreatedEvent.getEvent().getType());
+    assertEquals("CENSUS", caseCreatedEvent.getPayload().getCollectionCase().getSurvey());
+    assertEquals("RM", caseCreatedEvent.getEvent().getChannel());
+    assertEquals(EventType.CASE_CREATED, caseCreatedEvent.getEvent().getType());
     String now = LocalDateTime.now().toString();
     assertEquals(now.substring(0, 16), caseCreatedEvent.getEvent().getDateTime().substring(0, 16));
 
@@ -111,7 +113,7 @@ public class SampleReceiverTest {
     verify(uacQidLinkRepository).save(uacQidLinkArgumentCaptor.capture());
     UacQidLink uacQidLink = uacQidLinkArgumentCaptor.getValue();
     assertEquals(uac, uacQidLink.getUac());
-    assertEquals(qid, uacQidLink.getQid().longValue());
+    assertEquals(qid, uacQidLink.getQid());
 
     // Check case event is stored
     ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
@@ -136,6 +138,7 @@ public class SampleReceiverTest {
     CreateCaseSample createCaseSample = new CreateCaseSample();
     createCaseSample.setAddressLine1("123 Fake Street");
     createCaseSample.setRgn("E999");
+    createCaseSample.setTreatmentCode("HH_LF3R2E");
     when(uacQidLinkRepository.saveAndFlush(any())).thenThrow(new RuntimeException());
 
     // When
@@ -151,6 +154,7 @@ public class SampleReceiverTest {
     CreateCaseSample createCaseSample = new CreateCaseSample();
     createCaseSample.setAddressLine1("123 Fake Street");
     createCaseSample.setRgn("E999");
+    createCaseSample.setTreatmentCode("HH_LF3R2E");
     when(uacQidLinkRepository.saveAndFlush(any()))
         .then(
             obj -> {
@@ -174,8 +178,8 @@ public class SampleReceiverTest {
     String uac = "abcd-1234-xyza-4321";
     when(iacDispenser.getIacCode()).thenReturn(uac);
 
-    long qid = 1234567891011125L;
-    when(qidCreator.createQid(anyInt(), anyInt(), anyLong())).thenReturn(qid);
+    String qid = "1234567891011125";
+    when(qidCreator.createQid(eq("HH_LF3R2E"), anyInt(), anyLong())).thenReturn(qid);
 
     doThrow(new RuntimeException())
         .when(rabbitTemplate)

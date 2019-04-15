@@ -59,6 +59,7 @@ public class SampleReceiverIT {
     CreateCaseSample createCaseSample = new CreateCaseSample();
     createCaseSample.setPostcode("ABC123");
     createCaseSample.setRgn("E12000009");
+    createCaseSample.setTreatmentCode("HH_LF3R2E");
 
     // WHEN
     rabbitQueueHelper.sendMessage(inboundQueue, createCaseSample);
@@ -71,13 +72,13 @@ public class SampleReceiverIT {
     CaseCreatedEvent caseCreatedEvent =
         objectMapper.readValue(actualMessage, CaseCreatedEvent.class);
     assertNotNull(caseCreatedEvent);
-    assertEquals("rm", caseCreatedEvent.getEvent().getChannel());
+    assertEquals("RM", caseCreatedEvent.getEvent().getChannel());
 
     actualMessage = queue2.poll(10, TimeUnit.SECONDS);
     assertNotNull("Did not receive message before timeout", actualMessage);
     caseCreatedEvent = objectMapper.readValue(actualMessage, CaseCreatedEvent.class);
     assertNotNull(caseCreatedEvent);
-    assertEquals("rm", caseCreatedEvent.getEvent().getChannel());
+    assertEquals("RM", caseCreatedEvent.getEvent().getChannel());
 
     List<Case> caseList = caseRepository.findAll();
     assertEquals(1, caseList.size());

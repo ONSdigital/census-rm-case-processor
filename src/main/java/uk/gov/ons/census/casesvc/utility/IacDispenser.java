@@ -1,5 +1,7 @@
 package uk.gov.ons.census.casesvc.utility;
 
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -9,6 +11,8 @@ import uk.gov.ons.census.casesvc.client.InternetAccessCodeSvcClient;
 
 @Component
 public class IacDispenser implements Runnable {
+  private static final Logger log = LoggerFactory.getLogger(IacDispenser.class);
+
   private InternetAccessCodeSvcClient internetAccessCodeSvcClient;
   private BlockingQueue<String> iacCodePool = new LinkedBlockingQueue<>();
   private boolean isFetchingIacCodes = false;
@@ -56,8 +60,7 @@ public class IacDispenser implements Runnable {
       iacCodePool.addAll(generatedIacCodes);
     } catch (Exception exception) {
       // This is more of a warning because it's recoverable but it can cause an error
-      //      log.error("Unexpected exception when requesting IAC codes to top up pool", exception);
-      exception.printStackTrace();
+      log.error("Unexpected exception when requesting IAC codes to top up pool", exception);
     } finally {
       isFetchingIacCodes = false;
     }

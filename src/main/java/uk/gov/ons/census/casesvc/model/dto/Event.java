@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class Event {
-  private String type;
+  private EventType type;
   private String source;
   private String channel;
   private String dateTime;

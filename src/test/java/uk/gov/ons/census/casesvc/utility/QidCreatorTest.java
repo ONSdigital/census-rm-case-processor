@@ -2,7 +2,6 @@ package uk.gov.ons.census.casesvc.utility;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -14,32 +13,169 @@ public class QidCreatorTest {
 
   @InjectMocks private QidCreator underTest;
 
-  @Before
-  public void setUp() {
-    ReflectionTestUtils.setField(underTest, "modulus", 33);
-    ReflectionTestUtils.setField(underTest, "factor", 802);
-  }
-
   @Test
   public void testValidQid() {
     // Given
-
+    ReflectionTestUtils.setField(underTest, "modulus", 33);
+    ReflectionTestUtils.setField(underTest, "factor", 802);
     // When
-    long result = underTest.createQid(12, 2, 12345);
+    String result = underTest.createQid("HH_LF3R2E", 2, 12345);
 
     // Then
-    assertEquals(1220000001234502L, result);
+    assertEquals("0120000001234524", result);
   }
 
   @Test
   public void testValidCheckDigits() {
     // Given
-
+    ReflectionTestUtils.setField(underTest, "modulus", 33);
+    ReflectionTestUtils.setField(underTest, "factor", 802);
     // When
-    long result = underTest.createQid(12, 2, 12345);
+    String result = underTest.createQid("HH_LF3R2E", 2, 12345);
 
     // Then
-    String stringResult = Long.toString(result);
-    assertEquals("02", stringResult.substring(stringResult.length() - 2));
+    assertEquals("24", result.substring(result.length() - 2));
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void testTooManyCheckDigits() {
+    // Given
+    ReflectionTestUtils.setField(underTest, "modulus", 4312);
+    ReflectionTestUtils.setField(underTest, "factor", 802);
+    // When
+    String result = underTest.createQid("HH_LF3R2E", 2, 12345);
+
+    // Then
+
+  }
+
+  @Test
+  public void testValidQuestionnaireTypeEnglandHousehold() {
+    // Given
+    ReflectionTestUtils.setField(underTest, "modulus", 33);
+    ReflectionTestUtils.setField(underTest, "factor", 802);
+    // When
+    String result = underTest.createQid("HH_LF3R2E", 2, 12345);
+
+    // Then
+    assertEquals("01", result.substring(0, 2));
+  }
+
+  @Test
+  public void testValidQuestionnaireTypeWalesHousehold() {
+    // Given
+    ReflectionTestUtils.setField(underTest, "modulus", 33);
+    ReflectionTestUtils.setField(underTest, "factor", 802);
+    // When
+    String result = underTest.createQid("HH_LF3R2W", 2, 12345);
+
+    // Then
+    assertEquals("02", result.substring(0, 2));
+  }
+
+  @Test
+  public void testValidQuestionnaireTypeNorthernIrelandHousehold() {
+    // Given
+    ReflectionTestUtils.setField(underTest, "modulus", 33);
+    ReflectionTestUtils.setField(underTest, "factor", 802);
+    // When
+    String result = underTest.createQid("HH_LF3R2N", 2, 12345);
+
+    // Then
+    assertEquals("04", result.substring(0, 2));
+  }
+
+  @Test
+  public void testValidQuestionnaireTypeEnglandIndividual() {
+    // Given
+    ReflectionTestUtils.setField(underTest, "modulus", 33);
+    ReflectionTestUtils.setField(underTest, "factor", 802);
+    // When
+    String result = underTest.createQid("CI_LF3R2E", 2, 12345);
+
+    // Then
+    assertEquals("21", result.substring(0, 2));
+  }
+
+  @Test
+  public void testValidQuestionnaireTypeWalesIndividual() {
+    // Given
+    ReflectionTestUtils.setField(underTest, "modulus", 33);
+    ReflectionTestUtils.setField(underTest, "factor", 802);
+    // When
+    String result = underTest.createQid("CI_LF3R2W", 2, 12345);
+
+    // Then
+    assertEquals("22", result.substring(0, 2));
+  }
+
+  @Test
+  public void testValidQuestionnaireTypeNorthernIrelandIndividual() {
+    // Given
+    ReflectionTestUtils.setField(underTest, "modulus", 33);
+    ReflectionTestUtils.setField(underTest, "factor", 802);
+    // When
+    String result = underTest.createQid("CI_LF3R2N", 2, 12345);
+
+    // Then
+    assertEquals("24", result.substring(0, 2));
+  }
+
+  @Test
+  public void testValidQuestionnaireTypeEnglandCommunalEstablishment() {
+    // Given
+    ReflectionTestUtils.setField(underTest, "modulus", 33);
+    ReflectionTestUtils.setField(underTest, "factor", 802);
+    // When
+    String result = underTest.createQid("CE_LF3R2E", 2, 12345);
+
+    // Then
+    assertEquals("31", result.substring(0, 2));
+  }
+
+  @Test
+  public void testValidQuestionnaireTypeWalesCommunalEstablishment() {
+    // Given
+    ReflectionTestUtils.setField(underTest, "modulus", 33);
+    ReflectionTestUtils.setField(underTest, "factor", 802);
+    // When
+    String result = underTest.createQid("CE_LF3R2W", 2, 12345);
+
+    // Then
+    assertEquals("32", result.substring(0, 2));
+  }
+
+  @Test
+  public void testValidQuestionnaireTypeNorthernIrelandCommunalEstablishment() {
+    // Given
+    ReflectionTestUtils.setField(underTest, "modulus", 33);
+    ReflectionTestUtils.setField(underTest, "factor", 802);
+    // When
+    String result = underTest.createQid("CE_LF3R2N", 2, 12345);
+
+    // Then
+    assertEquals("34", result.substring(0, 2));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testInvalidCountryTreatmentCode() {
+    // Given
+    ReflectionTestUtils.setField(underTest, "modulus", 33);
+    ReflectionTestUtils.setField(underTest, "factor", 802);
+    // When
+    String result = underTest.createQid("HH_LF3R2Z", 2, 12345);
+
+    // Then
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testInvalidCaseType() {
+    // Given
+    ReflectionTestUtils.setField(underTest, "modulus", 33);
+    ReflectionTestUtils.setField(underTest, "factor", 802);
+    // When
+    String result = underTest.createQid("ZZ_LF3R2E", 2, 12345);
+
+    // Then
   }
 }

@@ -20,7 +20,7 @@ public class UacQidLink {
   @Generated(GenerationTime.INSERT)
   private Long uniqueNumber;
 
-  @Column private Long qid;
+  @Column private String qid;
 
   @Column private String uac;
 
