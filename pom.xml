@@ -148,9 +148,9 @@
             </goals>
             <phase>package</phase>
             <configuration>
-              <repository>${project.artifactId}</repository>
+              <repository>eu.gcr.io/census-rm-ci/rm/${project.artifactId}</repository>
               <buildArgs>
-                <JAR_FILE>eu.gcr.io/census-rm-ci/rm/${project.build.finalName}.jar</JAR_FILE>
+                <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
               </buildArgs>
             </configuration>
           </execution>

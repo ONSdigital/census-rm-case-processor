@@ -81,7 +81,7 @@ public class SampleReceiverTest {
     when(iacDispenser.getIacCode()).thenReturn(uac);
 
     String qid = "1234567891011125";
-    when(qidCreator.createQid(eq("HH_LF3R2E"), anyInt(), anyLong())).thenReturn(qid);
+    when(qidCreator.createQid(eq("HH_LF3R2E"), anyLong())).thenReturn(qid);
 
     // When
     underTest.receiveMessage(createCaseSample);
@@ -145,6 +145,7 @@ public class SampleReceiverTest {
     underTest.receiveMessage(createCaseSample);
 
     // Then
+    // Expected Exception is raised
 
   }
 
@@ -179,7 +180,7 @@ public class SampleReceiverTest {
     when(iacDispenser.getIacCode()).thenReturn(uac);
 
     String qid = "1234567891011125";
-    when(qidCreator.createQid(eq("HH_LF3R2E"), anyInt(), anyLong())).thenReturn(qid);
+    when(qidCreator.createQid(eq("HH_LF3R2E"), anyLong())).thenReturn(qid);
 
     doThrow(new RuntimeException())
         .when(rabbitTemplate)
@@ -187,5 +188,8 @@ public class SampleReceiverTest {
 
     // When
     underTest.receiveMessage(createCaseSample);
+
+    // Then
+    // Expected Exception is raised
   }
 }

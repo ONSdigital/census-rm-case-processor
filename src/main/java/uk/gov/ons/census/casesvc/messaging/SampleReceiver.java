@@ -47,9 +47,6 @@ public class SampleReceiver {
   @Value("${queueconfig.emit-case-event-exchange}")
   private String emitCaseEventExchange;
 
-  @Value("${qid.tranche-identifier}")
-  private int trancheIdentifier;
-
   public SampleReceiver(
       CaseRepository caseRepository,
       UacQidLinkRepository uacQidLinkRepository,
@@ -93,7 +90,7 @@ public class SampleReceiver {
 
     String qid =
         qidCreator.createQid(
-            createCaseSample.getTreatmentCode(), trancheIdentifier, uacQidLink.getUniqueNumber());
+            createCaseSample.getTreatmentCode(), uacQidLink.getUniqueNumber());
     uacQidLink.setQid(qid);
     uacQidLinkRepository.save(uacQidLink);
 

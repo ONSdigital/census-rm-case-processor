@@ -18,7 +18,10 @@ public class QidCreator {
   @Value("${qid.factor}")
   private int factor;
 
-  public String createQid(String treatmentCode, int trancheIdentifier, long uniqueNumber) {
+  @Value("${qid.tranche-identifier}")
+  private int trancheIdentifier;
+
+  public String createQid(String treatmentCode, long uniqueNumber) {
     int questionnaireType = calculateQuestionnaireType(treatmentCode);
     String sourceDigits =
         String.format("%02d%01d%011d", questionnaireType, trancheIdentifier, uniqueNumber);

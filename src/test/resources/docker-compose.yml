@@ -43,7 +43,7 @@ services:
   - REDIS_HOST=redis-case-it
   - CASE_SVC_CONNECTION_CONFIG_HOST=foobar
   - CASE_SVC_CONNECTION_CONFIG_PORT=666
-  - JAVA_OPTS=-Xmx128m -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5121
+  - JAVA_OPTS=-Xmx128m -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5121 -Dspring.profiles.active=dev
   - LIQUIBASE_USER=postgres
   - LIQUIBASE_PASSWORD=postgres
   - SPRING_DATASOURCE_USERNAME=postgres
