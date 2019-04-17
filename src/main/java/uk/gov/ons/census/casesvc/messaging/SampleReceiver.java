@@ -89,8 +89,7 @@ public class SampleReceiver {
     uacQidLink = uacQidLinkRepository.saveAndFlush(uacQidLink);
 
     String qid =
-        qidCreator.createQid(
-            createCaseSample.getTreatmentCode(), uacQidLink.getUniqueNumber());
+        qidCreator.createQid(createCaseSample.getTreatmentCode(), uacQidLink.getUniqueNumber());
     uacQidLink.setQid(qid);
     uacQidLinkRepository.save(uacQidLink);
 

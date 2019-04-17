@@ -46,7 +46,7 @@ public class QidCreatorTest {
     ReflectionTestUtils.setField(underTest, "factor", 802);
     ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
     // When
-    String result = underTest.createQid("HH_LF3R2E",12345);
+    String result = underTest.createQid("HH_LF3R2E", 12345);
 
     // Then
     // Expected Exception is raised
