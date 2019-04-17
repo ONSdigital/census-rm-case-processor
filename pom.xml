@@ -150,7 +150,7 @@
             <configuration>
               <repository>${project.artifactId}</repository>
               <buildArgs>
-                <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
+                <JAR_FILE>eu.gcr.io/census-rm-ci/rm/${project.build.finalName}.jar</JAR_FILE>
               </buildArgs>
             </configuration>
           </execution>
