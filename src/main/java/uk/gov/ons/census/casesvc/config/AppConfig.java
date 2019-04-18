@@ -63,8 +63,7 @@ public class AppConfig {
 
   @Bean
   public AmqpAdmin amqpAdmin(ConnectionFactory connectionFactory) {
-    RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
-    return rabbitAdmin;
+    return new RabbitAdmin(connectionFactory);
   }
 
   @Bean
