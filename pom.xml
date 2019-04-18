@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>uk.gov.ons.census.casesvc</groupId>
-  <artifactId>census-rm-case-service-v2</artifactId>
+  <artifactId>census-rm-casesvc-v2</artifactId>
   <version>1.0-SNAPSHOT</version>
 
   <parent>
@@ -36,6 +36,10 @@
       <artifactId>spring-integration-amqp</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-web</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
     </dependency>
@@ -49,6 +53,18 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
     </dependency>
+    <dependency>
+      <groupId>ma.glasnost.orika</groupId>
+      <artifactId>orika-core</artifactId>
+      <version>1.5.4</version>
+    </dependency>
+    <dependency>
+      <groupId>com.godaddy</groupId>
+      <artifactId>logging</artifactId>
+      <version>1.2.5</version>
+    </dependency>
+
+    <!--    Test Dependencies below this point -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -78,58 +94,30 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>io.fabric8</groupId>
-        <artifactId>docker-maven-plugin</artifactId>
-        <version>0.23.0</version>
+        <groupId>com.dkanejs.maven.plugins</groupId>
+        <artifactId>docker-compose-maven-plugin</artifactId>
+        <version>2.4.0</version>
         <executions>
           <execution>
-            <id>pre-stop</id>
-            <goals>
-              <goal>stop</goal>
-            </goals>
+            <id>up</id>
             <phase>pre-integration-test</phase>
+            <goals>
+              <goal>up</goal>
+            </goals>
             <configuration>
-              <images>
-                <image>
-                  <external>
-                    <type>compose</type>
-                    <basedir>${project.basedir}/src/test/resources</basedir>
-                  </external>
-                </image>
-              </images>
+              <composeFile>${project.basedir}/src/test/resources/docker-compose.yml</composeFile>
+              <detachedMode>true</detachedMode>
             </configuration>
           </execution>
           <execution>
-            <id>start</id>
+            <id>down</id>
+            <phase>post-integration-test</phase>
             <goals>
-              <goal>start</goal>
+              <goal>down</goal>
             </goals>
             <configuration>
-              <showLogs>false</showLogs>
-              <images>
-                <image>
-                  <external>
-                    <type>compose</type>
-                    <basedir>${project.basedir}/src/test/resources</basedir>
-                  </external>
-                </image>
-              </images>
-            </configuration>
-          </execution>
-          <execution>
-            <id>stop</id>
-            <goals>
-              <goal>stop</goal>
-            </goals>
-            <configuration>
-              <images>
-                <image>
-                  <external>
-                    <type>compose</type>
-                    <basedir>${project.basedir}/src/test/resources</basedir>
-                  </external>
-                </image>
-              </images>
+              <composeFile>${project.basedir}/src/test/resources/docker-compose.yml</composeFile>
+              <removeVolumes>true</removeVolumes>
             </configuration>
           </execution>
         </executions>
@@ -160,7 +148,7 @@
             </goals>
             <phase>package</phase>
             <configuration>
-              <repository>${project.artifactId}</repository>
+              <repository>eu.gcr.io/census-rm-ci/rm/${project.artifactId}</repository>
               <buildArgs>
                 <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
               </buildArgs>

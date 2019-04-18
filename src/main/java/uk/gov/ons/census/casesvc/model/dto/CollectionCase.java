@@ -8,7 +8,6 @@ public class CollectionCase {
   private String caseRef;
   private String survey;
   private String collectionExerciseId;
-  private String sampleUnitRef;
   private Address address;
   private String state;
   private String actionableFrom;

@@ -1,5 +1,8 @@
 package uk.gov.ons.census.casesvc.config;
 
+import ma.glasnost.orika.MapperFacade;
+import ma.glasnost.orika.MapperFactory;
+import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
@@ -22,14 +25,14 @@ public class AppConfig {
   private String inboundQueue;
 
   @Bean
-  public MessageChannel amqpInputChannel() {
+  public MessageChannel caseSampleInputChannel() {
     return new DirectChannel();
   }
 
   @Bean
   public AmqpInboundChannelAdapter inbound(
       SimpleMessageListenerContainer listenerContainer,
-      @Qualifier("amqpInputChannel") MessageChannel channel) {
+      @Qualifier("caseSampleInputChannel") MessageChannel channel) {
     AmqpInboundChannelAdapter adapter = new AmqpInboundChannelAdapter(listenerContainer);
     adapter.setOutputChannel(channel);
     return adapter;
@@ -37,16 +40,15 @@ public class AppConfig {
 
   @Bean
   public RabbitTemplate rabbitTemplate(
-      ConnectionFactory connectionFactory,
-      Jackson2JsonMessageConverter producerJackson2MessageConverter) {
+      ConnectionFactory connectionFactory, Jackson2JsonMessageConverter messageConverter) {
     RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-    rabbitTemplate.setMessageConverter(producerJackson2MessageConverter);
+    rabbitTemplate.setMessageConverter(messageConverter);
     rabbitTemplate.setChannelTransacted(true);
     return rabbitTemplate;
   }
 
   @Bean
-  public Jackson2JsonMessageConverter producerJackson2MessageConverter() {
+  public Jackson2JsonMessageConverter messageConverter() {
     return new Jackson2JsonMessageConverter();
   }
 
@@ -61,7 +63,13 @@ public class AppConfig {
 
   @Bean
   public AmqpAdmin amqpAdmin(ConnectionFactory connectionFactory) {
-    RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
-    return rabbitAdmin;
+    return new RabbitAdmin(connectionFactory);
+  }
+
+  @Bean
+  public MapperFacade mapperFacade() {
+    MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
+
+    return mapperFactory.getMapperFacade();
   }
 }
