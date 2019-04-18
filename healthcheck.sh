@@ -1,0 +1,1 @@
+find /tmp/case-service-healthy -mmin -1 | egrep '.*'
