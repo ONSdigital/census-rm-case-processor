@@ -36,13 +36,13 @@ public class SampleReceiver {
   private static final String EVENT_CHANNEL = "RM";
   private static final String EVENT_DESCRIPTION = "Case created";
 
-  private CaseRepository caseRepository;
-  private UacQidLinkRepository uacQidLinkRepository;
-  private EventRepository eventRepository;
-  private RabbitTemplate rabbitTemplate;
-  private IacDispenser iacDispenser;
-  private QidCreator qidCreator;
-  private MapperFacade mapperFacade;
+  private final CaseRepository caseRepository;
+  private final UacQidLinkRepository uacQidLinkRepository;
+  private final EventRepository eventRepository;
+  private final RabbitTemplate rabbitTemplate;
+  private final IacDispenser iacDispenser;
+  private final QidCreator qidCreator;
+  private final MapperFacade mapperFacade;
 
   @Value("${queueconfig.emit-case-event-exchange}")
   private String emitCaseEventExchange;

@@ -53,35 +53,39 @@ public class QidCreator {
       log.with("treatment_code", treatmentCode).error(UNKNOWN_COUNTRY_ERROR);
       throw new IllegalArgumentException();
     }
-    int questionnaireType = -1;
+
     if (treatmentCode.startsWith("HH")) {
-      if (country.equals("E")) {
-        questionnaireType = 1;
-      } else if (country.equals("W")) {
-        questionnaireType = 2;
-      } else if (country.equals("N")) {
-        questionnaireType = 4;
+      switch (country) {
+        case "E":
+          return 1;
+        case "W":
+          return 2;
+        case "N":
+          return 4;
       }
     } else if (treatmentCode.startsWith("CI")) {
-      if (country.equals("E")) {
-        questionnaireType = 21;
-      } else if (country.equals("W")) {
-        questionnaireType = 22;
-      } else if (country.equals("N")) {
-        questionnaireType = 24;
+      switch (country) {
+        case "E":
+          return 21;
+        case "W":
+          return 22;
+        case "N":
+          return 24;
       }
     } else if (treatmentCode.startsWith("CE")) {
-      if (country.equals("E")) {
-        questionnaireType = 31;
-      } else if (country.equals("W")) {
-        questionnaireType = 32;
-      } else if (country.equals("N")) {
-        questionnaireType = 34;
+      switch (country) {
+        case "E":
+          return 31;
+        case "W":
+          return 32;
+        case "N":
+          return 34;
       }
     } else {
       log.with("treatment_code", treatmentCode).error(UNEXPECTED_CASE_TYPE_ERROR);
       throw new IllegalArgumentException();
     }
-    return questionnaireType;
+
+    throw new RuntimeException(); // This code should be unreachable
   }
 }

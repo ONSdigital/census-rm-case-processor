@@ -19,6 +19,8 @@ import uk.gov.ons.census.casesvc.model.dto.CreateInternetAccessCodeDTO;
 /** The impl of the service which calls the IAC service via REST */
 @Component
 public class InternetAccessCodeSvcClient {
+  private static final String CREATED_BY = "SYSTEM";
+
   @Value("${iacservice.generate-iacs-path}")
   private String generateIacsPath;
 
@@ -42,7 +44,7 @@ public class InternetAccessCodeSvcClient {
     RestTemplate restTemplate = new RestTemplate();
     UriComponents uriComponents = createUriComponents(generateIacsPath, null);
 
-    CreateInternetAccessCodeDTO createCodesDTO = new CreateInternetAccessCodeDTO(count, "SYSTEM");
+    CreateInternetAccessCodeDTO createCodesDTO = new CreateInternetAccessCodeDTO(count, CREATED_BY);
     HttpEntity<CreateInternetAccessCodeDTO> httpEntity = createHttpEntity(createCodesDTO);
 
     ResponseEntity<String[]> responseEntity =
@@ -50,7 +52,7 @@ public class InternetAccessCodeSvcClient {
     return Arrays.asList(responseEntity.getBody());
   }
 
-  public UriComponents createUriComponents(
+  private UriComponents createUriComponents(
       String path, MultiValueMap<String, String> queryParams, Object... pathParams) {
     UriComponents uriComponentsWithOutQueryParams =
         UriComponentsBuilder.newInstance()

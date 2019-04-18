@@ -13,8 +13,8 @@ import uk.gov.ons.census.casesvc.client.InternetAccessCodeSvcClient;
 public class IacDispenser implements Runnable {
   private static final Logger log = LoggerFactory.getLogger(IacDispenser.class);
 
-  private InternetAccessCodeSvcClient internetAccessCodeSvcClient;
-  private BlockingQueue<String> iacCodePool = new LinkedBlockingQueue<>();
+  private final InternetAccessCodeSvcClient internetAccessCodeSvcClient;
+  private final BlockingQueue<String> iacCodePool = new LinkedBlockingQueue<>();
   private boolean isFetchingIacCodes = false;
 
   @Value("${iacservice.pool-size-min}")
