@@ -18,8 +18,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.ons.census.casesvc.model.dto.CaseCreatedEvent;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
+import uk.gov.ons.census.casesvc.model.dto.FanoutEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
@@ -69,16 +69,15 @@ public class SampleReceiverIT {
 
     String actualMessage = queue1.poll(10, TimeUnit.SECONDS);
     assertNotNull("Did not receive message before timeout", actualMessage);
-    CaseCreatedEvent caseCreatedEvent =
-        objectMapper.readValue(actualMessage, CaseCreatedEvent.class);
-    assertNotNull(caseCreatedEvent);
-    assertEquals("RM", caseCreatedEvent.getEvent().getChannel());
+    FanoutEvent fanoutEvent = objectMapper.readValue(actualMessage, FanoutEvent.class);
+    assertNotNull(fanoutEvent);
+    assertEquals("RM", fanoutEvent.getEvent().getChannel());
 
     actualMessage = queue2.poll(10, TimeUnit.SECONDS);
     assertNotNull("Did not receive message before timeout", actualMessage);
-    caseCreatedEvent = objectMapper.readValue(actualMessage, CaseCreatedEvent.class);
-    assertNotNull(caseCreatedEvent);
-    assertEquals("RM", caseCreatedEvent.getEvent().getChannel());
+    fanoutEvent = objectMapper.readValue(actualMessage, FanoutEvent.class);
+    assertNotNull(fanoutEvent);
+    assertEquals("RM", fanoutEvent.getEvent().getChannel());
 
     List<Case> caseList = caseRepository.findAll();
     assertEquals(1, caseList.size());

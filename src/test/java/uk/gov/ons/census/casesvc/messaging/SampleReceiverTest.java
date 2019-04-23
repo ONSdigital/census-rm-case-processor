@@ -22,9 +22,9 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
-import uk.gov.ons.census.casesvc.model.dto.CaseCreatedEvent;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
 import uk.gov.ons.census.casesvc.model.dto.EventType;
+import uk.gov.ons.census.casesvc.model.dto.FanoutEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
@@ -87,22 +87,22 @@ public class SampleReceiverTest {
 
     // Then
     // Check the emitted event
-    ArgumentCaptor<CaseCreatedEvent> emittedMessageArgCaptor =
-        ArgumentCaptor.forClass(CaseCreatedEvent.class);
+    ArgumentCaptor<FanoutEvent> emittedMessageArgCaptor =
+        ArgumentCaptor.forClass(FanoutEvent.class);
     verify(rabbitTemplate)
         .convertAndSend(eq("myExchange"), eq(""), emittedMessageArgCaptor.capture());
-    CaseCreatedEvent caseCreatedEvent = emittedMessageArgCaptor.getValue();
-    assertEquals("123456789", caseCreatedEvent.getPayload().getCollectionCase().getCaseRef());
+    FanoutEvent fanoutEvent = emittedMessageArgCaptor.getValue();
+    assertEquals("123456789", fanoutEvent.getPayload().getCollectionCase().getCaseRef());
     assertEquals(
         "123 Fake Street",
-        caseCreatedEvent.getPayload().getCollectionCase().getAddress().getAddressLine1());
-    assertEquals("E", caseCreatedEvent.getPayload().getCollectionCase().getAddress().getRegion());
-    assertEquals("ACTIONABLE", caseCreatedEvent.getPayload().getCollectionCase().getState());
-    assertEquals("CENSUS", caseCreatedEvent.getPayload().getCollectionCase().getSurvey());
-    assertEquals("RM", caseCreatedEvent.getEvent().getChannel());
-    assertEquals(EventType.CASE_CREATED, caseCreatedEvent.getEvent().getType());
+        fanoutEvent.getPayload().getCollectionCase().getAddress().getAddressLine1());
+    assertEquals("E", fanoutEvent.getPayload().getCollectionCase().getAddress().getRegion());
+    assertEquals("ACTIONABLE", fanoutEvent.getPayload().getCollectionCase().getState());
+    assertEquals("CENSUS", fanoutEvent.getPayload().getCollectionCase().getSurvey());
+    assertEquals("RM", fanoutEvent.getEvent().getChannel());
+    assertEquals(EventType.CASE_CREATED, fanoutEvent.getEvent().getType());
     String now = LocalDateTime.now().toString();
-    assertEquals(now.substring(0, 16), caseCreatedEvent.getEvent().getDateTime().substring(0, 16));
+    assertEquals(now.substring(0, 16), fanoutEvent.getEvent().getDateTime().substring(0, 16));
 
     // Check IAC is retrieved
     verify(iacDispenser).getIacCode();
@@ -183,7 +183,7 @@ public class SampleReceiverTest {
 
     doThrow(new RuntimeException())
         .when(rabbitTemplate)
-        .convertAndSend(anyString(), anyString(), any(CaseCreatedEvent.class));
+        .convertAndSend(anyString(), anyString(), any(FanoutEvent.class));
 
     // When
     underTest.receiveMessage(createCaseSample);

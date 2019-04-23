@@ -11,4 +11,9 @@ public class CollectionCase {
   private Address address;
   private String state;
   private String actionableFrom;
+
+  // OTHER STUFF WE NEED IN THE ACTION SERVICE
+  private String actionPlanId;
+//  private String uac;
+  private String treatmentCode;
 }
