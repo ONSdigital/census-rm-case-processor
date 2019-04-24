@@ -1,7 +1,5 @@
 package uk.gov.ons.census.casesvc.messaging;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
@@ -29,8 +27,6 @@ import uk.gov.ons.census.casesvc.utility.QidCreator;
 
 @MessageEndpoint
 public class SampleReceiver {
-  private static final Logger log = LoggerFactory.getLogger(SampleReceiver.class);
-
   private static final String EVENT_SOURCE = "CASE_SERVICE";
   private static final String SURVEY = "CENSUS";
   private static final String EVENT_CHANNEL = "RM";
