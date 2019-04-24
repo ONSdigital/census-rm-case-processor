@@ -99,23 +99,20 @@ public class SampleReceiver {
 
     emitUacUpdatedEvent(uacQidLink, caze);
 
+    logEvent(uacQidLink, CASE_CREATED_EVENT_DESCRIPTION);
+    logEvent(uacQidLink, UAC_QID_LINKED_EVENT_DESCRIPTION);
+
+    return caze;
+  }
+
+  private void logEvent(UacQidLink uacQidLink, String eventDescription) {
     uk.gov.ons.census.casesvc.model.entity.Event loggedEvent =
         new uk.gov.ons.census.casesvc.model.entity.Event();
     loggedEvent.setId(UUID.randomUUID());
     loggedEvent.setEventDate(new Date());
-    loggedEvent.setEventDescription(CASE_CREATED_EVENT_DESCRIPTION);
+    loggedEvent.setEventDescription(eventDescription);
     loggedEvent.setUacQidLink(uacQidLink);
     eventRepository.save(loggedEvent);
-
-    loggedEvent =
-        new uk.gov.ons.census.casesvc.model.entity.Event();
-    loggedEvent.setId(UUID.randomUUID());
-    loggedEvent.setEventDate(new Date());
-    loggedEvent.setEventDescription(UAC_QID_LINKED_EVENT_DESCRIPTION);
-    loggedEvent.setUacQidLink(uacQidLink);
-    eventRepository.save(loggedEvent);
-
-    return caze;
   }
 
   private void emitUacUpdatedEvent(UacQidLink uacQidLink, Case caze) {
@@ -131,7 +128,7 @@ public class SampleReceiver {
     Uac uac = new Uac();
     uac.setActive(true);
     uac.setCaseId(caze.getCaseId().toString());
-    uac.setCaseType("H"); // TODO: Fix this
+    uac.setCaseType(caze.getAddressType());
     uac.setCollectionExerciseId(caze.getCollectionExerciseId());
     uac.setQuestionnaireId(uacQidLink.getQid());
     uac.setUacHash(Sha256Helper.hash(uacQidLink.getUac()));
@@ -175,16 +172,13 @@ public class SampleReceiver {
     collectionCase.setId(caze.getCaseId().toString());
     collectionCase.setState(caze.getState().toString());
     collectionCase.setSurvey(SURVEY);
+    collectionCase.setActionPlanId(caze.getActionPlanId());
+    collectionCase.setTreatmentCode(caze.getTreatmentCode());
     Payload payload = new Payload();
     payload.setCollectionCase(collectionCase);
     FanoutEvent fanoutEvent = new FanoutEvent();
     fanoutEvent.setEvent(event);
     fanoutEvent.setPayload(payload);
-
-    // OTHER STUFF WE NEED
-    collectionCase.setActionPlanId(caze.getActionPlanId());
-//    collectionCase.setUac(caze.getUacQidLinks().get(0).getUac());
-    collectionCase.setTreatmentCode(caze.getTreatmentCode());
 
     rabbitTemplate.convertAndSend(emitCaseEventExchange, "", fanoutEvent);
   }

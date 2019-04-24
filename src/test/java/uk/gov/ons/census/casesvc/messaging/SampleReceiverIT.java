@@ -2,6 +2,7 @@ package uk.gov.ons.census.casesvc.messaging;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -19,6 +20,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
+import uk.gov.ons.census.casesvc.model.dto.EventType;
 import uk.gov.ons.census.casesvc.model.dto.FanoutEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
@@ -73,11 +75,39 @@ public class SampleReceiverIT {
     assertNotNull(fanoutEvent);
     assertEquals("RM", fanoutEvent.getEvent().getChannel());
 
-    actualMessage = queue2.poll(10, TimeUnit.SECONDS);
+    actualMessage = queue1.poll(10, TimeUnit.SECONDS);
     assertNotNull("Did not receive message before timeout", actualMessage);
     fanoutEvent = objectMapper.readValue(actualMessage, FanoutEvent.class);
     assertNotNull(fanoutEvent);
     assertEquals("RM", fanoutEvent.getEvent().getChannel());
+
+    actualMessage = queue2.poll(10, TimeUnit.SECONDS);
+    assertNotNull("Did not receive message before timeout", actualMessage);
+    fanoutEvent = objectMapper.readValue(actualMessage, FanoutEvent.class);
+    assertNotNull(fanoutEvent);
+
+    boolean haveSeenCaseCreatedEvent = false;
+    boolean haveSeenUacUpdatedEvent = false;
+
+    if (fanoutEvent.getEvent().getType() == EventType.CASE_CREATED) {
+      haveSeenCaseCreatedEvent = true;
+    } else if (fanoutEvent.getEvent().getType() == EventType.UAC_UPDATED) {
+      haveSeenUacUpdatedEvent = true;
+    }
+
+    actualMessage = queue2.poll(10, TimeUnit.SECONDS);
+    assertNotNull("Did not receive message before timeout", actualMessage);
+    fanoutEvent = objectMapper.readValue(actualMessage, FanoutEvent.class);
+    assertNotNull(fanoutEvent);
+
+    if (fanoutEvent.getEvent().getType() == EventType.CASE_CREATED) {
+      haveSeenCaseCreatedEvent = true;
+    } else if (fanoutEvent.getEvent().getType() == EventType.UAC_UPDATED) {
+      haveSeenUacUpdatedEvent = true;
+    }
+
+    assertTrue(haveSeenCaseCreatedEvent);
+    assertTrue(haveSeenUacUpdatedEvent);
 
     List<Case> caseList = caseRepository.findAll();
     assertEquals(1, caseList.size());

@@ -1,16 +1,22 @@
 package uk.gov.ons.census.casesvc.messaging;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.model.entity.CaseState.ACTIONABLE;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.junit.Test;
@@ -89,20 +95,35 @@ public class SampleReceiverTest {
     // Check the emitted event
     ArgumentCaptor<FanoutEvent> emittedMessageArgCaptor =
         ArgumentCaptor.forClass(FanoutEvent.class);
-    verify(rabbitTemplate)
+    verify(rabbitTemplate, times(2))
         .convertAndSend(eq("myExchange"), eq(""), emittedMessageArgCaptor.capture());
-    FanoutEvent fanoutEvent = emittedMessageArgCaptor.getValue();
-    assertEquals("123456789", fanoutEvent.getPayload().getCollectionCase().getCaseRef());
+    List<FanoutEvent> fanoutEvents = emittedMessageArgCaptor.getAllValues();
+    assertEquals(2, fanoutEvents.size());
+
+    FanoutEvent caseCreatedEvent = null;
+    FanoutEvent uacUpdatedEvent = null;
+    if (fanoutEvents.get(0).getEvent().getType() == EventType.CASE_CREATED) {
+      caseCreatedEvent = fanoutEvents.get(0);
+      uacUpdatedEvent = fanoutEvents.get(1);
+    } else {
+      caseCreatedEvent = fanoutEvents.get(1);
+      uacUpdatedEvent = fanoutEvents.get(0);
+    }
+
+    assertEquals("123456789", caseCreatedEvent.getPayload().getCollectionCase().getCaseRef());
     assertEquals(
         "123 Fake Street",
-        fanoutEvent.getPayload().getCollectionCase().getAddress().getAddressLine1());
-    assertEquals("E", fanoutEvent.getPayload().getCollectionCase().getAddress().getRegion());
-    assertEquals("ACTIONABLE", fanoutEvent.getPayload().getCollectionCase().getState());
-    assertEquals("CENSUS", fanoutEvent.getPayload().getCollectionCase().getSurvey());
-    assertEquals("RM", fanoutEvent.getEvent().getChannel());
-    assertEquals(EventType.CASE_CREATED, fanoutEvent.getEvent().getType());
+        caseCreatedEvent.getPayload().getCollectionCase().getAddress().getAddressLine1());
+    assertEquals("E", caseCreatedEvent.getPayload().getCollectionCase().getAddress().getRegion());
+    assertEquals("ACTIONABLE", caseCreatedEvent.getPayload().getCollectionCase().getState());
+    assertEquals("CENSUS", caseCreatedEvent.getPayload().getCollectionCase().getSurvey());
+    assertEquals("RM", caseCreatedEvent.getEvent().getChannel());
+    assertEquals(EventType.CASE_CREATED, caseCreatedEvent.getEvent().getType());
     String now = LocalDateTime.now().toString();
-    assertEquals(now.substring(0, 16), fanoutEvent.getEvent().getDateTime().substring(0, 16));
+    assertEquals(now.substring(0, 16), caseCreatedEvent.getEvent().getDateTime().substring(0, 16));
+
+    assertEquals(uac, uacUpdatedEvent.getPayload().getUac().getUac());
+    assertEquals(qid, uacUpdatedEvent.getPayload().getUac().getQuestionnaireId());
 
     // Check IAC is retrieved
     verify(iacDispenser).getIacCode();
@@ -116,9 +137,13 @@ public class SampleReceiverTest {
 
     // Check case event is stored
     ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
-    verify(eventRepository).save(eventArgumentCaptor.capture());
-    Event event = eventArgumentCaptor.getValue();
-    assertEquals("Case created", event.getEventDescription());
+    verify(eventRepository, times(2)).save(eventArgumentCaptor.capture());
+    List<Event> events = eventArgumentCaptor.getAllValues();
+    assertThat(
+        events,
+        containsInAnyOrder(
+            hasProperty("eventDescription", is("Case created")),
+            hasProperty("eventDescription", is("UAC QID linked"))));
 
     // Check case is stored in the database
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);

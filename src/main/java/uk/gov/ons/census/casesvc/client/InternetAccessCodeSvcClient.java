@@ -10,7 +10,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -42,7 +41,7 @@ public class InternetAccessCodeSvcClient {
   public List<String> generateIACs(int count) {
 
     RestTemplate restTemplate = new RestTemplate();
-    UriComponents uriComponents = createUriComponents(generateIacsPath, null);
+    UriComponents uriComponents = createUriComponents(generateIacsPath);
 
     CreateInternetAccessCodeDTO createCodesDTO = new CreateInternetAccessCodeDTO(count, CREATED_BY);
     HttpEntity<CreateInternetAccessCodeDTO> httpEntity = createHttpEntity(createCodesDTO);
@@ -52,18 +51,12 @@ public class InternetAccessCodeSvcClient {
     return Arrays.asList(responseEntity.getBody());
   }
 
-  private UriComponents createUriComponents(
-      String path, MultiValueMap<String, String> queryParams, Object... pathParams) {
-    UriComponents uriComponentsWithOutQueryParams =
-        UriComponentsBuilder.newInstance()
-            .scheme(scheme)
-            .host(host)
-            .port(port)
-            .path(path)
-            .buildAndExpand(pathParams);
+  private UriComponents createUriComponents(String path) {
     return UriComponentsBuilder.newInstance()
-        .uriComponents(uriComponentsWithOutQueryParams)
-        .queryParams(queryParams)
+        .scheme(scheme)
+        .host(host)
+        .port(port)
+        .path(path)
         .build()
         .encode();
   }
