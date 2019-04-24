@@ -134,8 +134,8 @@ public class SampleReceiver {
     uac.setCaseType("H"); // TODO: Fix this
     uac.setCollectionExerciseId(caze.getCollectionExerciseId());
     uac.setQuestionnaireId(uacQidLink.getQid());
-    uac.setUacHash(Sha256Helper.hash(uac.getUac()));
-    uac.setUac(uac.getUac());
+    uac.setUacHash(Sha256Helper.hash(uacQidLink.getUac()));
+    uac.setUac(uacQidLink.getUac());
 
     Payload payload = new Payload();
     payload.setUac(uac);
