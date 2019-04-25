@@ -4,12 +4,12 @@ import lombok.Data;
 
 @Data
 public class Uac {
-  String uacHash;
-  String uac;
-  boolean active;
-  String questionnaireId;
-  String caseType;
-  String region;
-  String caseId;
-  String collectionExerciseId;
+  private String uacHash;
+  private String uac;
+  private boolean active;
+  private String questionnaireId;
+  private String caseType;
+  private String region;
+  private String caseId;
+  private String collectionExerciseId;
 }

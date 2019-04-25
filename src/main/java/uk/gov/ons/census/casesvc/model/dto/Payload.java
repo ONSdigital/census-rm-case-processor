@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class Payload {
-  CollectionCase collectionCase;
-  Uac uac;
+  private CollectionCase collectionCase;
+  private Uac uac;
 }

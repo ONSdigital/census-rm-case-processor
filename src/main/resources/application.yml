@@ -5,6 +5,8 @@ spring:
     password: postgres
     driverClassName: org.postgresql.Driver
     initialization-mode: always
+    hikari:
+      maximumPoolSize: 50
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQL94Dialect
@@ -29,6 +31,7 @@ queueconfig:
   emit-case-event-exchange: myfanout.exchange
   emit-case-event-rh-queue: myfanout.rhqueue
   emit-case-event-action-queue: myfanout.actionqueue
+  consumers: 50
 
 healthcheck:
   frequency: 1000 #milliseconds

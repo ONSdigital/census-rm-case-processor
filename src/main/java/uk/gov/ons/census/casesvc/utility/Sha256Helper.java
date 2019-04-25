@@ -3,6 +3,7 @@ package uk.gov.ons.census.casesvc.utility;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import javax.xml.bind.DatatypeConverter;
 
 public class Sha256Helper {
   private static MessageDigest digest;
@@ -16,18 +17,13 @@ public class Sha256Helper {
   }
 
   public static String hash(String stringToHash) {
-    byte[] encodedhash = digest.digest(stringToHash.getBytes(StandardCharsets.UTF_8));
+    byte[] hash;
 
-    return (bytesToHex(encodedhash));
-  }
-
-  private static String bytesToHex(byte[] hash) {
-    StringBuffer hexString = new StringBuffer();
-    for (int i = 0; i < hash.length; i++) {
-      String hex = Integer.toHexString(0xff & hash[i]);
-      if (hex.length() == 1) hexString.append('0');
-      hexString.append(hex);
+    // Digest is not thread safe
+    synchronized (digest) {
+      hash = digest.digest(stringToHash.getBytes(StandardCharsets.UTF_8));
     }
-    return hexString.toString();
+
+    return DatatypeConverter.printHexBinary(hash).toLowerCase();
   }
 }
