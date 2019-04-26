@@ -30,7 +30,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
 import uk.gov.ons.census.casesvc.model.dto.EventType;
-import uk.gov.ons.census.casesvc.model.dto.FanoutEvent;
+import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
@@ -93,21 +93,21 @@ public class SampleReceiverTest {
 
     // Then
     // Check the emitted event
-    ArgumentCaptor<FanoutEvent> emittedMessageArgCaptor =
-        ArgumentCaptor.forClass(FanoutEvent.class);
+    ArgumentCaptor<ResponseManagementEvent> emittedMessageArgCaptor =
+        ArgumentCaptor.forClass(ResponseManagementEvent.class);
     verify(rabbitTemplate, times(2))
         .convertAndSend(eq("myExchange"), eq(""), emittedMessageArgCaptor.capture());
-    List<FanoutEvent> fanoutEvents = emittedMessageArgCaptor.getAllValues();
-    assertEquals(2, fanoutEvents.size());
+    List<ResponseManagementEvent> responseManagementEvents = emittedMessageArgCaptor.getAllValues();
+    assertEquals(2, responseManagementEvents.size());
 
-    FanoutEvent caseCreatedEvent = null;
-    FanoutEvent uacUpdatedEvent = null;
-    if (fanoutEvents.get(0).getEvent().getType() == EventType.CASE_CREATED) {
-      caseCreatedEvent = fanoutEvents.get(0);
-      uacUpdatedEvent = fanoutEvents.get(1);
+    ResponseManagementEvent caseCreatedEvent = null;
+    ResponseManagementEvent uacUpdatedEvent = null;
+    if (responseManagementEvents.get(0).getEvent().getType() == EventType.CASE_CREATED) {
+      caseCreatedEvent = responseManagementEvents.get(0);
+      uacUpdatedEvent = responseManagementEvents.get(1);
     } else {
-      caseCreatedEvent = fanoutEvents.get(1);
-      uacUpdatedEvent = fanoutEvents.get(0);
+      caseCreatedEvent = responseManagementEvents.get(1);
+      uacUpdatedEvent = responseManagementEvents.get(0);
     }
 
     assertEquals("123456789", caseCreatedEvent.getPayload().getCollectionCase().getCaseRef());
@@ -208,7 +208,7 @@ public class SampleReceiverTest {
 
     doThrow(new RuntimeException())
         .when(rabbitTemplate)
-        .convertAndSend(anyString(), anyString(), any(FanoutEvent.class));
+        .convertAndSend(anyString(), anyString(), any(ResponseManagementEvent.class));
 
     // When
     underTest.receiveMessage(createCaseSample);

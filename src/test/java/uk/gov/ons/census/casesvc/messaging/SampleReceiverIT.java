@@ -1,11 +1,13 @@
 package uk.gov.ons.census.casesvc.messaging;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -21,7 +23,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
 import uk.gov.ons.census.casesvc.model.dto.EventType;
-import uk.gov.ons.census.casesvc.model.dto.FanoutEvent;
+import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
@@ -31,6 +33,8 @@ import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 @SpringBootTest
 @RunWith(SpringJUnit4ClassRunner.class)
 public class SampleReceiverIT {
+  private ObjectMapper objectMapper = new ObjectMapper();
+
   @Value("${queueconfig.inbound-queue}")
   private String inboundQueue;
 
@@ -67,50 +71,30 @@ public class SampleReceiverIT {
     rabbitQueueHelper.sendMessage(inboundQueue, createCaseSample);
 
     // THEN
-    ObjectMapper objectMapper = new ObjectMapper();
+    checkExpectedMessageReceived(queue1);
+    checkExpectedMessageReceived(queue1);
 
-    String actualMessage = queue1.poll(10, TimeUnit.SECONDS);
-    assertNotNull("Did not receive message before timeout", actualMessage);
-    FanoutEvent fanoutEvent = objectMapper.readValue(actualMessage, FanoutEvent.class);
-    assertNotNull(fanoutEvent);
-    assertEquals("RM", fanoutEvent.getEvent().getChannel());
+    List<EventType> eventTypesSeen = new LinkedList<>();
+    ResponseManagementEvent responseManagementEvent = checkExpectedMessageReceived(queue2);
+    eventTypesSeen.add(responseManagementEvent.getEvent().getType());
+    responseManagementEvent = checkExpectedMessageReceived(queue2);
+    eventTypesSeen.add(responseManagementEvent.getEvent().getType());
 
-    actualMessage = queue1.poll(10, TimeUnit.SECONDS);
-    assertNotNull("Did not receive message before timeout", actualMessage);
-    fanoutEvent = objectMapper.readValue(actualMessage, FanoutEvent.class);
-    assertNotNull(fanoutEvent);
-    assertEquals("RM", fanoutEvent.getEvent().getChannel());
-
-    actualMessage = queue2.poll(10, TimeUnit.SECONDS);
-    assertNotNull("Did not receive message before timeout", actualMessage);
-    fanoutEvent = objectMapper.readValue(actualMessage, FanoutEvent.class);
-    assertNotNull(fanoutEvent);
-
-    boolean haveSeenCaseCreatedEvent = false;
-    boolean haveSeenUacUpdatedEvent = false;
-
-    if (fanoutEvent.getEvent().getType() == EventType.CASE_CREATED) {
-      haveSeenCaseCreatedEvent = true;
-    } else if (fanoutEvent.getEvent().getType() == EventType.UAC_UPDATED) {
-      haveSeenUacUpdatedEvent = true;
-    }
-
-    actualMessage = queue2.poll(10, TimeUnit.SECONDS);
-    assertNotNull("Did not receive message before timeout", actualMessage);
-    fanoutEvent = objectMapper.readValue(actualMessage, FanoutEvent.class);
-    assertNotNull(fanoutEvent);
-
-    if (fanoutEvent.getEvent().getType() == EventType.CASE_CREATED) {
-      haveSeenCaseCreatedEvent = true;
-    } else if (fanoutEvent.getEvent().getType() == EventType.UAC_UPDATED) {
-      haveSeenUacUpdatedEvent = true;
-    }
-
-    assertTrue(haveSeenCaseCreatedEvent);
-    assertTrue(haveSeenUacUpdatedEvent);
+    assertThat(eventTypesSeen, containsInAnyOrder(EventType.CASE_CREATED, EventType.UAC_UPDATED));
 
     List<Case> caseList = caseRepository.findAll();
     assertEquals(1, caseList.size());
     assertEquals("ABC123", caseList.get(0).getPostcode());
+  }
+
+  private ResponseManagementEvent checkExpectedMessageReceived(BlockingQueue<String> queue)
+      throws IOException, InterruptedException {
+    String actualMessage = queue.poll(10, TimeUnit.SECONDS);
+    assertNotNull("Did not receive message before timeout", actualMessage);
+    ResponseManagementEvent responseManagementEvent =
+        objectMapper.readValue(actualMessage, ResponseManagementEvent.class);
+    assertNotNull(responseManagementEvent);
+    assertEquals("RM", responseManagementEvent.getEvent().getChannel());
+    return responseManagementEvent;
   }
 }
