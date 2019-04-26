@@ -14,7 +14,7 @@ spring:
       ddl-auto: create
     properties:
       hibernate:
-        default_schema: casesvcv2
+        default_schema: casev2
         jdbc:
           lob:
             non_contextual_creation: true

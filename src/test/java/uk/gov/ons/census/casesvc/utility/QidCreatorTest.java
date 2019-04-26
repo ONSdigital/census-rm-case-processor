@@ -19,6 +19,7 @@ public class QidCreatorTest {
     ReflectionTestUtils.setField(underTest, "modulus", 33);
     ReflectionTestUtils.setField(underTest, "factor", 802);
     ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
+
     // When
     String result = underTest.createQid("HH_LF3R2E", 12345);
 
@@ -32,6 +33,7 @@ public class QidCreatorTest {
     ReflectionTestUtils.setField(underTest, "modulus", 33);
     ReflectionTestUtils.setField(underTest, "factor", 802);
     ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
+
     // When
     String result = underTest.createQid("HH_LF3R2E", 12345);
 
@@ -45,6 +47,7 @@ public class QidCreatorTest {
     ReflectionTestUtils.setField(underTest, "modulus", 4312);
     ReflectionTestUtils.setField(underTest, "factor", 802);
     ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
+
     // When
     String result = underTest.createQid("HH_LF3R2E", 12345);
 
@@ -59,6 +62,7 @@ public class QidCreatorTest {
     ReflectionTestUtils.setField(underTest, "modulus", 33);
     ReflectionTestUtils.setField(underTest, "factor", 802);
     ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
+
     // When
     String result = underTest.createQid("HH_LF3R2E", 12345);
 
@@ -72,6 +76,7 @@ public class QidCreatorTest {
     ReflectionTestUtils.setField(underTest, "modulus", 33);
     ReflectionTestUtils.setField(underTest, "factor", 802);
     ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
+
     // When
     String result = underTest.createQid("HH_LF3R2W", 12345);
 
@@ -85,6 +90,7 @@ public class QidCreatorTest {
     ReflectionTestUtils.setField(underTest, "modulus", 33);
     ReflectionTestUtils.setField(underTest, "factor", 802);
     ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
+
     // When
     String result = underTest.createQid("HH_LF3R2N", 12345);
 
@@ -98,6 +104,7 @@ public class QidCreatorTest {
     ReflectionTestUtils.setField(underTest, "modulus", 33);
     ReflectionTestUtils.setField(underTest, "factor", 802);
     ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
+
     // When
     String result = underTest.createQid("CI_LF3R2E", 12345);
 
@@ -111,6 +118,7 @@ public class QidCreatorTest {
     ReflectionTestUtils.setField(underTest, "modulus", 33);
     ReflectionTestUtils.setField(underTest, "factor", 802);
     ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
+
     // When
     String result = underTest.createQid("CI_LF3R2W", 12345);
 
@@ -124,6 +132,7 @@ public class QidCreatorTest {
     ReflectionTestUtils.setField(underTest, "modulus", 33);
     ReflectionTestUtils.setField(underTest, "factor", 802);
     ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
+
     // When
     String result = underTest.createQid("CI_LF3R2N", 12345);
 
@@ -137,6 +146,7 @@ public class QidCreatorTest {
     ReflectionTestUtils.setField(underTest, "modulus", 33);
     ReflectionTestUtils.setField(underTest, "factor", 802);
     ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
+
     // When
     String result = underTest.createQid("CE_LF3R2E", 12345);
 
@@ -150,6 +160,7 @@ public class QidCreatorTest {
     ReflectionTestUtils.setField(underTest, "modulus", 33);
     ReflectionTestUtils.setField(underTest, "factor", 802);
     ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
+
     // When
     String result = underTest.createQid("CE_LF3R2W", 12345);
 
@@ -163,6 +174,7 @@ public class QidCreatorTest {
     ReflectionTestUtils.setField(underTest, "modulus", 33);
     ReflectionTestUtils.setField(underTest, "factor", 802);
     ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
+
     // When
     String result = underTest.createQid("CE_LF3R2N", 12345);
 
@@ -176,8 +188,9 @@ public class QidCreatorTest {
     ReflectionTestUtils.setField(underTest, "modulus", 33);
     ReflectionTestUtils.setField(underTest, "factor", 802);
     ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
+
     // When
-    String result = underTest.createQid("HH_LF3R2Z", 12345);
+    underTest.createQid("HH_LF3R2Z", 12345);
 
     // Then
     // Expected Exception is raised
@@ -189,8 +202,9 @@ public class QidCreatorTest {
     ReflectionTestUtils.setField(underTest, "modulus", 33);
     ReflectionTestUtils.setField(underTest, "factor", 802);
     ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
+
     // When
-    String result = underTest.createQid("ZZ_LF3R2E", 12345);
+    underTest.createQid("ZZ_LF3R2E", 12345);
 
     // Then
     // Expected Exception is raised

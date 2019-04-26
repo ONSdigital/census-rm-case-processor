@@ -15,7 +15,6 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.ons.census.casesvc.model.dto.CreateInternetAccessCodeDTO;
 
-/** The impl of the service which calls the IAC service via REST */
 @Component
 public class InternetAccessCodeSvcClient {
   private static final String CREATED_BY = "SYSTEM";
