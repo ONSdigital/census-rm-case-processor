@@ -11,4 +11,6 @@ public class CollectionCase {
   private Address address;
   private String state;
   private String actionableFrom;
+  private String actionPlanId;
+  private String treatmentCode;
 }

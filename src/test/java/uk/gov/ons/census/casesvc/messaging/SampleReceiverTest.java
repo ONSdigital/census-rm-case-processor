@@ -1,16 +1,22 @@
 package uk.gov.ons.census.casesvc.messaging;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.model.entity.CaseState.ACTIONABLE;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.junit.Test;
@@ -22,9 +28,9 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
-import uk.gov.ons.census.casesvc.model.dto.CaseCreatedEvent;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
 import uk.gov.ons.census.casesvc.model.dto.EventType;
+import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
@@ -87,11 +93,23 @@ public class SampleReceiverTest {
 
     // Then
     // Check the emitted event
-    ArgumentCaptor<CaseCreatedEvent> emittedMessageArgCaptor =
-        ArgumentCaptor.forClass(CaseCreatedEvent.class);
-    verify(rabbitTemplate)
+    ArgumentCaptor<ResponseManagementEvent> emittedMessageArgCaptor =
+        ArgumentCaptor.forClass(ResponseManagementEvent.class);
+    verify(rabbitTemplate, times(2))
         .convertAndSend(eq("myExchange"), eq(""), emittedMessageArgCaptor.capture());
-    CaseCreatedEvent caseCreatedEvent = emittedMessageArgCaptor.getValue();
+    List<ResponseManagementEvent> responseManagementEvents = emittedMessageArgCaptor.getAllValues();
+    assertEquals(2, responseManagementEvents.size());
+
+    ResponseManagementEvent caseCreatedEvent = null;
+    ResponseManagementEvent uacUpdatedEvent = null;
+    if (responseManagementEvents.get(0).getEvent().getType() == EventType.CASE_CREATED) {
+      caseCreatedEvent = responseManagementEvents.get(0);
+      uacUpdatedEvent = responseManagementEvents.get(1);
+    } else {
+      caseCreatedEvent = responseManagementEvents.get(1);
+      uacUpdatedEvent = responseManagementEvents.get(0);
+    }
+
     assertEquals("123456789", caseCreatedEvent.getPayload().getCollectionCase().getCaseRef());
     assertEquals(
         "123 Fake Street",
@@ -103,6 +121,9 @@ public class SampleReceiverTest {
     assertEquals(EventType.CASE_CREATED, caseCreatedEvent.getEvent().getType());
     String now = LocalDateTime.now().toString();
     assertEquals(now.substring(0, 16), caseCreatedEvent.getEvent().getDateTime().substring(0, 16));
+
+    assertEquals(uac, uacUpdatedEvent.getPayload().getUac().getUac());
+    assertEquals(qid, uacUpdatedEvent.getPayload().getUac().getQuestionnaireId());
 
     // Check IAC is retrieved
     verify(iacDispenser).getIacCode();
@@ -116,9 +137,13 @@ public class SampleReceiverTest {
 
     // Check case event is stored
     ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
-    verify(eventRepository).save(eventArgumentCaptor.capture());
-    Event event = eventArgumentCaptor.getValue();
-    assertEquals("Case created", event.getEventDescription());
+    verify(eventRepository, times(2)).save(eventArgumentCaptor.capture());
+    List<Event> events = eventArgumentCaptor.getAllValues();
+    assertThat(
+        events,
+        containsInAnyOrder(
+            hasProperty("eventDescription", is("Case created")),
+            hasProperty("eventDescription", is("UAC QID linked"))));
 
     // Check case is stored in the database
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
@@ -183,7 +208,7 @@ public class SampleReceiverTest {
 
     doThrow(new RuntimeException())
         .when(rabbitTemplate)
-        .convertAndSend(anyString(), anyString(), any(CaseCreatedEvent.class));
+        .convertAndSend(anyString(), anyString(), any(ResponseManagementEvent.class));
 
     // When
     underTest.receiveMessage(createCaseSample);

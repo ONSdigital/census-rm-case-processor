@@ -5,6 +5,7 @@ import com.godaddy.logging.LoggerFactory;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.client.InternetAccessCodeSvcClient;
@@ -31,9 +32,10 @@ public class IacDispenser implements Runnable {
     topUpPoolIfNecessary();
 
     try {
-      return iacCodePool.take();
+      return iacCodePool.poll(60, TimeUnit.SECONDS);
     } catch (InterruptedException e) {
-      throw new RuntimeException("Thread shut down while waiting for IAC code");
+      log.error("Waited too long for an IAC code - is the IAC service down?");
+      throw new RuntimeException();
     }
   }
 
@@ -61,6 +63,9 @@ public class IacDispenser implements Runnable {
     } catch (Exception exception) {
       // This is more of a warning because it's recoverable but it can cause an error
       log.error("Unexpected exception when requesting IAC codes to top up pool", exception);
+
+      // No point throwing an exception here, because we are on a different thread
+      // we will have to wait for the threads that are waiting timeout
     } finally {
       isFetchingIacCodes = false;
     }
