@@ -176,8 +176,17 @@ public class SampleReceiver {
     collectionCase.setId(caze.getCaseId().toString());
     collectionCase.setState(caze.getState().toString());
     collectionCase.setSurvey(SURVEY);
+
+    // Below this line is extra data potentially needed by Action Scheduler - can be ignored by RM
     collectionCase.setActionPlanId(caze.getActionPlanId());
     collectionCase.setTreatmentCode(caze.getTreatmentCode());
+    collectionCase.setOa(caze.getOa());
+    collectionCase.setLsoa(caze.getLsoa());
+    collectionCase.setMsoa(caze.getMsoa());
+    collectionCase.setLad(caze.getLad());
+    collectionCase.setHtcWillingness(caze.getHtcWillingness());
+    collectionCase.setHtcDigital(caze.getHtcDigital());
+
     return collectionCase;
   }
 }
