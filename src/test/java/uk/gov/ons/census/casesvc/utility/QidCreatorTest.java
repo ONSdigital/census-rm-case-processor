@@ -21,7 +21,7 @@ public class QidCreatorTest {
     ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
 
     // When
-    String result = underTest.createQid("HH_LF3R2E", 12345);
+    String result = underTest.createQid(1, 12345);
 
     // Then
     assertEquals("0120000001234524", result);
@@ -35,7 +35,7 @@ public class QidCreatorTest {
     ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
 
     // When
-    String result = underTest.createQid("HH_LF3R2E", 12345);
+    String result = underTest.createQid(1, 12345);
 
     // Then
     assertEquals("24", result.substring(result.length() - 2));
@@ -49,7 +49,7 @@ public class QidCreatorTest {
     ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
 
     // When
-    String result = underTest.createQid("HH_LF3R2E", 12345);
+    String result = underTest.createQid(1, 12345);
 
     // Then
     // Expected Exception is raised
@@ -64,7 +64,7 @@ public class QidCreatorTest {
     ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
 
     // When
-    String result = underTest.createQid("HH_LF3R2E", 12345);
+    String result = underTest.createQid(1, 12345);
 
     // Then
     assertEquals("01", result.substring(0, 2));
@@ -78,7 +78,7 @@ public class QidCreatorTest {
     ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
 
     // When
-    String result = underTest.createQid("HH_LF3R2W", 12345);
+    String result = underTest.createQid(2, 12345);
 
     // Then
     assertEquals("02", result.substring(0, 2));
@@ -92,7 +92,7 @@ public class QidCreatorTest {
     ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
 
     // When
-    String result = underTest.createQid("HH_LF3R2N", 12345);
+    String result = underTest.createQid(4, 12345);
 
     // Then
     assertEquals("04", result.substring(0, 2));
@@ -106,7 +106,7 @@ public class QidCreatorTest {
     ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
 
     // When
-    String result = underTest.createQid("CI_LF3R2E", 12345);
+    String result = underTest.createQid(21, 12345);
 
     // Then
     assertEquals("21", result.substring(0, 2));
@@ -120,7 +120,7 @@ public class QidCreatorTest {
     ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
 
     // When
-    String result = underTest.createQid("CI_LF3R2W", 12345);
+    String result = underTest.createQid(22, 12345);
 
     // Then
     assertEquals("22", result.substring(0, 2));
@@ -134,7 +134,7 @@ public class QidCreatorTest {
     ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
 
     // When
-    String result = underTest.createQid("CI_LF3R2N", 12345);
+    String result = underTest.createQid(24, 12345);
 
     // Then
     assertEquals("24", result.substring(0, 2));
@@ -148,7 +148,7 @@ public class QidCreatorTest {
     ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
 
     // When
-    String result = underTest.createQid("CE_LF3R2E", 12345);
+    String result = underTest.createQid(31, 12345);
 
     // Then
     assertEquals("31", result.substring(0, 2));
@@ -162,7 +162,7 @@ public class QidCreatorTest {
     ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
 
     // When
-    String result = underTest.createQid("CE_LF3R2W", 12345);
+    String result = underTest.createQid(32, 12345);
 
     // Then
     assertEquals("32", result.substring(0, 2));
@@ -176,37 +176,37 @@ public class QidCreatorTest {
     ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
 
     // When
-    String result = underTest.createQid("CE_LF3R2N", 12345);
+    String result = underTest.createQid(34, 12345);
 
     // Then
     assertEquals("34", result.substring(0, 2));
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void testInvalidCountryTreatmentCode() {
-    // Given
-    ReflectionTestUtils.setField(underTest, "modulus", 33);
-    ReflectionTestUtils.setField(underTest, "factor", 802);
-    ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
-
-    // When
-    underTest.createQid("HH_LF3R2Z", 12345);
-
-    // Then
-    // Expected Exception is raised
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void testInvalidCaseType() {
-    // Given
-    ReflectionTestUtils.setField(underTest, "modulus", 33);
-    ReflectionTestUtils.setField(underTest, "factor", 802);
-    ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
-
-    // When
-    underTest.createQid("ZZ_LF3R2E", 12345);
-
-    // Then
-    // Expected Exception is raised
-  }
+//  @Test(expected = IllegalArgumentException.class)
+//  public void testInvalidCountryTreatmentCode() {
+//    // Given
+//    ReflectionTestUtils.setField(underTest, "modulus", 33);
+//    ReflectionTestUtils.setField(underTest, "factor", 802);
+//    ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
+//
+//    // When
+//    underTest.createQid(1, 12345);
+//
+//    // Then
+//    // Expected Exception is raised
+//  }
+//
+//  @Test(expected = IllegalArgumentException.class)
+//  public void testInvalidCaseType() {
+//    // Given
+//    ReflectionTestUtils.setField(underTest, "modulus", 33);
+//    ReflectionTestUtils.setField(underTest, "factor", 802);
+//    ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
+//
+//    // When
+//    underTest.createQid("ZZ_LF3R2E", 12345);
+//
+//    // Then
+//    // Expected Exception is raised
+//  }
 }

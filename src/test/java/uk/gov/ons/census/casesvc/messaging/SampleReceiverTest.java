@@ -86,7 +86,7 @@ public class SampleReceiverTest {
     when(iacDispenser.getIacCode()).thenReturn(uac);
 
     String qid = "1234567891011125";
-    when(qidCreator.createQid(eq("HH_LF3R2E"), anyLong())).thenReturn(qid);
+    when(qidCreator.createQid(eq(1), anyLong())).thenReturn(qid);
 
     // When
     underTest.receiveMessage(createCaseSample);
@@ -164,6 +164,7 @@ public class SampleReceiverTest {
     createCaseSample.setRgn("E999");
     createCaseSample.setTreatmentCode("HH_LF3R2E");
     when(uacQidLinkRepository.saveAndFlush(any())).thenThrow(new RuntimeException());
+    when(caseRepository.saveAndFlush(any())).then(obj -> obj.getArgument(0));
 
     // When
     underTest.receiveMessage(createCaseSample);
@@ -204,7 +205,7 @@ public class SampleReceiverTest {
     when(iacDispenser.getIacCode()).thenReturn(uac);
 
     String qid = "1234567891011125";
-    when(qidCreator.createQid(eq("HH_LF3R2E"), anyLong())).thenReturn(qid);
+    when(qidCreator.createQid(eq(1), anyLong())).thenReturn(qid);
 
     doThrow(new RuntimeException())
         .when(rabbitTemplate)
