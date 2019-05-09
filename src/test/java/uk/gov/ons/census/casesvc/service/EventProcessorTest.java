@@ -51,7 +51,6 @@ public class EventProcessorTest {
         when(caseProcessor.saveCase(createCaseSample)).thenReturn(caze);
         UacQidLink uacQidLink = new UacQidLink();
         UacQidLink secondUacQidLink = new UacQidLink();
-        when(uacProcessor.saveUacQidLink(caze, 1)).thenReturn(uacQidLink);
         when(uacProcessor.saveUacQidLink(caze, 2)).thenReturn(uacQidLink);
 
         // When
