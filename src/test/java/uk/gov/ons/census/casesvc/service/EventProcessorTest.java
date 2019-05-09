@@ -42,5 +42,26 @@ public class EventProcessorTest {
         verify(uacProcessor, times(2)).logEvent(eq(uacQidLink), any(String.class));
     }
 
-    //TODO: Wales questionnaire
+    @Test
+    public void testWelshQuestionnaire() {
+        // Given
+        CreateCaseSample createCaseSample = new CreateCaseSample();
+        Case caze = new Case();
+        caze.setTreatmentCode("HH_QF2R1W");
+        when(caseProcessor.saveCase(createCaseSample)).thenReturn(caze);
+        UacQidLink uacQidLink = new UacQidLink();
+        UacQidLink secondUacQidLink = new UacQidLink();
+        when(uacProcessor.saveUacQidLink(caze, 1)).thenReturn(uacQidLink);
+        when(uacProcessor.saveUacQidLink(caze, 2)).thenReturn(uacQidLink);
+
+        // When
+        underTest.processSampleReceivedMessage(createCaseSample);
+
+        // Then
+        verify(caseProcessor).saveCase(createCaseSample);
+        verify(uacProcessor, times(1)).saveUacQidLink(eq(caze), eq(2));
+        verify(uacProcessor).emitUacUpdatedEvent(uacQidLink, caze);
+        verify(caseProcessor).emitCaseCreatedEvent(caze);
+        verify(uacProcessor, times(2)).logEvent(eq(uacQidLink), any(String.class));
+    }
 }
