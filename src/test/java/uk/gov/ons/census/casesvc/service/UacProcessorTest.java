@@ -22,6 +22,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -76,7 +77,6 @@ public class UacProcessorTest {
         UacQidLink uacQuidLink = new UacQidLink();
         uacQuidLink.setUniqueNumber(12345L);
 
-
         // When
         underTest.logEvent(uacQuidLink, "TEST_LOGGED_EVENT");
 
@@ -84,6 +84,24 @@ public class UacProcessorTest {
         ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventRepository).save(eventArgumentCaptor.capture());
         assertEquals("TEST_LOGGED_EVENT", eventArgumentCaptor.getValue().getEventDescription());
+    }
 
+    @Test
+    public void testEmitUacUpdatedEvent() {
+        // Given
+        UacQidLink uacQidLink = new UacQidLink();
+        uacQidLink.setUac("12345");
+        Case caze = new Case();
+        UUID caseUuid = UUID.randomUUID();
+        caze.setCaseId(caseUuid);
+        ReflectionTestUtils.setField(underTest, "emitCaseEventExchange", "TEST_EXCHANGE");
+
+        // When
+        underTest.emitUacUpdatedEvent(uacQidLink, caze);
+
+        // Then
+        ArgumentCaptor<ResponseManagementEvent> responseManagementEventArgumentCaptor = ArgumentCaptor.forClass(ResponseManagementEvent.class);
+        verify(rabbitTemplate).convertAndSend(eq("TEST_EXCHANGE"), eq(""), responseManagementEventArgumentCaptor.capture());
+        assertEquals("12345", responseManagementEventArgumentCaptor.getValue().getPayload().getUac().getUac());
     }
 }
