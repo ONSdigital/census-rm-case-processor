@@ -50,7 +50,8 @@ public class EventProcessorTest {
     when(caseProcessor.saveCase(createCaseSample)).thenReturn(caze);
     UacQidLink uacQidLink = new UacQidLink();
     UacQidLink secondUacQidLink = new UacQidLink();
-    when(uacProcessor.saveUacQidLink(caze, 2)).thenReturn(uacQidLink);
+      when(uacProcessor.saveUacQidLink(caze, 2)).thenReturn(uacQidLink);
+      when(uacProcessor.saveUacQidLink(caze, 3)).thenReturn(secondUacQidLink);
 
     // When
     underTest.processSampleReceivedMessage(createCaseSample);
@@ -58,8 +59,8 @@ public class EventProcessorTest {
     // Then
     verify(caseProcessor).saveCase(createCaseSample);
     verify(uacProcessor, times(1)).saveUacQidLink(eq(caze), eq(2));
-    verify(uacProcessor).emitUacUpdatedEvent(uacQidLink, caze);
+    verify(uacProcessor, times(2)).emitUacUpdatedEvent(uacQidLink, caze);
     verify(caseProcessor).emitCaseCreatedEvent(caze);
-    verify(uacProcessor, times(2)).logEvent(eq(uacQidLink), any(String.class));
+    verify(uacProcessor, times(3)).logEvent(eq(uacQidLink), any(String.class));
   }
 }
