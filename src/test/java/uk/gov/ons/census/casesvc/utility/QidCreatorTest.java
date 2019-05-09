@@ -56,6 +56,8 @@ public class QidCreatorTest {
 
   }
 
+  //TODO: Turn the remaining into tests in EventProcessorTest
+
   @Test
   public void testValidQuestionnaireTypeEnglandHousehold() {
     // Given
