@@ -10,18 +10,17 @@ import uk.gov.ons.census.casesvc.service.EventProcessor;
 
 @MessageEndpoint
 public class SampleReceiver {
-    private static final Logger log = LoggerFactory.getLogger(SampleReceiver.class);
+  private static final Logger log = LoggerFactory.getLogger(SampleReceiver.class);
 
-    private final EventProcessor eventProcessor;
+  private final EventProcessor eventProcessor;
 
-    public SampleReceiver(EventProcessor eventProcessor) {
-        this.eventProcessor = eventProcessor;
-    }
+  public SampleReceiver(EventProcessor eventProcessor) {
+    this.eventProcessor = eventProcessor;
+  }
 
-    @Transactional
-    @ServiceActivator(inputChannel = "caseSampleInputChannel")
-    public void receiveMessage(CreateCaseSample createCaseSample) {
-        eventProcessor.processSampleReceivedMessage(createCaseSample);
-    }
-
+  @Transactional
+  @ServiceActivator(inputChannel = "caseSampleInputChannel")
+  public void receiveMessage(CreateCaseSample createCaseSample) {
+    eventProcessor.processSampleReceivedMessage(createCaseSample);
+  }
 }

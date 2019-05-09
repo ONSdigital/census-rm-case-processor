@@ -56,7 +56,7 @@ public class QidCreatorTest {
 
   }
 
-  //TODO: Turn the remaining into tests in EventProcessorTest
+  // TODO: Turn the remaining into tests in EventProcessorTest
 
   @Test
   public void testValidQuestionnaireTypeEnglandHousehold() {
@@ -184,31 +184,31 @@ public class QidCreatorTest {
     assertEquals("34", result.substring(0, 2));
   }
 
-//  @Test(expected = IllegalArgumentException.class)
-//  public void testInvalidCountryTreatmentCode() {
-//    // Given
-//    ReflectionTestUtils.setField(underTest, "modulus", 33);
-//    ReflectionTestUtils.setField(underTest, "factor", 802);
-//    ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
-//
-//    // When
-//    underTest.createQid(1, 12345);
-//
-//    // Then
-//    // Expected Exception is raised
-//  }
-//
-//  @Test(expected = IllegalArgumentException.class)
-//  public void testInvalidCaseType() {
-//    // Given
-//    ReflectionTestUtils.setField(underTest, "modulus", 33);
-//    ReflectionTestUtils.setField(underTest, "factor", 802);
-//    ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
-//
-//    // When
-//    underTest.createQid("ZZ_LF3R2E", 12345);
-//
-//    // Then
-//    // Expected Exception is raised
-//  }
+  //  @Test(expected = IllegalArgumentException.class)
+  //  public void testInvalidCountryTreatmentCode() {
+  //    // Given
+  //    ReflectionTestUtils.setField(underTest, "modulus", 33);
+  //    ReflectionTestUtils.setField(underTest, "factor", 802);
+  //    ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
+  //
+  //    // When
+  //    underTest.createQid(1, 12345);
+  //
+  //    // Then
+  //    // Expected Exception is raised
+  //  }
+  //
+  //  @Test(expected = IllegalArgumentException.class)
+  //  public void testInvalidCaseType() {
+  //    // Given
+  //    ReflectionTestUtils.setField(underTest, "modulus", 33);
+  //    ReflectionTestUtils.setField(underTest, "factor", 802);
+  //    ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
+  //
+  //    // When
+  //    underTest.createQid("ZZ_LF3R2E", 12345);
+  //
+  //    // Then
+  //    // Expected Exception is raised
+  //  }
 }

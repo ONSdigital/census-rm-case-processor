@@ -22,7 +22,8 @@ public class QidCreator {
   private int trancheIdentifier;
 
   public String createQid(int questionnaireType, long uniqueNumber) {
-    String sourceDigits = String.format("%02d%01d%011d", questionnaireType, trancheIdentifier, uniqueNumber);
+    String sourceDigits =
+        String.format("%02d%01d%011d", questionnaireType, trancheIdentifier, uniqueNumber);
 
     int checkDigits = calculateCheckDigits(sourceDigits);
     if (checkDigits > 99) {
@@ -44,5 +45,4 @@ public class QidCreator {
     }
     return remainder % modulus;
   }
-
 }
