@@ -24,9 +24,17 @@ public class QueueSetterUpper {
   @Value("${queueconfig.emit-case-event-action-queue}")
   private String emitCaseEventActionQueue;
 
+  @Value("${queueconfig.unaddressed-inbound-queue}")
+  private String unaddressedQueue;
+
   @Bean
   public Queue inboundQueue() {
     return new Queue(inboundQueue, true);
+  }
+
+  @Bean
+  public Queue unaddressedQueue() {
+    return new Queue(unaddressedQueue, true);
   }
 
   @Bean

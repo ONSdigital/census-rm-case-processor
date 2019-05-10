@@ -28,5 +28,4 @@ public class SampleReceiverTest {
     // Then
     verify(eventProcessor).processSampleReceivedMessage(createCaseSample);
   }
-
 }
