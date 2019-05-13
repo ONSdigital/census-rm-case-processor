@@ -35,8 +35,6 @@ import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 @SpringBootTest
 @RunWith(SpringJUnit4ClassRunner.class)
 public class SampleReceiverIT {
-  private ObjectMapper objectMapper = new ObjectMapper();
-
   @Value("${queueconfig.inbound-queue}")
   private String inboundQueue;
 
@@ -77,13 +75,13 @@ public class SampleReceiverIT {
     rabbitQueueHelper.sendMessage(inboundQueue, createCaseSample);
 
     // THEN
-    checkExpectedMessageReceived(queue1);
-    checkExpectedMessageReceived(queue1);
+    rabbitQueueHelper.checkExpectedMessageReceived(queue1);
+    rabbitQueueHelper.checkExpectedMessageReceived(queue1);
 
     List<EventType> eventTypesSeen = new LinkedList<>();
-    ResponseManagementEvent responseManagementEvent = checkExpectedMessageReceived(queue2);
+    ResponseManagementEvent responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(queue2);
     eventTypesSeen.add(responseManagementEvent.getEvent().getType());
-    responseManagementEvent = checkExpectedMessageReceived(queue2);
+    responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(queue2);
     eventTypesSeen.add(responseManagementEvent.getEvent().getType());
 
     assertThat(eventTypesSeen, containsInAnyOrder(EventType.CASE_CREATED, EventType.UAC_UPDATED));
@@ -91,16 +89,5 @@ public class SampleReceiverIT {
     List<Case> caseList = caseRepository.findAll();
     assertEquals(1, caseList.size());
     assertEquals("ABC123", caseList.get(0).getPostcode());
-  }
-
-  private ResponseManagementEvent checkExpectedMessageReceived(BlockingQueue<String> queue)
-      throws IOException, InterruptedException {
-    String actualMessage = queue.poll(10, TimeUnit.SECONDS);
-    assertNotNull("Did not receive message before timeout", actualMessage);
-    ResponseManagementEvent responseManagementEvent =
-        objectMapper.readValue(actualMessage, ResponseManagementEvent.class);
-    assertNotNull(responseManagementEvent);
-    assertEquals("RM", responseManagementEvent.getEvent().getChannel());
-    return responseManagementEvent;
   }
 }
