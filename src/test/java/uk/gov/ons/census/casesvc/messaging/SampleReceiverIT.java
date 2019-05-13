@@ -2,21 +2,19 @@ package uk.gov.ons.census.casesvc.messaging;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -33,6 +31,7 @@ import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 @ContextConfiguration
 @ActiveProfiles("test")
 @SpringBootTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @RunWith(SpringJUnit4ClassRunner.class)
 public class SampleReceiverIT {
   @Value("${queueconfig.inbound-queue}")
@@ -79,7 +78,8 @@ public class SampleReceiverIT {
     rabbitQueueHelper.checkExpectedMessageReceived(queue1);
 
     List<EventType> eventTypesSeen = new LinkedList<>();
-    ResponseManagementEvent responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(queue2);
+    ResponseManagementEvent responseManagementEvent =
+        rabbitQueueHelper.checkExpectedMessageReceived(queue2);
     eventTypesSeen.add(responseManagementEvent.getEvent().getType());
     responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(queue2);
     eventTypesSeen.add(responseManagementEvent.getEvent().getType());

@@ -1,10 +1,8 @@
 package uk.gov.ons.census.casesvc.messaging;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import org.junit.Before;
@@ -13,6 +11,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -20,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.model.dto.CreateUacQid;
 import uk.gov.ons.census.casesvc.model.dto.EventType;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
-import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
@@ -29,6 +27,7 @@ import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 @ActiveProfiles("test")
 @SpringBootTest
 @RunWith(SpringJUnit4ClassRunner.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class UnaddressedReceiverTestIT {
   @Value("${queueconfig.unaddressed-inbound-queue}")
   private String unaddressedQueue;
@@ -36,8 +35,7 @@ public class UnaddressedReceiverTestIT {
   @Value("${queueconfig.emit-case-event-rh-queue}")
   private String emitCaseEventRhQueue;
 
-  @Autowired
-  private RabbitQueueHelper rabbitQueueHelper;
+  @Autowired private RabbitQueueHelper rabbitQueueHelper;
   @Autowired private EventRepository eventRepository;
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
 
@@ -61,9 +59,9 @@ public class UnaddressedReceiverTestIT {
     rabbitQueueHelper.sendMessage(unaddressedQueue, createUacQid);
 
     // THEN
-    ResponseManagementEvent responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(queue);
+    ResponseManagementEvent responseManagementEvent =
+        rabbitQueueHelper.checkExpectedMessageReceived(queue);
     assertEquals(EventType.UAC_UPDATED, responseManagementEvent.getEvent().getType());
     assertThat(responseManagementEvent.getPayload().getUac().getQuestionnaireId()).startsWith("21");
   }
-
 }

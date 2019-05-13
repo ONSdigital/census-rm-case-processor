@@ -75,5 +75,4 @@ public class RabbitQueueHelper {
     assertEquals("RM", responseManagementEvent.getEvent().getChannel());
     return responseManagementEvent;
   }
-
 }

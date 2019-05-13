@@ -15,8 +15,7 @@ import uk.gov.ons.census.casesvc.service.UacProcessor;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UnaddressedReceiverTest {
-  @Mock
-  UacProcessor uacProcessor;
+  @Mock UacProcessor uacProcessor;
 
   @InjectMocks UnaddressedReceiver underTest;
 
