@@ -125,7 +125,7 @@ public class SampleReceiver {
     responseManagementEvent.setEvent(event);
     responseManagementEvent.setPayload(payload);
 
-    rabbitTemplate.convertAndSend(emitCaseEventExchange, "", responseManagementEvent);
+    rabbitTemplate.convertAndSend(emitCaseEventExchange, "event.uac.update", responseManagementEvent);
   }
 
   private void emitCaseCreatedEvent(Case caze) {
@@ -138,7 +138,7 @@ public class SampleReceiver {
     responseManagementEvent.setEvent(event);
     responseManagementEvent.setPayload(payload);
 
-    rabbitTemplate.convertAndSend(emitCaseEventExchange, "", responseManagementEvent);
+    rabbitTemplate.convertAndSend(emitCaseEventExchange, "event.case.update", responseManagementEvent);
   }
 
   private Event createEvent(EventType eventType) {

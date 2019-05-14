@@ -40,8 +40,8 @@ public class SampleReceiverIT {
   @Value("${queueconfig.inbound-queue}")
   private String inboundQueue;
 
-  @Value("${queueconfig.emit-case-event-rh-queue}")
-  private String emitCaseEventRhQueue;
+//  @Value("${queueconfig.emit-case-event-rh-queue-case}")
+//  private String emitCaseEventRhQueue;
 
   @Value("${queueconfig.emit-case-event-action-queue}")
   private String emitCaseEventActionQueue;
@@ -55,7 +55,7 @@ public class SampleReceiverIT {
   @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(inboundQueue);
-    rabbitQueueHelper.purgeQueue(emitCaseEventRhQueue);
+//    rabbitQueueHelper.purgeQueue(emitCaseEventRhQueue);
     rabbitQueueHelper.purgeQueue(emitCaseEventActionQueue);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
@@ -65,7 +65,7 @@ public class SampleReceiverIT {
   @Test
   public void testHappyPath() throws InterruptedException, IOException {
     // GIVEN
-    BlockingQueue<String> queue1 = rabbitQueueHelper.listen(emitCaseEventRhQueue);
+//    BlockingQueue<String> queue1 = rabbitQueueHelper.listen(emitCaseEventRhQueue);
     BlockingQueue<String> queue2 = rabbitQueueHelper.listen(emitCaseEventActionQueue);
 
     CreateCaseSample createCaseSample = new CreateCaseSample();
@@ -77,8 +77,8 @@ public class SampleReceiverIT {
     rabbitQueueHelper.sendMessage(inboundQueue, createCaseSample);
 
     // THEN
-    checkExpectedMessageReceived(queue1);
-    checkExpectedMessageReceived(queue1);
+//    checkExpectedMessageReceived(queue1);
+//    checkExpectedMessageReceived(queue1);
 
     List<EventType> eventTypesSeen = new LinkedList<>();
     ResponseManagementEvent responseManagementEvent = checkExpectedMessageReceived(queue2);

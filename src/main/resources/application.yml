@@ -28,9 +28,10 @@ spring:
 
 queueconfig:
   inbound-queue: exampleInboundQueue
-  emit-case-event-exchange: myfanout.exchange
-  emit-case-event-rh-queue: myfanout.rhqueue
-  emit-case-event-action-queue: myfanout.actionqueue
+  emit-case-event-exchange: mytopic.exchange
+  emit-case-event-rh-queue-case: mytopic.rhqueue.case
+  emit-case-event-rh-queue-uac: mytopic.rhqueue.uac
+  emit-case-event-action-queue: mytopic.actionqueue
   consumers: 50
 
 healthcheck:

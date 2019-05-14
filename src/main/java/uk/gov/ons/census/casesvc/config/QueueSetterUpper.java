@@ -6,6 +6,7 @@ import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.Exchange;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,8 +19,11 @@ public class QueueSetterUpper {
   @Value("${queueconfig.emit-case-event-exchange}")
   private String emitCaseEventExchange;
 
-  @Value("${queueconfig.emit-case-event-rh-queue}")
-  private String emitCaseEventRhQueue;
+  @Value("${queueconfig.emit-case-event-rh-queue-case}")
+  private String emitCaseEventRhQueueCase;
+
+  @Value("${queueconfig.emit-case-event-rh-queue-uac}")
+  private String emitCaseEventRhQueueUac;
 
   @Value("${queueconfig.emit-case-event-action-queue}")
   private String emitCaseEventActionQueue;
@@ -30,27 +34,37 @@ public class QueueSetterUpper {
   }
 
   @Bean
-  public Queue fanoutOneQueue() {
-    return new Queue(emitCaseEventRhQueue, true);
+  public Queue rhCaseQueue() {
+    return new Queue(emitCaseEventRhQueueCase, true);
   }
 
   @Bean
-  public Queue fanoutTwoQueue() {
+  public Queue rhUacQueue() {
+    return new Queue(emitCaseEventRhQueueUac, true);
+  }
+
+  @Bean
+  public Queue actionQueue() {
     return new Queue(emitCaseEventActionQueue, true);
   }
 
   @Bean
-  public Exchange myFanoutExchange() {
-    return new FanoutExchange(emitCaseEventExchange, true, false);
+  public Exchange myTopicExchange() {
+    return new TopicExchange(emitCaseEventExchange, true, false);
   }
 
   @Bean
-  public Binding bindingOne() {
-    return new Binding(emitCaseEventRhQueue, QUEUE, emitCaseEventExchange, "", null);
+  public Binding bindingRhCase() {
+    return new Binding(emitCaseEventRhQueueCase, QUEUE, emitCaseEventExchange, "event.case.*", null);
   }
 
   @Bean
-  public Binding bindingTwo() {
-    return new Binding(emitCaseEventActionQueue, QUEUE, emitCaseEventExchange, "", null);
+  public Binding bindingRhUac() {
+    return new Binding(emitCaseEventRhQueueUac, QUEUE, emitCaseEventExchange, "event.uac.*", null);
+  }
+
+  @Bean
+  public Binding bindingAction() {
+    return new Binding(emitCaseEventActionQueue, QUEUE, emitCaseEventExchange, "*", null);
   }
 }

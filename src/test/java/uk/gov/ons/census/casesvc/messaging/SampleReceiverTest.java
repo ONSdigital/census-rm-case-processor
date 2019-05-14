@@ -93,22 +93,17 @@ public class SampleReceiverTest {
 
     // Then
     // Check the emitted event
-    ArgumentCaptor<ResponseManagementEvent> emittedMessageArgCaptor =
+    ArgumentCaptor<ResponseManagementEvent> emittedCaseMessageArgCaptor =
         ArgumentCaptor.forClass(ResponseManagementEvent.class);
-    verify(rabbitTemplate, times(2))
-        .convertAndSend(eq("myExchange"), eq(""), emittedMessageArgCaptor.capture());
-    List<ResponseManagementEvent> responseManagementEvents = emittedMessageArgCaptor.getAllValues();
-    assertEquals(2, responseManagementEvents.size());
+    verify(rabbitTemplate)
+        .convertAndSend(eq("myExchange"), eq("event.case.update"), emittedCaseMessageArgCaptor.capture());
+    ArgumentCaptor<ResponseManagementEvent> emittedUacMessageArgCaptor =
+        ArgumentCaptor.forClass(ResponseManagementEvent.class);
+    verify(rabbitTemplate)
+        .convertAndSend(eq("myExchange"), eq("event.uac.update"), emittedUacMessageArgCaptor.capture());
 
-    ResponseManagementEvent caseCreatedEvent = null;
-    ResponseManagementEvent uacUpdatedEvent = null;
-    if (responseManagementEvents.get(0).getEvent().getType() == EventType.CASE_CREATED) {
-      caseCreatedEvent = responseManagementEvents.get(0);
-      uacUpdatedEvent = responseManagementEvents.get(1);
-    } else {
-      caseCreatedEvent = responseManagementEvents.get(1);
-      uacUpdatedEvent = responseManagementEvents.get(0);
-    }
+    ResponseManagementEvent caseCreatedEvent = emittedCaseMessageArgCaptor.getValue();
+    ResponseManagementEvent uacUpdatedEvent = emittedUacMessageArgCaptor.getValue();
 
     assertEquals("123456789", caseCreatedEvent.getPayload().getCollectionCase().getCaseRef());
     assertEquals(
