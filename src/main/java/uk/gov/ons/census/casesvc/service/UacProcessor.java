@@ -1,5 +1,6 @@
 package uk.gov.ons.census.casesvc.service;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -55,17 +56,18 @@ public class UacProcessor {
     return uacQidLink;
   }
 
-  public void logEvent(UacQidLink uacQidLink, String eventDescription) {
+  public void logEvent(UacQidLink uacQidLink, String eventDescription, LocalDateTime eventMetaDataDateTime) {
     uk.gov.ons.census.casesvc.model.entity.Event loggedEvent =
         new uk.gov.ons.census.casesvc.model.entity.Event();
     loggedEvent.setId(UUID.randomUUID());
-    loggedEvent.setEventDate(new Date());
+    loggedEvent.setEventDate(eventMetaDataDateTime);
+    loggedEvent.setRmEventProcessed(LocalDateTime.now());
     loggedEvent.setEventDescription(eventDescription);
     loggedEvent.setUacQidLink(uacQidLink);
     eventRepository.save(loggedEvent);
   }
 
-  public void emitUacUpdatedEvent(UacQidLink uacQidLink, Case caze) {
+  public void emitUacUpdatedEvent(UacQidLink uacQidLink, Case caze, Boolean active) {
     Event event = EventHelper.createEvent(EventType.UAC_UPDATED);
 
     Uac uac = new Uac();
@@ -73,6 +75,7 @@ public class UacProcessor {
     uac.setQuestionnaireId(uacQidLink.getQid());
     uac.setUacHash(Sha256Helper.hash(uacQidLink.getUac()));
     uac.setUac(uacQidLink.getUac());
+    uac.setActive(active);
 
     if (caze != null) {
       uac.setCaseId(caze.getCaseId().toString());

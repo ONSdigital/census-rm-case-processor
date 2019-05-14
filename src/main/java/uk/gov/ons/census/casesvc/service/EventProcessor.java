@@ -28,15 +28,15 @@ public class EventProcessor {
     int questionnaireType =
         QuestionnaireTypeHelper.calculateQuestionnaireType(caze.getTreatmentCode());
     UacQidLink uacQidLink = uacProcessor.saveUacQidLink(caze, questionnaireType);
-    uacProcessor.emitUacUpdatedEvent(uacQidLink, caze);
+    uacProcessor.emitUacUpdatedEvent(uacQidLink, caze, true);
     caseProcessor.emitCaseCreatedEvent(caze);
-    uacProcessor.logEvent(uacQidLink, CASE_CREATED_EVENT_DESCRIPTION);
-    uacProcessor.logEvent(uacQidLink, UAC_QID_LINKED_EVENT_DESCRIPTION);
+    uacProcessor.logEvent(uacQidLink, CASE_CREATED_EVENT_DESCRIPTION, null);
+    uacProcessor.logEvent(uacQidLink, UAC_QID_LINKED_EVENT_DESCRIPTION, null);
 
     if (QuestionnaireTypeHelper.isQuestionnaireWelsh(caze.getTreatmentCode())) {
       uacQidLink = uacProcessor.saveUacQidLink(caze, 3);
-      uacProcessor.emitUacUpdatedEvent(uacQidLink, caze);
-      uacProcessor.logEvent(uacQidLink, UAC_QID_LINKED_EVENT_DESCRIPTION);
+      uacProcessor.emitUacUpdatedEvent(uacQidLink, caze, true);
+      uacProcessor.logEvent(uacQidLink, UAC_QID_LINKED_EVENT_DESCRIPTION, null);
     }
   }
 }

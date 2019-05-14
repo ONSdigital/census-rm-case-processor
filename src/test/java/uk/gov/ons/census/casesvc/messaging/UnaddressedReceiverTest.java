@@ -31,7 +31,7 @@ public class UnaddressedReceiverTest {
     underTest.receiveMessage(createUacQid);
 
     // Then
-    verify(uacProcessor).emitUacUpdatedEvent(eq(uacQidLink), eq(null));
-    verify(uacProcessor).logEvent(eq(uacQidLink), eq("Unaddressed UAC/QID pair created"));
+    verify(uacProcessor).emitUacUpdatedEvent(eq(uacQidLink), eq(null), eq(true));
+    verify(uacProcessor).logEvent(eq(uacQidLink), eq("Unaddressed UAC/QID pair created"), eq(null));
   }
 }

@@ -20,7 +20,7 @@ public class UnaddressedReceiver {
   public void receiveMessage(CreateUacQid createUacQid) {
     UacQidLink uacQidLink =
         uacProcessor.saveUacQidLink(null, Integer.parseInt(createUacQid.getQuestionnaireType()));
-    uacProcessor.emitUacUpdatedEvent(uacQidLink, null);
-    uacProcessor.logEvent(uacQidLink, "Unaddressed UAC/QID pair created");
+    uacProcessor.emitUacUpdatedEvent(uacQidLink, null, true);
+    uacProcessor.logEvent(uacQidLink, "Unaddressed UAC/QID pair created", null);
   }
 }

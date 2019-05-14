@@ -32,6 +32,7 @@ queueconfig:
   emit-case-event-rh-queue: myfanout.rhqueue
   emit-case-event-action-queue: myfanout.actionqueue
   unaddressed-inbound-queue: unaddressedRequestQueue
+  receipt-response-inbound-queue: event.response.receipt
   consumers: 50
 
 healthcheck:

@@ -27,6 +27,9 @@ public class QueueSetterUpper {
   @Value("${queueconfig.unaddressed-inbound-queue}")
   private String unaddressedQueue;
 
+  @Value("${queueconfig.receipt-response-inbound-queue}")
+  private String receiptInboundQueue;
+
   @Bean
   public Queue inboundQueue() {
     return new Queue(inboundQueue, true);
@@ -61,4 +64,7 @@ public class QueueSetterUpper {
   public Binding bindingTwo() {
     return new Binding(emitCaseEventActionQueue, QUEUE, emitCaseEventExchange, "", null);
   }
+
+  @Bean
+  public Queue receiptInboundQueue() { return new Queue(receiptInboundQueue, true); }
 }

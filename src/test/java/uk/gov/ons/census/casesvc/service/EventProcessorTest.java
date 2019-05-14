@@ -36,9 +36,9 @@ public class EventProcessorTest {
     // Then
     verify(caseProcessor).saveCase(createCaseSample);
     verify(uacProcessor).saveUacQidLink(eq(caze), eq(1));
-    verify(uacProcessor).emitUacUpdatedEvent(uacQidLink, caze);
+    verify(uacProcessor).emitUacUpdatedEvent(uacQidLink, caze, true);
     verify(caseProcessor).emitCaseCreatedEvent(caze);
-    verify(uacProcessor, times(2)).logEvent(eq(uacQidLink), any(String.class));
+    verify(uacProcessor, times(2)).logEvent(eq(uacQidLink), any(String.class), eq(null));
   }
 
   @Test
@@ -59,8 +59,8 @@ public class EventProcessorTest {
     // Then
     verify(caseProcessor).saveCase(createCaseSample);
     verify(uacProcessor, times(1)).saveUacQidLink(eq(caze), eq(2));
-    verify(uacProcessor, times(2)).emitUacUpdatedEvent(uacQidLink, caze);
+    verify(uacProcessor, times(2)).emitUacUpdatedEvent(uacQidLink, caze, true);
     verify(caseProcessor).emitCaseCreatedEvent(caze);
-    verify(uacProcessor, times(3)).logEvent(eq(uacQidLink), any(String.class));
+    verify(uacProcessor, times(3)).logEvent(eq(uacQidLink), any(String.class), eq(null));
   }
 }

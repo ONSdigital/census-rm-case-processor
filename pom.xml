@@ -75,6 +75,11 @@
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.jeasy</groupId>
+      <artifactId>easy-random-core</artifactId>
+      <version>4.0.0.RC1</version>
+    </dependency>
   </dependencies>
 
   <build>
