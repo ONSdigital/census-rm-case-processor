@@ -1,7 +1,5 @@
 package uk.gov.ons.census.casesvc.service;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -10,8 +8,6 @@ import uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper;
 
 @Component
 public class EventProcessor {
-  private static final Logger log = LoggerFactory.getLogger(EventProcessor.class);
-
   private static final String CASE_CREATED_EVENT_DESCRIPTION = "Case created";
   private static final String UAC_QID_LINKED_EVENT_DESCRIPTION = "UAC QID linked";
 

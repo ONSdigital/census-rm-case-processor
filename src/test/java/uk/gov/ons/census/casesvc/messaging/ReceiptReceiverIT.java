@@ -12,6 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.ons.census.casesvc.model.dto.EventType;
 import uk.gov.ons.census.casesvc.model.dto.Receipt;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.Uac;
@@ -92,6 +93,7 @@ public class ReceiptReceiverIT {
 
         //check the emitted event
         ResponseManagementEvent responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(outboundQueue);
+        assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventType.UAC_UPDATED);
         Uac actualUacObject = responseManagementEvent.getPayload().getUac();
         assertThat(actualUacObject.getUac()).isEqualTo(TEST_UAC);
         assertThat(actualUacObject.getQuestionnaireId()).isEqualTo(TEST_QID);

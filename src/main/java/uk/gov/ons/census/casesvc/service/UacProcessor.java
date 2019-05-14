@@ -1,7 +1,6 @@
 package uk.gov.ons.census.casesvc.service;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.UUID;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
