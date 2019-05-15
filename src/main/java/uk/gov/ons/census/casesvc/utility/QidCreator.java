@@ -21,8 +21,7 @@ public class QidCreator {
   @Value("${qid.tranche-identifier}")
   private int trancheIdentifier;
 
-  public String createQid(String treatmentCode, long uniqueNumber) {
-    int questionnaireType = calculateQuestionnaireType(treatmentCode);
+  public String createQid(int questionnaireType, long uniqueNumber) {
     String sourceDigits =
         String.format("%02d%01d%011d", questionnaireType, trancheIdentifier, uniqueNumber);
 
@@ -45,47 +44,5 @@ public class QidCreator {
       remainder = (remainder * factor + temp) % modulus;
     }
     return remainder % modulus;
-  }
-
-  private int calculateQuestionnaireType(String treatmentCode) {
-    String country = treatmentCode.substring(treatmentCode.length() - 1);
-    if (!country.equals("E") && !country.equals("W") && !country.equals("N")) {
-      log.with("treatment_code", treatmentCode).error(UNKNOWN_COUNTRY_ERROR);
-      throw new IllegalArgumentException();
-    }
-
-    if (treatmentCode.startsWith("HH")) {
-      switch (country) {
-        case "E":
-          return 1;
-        case "W":
-          return 2;
-        case "N":
-          return 4;
-      }
-    } else if (treatmentCode.startsWith("CI")) {
-      switch (country) {
-        case "E":
-          return 21;
-        case "W":
-          return 22;
-        case "N":
-          return 24;
-      }
-    } else if (treatmentCode.startsWith("CE")) {
-      switch (country) {
-        case "E":
-          return 31;
-        case "W":
-          return 32;
-        case "N":
-          return 34;
-      }
-    } else {
-      log.with("treatment_code", treatmentCode).error(UNEXPECTED_CASE_TYPE_ERROR);
-      throw new IllegalArgumentException();
-    }
-
-    throw new RuntimeException(); // This code should be unreachable
   }
 }
