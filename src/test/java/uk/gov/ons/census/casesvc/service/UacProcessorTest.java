@@ -87,7 +87,7 @@ public class UacProcessorTest {
     Case caze = new Case();
     UUID caseUuid = UUID.randomUUID();
     caze.setCaseId(caseUuid);
-    ReflectionTestUtils.setField(underTest, "emitCaseEventExchange", "TEST_EXCHANGE");
+    ReflectionTestUtils.setField(underTest, "outboundExchange", "TEST_EXCHANGE");
 
     // When
     underTest.emitUacUpdatedEvent(uacQidLink, caze);
@@ -97,7 +97,7 @@ public class UacProcessorTest {
         ArgumentCaptor.forClass(ResponseManagementEvent.class);
     verify(rabbitTemplate)
         .convertAndSend(
-            eq("TEST_EXCHANGE"), eq(""), responseManagementEventArgumentCaptor.capture());
+            eq("TEST_EXCHANGE"), eq("event.uac.update"), responseManagementEventArgumentCaptor.capture());
     assertEquals(
         "12345", responseManagementEventArgumentCaptor.getValue().getPayload().getUac().getUac());
   }

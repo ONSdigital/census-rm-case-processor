@@ -4,7 +4,6 @@ import static org.springframework.amqp.core.Binding.DestinationType.QUEUE;
 
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.Exchange;
-import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,17 +15,26 @@ public class QueueSetterUpper {
   @Value("${queueconfig.inbound-queue}")
   private String inboundQueue;
 
-  @Value("${queueconfig.emit-case-event-exchange}")
-  private String emitCaseEventExchange;
+  @Value("${queueconfig.outbound-exchange}")
+  private String outboundExchange;
 
-  @Value("${queueconfig.emit-case-event-rh-queue-case}")
-  private String emitCaseEventRhQueueCase;
+  @Value("${queueconfig.rh-case-queue}")
+  private String rhCaseQueue;
 
-  @Value("${queueconfig.emit-case-event-rh-queue-uac}")
-  private String emitCaseEventRhQueueUac;
+  @Value("${queueconfig.rh-case-routing-key}")
+  private String rhCaseRoutingKey;
 
-  @Value("${queueconfig.emit-case-event-action-queue}")
-  private String emitCaseEventActionQueue;
+  @Value("${queueconfig.rh-uac-queue}")
+  private String rhUacQueue;
+
+  @Value("${queueconfig.rh-uac-routing-key}")
+  private String rhUacRoutingKey;
+
+  @Value("${queueconfig.action-scheduler-queue}")
+  private String actionSchedulerQueue;
+
+  @Value("${queueconfig.action-scheduler-routing-key}")
+  private String actionSchedulerRoutingKey;
 
   @Bean
   public Queue inboundQueue() {
@@ -35,36 +43,36 @@ public class QueueSetterUpper {
 
   @Bean
   public Queue rhCaseQueue() {
-    return new Queue(emitCaseEventRhQueueCase, true);
+    return new Queue(rhCaseQueue, true);
   }
 
   @Bean
   public Queue rhUacQueue() {
-    return new Queue(emitCaseEventRhQueueUac, true);
+    return new Queue(rhUacQueue, true);
   }
 
   @Bean
-  public Queue actionQueue() {
-    return new Queue(emitCaseEventActionQueue, true);
+  public Queue actionSchedulerQueue() {
+    return new Queue(actionSchedulerQueue, true);
   }
 
   @Bean
   public Exchange myTopicExchange() {
-    return new TopicExchange(emitCaseEventExchange, true, false);
+    return new TopicExchange(outboundExchange, true, false);
   }
 
   @Bean
   public Binding bindingRhCase() {
-    return new Binding(emitCaseEventRhQueueCase, QUEUE, emitCaseEventExchange, "event.case.*", null);
+    return new Binding(rhCaseQueue, QUEUE, outboundExchange, rhCaseRoutingKey, null);
   }
 
   @Bean
   public Binding bindingRhUac() {
-    return new Binding(emitCaseEventRhQueueUac, QUEUE, emitCaseEventExchange, "event.uac.*", null);
+    return new Binding(rhUacQueue, QUEUE, outboundExchange, rhUacRoutingKey, null);
   }
 
   @Bean
   public Binding bindingAction() {
-    return new Binding(emitCaseEventActionQueue, QUEUE, emitCaseEventExchange, "*", null);
+    return new Binding(actionSchedulerQueue, QUEUE, outboundExchange, actionSchedulerRoutingKey, null);
   }
 }
