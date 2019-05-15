@@ -68,7 +68,8 @@ public class CaseProcessorTest {
     // Then
     ArgumentCaptor<ResponseManagementEvent> rmeArgumentCaptor =
         ArgumentCaptor.forClass(ResponseManagementEvent.class);
-    verify(rabbitTemplate).convertAndSend(eq("TEST_EXCHANGE"), eq("event.case.update"), rmeArgumentCaptor.capture());
+    verify(rabbitTemplate)
+        .convertAndSend(eq("TEST_EXCHANGE"), eq("event.case.update"), rmeArgumentCaptor.capture());
     assertEquals(
         "TEST_POSTCODE",
         rmeArgumentCaptor.getValue().getPayload().getCollectionCase().getAddress().getPostcode());

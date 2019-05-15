@@ -97,7 +97,9 @@ public class UacProcessorTest {
         ArgumentCaptor.forClass(ResponseManagementEvent.class);
     verify(rabbitTemplate)
         .convertAndSend(
-            eq("TEST_EXCHANGE"), eq("event.uac.update"), responseManagementEventArgumentCaptor.capture());
+            eq("TEST_EXCHANGE"),
+            eq("event.uac.update"),
+            responseManagementEventArgumentCaptor.capture());
     assertEquals(
         "12345", responseManagementEventArgumentCaptor.getValue().getPayload().getUac().getUac());
   }

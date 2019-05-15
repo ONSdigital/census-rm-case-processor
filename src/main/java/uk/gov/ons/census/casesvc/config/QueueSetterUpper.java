@@ -73,6 +73,7 @@ public class QueueSetterUpper {
 
   @Bean
   public Binding bindingAction() {
-    return new Binding(actionSchedulerQueue, QUEUE, outboundExchange, actionSchedulerRoutingKey, null);
+    return new Binding(
+        actionSchedulerQueue, QUEUE, outboundExchange, actionSchedulerRoutingKey, null);
   }
 }

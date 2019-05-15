@@ -85,6 +85,7 @@ public class UacProcessor {
     responseManagementEvent.setEvent(event);
     responseManagementEvent.setPayload(payload);
 
-    rabbitTemplate.convertAndSend(outboundExchange, UAC_UPDATE_ROUTING_KEY, responseManagementEvent);
+    rabbitTemplate.convertAndSend(
+        outboundExchange, UAC_UPDATE_ROUTING_KEY, responseManagementEvent);
   }
 }

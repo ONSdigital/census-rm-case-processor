@@ -50,7 +50,8 @@ public class CaseProcessor {
     responseManagementEvent.setEvent(event);
     responseManagementEvent.setPayload(payload);
 
-    rabbitTemplate.convertAndSend(outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
+    rabbitTemplate.convertAndSend(
+        outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
   }
 
   private Address createAddress(Case caze) {
