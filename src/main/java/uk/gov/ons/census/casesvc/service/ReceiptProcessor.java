@@ -2,14 +2,13 @@ package uk.gov.ons.census.casesvc.service;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import java.util.Optional;
+import java.util.UUID;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.model.dto.Receipt;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
-
-import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class ReceiptProcessor {
@@ -19,9 +18,7 @@ public class ReceiptProcessor {
   private final CaseRepository caseRepository;
   private final UacProcessor uacProcessor;
 
-  public ReceiptProcessor(
-          CaseRepository caseRepository,
-          UacProcessor uacProcessor) {
+  public ReceiptProcessor(CaseRepository caseRepository, UacProcessor uacProcessor) {
     this.caseRepository = caseRepository;
     this.uacProcessor = uacProcessor;
   }
@@ -38,7 +35,7 @@ public class ReceiptProcessor {
       throw new RuntimeException();
     }
 
-    //This nice long path and the 'random' get(0) will dissapear when we get QID
+    // This nice long path and the 'random' get(0) will dissapear when we get QID
     UacQidLink uacQidLink = cazeOpt.get().getUacQidLinks().get(0);
     uacProcessor.emitUacUpdatedEvent(uacQidLink, cazeOpt.get(), false);
     uacProcessor.logEvent(uacQidLink, QID_RECEIPTED, receipt.getResponse_dateTime());

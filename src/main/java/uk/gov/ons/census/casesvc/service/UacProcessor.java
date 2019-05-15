@@ -55,7 +55,8 @@ public class UacProcessor {
     return uacQidLink;
   }
 
-  public void logEvent(UacQidLink uacQidLink, String eventDescription, LocalDateTime eventMetaDataDateTime) {
+  public void logEvent(
+      UacQidLink uacQidLink, String eventDescription, LocalDateTime eventMetaDataDateTime) {
     uk.gov.ons.census.casesvc.model.entity.Event loggedEvent =
         new uk.gov.ons.census.casesvc.model.entity.Event();
     loggedEvent.setId(UUID.randomUUID());

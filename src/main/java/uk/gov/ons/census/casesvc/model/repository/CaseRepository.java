@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 
 public interface CaseRepository extends JpaRepository<Case, UUID> {
-    Optional<Case> findByCaseId(UUID caseId);
+  Optional<Case> findByCaseId(UUID caseId);
 }
