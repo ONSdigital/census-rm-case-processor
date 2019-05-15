@@ -22,6 +22,6 @@ public class ReceiptReceiver {
   @Transactional
   @ServiceActivator(inputChannel = "receiptInputChannel")
   public void receiveMessage(Receipt receipt) {
-      receiptProcessor.processReceipt(receipt);
+    receiptProcessor.processReceipt(receipt);
   }
 }

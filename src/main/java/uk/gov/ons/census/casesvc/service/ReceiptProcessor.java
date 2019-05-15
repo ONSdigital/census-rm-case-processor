@@ -31,7 +31,7 @@ public class ReceiptProcessor {
     // HOWEVER THIS CODE IS WRITTEN IN A WAY TO MAKE THE PROMISED LAND OF RECEIVING A QID EASY
     // JUST HAVE A QIDREPOSITORY RATHER THAN A CASE RESPOSITORY AND WORK OF THAT (AND THE QID)
 
-    Optional<Case> cazeOpt = caseRepository.findByCaseId(UUID.fromString(receipt.getCaseId()));
+    Optional<Case> cazeOpt = caseRepository.findByCaseId(UUID.fromString(receipt.getCase_id()));
 
     if (cazeOpt.isEmpty()) {
       log.error(CASE_NOT_FOUND_ERROR);
@@ -41,6 +41,6 @@ public class ReceiptProcessor {
     //This nice long path and the 'random' get(0) will dissapear when we get QID
     UacQidLink uacQidLink = cazeOpt.get().getUacQidLinks().get(0);
     uacProcessor.emitUacUpdatedEvent(uacQidLink, cazeOpt.get(), false);
-    uacProcessor.logEvent(uacQidLink, QID_RECEIPTED, receipt.getResponseDateTime());
+    uacProcessor.logEvent(uacQidLink, QID_RECEIPTED, receipt.getResponse_dateTime());
   }
 }

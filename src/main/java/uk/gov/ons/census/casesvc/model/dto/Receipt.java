@@ -8,9 +8,9 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 public class Receipt {
-    private long caseRef;
-    private String caseId;
-    private String inboundChannel;
-    private LocalDateTime responseDateTime;
-    private String partyId;
+    private String case_id;
+    private String tx_id;
+    private String questionnaire_id;
+    private LocalDateTime response_dateTime;
+    private String inbound_channel;
 }
