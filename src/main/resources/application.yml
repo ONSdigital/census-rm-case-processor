@@ -35,6 +35,7 @@ queueconfig:
   rh-uac-routing-key: event.uac.*
   action-scheduler-queue: case.action
   action-scheduler-routing-key: "#"
+  unaddressed-inbound-queue: unaddressedRequestQueue
   consumers: 50
 
 healthcheck:

@@ -24,6 +24,9 @@ public class AppConfig {
   @Value("${queueconfig.inbound-queue}")
   private String inboundQueue;
 
+  @Value("${queueconfig.unaddressed-inbound-queue}")
+  private String unaddressedQueue;
+
   @Value("${queueconfig.consumers}")
   private int consumers;
 
@@ -33,9 +36,23 @@ public class AppConfig {
   }
 
   @Bean
-  public AmqpInboundChannelAdapter inbound(
-      SimpleMessageListenerContainer listenerContainer,
+  public MessageChannel unaddressedInputChannel() {
+    return new DirectChannel();
+  }
+
+  @Bean
+  public AmqpInboundChannelAdapter inboundSamples(
+      @Qualifier("sampleContainer") SimpleMessageListenerContainer listenerContainer,
       @Qualifier("caseSampleInputChannel") MessageChannel channel) {
+    AmqpInboundChannelAdapter adapter = new AmqpInboundChannelAdapter(listenerContainer);
+    adapter.setOutputChannel(channel);
+    return adapter;
+  }
+
+  @Bean
+  public AmqpInboundChannelAdapter inboundUnaddressed(
+      @Qualifier("unaddressedContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("unaddressedInputChannel") MessageChannel channel) {
     AmqpInboundChannelAdapter adapter = new AmqpInboundChannelAdapter(listenerContainer);
     adapter.setOutputChannel(channel);
     return adapter;
@@ -56,10 +73,19 @@ public class AppConfig {
   }
 
   @Bean
-  public SimpleMessageListenerContainer container(ConnectionFactory connectionFactory) {
+  public SimpleMessageListenerContainer sampleContainer(ConnectionFactory connectionFactory) {
     SimpleMessageListenerContainer container =
         new SimpleMessageListenerContainer(connectionFactory);
     container.setQueueNames(inboundQueue);
+    container.setConcurrentConsumers(consumers);
+    return container;
+  }
+
+  @Bean
+  public SimpleMessageListenerContainer unaddressedContainer(ConnectionFactory connectionFactory) {
+    SimpleMessageListenerContainer container =
+        new SimpleMessageListenerContainer(connectionFactory);
+    container.setQueueNames(unaddressedQueue);
     container.setConcurrentConsumers(consumers);
     return container;
   }

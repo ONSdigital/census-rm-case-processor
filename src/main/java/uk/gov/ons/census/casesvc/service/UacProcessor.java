@@ -72,12 +72,15 @@ public class UacProcessor {
 
     Uac uac = new Uac();
     uac.setActive(true);
-    uac.setCaseId(caze.getCaseId().toString());
-    uac.setCaseType(caze.getAddressType());
-    uac.setCollectionExerciseId(caze.getCollectionExerciseId());
     uac.setQuestionnaireId(uacQidLink.getQid());
     uac.setUacHash(Sha256Helper.hash(uacQidLink.getUac()));
     uac.setUac(uacQidLink.getUac());
+
+    if (caze != null) {
+      uac.setCaseId(caze.getCaseId().toString());
+      uac.setCaseType(caze.getAddressType());
+      uac.setCollectionExerciseId(caze.getCollectionExerciseId());
+    }
 
     Payload payload = new Payload();
     payload.setUac(uac);

@@ -36,9 +36,17 @@ public class QueueSetterUpper {
   @Value("${queueconfig.action-scheduler-routing-key}")
   private String actionSchedulerRoutingKey;
 
+  @Value("${queueconfig.unaddressed-inbound-queue}")
+  private String unaddressedQueue;
+
   @Bean
   public Queue inboundQueue() {
     return new Queue(inboundQueue, true);
+  }
+
+  @Bean
+  public Queue unaddressedQueue() {
+    return new Queue(unaddressedQueue, true);
   }
 
   @Bean
