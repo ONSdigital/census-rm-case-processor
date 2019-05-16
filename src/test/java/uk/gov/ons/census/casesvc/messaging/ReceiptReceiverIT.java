@@ -109,6 +109,7 @@ public class ReceiptReceiverIT {
     assertThat(actualUacQuidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
   }
 
+  //  Too many log lines, can these be suppressed?
   //  @Test
   //  public void testTransactionality() throws InterruptedException, IOException {
   //    // Stick no cases on the database
