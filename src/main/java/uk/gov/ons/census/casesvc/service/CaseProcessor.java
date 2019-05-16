@@ -52,7 +52,6 @@ public class CaseProcessor {
     rabbitTemplate.convertAndSend(emitCaseEventExchange, "", responseManagementEvent);
   }
 
-
   private Address createAddress(Case caze) {
     Address address = new Address();
     address.setAddressLine1(caze.getAddressLine1());
