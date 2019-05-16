@@ -14,8 +14,7 @@ public class ReceiptReceiver {
   @Value("${queueconfig.emit-case-event-exchange}")
   private String emitCaseEventExchange;
 
-  public ReceiptReceiver(
-          ReceiptProcessor receiptProcessor) {
+  public ReceiptReceiver(ReceiptProcessor receiptProcessor) {
     this.receiptProcessor = receiptProcessor;
   }
 

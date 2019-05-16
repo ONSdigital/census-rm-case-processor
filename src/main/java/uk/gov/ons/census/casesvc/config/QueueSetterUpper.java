@@ -66,5 +66,7 @@ public class QueueSetterUpper {
   }
 
   @Bean
-  public Queue receiptInboundQueue() { return new Queue(receiptInboundQueue, true); }
+  public Queue receiptInboundQueue() {
+    return new Queue(receiptInboundQueue, true);
+  }
 }
