@@ -52,6 +52,7 @@ public class CaseProcessor {
     rabbitTemplate.convertAndSend(emitCaseEventExchange, "", responseManagementEvent);
   }
 
+
   private Address createAddress(Case caze) {
     Address address = new Address();
     address.setAddressLine1(caze.getAddressLine1());
@@ -69,6 +70,7 @@ public class CaseProcessor {
     address.setApbCode(caze.getAbpCode());
     address.setOrganisationName(caze.getOrganisationName());
     address.setUprn(caze.getUprn());
+    address.setAddressLevel(caze.getAddressLevel());
 
     return address;
   }
