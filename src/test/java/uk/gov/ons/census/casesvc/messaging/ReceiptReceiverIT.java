@@ -1,5 +1,12 @@
 package uk.gov.ons.census.casesvc.messaging;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.ons.census.casesvc.service.ReceiptProcessor.QID_RECEIPTED;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.BlockingQueue;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,14 +30,6 @@ import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.BlockingQueue;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.ons.census.casesvc.service.ReceiptProcessor.QID_RECEIPTED;
 
 @ContextConfiguration
 @ActiveProfiles("test")
