@@ -13,7 +13,11 @@ public class Address {
   private String latitude;
   private String longitude;
   private String uprn;
+  private String apbCode;
   private String arid;
+  private String estabArid;
   private String addressType;
+  private String addressLevel;
   private String estabType;
+  private String organisationName;
 }

@@ -61,12 +61,18 @@ public class CaseProcessor {
     address.setAddressLine3(caze.getAddressLine3());
     address.setAddressType(caze.getAddressType());
     address.setArid(caze.getArid());
+    address.setEstabArid(caze.getEstabArid());
     address.setRegion(caze.getRgn().substring(0, 1));
     address.setEstabType(caze.getEstabType());
     address.setLatitude(caze.getLatitude());
     address.setLongitude(caze.getLongitude());
     address.setPostcode(caze.getPostcode());
     address.setTownName(caze.getTownName());
+    address.setApbCode(caze.getAbpCode());
+    address.setOrganisationName(caze.getOrganisationName());
+    address.setUprn(caze.getUprn());
+    address.setAddressLevel(caze.getAddressLevel());
+
     return address;
   }
 

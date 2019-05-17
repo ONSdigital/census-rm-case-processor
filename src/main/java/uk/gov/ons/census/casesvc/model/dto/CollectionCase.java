@@ -12,7 +12,7 @@ public class CollectionCase {
   private String state;
   private String actionableFrom;
 
-  // Below this line is extra data potentially needed by Action Scheduler - can be ignored by RM
+  // Below this line is extra data potentially needed by Action Scheduler - can be ignored by RH
   private String actionPlanId;
   private String treatmentCode;
   private String oa;
