@@ -79,7 +79,8 @@ public class SampleReceiverIT {
     rabbitQueueHelper.sendMessage(inboundQueue, createCaseSample);
 
     // THEN
-    ResponseManagementEvent responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(rhCaseMessages);
+    ResponseManagementEvent responseManagementEvent =
+        rabbitQueueHelper.checkExpectedMessageReceived(rhCaseMessages);
     assertEquals(EventType.CASE_CREATED, responseManagementEvent.getEvent().getType());
     responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(rhUacMessages);
     assertEquals(EventType.UAC_UPDATED, responseManagementEvent.getEvent().getType());
