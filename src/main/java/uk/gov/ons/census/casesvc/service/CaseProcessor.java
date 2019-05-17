@@ -16,13 +16,14 @@ import uk.gov.ons.census.casesvc.utility.EventHelper;
 public class CaseProcessor {
 
   private static final String SURVEY = "CENSUS";
+  private static final String CASE_UPDATE_ROUTING_KEY = "event.case.update";
 
   private final CaseRepository caseRepository;
   private final MapperFacade mapperFacade;
   private final RabbitTemplate rabbitTemplate;
 
-  @Value("${queueconfig.emit-case-event-exchange}")
-  private String emitCaseEventExchange;
+  @Value("${queueconfig.outbound-exchange}")
+  private String outboundExchange;
 
   public CaseProcessor(
       CaseRepository caseRepository, RabbitTemplate rabbitTemplate, MapperFacade mapperFacade) {
@@ -49,7 +50,8 @@ public class CaseProcessor {
     responseManagementEvent.setEvent(event);
     responseManagementEvent.setPayload(payload);
 
-    rabbitTemplate.convertAndSend(emitCaseEventExchange, "", responseManagementEvent);
+    rabbitTemplate.convertAndSend(
+        outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
   }
 
   private Address createAddress(Case caze) {

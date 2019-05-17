@@ -37,11 +37,14 @@ public class SampleReceiverIT {
   @Value("${queueconfig.inbound-queue}")
   private String inboundQueue;
 
-  @Value("${queueconfig.emit-case-event-rh-queue}")
-  private String emitCaseEventRhQueue;
+  @Value("${queueconfig.rh-case-queue}")
+  private String rhCaseQueue;
 
-  @Value("${queueconfig.emit-case-event-action-queue}")
-  private String emitCaseEventActionQueue;
+  @Value("${queueconfig.rh-uac-queue}")
+  private String rhUacQueue;
+
+  @Value("${queueconfig.action-scheduler-queue}")
+  private String actionSchedulerQueue;
 
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
   @Autowired private CaseRepository caseRepository;
@@ -52,8 +55,9 @@ public class SampleReceiverIT {
   @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(inboundQueue);
-    rabbitQueueHelper.purgeQueue(emitCaseEventRhQueue);
-    rabbitQueueHelper.purgeQueue(emitCaseEventActionQueue);
+    rabbitQueueHelper.purgeQueue(rhCaseQueue);
+    rabbitQueueHelper.purgeQueue(rhUacQueue);
+    rabbitQueueHelper.purgeQueue(actionSchedulerQueue);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
@@ -62,8 +66,9 @@ public class SampleReceiverIT {
   @Test
   public void testHappyPath() throws InterruptedException, IOException {
     // GIVEN
-    BlockingQueue<String> queue1 = rabbitQueueHelper.listen(emitCaseEventRhQueue);
-    BlockingQueue<String> queue2 = rabbitQueueHelper.listen(emitCaseEventActionQueue);
+    BlockingQueue<String> rhCaseMessages = rabbitQueueHelper.listen(rhCaseQueue);
+    BlockingQueue<String> rhUacMessages = rabbitQueueHelper.listen(rhUacQueue);
+    BlockingQueue<String> actionMessages = rabbitQueueHelper.listen(actionSchedulerQueue);
 
     CreateCaseSample createCaseSample = new CreateCaseSample();
     createCaseSample.setPostcode("ABC123");
@@ -74,14 +79,16 @@ public class SampleReceiverIT {
     rabbitQueueHelper.sendMessage(inboundQueue, createCaseSample);
 
     // THEN
-    rabbitQueueHelper.checkExpectedMessageReceived(queue1);
-    rabbitQueueHelper.checkExpectedMessageReceived(queue1);
+    ResponseManagementEvent responseManagementEvent =
+        rabbitQueueHelper.checkExpectedMessageReceived(rhCaseMessages);
+    assertEquals(EventType.CASE_CREATED, responseManagementEvent.getEvent().getType());
+    responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(rhUacMessages);
+    assertEquals(EventType.UAC_UPDATED, responseManagementEvent.getEvent().getType());
 
     List<EventType> eventTypesSeen = new LinkedList<>();
-    ResponseManagementEvent responseManagementEvent =
-        rabbitQueueHelper.checkExpectedMessageReceived(queue2);
+    responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(actionMessages);
     eventTypesSeen.add(responseManagementEvent.getEvent().getType());
-    responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(queue2);
+    responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(actionMessages);
     eventTypesSeen.add(responseManagementEvent.getEvent().getType());
 
     assertThat(eventTypesSeen, containsInAnyOrder(EventType.CASE_CREATED, EventType.UAC_UPDATED));

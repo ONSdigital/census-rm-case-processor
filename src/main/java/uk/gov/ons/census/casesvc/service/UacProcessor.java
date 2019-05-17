@@ -18,14 +18,16 @@ import uk.gov.ons.census.casesvc.utility.Sha256Helper;
 @Component
 public class UacProcessor {
 
+  private static final String UAC_UPDATE_ROUTING_KEY = "event.uac.update";
+
   private final UacQidLinkRepository uacQidLinkRepository;
   private final EventRepository eventRepository;
   private final RabbitTemplate rabbitTemplate;
   private final IacDispenser iacDispenser;
   private final QidCreator qidCreator;
 
-  @Value("${queueconfig.emit-case-event-exchange}")
-  private String emitCaseEventExchange;
+  @Value("${queueconfig.outbound-exchange}")
+  private String outboundExchange;
 
   public UacProcessor(
       UacQidLinkRepository uacQidLinkRepository,
@@ -86,6 +88,7 @@ public class UacProcessor {
     responseManagementEvent.setEvent(event);
     responseManagementEvent.setPayload(payload);
 
-    rabbitTemplate.convertAndSend(emitCaseEventExchange, "", responseManagementEvent);
+    rabbitTemplate.convertAndSend(
+        outboundExchange, UAC_UPDATE_ROUTING_KEY, responseManagementEvent);
   }
 }
