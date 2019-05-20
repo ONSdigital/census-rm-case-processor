@@ -45,8 +45,8 @@ public class ReceiptReceiverIT {
   @Value("${queueconfig.receipt-response-inbound-queue}")
   private String inboundQueue;
 
-  @Value("${queueconfig.emit-case-event-action-queue}")
-  private String emitCaseEventActionQueue;
+  @Value("${queueconfig.rh-uac-queue}")
+  private String rhUacQueue;
 
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
   @Autowired private CaseRepository caseRepository;
@@ -57,7 +57,7 @@ public class ReceiptReceiverIT {
   @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(inboundQueue);
-    rabbitQueueHelper.purgeQueue(emitCaseEventActionQueue);
+    rabbitQueueHelper.purgeQueue(rhUacQueue);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
@@ -66,7 +66,7 @@ public class ReceiptReceiverIT {
   @Test
   public void testGoodReceiptEmitsMessageAndLogsEvent() throws InterruptedException, IOException {
     // GIVEN
-    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(emitCaseEventActionQueue);
+    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhUacQueue);
 
     EasyRandom easyRandom = new EasyRandom();
     Case caze = easyRandom.nextObject(Case.class);
