@@ -4,8 +4,8 @@ import static org.springframework.amqp.core.Binding.DestinationType.QUEUE;
 
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.Exchange;
-import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,14 +15,26 @@ public class QueueSetterUpper {
   @Value("${queueconfig.inbound-queue}")
   private String inboundQueue;
 
-  @Value("${queueconfig.emit-case-event-exchange}")
-  private String emitCaseEventExchange;
+  @Value("${queueconfig.outbound-exchange}")
+  private String outboundExchange;
 
-  @Value("${queueconfig.emit-case-event-rh-queue}")
-  private String emitCaseEventRhQueue;
+  @Value("${queueconfig.rh-case-queue}")
+  private String rhCaseQueue;
 
-  @Value("${queueconfig.emit-case-event-action-queue}")
-  private String emitCaseEventActionQueue;
+  @Value("${queueconfig.rh-case-routing-key}")
+  private String rhCaseRoutingKey;
+
+  @Value("${queueconfig.rh-uac-queue}")
+  private String rhUacQueue;
+
+  @Value("${queueconfig.rh-uac-routing-key}")
+  private String rhUacRoutingKey;
+
+  @Value("${queueconfig.action-scheduler-queue}")
+  private String actionSchedulerQueue;
+
+  @Value("${queueconfig.action-scheduler-routing-key}")
+  private String actionSchedulerRoutingKey;
 
   @Value("${queueconfig.unaddressed-inbound-queue}")
   private String unaddressedQueue;
@@ -41,28 +53,39 @@ public class QueueSetterUpper {
   }
 
   @Bean
-  public Queue fanoutOneQueue() {
-    return new Queue(emitCaseEventRhQueue, true);
+  public Queue rhCaseQueue() {
+    return new Queue(rhCaseQueue, true);
   }
 
   @Bean
-  public Queue fanoutTwoQueue() {
-    return new Queue(emitCaseEventActionQueue, true);
+  public Queue rhUacQueue() {
+    return new Queue(rhUacQueue, true);
   }
 
   @Bean
-  public Exchange myFanoutExchange() {
-    return new FanoutExchange(emitCaseEventExchange, true, false);
+  public Queue actionSchedulerQueue() {
+    return new Queue(actionSchedulerQueue, true);
   }
 
   @Bean
-  public Binding bindingOne() {
-    return new Binding(emitCaseEventRhQueue, QUEUE, emitCaseEventExchange, "", null);
+  public Exchange myTopicExchange() {
+    return new TopicExchange(outboundExchange, true, false);
   }
 
   @Bean
-  public Binding bindingTwo() {
-    return new Binding(emitCaseEventActionQueue, QUEUE, emitCaseEventExchange, "", null);
+  public Binding bindingRhCase() {
+    return new Binding(rhCaseQueue, QUEUE, outboundExchange, rhCaseRoutingKey, null);
+  }
+
+  @Bean
+  public Binding bindingRhUac() {
+    return new Binding(rhUacQueue, QUEUE, outboundExchange, rhUacRoutingKey, null);
+  }
+
+  @Bean
+  public Binding bindingAction() {
+    return new Binding(
+        actionSchedulerQueue, QUEUE, outboundExchange, actionSchedulerRoutingKey, null);
   }
 
   @Bean

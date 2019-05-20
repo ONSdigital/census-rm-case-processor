@@ -32,8 +32,8 @@ public class UnaddressedReceiverTestIT {
   @Value("${queueconfig.unaddressed-inbound-queue}")
   private String unaddressedQueue;
 
-  @Value("${queueconfig.emit-case-event-rh-queue}")
-  private String emitCaseEventRhQueue;
+  @Value("${queueconfig.rh-uac-queue}")
+  private String rhUacQueue;
 
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
   @Autowired private EventRepository eventRepository;
@@ -43,7 +43,7 @@ public class UnaddressedReceiverTestIT {
   @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(unaddressedQueue);
-    rabbitQueueHelper.purgeQueue(emitCaseEventRhQueue);
+    rabbitQueueHelper.purgeQueue(rhUacQueue);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
   }
@@ -51,7 +51,7 @@ public class UnaddressedReceiverTestIT {
   @Test
   public void testHappyPath() throws IOException, InterruptedException {
     // GIVEN
-    BlockingQueue<String> queue = rabbitQueueHelper.listen(emitCaseEventRhQueue);
+    BlockingQueue<String> queue = rabbitQueueHelper.listen(rhUacQueue);
     CreateUacQid createUacQid = new CreateUacQid();
     createUacQid.setQuestionnaireType("21");
 

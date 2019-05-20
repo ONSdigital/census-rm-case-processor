@@ -39,18 +39,8 @@ public class AppConfig {
   }
 
   @Bean
-  public MessageChannel unaddressedInputChannel() {
-    return new DirectChannel();
-  }
-
-  @Bean
-  public MessageChannel receiptInputChannel() {
-    return new DirectChannel();
-  }
-
-  @Bean
-  public AmqpInboundChannelAdapter inboundSamples(
-      @Qualifier("sampleContainer") SimpleMessageListenerContainer listenerContainer,
+  public AmqpInboundChannelAdapter inbound(
+      SimpleMessageListenerContainer listenerContainer,
       @Qualifier("caseSampleInputChannel") MessageChannel channel) {
     AmqpInboundChannelAdapter adapter = new AmqpInboundChannelAdapter(listenerContainer);
     adapter.setOutputChannel(channel);
@@ -90,28 +80,10 @@ public class AppConfig {
   }
 
   @Bean
-  public SimpleMessageListenerContainer sampleContainer(ConnectionFactory connectionFactory) {
+  public SimpleMessageListenerContainer container(ConnectionFactory connectionFactory) {
     SimpleMessageListenerContainer container =
         new SimpleMessageListenerContainer(connectionFactory);
     container.setQueueNames(inboundQueue);
-    container.setConcurrentConsumers(consumers);
-    return container;
-  }
-
-  @Bean
-  public SimpleMessageListenerContainer unaddressedContainer(ConnectionFactory connectionFactory) {
-    SimpleMessageListenerContainer container =
-        new SimpleMessageListenerContainer(connectionFactory);
-    container.setQueueNames(unaddressedQueue);
-    container.setConcurrentConsumers(consumers);
-    return container;
-  }
-
-  @Bean
-  public SimpleMessageListenerContainer receiptContainer(ConnectionFactory connectionFactory) {
-    SimpleMessageListenerContainer container =
-        new SimpleMessageListenerContainer(connectionFactory);
-    container.setQueueNames(receiptInboundQueue);
     container.setConcurrentConsumers(consumers);
     return container;
   }

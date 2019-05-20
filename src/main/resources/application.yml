@@ -27,10 +27,14 @@ spring:
     virtualhost: /
 
 queueconfig:
-  inbound-queue: exampleInboundQueue
-  emit-case-event-exchange: myfanout.exchange
-  emit-case-event-rh-queue: myfanout.rhqueue
-  emit-case-event-action-queue: myfanout.actionqueue
+  inbound-queue: case.sample.inbound
+  outbound-exchange: case.outbound.exchange
+  rh-case-queue: case.rh.case
+  rh-case-routing-key: event.case.*
+  rh-uac-queue: case.rh.uac
+  rh-uac-routing-key: event.uac.*
+  action-scheduler-queue: case.action
+  action-scheduler-routing-key: "#"
   unaddressed-inbound-queue: unaddressedRequestQueue
   receipt-response-inbound-queue: Case.Responses
   consumers: 50
