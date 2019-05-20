@@ -85,12 +85,6 @@ public class UacProcessor {
       uac.setCollectionExerciseId(caze.getCollectionExerciseId());
     }
 
-    if (caze != null) {
-      uac.setCaseId(caze.getCaseId().toString());
-      uac.setCaseType(caze.getAddressType());
-      uac.setCollectionExerciseId(caze.getCollectionExerciseId());
-    }
-
     Payload payload = new Payload();
     payload.setUac(uac);
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
