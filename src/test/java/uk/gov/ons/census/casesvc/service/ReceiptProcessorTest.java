@@ -34,12 +34,12 @@ public class ReceiptProcessorTest {
 
     // when
     Receipt receipt = new Receipt();
-    receipt.setCase_id(TEST_CASE_ID.toString());
+    receipt.setCaseId(TEST_CASE_ID.toString());
 
     String dateTime = "2016-03-04 11:30";
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     LocalDateTime expectedReceiptDateTime = LocalDateTime.parse(dateTime, formatter);
-    receipt.setResponse_dateTime(expectedReceiptDateTime);
+    receipt.setResponseDateTime(expectedReceiptDateTime);
 
     ReceiptProcessor receiptProcessor = new ReceiptProcessor(caseRepository, uacProcessor);
     receiptProcessor.processReceipt(receipt);
@@ -47,7 +47,7 @@ public class ReceiptProcessorTest {
     // then
     verify(uacProcessor, times(1)).emitUacUpdatedEvent(expectedUacQidLink, expectedCase, false);
     verify(uacProcessor, times(1))
-        .logEvent(expectedUacQidLink, QID_RECEIPTED, receipt.getResponse_dateTime());
+        .logEvent(expectedUacQidLink, QID_RECEIPTED, receipt.getResponseDateTime());
   }
 
   @Test(expected = RuntimeException.class)
@@ -60,7 +60,7 @@ public class ReceiptProcessorTest {
 
     // Given
     Receipt receipt = new Receipt();
-    receipt.setCase_id(TEST_CASE_ID.toString());
+    receipt.setCaseId(TEST_CASE_ID.toString());
 
     ReceiptProcessor receiptProcessor = new ReceiptProcessor(caseRepository, uacProcessor);
     receiptProcessor.processReceipt(receipt);

@@ -57,6 +57,10 @@ public class UacProcessor {
     return uacQidLink;
   }
 
+  public void logEvent(UacQidLink uacQidLink, String eventDescription) {
+    logEvent(uacQidLink, eventDescription, null);
+  }
+
   public void logEvent(
       UacQidLink uacQidLink, String eventDescription, LocalDateTime eventMetaDataDateTime) {
     uk.gov.ons.census.casesvc.model.entity.Event loggedEvent =
@@ -67,6 +71,10 @@ public class UacProcessor {
     loggedEvent.setEventDescription(eventDescription);
     loggedEvent.setUacQidLink(uacQidLink);
     eventRepository.save(loggedEvent);
+  }
+
+  public void emitUacUpdatedEvent(UacQidLink uacQidLink, Case caze) {
+    emitUacUpdatedEvent(uacQidLink, caze, true);
   }
 
   public void emitUacUpdatedEvent(UacQidLink uacQidLink, Case caze, Boolean active) {

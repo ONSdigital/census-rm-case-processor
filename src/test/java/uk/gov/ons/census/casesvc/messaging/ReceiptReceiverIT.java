@@ -82,7 +82,7 @@ public class ReceiptReceiverIT {
     uacQidLinkRepository.saveAndFlush(uacQidLink);
 
     Receipt receipt = new Receipt();
-    receipt.setCase_id(TEST_CASE_ID.toString());
+    receipt.setCaseId(TEST_CASE_ID.toString());
 
     // WHEN
     rabbitQueueHelper.sendMessage(inboundQueue, receipt);

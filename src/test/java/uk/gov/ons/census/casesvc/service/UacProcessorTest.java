@@ -71,7 +71,7 @@ public class UacProcessorTest {
     uacQuidLink.setUniqueNumber(12345L);
 
     // When
-    underTest.logEvent(uacQuidLink, "TEST_LOGGED_EVENT", null);
+    underTest.logEvent(uacQuidLink, "TEST_LOGGED_EVENT");
 
     // Then
     ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
@@ -90,7 +90,7 @@ public class UacProcessorTest {
     ReflectionTestUtils.setField(underTest, "outboundExchange", "TEST_EXCHANGE");
 
     // When
-    underTest.emitUacUpdatedEvent(uacQidLink, caze, true);
+    underTest.emitUacUpdatedEvent(uacQidLink, caze);
 
     // Then
     ArgumentCaptor<ResponseManagementEvent> responseManagementEventArgumentCaptor =
