@@ -57,13 +57,17 @@ public class UacProcessor {
     return uacQidLink;
   }
 
-  public void logEvent(UacQidLink uacQidLink, String eventDescription) {
+  public void logEvent(
+      UacQidLink uacQidLink,
+      String eventDescription,
+      uk.gov.ons.census.casesvc.model.entity.EventType eventType) {
     uk.gov.ons.census.casesvc.model.entity.Event loggedEvent =
         new uk.gov.ons.census.casesvc.model.entity.Event();
     loggedEvent.setId(UUID.randomUUID());
     loggedEvent.setEventDate(new Date());
     loggedEvent.setEventDescription(eventDescription);
     loggedEvent.setUacQidLink(uacQidLink);
+    loggedEvent.setEventType(eventType);
     eventRepository.save(loggedEvent);
   }
 

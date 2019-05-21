@@ -1,5 +1,6 @@
 package uk.gov.ons.census.casesvc.messaging;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -10,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.model.dto.CreateUacQid;
+import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.service.UacProcessor;
 
@@ -32,6 +34,7 @@ public class UnaddressedReceiverTest {
 
     // Then
     verify(uacProcessor).emitUacUpdatedEvent(eq(uacQidLink), eq(null));
-    verify(uacProcessor).logEvent(eq(uacQidLink), eq("Unaddressed UAC/QID pair created"));
+    verify(uacProcessor)
+        .logEvent(eq(uacQidLink), eq("Unaddressed UAC/QID pair created"), any(EventType.class));
   }
 }
