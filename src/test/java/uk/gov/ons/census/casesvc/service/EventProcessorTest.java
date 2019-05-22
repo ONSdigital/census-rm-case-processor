@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
 import uk.gov.ons.census.casesvc.model.entity.Case;
+import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -38,7 +39,8 @@ public class EventProcessorTest {
     verify(uacProcessor).saveUacQidLink(eq(caze), eq(1));
     verify(uacProcessor).emitUacUpdatedEvent(uacQidLink, caze);
     verify(caseProcessor).emitCaseCreatedEvent(caze);
-    verify(uacProcessor, times(2)).logEvent(eq(uacQidLink), any(String.class));
+    verify(uacProcessor, times(2))
+        .logEvent(eq(uacQidLink), any(String.class), any(EventType.class));
   }
 
   @Test
@@ -61,6 +63,7 @@ public class EventProcessorTest {
     verify(uacProcessor, times(1)).saveUacQidLink(eq(caze), eq(2));
     verify(uacProcessor, times(2)).emitUacUpdatedEvent(uacQidLink, caze);
     verify(caseProcessor).emitCaseCreatedEvent(caze);
-    verify(uacProcessor, times(3)).logEvent(eq(uacQidLink), any(String.class));
+    verify(uacProcessor, times(3))
+        .logEvent(eq(uacQidLink), any(String.class), any(EventType.class));
   }
 }
