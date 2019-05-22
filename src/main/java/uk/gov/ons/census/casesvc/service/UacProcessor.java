@@ -77,7 +77,7 @@ public class UacProcessor {
     emitUacUpdatedEvent(uacQidLink, caze, true);
   }
 
-  public void emitUacUpdatedEvent(UacQidLink uacQidLink, Case caze, Boolean active) {
+  public void emitUacUpdatedEvent(UacQidLink uacQidLink, Case caze, boolean active) {
     Event event = EventHelper.createEvent(EventType.UAC_UPDATED);
 
     Uac uac = new Uac();

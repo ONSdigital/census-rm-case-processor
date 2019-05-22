@@ -30,4 +30,3 @@ cache:
 branches:
   only:
   - master
-  - pubsub-receipting
