@@ -50,8 +50,8 @@ public class AppConfig {
 
   @Bean
   public AmqpInboundChannelAdapter inboundSamples(
-          @Qualifier("sampleContainer") SimpleMessageListenerContainer listenerContainer,
-          @Qualifier("caseSampleInputChannel") MessageChannel channel) {
+      @Qualifier("sampleContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("caseSampleInputChannel") MessageChannel channel) {
     AmqpInboundChannelAdapter adapter = new AmqpInboundChannelAdapter(listenerContainer);
     adapter.setOutputChannel(channel);
     return adapter;
@@ -59,8 +59,8 @@ public class AppConfig {
 
   @Bean
   public AmqpInboundChannelAdapter inboundUnaddressed(
-          @Qualifier("unaddressedContainer") SimpleMessageListenerContainer listenerContainer,
-          @Qualifier("unaddressedInputChannel") MessageChannel channel) {
+      @Qualifier("unaddressedContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("unaddressedInputChannel") MessageChannel channel) {
     AmqpInboundChannelAdapter adapter = new AmqpInboundChannelAdapter(listenerContainer);
     adapter.setOutputChannel(channel);
     return adapter;
@@ -68,8 +68,8 @@ public class AppConfig {
 
   @Bean
   public AmqpInboundChannelAdapter receiptInbound(
-          @Qualifier("receiptContainer") SimpleMessageListenerContainer listenerContainer,
-          @Qualifier("receiptInputChannel") MessageChannel channel) {
+      @Qualifier("receiptContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("receiptInputChannel") MessageChannel channel) {
     AmqpInboundChannelAdapter adapter = new AmqpInboundChannelAdapter(listenerContainer);
     adapter.setOutputChannel(channel);
     return adapter;
@@ -77,7 +77,7 @@ public class AppConfig {
 
   @Bean
   public RabbitTemplate rabbitTemplate(
-          ConnectionFactory connectionFactory, Jackson2JsonMessageConverter messageConverter) {
+      ConnectionFactory connectionFactory, Jackson2JsonMessageConverter messageConverter) {
     RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
     rabbitTemplate.setMessageConverter(messageConverter);
     rabbitTemplate.setChannelTransacted(true);
@@ -92,7 +92,7 @@ public class AppConfig {
   @Bean
   public SimpleMessageListenerContainer sampleContainer(ConnectionFactory connectionFactory) {
     SimpleMessageListenerContainer container =
-            new SimpleMessageListenerContainer(connectionFactory);
+        new SimpleMessageListenerContainer(connectionFactory);
     container.setQueueNames(inboundQueue);
     container.setConcurrentConsumers(consumers);
     return container;
@@ -101,7 +101,7 @@ public class AppConfig {
   @Bean
   public SimpleMessageListenerContainer unaddressedContainer(ConnectionFactory connectionFactory) {
     SimpleMessageListenerContainer container =
-            new SimpleMessageListenerContainer(connectionFactory);
+        new SimpleMessageListenerContainer(connectionFactory);
     container.setQueueNames(unaddressedQueue);
     container.setConcurrentConsumers(consumers);
     return container;
@@ -110,7 +110,7 @@ public class AppConfig {
   @Bean
   public SimpleMessageListenerContainer receiptContainer(ConnectionFactory connectionFactory) {
     SimpleMessageListenerContainer container =
-            new SimpleMessageListenerContainer(connectionFactory);
+        new SimpleMessageListenerContainer(connectionFactory);
     container.setQueueNames(receiptInboundQueue);
     container.setConcurrentConsumers(consumers);
     return container;
