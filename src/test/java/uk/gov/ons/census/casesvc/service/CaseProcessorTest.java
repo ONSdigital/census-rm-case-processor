@@ -90,7 +90,8 @@ public class CaseProcessorTest {
     ArgumentCaptor<ResponseManagementEvent> rmeArgumentCaptor =
         ArgumentCaptor.forClass(ResponseManagementEvent.class);
     verify(rabbitTemplate)
-        .convertAndSend(eq(TEST_EXCHANGE), eq(CASE_UPDATE_ROUTING_KEY), rmeArgumentCaptor.capture());
+        .convertAndSend(
+            eq(TEST_EXCHANGE), eq(CASE_UPDATE_ROUTING_KEY), rmeArgumentCaptor.capture());
 
     CollectionCase collectionCase = rmeArgumentCaptor.getValue().getPayload().getCollectionCase();
 

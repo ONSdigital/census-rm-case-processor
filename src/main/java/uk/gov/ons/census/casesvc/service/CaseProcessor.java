@@ -86,7 +86,6 @@ public class CaseProcessor {
     collectionCase.setState(caze.getState().toString());
     collectionCase.setSurvey(SURVEY);
 
-
     // Below this line is extra data potentially needed by Action Scheduler - can be ignored by RM
     collectionCase.setActionPlanId(caze.getActionPlanId());
     collectionCase.setTreatmentCode(caze.getTreatmentCode());
