@@ -86,10 +86,6 @@ public class CaseProcessor {
     collectionCase.setState(caze.getState().toString());
     collectionCase.setSurvey(SURVEY);
 
-    //TODO: is this for rh?
-    collectionCase.setFieldCoordinatorId(caze.getFieldCoordinatorId());
-    collectionCase.setFieldOfficerId(caze.getFieldOfficerId());
-    collectionCase.setCeExpectedCapacity(caze.getCeExpectedCapacity());
 
     // Below this line is extra data potentially needed by Action Scheduler - can be ignored by RM
     collectionCase.setActionPlanId(caze.getActionPlanId());
@@ -100,6 +96,9 @@ public class CaseProcessor {
     collectionCase.setLad(caze.getLad());
     collectionCase.setHtcWillingness(caze.getHtcWillingness());
     collectionCase.setHtcDigital(caze.getHtcDigital());
+    collectionCase.setFieldCoordinatorId(caze.getFieldCoordinatorId());
+    collectionCase.setFieldOfficerId(caze.getFieldOfficerId());
+    collectionCase.setCeExpectedCapacity(caze.getCeExpectedCapacity());
 
     return collectionCase;
   }
