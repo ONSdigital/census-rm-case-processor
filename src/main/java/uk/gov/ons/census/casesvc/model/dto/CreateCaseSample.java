@@ -23,7 +23,7 @@ public class CreateCaseSample {
   private String lsoa;
   private String msoa;
   private String lad;
-  private String rgn;
+  private String region;
   private String htcWillingness;
   private String htcDigital;
   private String fieldCoordinatorId;

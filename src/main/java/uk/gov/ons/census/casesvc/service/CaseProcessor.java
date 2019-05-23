@@ -62,7 +62,7 @@ public class CaseProcessor {
     address.setAddressType(caze.getAddressType());
     address.setArid(caze.getArid());
     address.setEstabArid(caze.getEstabArid());
-    address.setRegion(caze.getRgn().substring(0, 1));
+    address.setRegion(caze.getRegion().substring(0, 1));
     address.setEstabType(caze.getEstabType());
     address.setLatitude(caze.getLatitude());
     address.setLongitude(caze.getLongitude());

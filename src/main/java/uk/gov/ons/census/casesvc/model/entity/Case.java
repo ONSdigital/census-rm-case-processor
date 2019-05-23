@@ -64,7 +64,7 @@ public class Case {
 
   @Column private String lad;
 
-  @Column private String rgn;
+  @Column private String region;
 
   @Column private String htcWillingness;
 

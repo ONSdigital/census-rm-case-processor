@@ -74,7 +74,7 @@ public class CaseProcessorTest {
   public void testEmitCaseCreatedEvent() {
     // Given
     Case caze = new Case();
-    caze.setRgn("E");
+    caze.setRegion("E");
     caze.setCaseId(UUID.randomUUID());
     caze.setState(CaseState.ACTIONABLE);
     caze.setPostcode(TEST_POSTCODE);
