@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.model.dto.Receipt;
 import uk.gov.ons.census.casesvc.model.entity.Case;
+import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 
@@ -38,6 +39,6 @@ public class ReceiptProcessor {
     // This nice long path and the 'random' get(0) will dissapear when we get QID
     UacQidLink uacQidLink = cazeOpt.get().getUacQidLinks().get(0);
     uacProcessor.emitUacUpdatedEvent(uacQidLink, cazeOpt.get(), false);
-    uacProcessor.logEvent(uacQidLink, QID_RECEIPTED, receipt.getResponseDateTime());
+    uacProcessor.logEvent(uacQidLink, QID_RECEIPTED, EventType.UAC_UPDATED, receipt.getResponseDateTime());
   }
 }

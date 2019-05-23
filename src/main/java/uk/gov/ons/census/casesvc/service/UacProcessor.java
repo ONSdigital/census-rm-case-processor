@@ -1,6 +1,7 @@
 package uk.gov.ons.census.casesvc.service;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,12 +58,15 @@ public class UacProcessor {
     return uacQidLink;
   }
 
-  public void logEvent(UacQidLink uacQidLink, String eventDescription) {
-    logEvent(uacQidLink, eventDescription, null);
+  public void logEvent(UacQidLink uacQidLink, String eventDescription, uk.gov.ons.census.casesvc.model.entity.EventType eventType) {
+    logEvent(uacQidLink, eventDescription,  eventType, null);
   }
 
   public void logEvent(
-      UacQidLink uacQidLink, String eventDescription, LocalDateTime eventMetaDataDateTime) {
+      UacQidLink uacQidLink,
+      String eventDescription,
+      uk.gov.ons.census.casesvc.model.entity.EventType eventType,
+      LocalDateTime eventMetaDataDateTime) {
     uk.gov.ons.census.casesvc.model.entity.Event loggedEvent =
         new uk.gov.ons.census.casesvc.model.entity.Event();
     loggedEvent.setId(UUID.randomUUID());
@@ -70,12 +74,14 @@ public class UacProcessor {
     loggedEvent.setRmEventProcessed(LocalDateTime.now());
     loggedEvent.setEventDescription(eventDescription);
     loggedEvent.setUacQidLink(uacQidLink);
+    loggedEvent.setEventType(eventType);
     eventRepository.save(loggedEvent);
   }
 
   public void emitUacUpdatedEvent(UacQidLink uacQidLink, Case caze) {
     emitUacUpdatedEvent(uacQidLink, caze, true);
   }
+
 
   public void emitUacUpdatedEvent(UacQidLink uacQidLink, Case caze, boolean active) {
     Event event = EventHelper.createEvent(EventType.UAC_UPDATED);

@@ -12,6 +12,7 @@ import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import uk.gov.ons.census.casesvc.model.dto.Receipt;
 import uk.gov.ons.census.casesvc.model.entity.Case;
+import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 
@@ -47,7 +48,7 @@ public class ReceiptProcessorTest {
     // then
     verify(uacProcessor, times(1)).emitUacUpdatedEvent(expectedUacQidLink, expectedCase, false);
     verify(uacProcessor, times(1))
-        .logEvent(expectedUacQidLink, QID_RECEIPTED, receipt.getResponseDateTime());
+        .logEvent(expectedUacQidLink, QID_RECEIPTED, EventType.UAC_UPDATED, receipt.getResponseDateTime());
   }
 
   @Test(expected = RuntimeException.class)
