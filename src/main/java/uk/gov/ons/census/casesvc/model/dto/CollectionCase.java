@@ -12,6 +12,11 @@ public class CollectionCase {
   private String state;
   private String actionableFrom;
 
+  //TODO, Are these for RH too, only important regarding where they go in this file, nowt functional
+  private String fieldCoordinatorId;
+  private String fieldOfficerId;
+  private String ceExpectedCapacity;
+
   // Below this line is extra data potentially needed by Action Scheduler - can be ignored by RH
   private String actionPlanId;
   private String treatmentCode;

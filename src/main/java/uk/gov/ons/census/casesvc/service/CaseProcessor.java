@@ -16,7 +16,7 @@ import uk.gov.ons.census.casesvc.utility.EventHelper;
 public class CaseProcessor {
 
   private static final String SURVEY = "CENSUS";
-  private static final String CASE_UPDATE_ROUTING_KEY = "event.case.update";
+  public static final String CASE_UPDATE_ROUTING_KEY = "event.case.update";
 
   private final CaseRepository caseRepository;
   private final MapperFacade mapperFacade;
@@ -85,6 +85,11 @@ public class CaseProcessor {
     collectionCase.setId(caze.getCaseId().toString());
     collectionCase.setState(caze.getState().toString());
     collectionCase.setSurvey(SURVEY);
+
+    //TODO: is this for rh?
+    collectionCase.setFieldCoordinatorId(caze.getFieldCoordinatorId());
+    collectionCase.setFieldOfficerId(caze.getFieldOfficerId());
+    collectionCase.setCeExpectedCapacity(caze.getCeExpectedCapacity());
 
     // Below this line is extra data potentially needed by Action Scheduler - can be ignored by RM
     collectionCase.setActionPlanId(caze.getActionPlanId());

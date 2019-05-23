@@ -26,7 +26,10 @@ public class CreateCaseSample {
   private String rgn;
   private String htcWillingness;
   private String htcDigital;
+  private String fieldCoordinatorId;
+  private String fieldOfficerId;
   private String treatmentCode;
+  private String ceExpectedCapacity;
   private String collectionExerciseId;
   private String actionPlanId;
 }
