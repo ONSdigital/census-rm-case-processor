@@ -79,7 +79,8 @@ public class UacProcessor {
 
     if (caze != null) {
       uac.setCaseId(caze.getCaseId().toString());
-      uac.setCaseType(AddressTypeToCaseTypeMapper.mapFromAddressTypeToCaseType(caze.getAddressType()));
+      uac.setCaseType(
+          AddressTypeToCaseTypeMapper.mapFromAddressTypeToCaseType(caze.getAddressType()));
       uac.setCollectionExerciseId(caze.getCollectionExerciseId());
     }
 
