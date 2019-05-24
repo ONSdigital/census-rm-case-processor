@@ -1,7 +1,6 @@
 package uk.gov.ons.census.casesvc.service;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.UUID;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,8 +57,11 @@ public class UacProcessor {
     return uacQidLink;
   }
 
-  public void logEvent(UacQidLink uacQidLink, String eventDescription, uk.gov.ons.census.casesvc.model.entity.EventType eventType) {
-    logEvent(uacQidLink, eventDescription,  eventType, null);
+  public void logEvent(
+      UacQidLink uacQidLink,
+      String eventDescription,
+      uk.gov.ons.census.casesvc.model.entity.EventType eventType) {
+    logEvent(uacQidLink, eventDescription, eventType, null);
   }
 
   public void logEvent(
@@ -81,7 +83,6 @@ public class UacProcessor {
   public void emitUacUpdatedEvent(UacQidLink uacQidLink, Case caze) {
     emitUacUpdatedEvent(uacQidLink, caze, true);
   }
-
 
   public void emitUacUpdatedEvent(UacQidLink uacQidLink, Case caze, boolean active) {
     Event event = EventHelper.createEvent(EventType.UAC_UPDATED);

@@ -48,7 +48,11 @@ public class ReceiptProcessorTest {
     // then
     verify(uacProcessor, times(1)).emitUacUpdatedEvent(expectedUacQidLink, expectedCase, false);
     verify(uacProcessor, times(1))
-        .logEvent(expectedUacQidLink, QID_RECEIPTED, EventType.UAC_UPDATED, receipt.getResponseDateTime());
+        .logEvent(
+            expectedUacQidLink,
+            QID_RECEIPTED,
+            EventType.UAC_UPDATED,
+            receipt.getResponseDateTime());
   }
 
   @Test(expected = RuntimeException.class)
