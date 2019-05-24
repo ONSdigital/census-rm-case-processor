@@ -19,6 +19,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
+import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
@@ -56,7 +57,6 @@ public class UacProcessorTest {
 
     // When
     UacQidLink result;
-    // ArgumentCaptor<UacQidLink> caseArgumentCaptor = ArgumentCaptor.forClass(UacQidLink.class);
     result = underTest.saveUacQidLink(caze, 1);
 
     // Then
@@ -71,12 +71,13 @@ public class UacProcessorTest {
     uacQuidLink.setUniqueNumber(12345L);
 
     // When
-    underTest.logEvent(uacQuidLink, "TEST_LOGGED_EVENT", null);
+    underTest.logEvent(uacQuidLink, "TEST_LOGGED_EVENT", EventType.UAC_UPDATED);
 
     // Then
     ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
     verify(eventRepository).save(eventArgumentCaptor.capture());
     assertEquals("TEST_LOGGED_EVENT", eventArgumentCaptor.getValue().getEventDescription());
+    assertEquals(EventType.UAC_UPDATED, eventArgumentCaptor.getValue().getEventType());
   }
 
   @Test
@@ -87,17 +88,19 @@ public class UacProcessorTest {
     Case caze = new Case();
     UUID caseUuid = UUID.randomUUID();
     caze.setCaseId(caseUuid);
-    ReflectionTestUtils.setField(underTest, "emitCaseEventExchange", "TEST_EXCHANGE");
+    ReflectionTestUtils.setField(underTest, "outboundExchange", "TEST_EXCHANGE");
 
     // When
-    underTest.emitUacUpdatedEvent(uacQidLink, caze, true);
+    underTest.emitUacUpdatedEvent(uacQidLink, caze);
 
     // Then
     ArgumentCaptor<ResponseManagementEvent> responseManagementEventArgumentCaptor =
         ArgumentCaptor.forClass(ResponseManagementEvent.class);
     verify(rabbitTemplate)
         .convertAndSend(
-            eq("TEST_EXCHANGE"), eq(""), responseManagementEventArgumentCaptor.capture());
+            eq("TEST_EXCHANGE"),
+            eq("event.uac.update"),
+            responseManagementEventArgumentCaptor.capture());
     assertEquals(
         "12345", responseManagementEventArgumentCaptor.getValue().getPayload().getUac().getUac());
   }

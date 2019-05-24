@@ -29,7 +29,8 @@ public class CaseProcessorTest {
 
   @Mock CaseRepository caseRepository;
 
-  @Spy MapperFacade mapperFacade = new DefaultMapperFactory.Builder().build().getMapperFacade();;
+  @Spy
+  private MapperFacade mapperFacade = new DefaultMapperFactory.Builder().build().getMapperFacade();
 
   @Mock RabbitTemplate rabbitTemplate;
 
@@ -60,7 +61,7 @@ public class CaseProcessorTest {
     caze.setCaseId(UUID.randomUUID());
     caze.setState(CaseState.ACTIONABLE);
     caze.setPostcode("TEST_POSTCODE");
-    ReflectionTestUtils.setField(underTest, "emitCaseEventExchange", "TEST_EXCHANGE");
+    ReflectionTestUtils.setField(underTest, "outboundExchange", "TEST_EXCHANGE");
 
     // When
     underTest.emitCaseCreatedEvent(caze);
@@ -68,7 +69,8 @@ public class CaseProcessorTest {
     // Then
     ArgumentCaptor<ResponseManagementEvent> rmeArgumentCaptor =
         ArgumentCaptor.forClass(ResponseManagementEvent.class);
-    verify(rabbitTemplate).convertAndSend(eq("TEST_EXCHANGE"), eq(""), rmeArgumentCaptor.capture());
+    verify(rabbitTemplate)
+        .convertAndSend(eq("TEST_EXCHANGE"), eq("event.case.update"), rmeArgumentCaptor.capture());
     assertEquals(
         "TEST_POSTCODE",
         rmeArgumentCaptor.getValue().getPayload().getCollectionCase().getAddress().getPostcode());

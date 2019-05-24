@@ -1,7 +1,6 @@
 package uk.gov.ons.census.casesvc.service;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.UUID;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,14 +18,16 @@ import uk.gov.ons.census.casesvc.utility.Sha256Helper;
 @Component
 public class UacProcessor {
 
+  private static final String UAC_UPDATE_ROUTING_KEY = "event.uac.update";
+
   private final UacQidLinkRepository uacQidLinkRepository;
   private final EventRepository eventRepository;
   private final RabbitTemplate rabbitTemplate;
   private final IacDispenser iacDispenser;
   private final QidCreator qidCreator;
 
-  @Value("${queueconfig.emit-case-event-exchange}")
-  private String emitCaseEventExchange;
+  @Value("${queueconfig.outbound-exchange}")
+  private String outboundExchange;
 
   public UacProcessor(
       UacQidLinkRepository uacQidLinkRepository,
@@ -56,7 +57,18 @@ public class UacProcessor {
     return uacQidLink;
   }
 
-  public void logEvent(UacQidLink uacQidLink, String eventDescription, LocalDateTime eventMetaDataDateTime) {
+  public void logEvent(
+      UacQidLink uacQidLink,
+      String eventDescription,
+      uk.gov.ons.census.casesvc.model.entity.EventType eventType) {
+    logEvent(uacQidLink, eventDescription, eventType, null);
+  }
+
+  public void logEvent(
+      UacQidLink uacQidLink,
+      String eventDescription,
+      uk.gov.ons.census.casesvc.model.entity.EventType eventType,
+      LocalDateTime eventMetaDataDateTime) {
     uk.gov.ons.census.casesvc.model.entity.Event loggedEvent =
         new uk.gov.ons.census.casesvc.model.entity.Event();
     loggedEvent.setId(UUID.randomUUID());
@@ -64,10 +76,15 @@ public class UacProcessor {
     loggedEvent.setRmEventProcessed(LocalDateTime.now());
     loggedEvent.setEventDescription(eventDescription);
     loggedEvent.setUacQidLink(uacQidLink);
+    loggedEvent.setEventType(eventType);
     eventRepository.save(loggedEvent);
   }
 
-  public void emitUacUpdatedEvent(UacQidLink uacQidLink, Case caze, Boolean active) {
+  public void emitUacUpdatedEvent(UacQidLink uacQidLink, Case caze) {
+    emitUacUpdatedEvent(uacQidLink, caze, true);
+  }
+
+  public void emitUacUpdatedEvent(UacQidLink uacQidLink, Case caze, boolean active) {
     Event event = EventHelper.createEvent(EventType.UAC_UPDATED);
 
     Uac uac = new Uac();
@@ -89,6 +106,7 @@ public class UacProcessor {
     responseManagementEvent.setEvent(event);
     responseManagementEvent.setPayload(payload);
 
-    rabbitTemplate.convertAndSend(emitCaseEventExchange, "", responseManagementEvent);
+    rabbitTemplate.convertAndSend(
+        outboundExchange, UAC_UPDATE_ROUTING_KEY, responseManagementEvent);
   }
 }

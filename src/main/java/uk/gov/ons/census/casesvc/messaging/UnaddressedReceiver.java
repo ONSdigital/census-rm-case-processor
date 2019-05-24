@@ -4,6 +4,7 @@ import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.model.dto.CreateUacQid;
+import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.service.UacProcessor;
 
@@ -20,7 +21,7 @@ public class UnaddressedReceiver {
   public void receiveMessage(CreateUacQid createUacQid) {
     UacQidLink uacQidLink =
         uacProcessor.saveUacQidLink(null, Integer.parseInt(createUacQid.getQuestionnaireType()));
-    uacProcessor.emitUacUpdatedEvent(uacQidLink, null, true);
-    uacProcessor.logEvent(uacQidLink, "Unaddressed UAC/QID pair created", null);
+    uacProcessor.emitUacUpdatedEvent(uacQidLink, null);
+    uacProcessor.logEvent(uacQidLink, "Unaddressed UAC/QID pair created", EventType.UAC_UPDATED);
   }
 }

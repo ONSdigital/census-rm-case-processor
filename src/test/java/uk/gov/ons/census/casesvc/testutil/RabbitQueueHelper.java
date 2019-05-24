@@ -24,7 +24,7 @@ import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 @ActiveProfiles("test")
 @EnableRetry
 public class RabbitQueueHelper {
-  private ObjectMapper objectMapper = new ObjectMapper();
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
   @Autowired private ConnectionFactory connectionFactory;
 
