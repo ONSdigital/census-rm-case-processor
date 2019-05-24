@@ -10,10 +10,7 @@ import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
-import uk.gov.ons.census.casesvc.utility.EventHelper;
-import uk.gov.ons.census.casesvc.utility.IacDispenser;
-import uk.gov.ons.census.casesvc.utility.QidCreator;
-import uk.gov.ons.census.casesvc.utility.Sha256Helper;
+import uk.gov.ons.census.casesvc.utility.*;
 
 @Component
 public class UacProcessor {
@@ -82,7 +79,7 @@ public class UacProcessor {
 
     if (caze != null) {
       uac.setCaseId(caze.getCaseId().toString());
-      uac.setCaseType(caze.getAddressType());
+      uac.setCaseType(AddressTypeToCaseTypeMapper.mapFromAddressTypeToCaseType(caze.getAddressType()));
       uac.setCollectionExerciseId(caze.getCollectionExerciseId());
     }
 

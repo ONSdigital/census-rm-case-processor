@@ -88,6 +88,7 @@ public class UacProcessorTest {
     Case caze = new Case();
     UUID caseUuid = UUID.randomUUID();
     caze.setCaseId(caseUuid);
+    caze.setAddressType("HH");
     ReflectionTestUtils.setField(underTest, "outboundExchange", "TEST_EXCHANGE");
 
     // When
