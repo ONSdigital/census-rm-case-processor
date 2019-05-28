@@ -49,7 +49,7 @@ public class QidCreatorTest {
     ReflectionTestUtils.setField(underTest, "trancheIdentifier", 2);
 
     // When
-    String result = underTest.createQid(1, 12345);
+    underTest.createQid(1, 12345);
 
     // Then
     // Expected Exception is raised

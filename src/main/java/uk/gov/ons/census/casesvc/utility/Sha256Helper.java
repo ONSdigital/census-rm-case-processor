@@ -6,7 +6,7 @@ import java.security.NoSuchAlgorithmException;
 import javax.xml.bind.DatatypeConverter;
 
 public class Sha256Helper {
-  private static MessageDigest digest;
+  private static final MessageDigest digest;
 
   static {
     try {

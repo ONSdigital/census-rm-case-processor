@@ -1,6 +1,6 @@
 package uk.gov.ons.census.casesvc.model.entity;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,9 +17,11 @@ public class Event {
 
   @ManyToOne private UacQidLink uacQidLink;
 
-  @Column private Date eventDate;
+  @Column private LocalDateTime eventDate;
 
   @Column private String eventDescription;
+
+  @Column private LocalDateTime rmEventProcessed;
 
   @Column
   @Enumerated(EnumType.STRING)
