@@ -1,5 +1,6 @@
 package uk.gov.ons.census.casesvc.model.entity;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import javax.persistence.Column;
@@ -75,6 +76,8 @@ public class Case {
   @Column private String collectionExerciseId;
 
   @Column private String actionPlanId;
+
+  @Column private Date createdDateTime;
 
   @Column
   @Enumerated(EnumType.STRING)

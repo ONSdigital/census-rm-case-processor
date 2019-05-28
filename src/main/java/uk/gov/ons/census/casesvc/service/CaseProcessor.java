@@ -1,6 +1,7 @@
 package uk.gov.ons.census.casesvc.service;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -36,6 +37,7 @@ public class CaseProcessor {
     Case caze = mapperFacade.map(createCaseSample, Case.class);
     caze.setCaseId(UUID.randomUUID());
     caze.setState(CaseState.ACTIONABLE);
+    caze.setCreatedDateTime(new Date());
     caze = caseRepository.saveAndFlush(caze);
     return caze;
   }
