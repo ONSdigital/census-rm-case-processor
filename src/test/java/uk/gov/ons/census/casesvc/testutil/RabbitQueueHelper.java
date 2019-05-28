@@ -49,10 +49,6 @@ public class RabbitQueueHelper {
     return transfer;
   }
 
-//  @Retryable(
-//      value = {java.io.IOException.class},
-//      maxAttempts = 10,
-//      backoff = @Backoff(delay = 5000))
   public void sendMessage(String queueName, Object message) {
     rabbitTemplate.convertAndSend(queueName, message);
   }
