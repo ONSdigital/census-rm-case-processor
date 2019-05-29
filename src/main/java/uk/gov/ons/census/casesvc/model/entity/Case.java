@@ -77,7 +77,9 @@ public class Case {
 
   @Column private String actionPlanId;
 
-  @Column private Date createdDateTime;
+  @Column(columnDefinition = "timestamp with time zone")
+
+  private Date createdDateTime;
 
   @Column
   @Enumerated(EnumType.STRING)
