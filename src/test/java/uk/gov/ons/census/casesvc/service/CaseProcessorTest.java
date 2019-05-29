@@ -39,7 +39,8 @@ public class CaseProcessorTest {
 
   @Mock CaseRepository caseRepository;
 
-  @Spy MapperFacade mapperFacade = new DefaultMapperFactory.Builder().build().getMapperFacade();;
+  @Spy
+  private MapperFacade mapperFacade = new DefaultMapperFactory.Builder().build().getMapperFacade();
 
   @Mock RabbitTemplate rabbitTemplate;
 

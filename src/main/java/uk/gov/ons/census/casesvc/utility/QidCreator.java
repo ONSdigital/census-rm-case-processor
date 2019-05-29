@@ -9,9 +9,6 @@ import org.springframework.stereotype.Component;
 public class QidCreator {
   private static final Logger log = LoggerFactory.getLogger(QidCreator.class);
 
-  private static final String UNKNOWN_COUNTRY_ERROR = "Unknown Country";
-  private static final String UNEXPECTED_CASE_TYPE_ERROR = "Unexpected Case Type";
-
   @Value("${qid.modulus}")
   private int modulus;
 

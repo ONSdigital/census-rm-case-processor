@@ -34,6 +34,7 @@ import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @RunWith(SpringJUnit4ClassRunner.class)
 public class SampleReceiverIT {
+
   @Value("${queueconfig.inbound-queue}")
   private String inboundQueue;
 

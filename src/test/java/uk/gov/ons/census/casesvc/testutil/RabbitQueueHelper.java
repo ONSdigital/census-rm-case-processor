@@ -24,7 +24,7 @@ import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 @ActiveProfiles("test")
 @EnableRetry
 public class RabbitQueueHelper {
-  private ObjectMapper objectMapper = new ObjectMapper();
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
   @Autowired private ConnectionFactory connectionFactory;
 
@@ -49,10 +49,6 @@ public class RabbitQueueHelper {
     return transfer;
   }
 
-  @Retryable(
-      value = {java.io.IOException.class},
-      maxAttempts = 10,
-      backoff = @Backoff(delay = 5000))
   public void sendMessage(String queueName, Object message) {
     rabbitTemplate.convertAndSend(queueName, message);
   }
