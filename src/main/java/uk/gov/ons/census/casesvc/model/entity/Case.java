@@ -78,7 +78,6 @@ public class Case {
   @Column private String actionPlanId;
 
   @Column(columnDefinition = "timestamp with time zone")
-
   private Date createdDateTime;
 
   @Column
