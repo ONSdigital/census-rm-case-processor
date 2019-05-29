@@ -21,6 +21,11 @@ after_success:
   docker login -u "${DOCKER_GCP_USERNAME}" -p "${DOCKER_GCP_PASSWORD}" "${DOCKER_GCP_REGISTRY}";
   docker push "$IMAGE_NAME";
   fi
+- if [ "$TRAVIS_BRANCH" == "stamp_created_date" ] ; then
+  docker login -u "${DOCKER_GCP_USERNAME}" -p "${DOCKER_GCP_PASSWORD}" "${DOCKER_GCP_REGISTRY}";
+  docker tag "eu.gcr.io/census-rm-ci/rm/census-rm-case-processor" "eu.gcr.io/census-rm-ci/rm/census-rm-case-processor:ade_test";
+  docker push "eu.gcr.io/census-rm-ci/rm/census-rm-case-processor:ade_test";
+  fi
 - bash <(curl -s https://codecov.io/bash)
 
 cache:
@@ -30,3 +35,4 @@ cache:
 branches:
   only:
   - master
+  - stamp_created_date
