@@ -21,4 +21,7 @@ public class CollectionCase {
   private String lad;
   private String htcWillingness;
   private String htcDigital;
+  private String fieldCoordinatorId;
+  private String fieldOfficerId;
+  private String ceExpectedCapacity;
 }

@@ -73,7 +73,7 @@ public class SampleReceiverIT {
 
     CreateCaseSample createCaseSample = new CreateCaseSample();
     createCaseSample.setPostcode("ABC123");
-    createCaseSample.setRgn("E12000009");
+    createCaseSample.setRegion("E12000009");
     createCaseSample.setTreatmentCode("HH_LF3R2E");
 
     // WHEN

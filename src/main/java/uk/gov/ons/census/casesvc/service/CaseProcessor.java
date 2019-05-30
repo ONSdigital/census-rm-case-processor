@@ -16,7 +16,7 @@ import uk.gov.ons.census.casesvc.utility.EventHelper;
 public class CaseProcessor {
 
   private static final String SURVEY = "CENSUS";
-  private static final String CASE_UPDATE_ROUTING_KEY = "event.case.update";
+  public static final String CASE_UPDATE_ROUTING_KEY = "event.case.update";
 
   private final CaseRepository caseRepository;
   private final MapperFacade mapperFacade;
@@ -62,7 +62,7 @@ public class CaseProcessor {
     address.setAddressType(caze.getAddressType());
     address.setArid(caze.getArid());
     address.setEstabArid(caze.getEstabArid());
-    address.setRegion(caze.getRgn().substring(0, 1));
+    address.setRegion(caze.getRegion().substring(0, 1));
     address.setEstabType(caze.getEstabType());
     address.setLatitude(caze.getLatitude());
     address.setLongitude(caze.getLongitude());
@@ -95,6 +95,9 @@ public class CaseProcessor {
     collectionCase.setLad(caze.getLad());
     collectionCase.setHtcWillingness(caze.getHtcWillingness());
     collectionCase.setHtcDigital(caze.getHtcDigital());
+    collectionCase.setFieldCoordinatorId(caze.getFieldCoordinatorId());
+    collectionCase.setFieldOfficerId(caze.getFieldOfficerId());
+    collectionCase.setCeExpectedCapacity(caze.getCeExpectedCapacity());
 
     return collectionCase;
   }
