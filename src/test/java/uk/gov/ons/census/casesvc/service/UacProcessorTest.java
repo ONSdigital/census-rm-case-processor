@@ -6,6 +6,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,6 +25,7 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
+import uk.gov.ons.census.casesvc.utility.DateUtils;
 import uk.gov.ons.census.casesvc.utility.IacDispenser;
 import uk.gov.ons.census.casesvc.utility.QidCreator;
 
@@ -36,6 +39,9 @@ public class UacProcessorTest {
   @Mock RabbitTemplate rabbitTemplate;
 
   @Mock IacDispenser iacDispenser;
+
+  @Mock
+  DateUtils dateUtils;
 
   @Spy QidCreator qidCreator;
 
@@ -65,7 +71,7 @@ public class UacProcessorTest {
   }
 
   @Test
-  public void testLogEvent() {
+  public void testLogEventWithoutEventMetaDataDateTime() {
     // Given
     UacQidLink uacQuidLink = new UacQidLink();
     uacQuidLink.setUniqueNumber(12345L);
@@ -78,6 +84,26 @@ public class UacProcessorTest {
     verify(eventRepository).save(eventArgumentCaptor.capture());
     assertEquals("TEST_LOGGED_EVENT", eventArgumentCaptor.getValue().getEventDescription());
     assertEquals(EventType.UAC_UPDATED, eventArgumentCaptor.getValue().getEventType());
+  }
+
+  @Test
+  public void testLogEventWithEventMetaDataDateTime() {
+    // Given
+    UacQidLink uacQuidLink = new UacQidLink();
+    uacQuidLink.setUniqueNumber(12345L);
+    OffsetDateTime now = OffsetDateTime.now();
+
+    when(dateUtils.convertLocalDateTimeToOffsetDateTime(any(), any())).thenReturn(now);
+
+    // When
+    underTest.logEvent(uacQuidLink, "TEST_LOGGED_EVENT", EventType.UAC_UPDATED, LocalDateTime.now());
+
+    // Then
+    ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
+    verify(eventRepository).save(eventArgumentCaptor.capture());
+    assertEquals("TEST_LOGGED_EVENT", eventArgumentCaptor.getValue().getEventDescription());
+    assertEquals(EventType.UAC_UPDATED, eventArgumentCaptor.getValue().getEventType());
+    assertEquals(now, eventArgumentCaptor.getValue().getEventDate());
   }
 
   @Test

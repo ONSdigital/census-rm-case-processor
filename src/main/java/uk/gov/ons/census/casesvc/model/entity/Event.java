@@ -1,6 +1,7 @@
 package uk.gov.ons.census.casesvc.model.entity;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,7 +19,7 @@ public class Event {
   @ManyToOne private UacQidLink uacQidLink;
 
   @Column(columnDefinition = "timestamp with time zone")
-  private LocalDateTime eventDate;
+  private OffsetDateTime eventDate;
 
   @Column private String eventDescription;
 

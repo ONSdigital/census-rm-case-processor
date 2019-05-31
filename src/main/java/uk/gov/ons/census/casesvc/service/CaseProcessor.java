@@ -1,13 +1,19 @@
 package uk.gov.ons.census.casesvc.service;
 
 import java.time.LocalDateTime;
-import java.util.Date;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import uk.gov.ons.census.casesvc.model.dto.*;
+import uk.gov.ons.census.casesvc.model.dto.Address;
+import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
+import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
+import uk.gov.ons.census.casesvc.model.dto.Event;
+import uk.gov.ons.census.casesvc.model.dto.EventType;
+import uk.gov.ons.census.casesvc.model.dto.Payload;
+import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.CaseState;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
@@ -37,7 +43,7 @@ public class CaseProcessor {
     Case caze = mapperFacade.map(createCaseSample, Case.class);
     caze.setCaseId(UUID.randomUUID());
     caze.setState(CaseState.ACTIONABLE);
-    caze.setCreatedDateTime(new Date());
+    caze.setCreatedDateTime(OffsetDateTime.now());
     caze = caseRepository.saveAndFlush(caze);
     return caze;
   }

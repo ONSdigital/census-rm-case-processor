@@ -1,6 +1,6 @@
 package uk.gov.ons.census.casesvc.model.entity;
 
-import java.util.Date;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 import javax.persistence.Column;
@@ -84,7 +84,7 @@ public class Case {
   @Column private String actionPlanId;
 
   @Column(columnDefinition = "timestamp with time zone")
-  private Date createdDateTime;
+  private OffsetDateTime createdDateTime;
 
   @Column
   @Enumerated(EnumType.STRING)
