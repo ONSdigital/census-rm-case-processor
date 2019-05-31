@@ -28,4 +28,6 @@ public class UacQidLink {
 
   @OneToMany(mappedBy = "uacQidLink")
   private List<Event> events;
+
+  @Column private UUID batchId;
 }

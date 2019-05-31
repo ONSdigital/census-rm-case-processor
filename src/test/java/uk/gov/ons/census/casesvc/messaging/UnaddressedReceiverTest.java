@@ -15,6 +15,8 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.service.UacProcessor;
 
+import java.util.UUID;
+
 @RunWith(MockitoJUnitRunner.class)
 public class UnaddressedReceiverTest {
   @Mock UacProcessor uacProcessor;
@@ -26,8 +28,9 @@ public class UnaddressedReceiverTest {
     // Given
     CreateUacQid createUacQid = new CreateUacQid();
     createUacQid.setQuestionnaireType("21");
+    createUacQid.setBatchId(UUID.randomUUID());
     UacQidLink uacQidLink = new UacQidLink();
-    when(uacProcessor.saveUacQidLink(null, 21)).thenReturn(uacQidLink);
+    when(uacProcessor.saveUacQidLink(null, 21, createUacQid.getBatchId())).thenReturn(uacQidLink);
 
     // When
     underTest.receiveMessage(createUacQid);
