@@ -24,7 +24,10 @@ public class DateUtilsTest {
     String expected = "2019-05-31T12:00+01:00";
     LocalDateTime localDateTime = LocalDateTime.parse("2019-05-31 12:00", formatter);
 
-    String actual = underTest.convertLocalDateTimeToOffsetDateTime(localDateTime, ZoneOffset.ofHours(1)).toString();
+    String actual =
+        underTest
+            .convertLocalDateTimeToOffsetDateTime(localDateTime, ZoneOffset.ofHours(1))
+            .toString();
 
     assertThat(actual).isEqualTo(expected);
   }
@@ -34,7 +37,10 @@ public class DateUtilsTest {
     String expected = "2019-05-31T12:00Z";
     LocalDateTime localDateTime = LocalDateTime.parse("2019-05-31 12:00", formatter);
 
-    String actual = underTest.convertLocalDateTimeToOffsetDateTime(localDateTime, ZoneOffset.ofHours(0)).toString();
+    String actual =
+        underTest
+            .convertLocalDateTimeToOffsetDateTime(localDateTime, ZoneOffset.ofHours(0))
+            .toString();
 
     assertThat(actual).isEqualTo(expected);
   }

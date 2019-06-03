@@ -83,9 +83,10 @@ public class UacProcessor {
         new uk.gov.ons.census.casesvc.model.entity.Event();
     loggedEvent.setId(UUID.randomUUID());
 
-    if(eventMetaDataDateTime != null) {
+    if (eventMetaDataDateTime != null) {
       ZoneOffset zoneOffset = OffsetDateTime.now().getOffset();
-      loggedEvent.setEventDate(dateUtils.convertLocalDateTimeToOffsetDateTime(eventMetaDataDateTime, zoneOffset));
+      loggedEvent.setEventDate(
+          dateUtils.convertLocalDateTimeToOffsetDateTime(eventMetaDataDateTime, zoneOffset));
     }
 
     loggedEvent.setRmEventProcessed(LocalDateTime.now());

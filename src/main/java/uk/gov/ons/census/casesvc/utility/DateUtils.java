@@ -7,7 +7,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DateUtils {
-  public OffsetDateTime convertLocalDateTimeToOffsetDateTime(LocalDateTime localDateTime, ZoneOffset zoneOffset) {
+  public OffsetDateTime convertLocalDateTimeToOffsetDateTime(
+      LocalDateTime localDateTime, ZoneOffset zoneOffset) {
     return OffsetDateTime.of(localDateTime, zoneOffset);
   }
 }

@@ -40,8 +40,7 @@ public class UacProcessorTest {
 
   @Mock IacDispenser iacDispenser;
 
-  @Mock
-  DateUtils dateUtils;
+  @Mock DateUtils dateUtils;
 
   @Spy QidCreator qidCreator;
 
@@ -96,7 +95,8 @@ public class UacProcessorTest {
     when(dateUtils.convertLocalDateTimeToOffsetDateTime(any(), any())).thenReturn(now);
 
     // When
-    underTest.logEvent(uacQuidLink, "TEST_LOGGED_EVENT", EventType.UAC_UPDATED, LocalDateTime.now());
+    underTest.logEvent(
+        uacQuidLink, "TEST_LOGGED_EVENT", EventType.UAC_UPDATED, LocalDateTime.now());
 
     // Then
     ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
