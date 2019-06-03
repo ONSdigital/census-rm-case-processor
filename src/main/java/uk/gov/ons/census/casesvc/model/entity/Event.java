@@ -1,6 +1,5 @@
 package uk.gov.ons.census.casesvc.model.entity;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import javax.persistence.Column;
@@ -23,7 +22,8 @@ public class Event {
 
   @Column private String eventDescription;
 
-  @Column private LocalDateTime rmEventProcessed;
+  @Column(columnDefinition = "timestamp with time zone")
+  private OffsetDateTime rmEventProcessed;
 
   @Column
   @Enumerated(EnumType.STRING)
