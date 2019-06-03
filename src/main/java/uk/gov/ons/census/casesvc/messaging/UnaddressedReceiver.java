@@ -20,7 +20,8 @@ public class UnaddressedReceiver {
   @ServiceActivator(inputChannel = "unaddressedInputChannel")
   public void receiveMessage(CreateUacQid createUacQid) {
     UacQidLink uacQidLink =
-        uacProcessor.saveUacQidLink(null, Integer.parseInt(createUacQid.getQuestionnaireType()));
+        uacProcessor.saveUacQidLink(
+            null, Integer.parseInt(createUacQid.getQuestionnaireType()), createUacQid.getBatchId());
     uacProcessor.emitUacUpdatedEvent(uacQidLink, null);
     uacProcessor.logEvent(uacQidLink, "Unaddressed UAC/QID pair created", EventType.UAC_UPDATED);
   }

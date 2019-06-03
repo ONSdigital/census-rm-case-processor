@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import org.junit.Before;
 import org.junit.Test;
@@ -54,6 +55,7 @@ public class UnaddressedReceiverTestIT {
     BlockingQueue<String> queue = rabbitQueueHelper.listen(rhUacQueue);
     CreateUacQid createUacQid = new CreateUacQid();
     createUacQid.setQuestionnaireType("21");
+    createUacQid.setBatchId(UUID.randomUUID());
 
     // WHEN
     rabbitQueueHelper.sendMessage(unaddressedQueue, createUacQid);

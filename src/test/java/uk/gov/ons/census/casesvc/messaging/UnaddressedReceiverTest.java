@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -26,8 +27,9 @@ public class UnaddressedReceiverTest {
     // Given
     CreateUacQid createUacQid = new CreateUacQid();
     createUacQid.setQuestionnaireType("21");
+    createUacQid.setBatchId(UUID.randomUUID());
     UacQidLink uacQidLink = new UacQidLink();
-    when(uacProcessor.saveUacQidLink(null, 21)).thenReturn(uacQidLink);
+    when(uacProcessor.saveUacQidLink(null, 21, createUacQid.getBatchId())).thenReturn(uacQidLink);
 
     // When
     underTest.receiveMessage(createUacQid);
