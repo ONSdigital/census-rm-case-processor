@@ -43,6 +43,8 @@ public class ReceiptProcessor {
     UacQidLink uacQidLink = cazeOpt.get().getUacQidLinks().get(0);
     uacProcessor.emitUacUpdatedEvent(uacQidLink, cazeOpt.get(), false);
     caseRepository.setReceiptReceived(UUID.fromString(receipt.getCaseId()));
+    Case caze = cazeOpt.get();
+    caze.setReceiptReceived(true);
     caseProcessor.emitCaseUpdatedEvent(cazeOpt.get());
     uacProcessor.logEvent(uacQidLink, QID_RECEIPTED, EventType.UAC_UPDATED, receipt.getResponseDateTime());
   }

@@ -50,15 +50,20 @@ public class CaseProcessor {
 
   public void emitCaseCreatedEvent(Case caze) {
     Event event = EventHelper.createEvent(EventType.CASE_CREATED);
-    prepareCaseEvent(caze, event);
+    ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, event);
+    rabbitTemplate.convertAndSend(
+            outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
   }
 
   public void emitCaseUpdatedEvent(Case caze) {
     Event event = EventHelper.createEvent(EventType.CASE_UPDATED);
-    prepareCaseEvent(caze, event);
+    event.setReceiptReceived(caze.isReceiptReceived());
+    ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, event);
+    rabbitTemplate.convertAndSend(
+            outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
   }
 
-  private void prepareCaseEvent(Case caze, Event event) {
+  private ResponseManagementEvent prepareCaseEvent(Case caze, Event event) {
     Address address = createAddress(caze);
     CollectionCase collectionCase = createCollectionCase(caze, address);
     Payload payload = new Payload();
@@ -66,9 +71,7 @@ public class CaseProcessor {
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
     responseManagementEvent.setEvent(event);
     responseManagementEvent.setPayload(payload);
-
-    rabbitTemplate.convertAndSend(
-            outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
+    return responseManagementEvent;
   }
 
   private Address createAddress(Case caze) {
