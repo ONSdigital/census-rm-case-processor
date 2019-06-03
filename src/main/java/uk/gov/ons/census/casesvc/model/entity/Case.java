@@ -83,7 +83,8 @@ public class Case {
 
   @Column private String actionPlanId;
 
-  @Column private OffsetDateTime createdDateTime;
+  @Column(columnDefinition = "timestamp with time zone")
+  private OffsetDateTime createdDateTime;
 
   @Column
   @Enumerated(EnumType.STRING)

@@ -18,7 +18,8 @@ public class Event {
 
   @ManyToOne private UacQidLink uacQidLink;
 
-  @Column private OffsetDateTime eventDate;
+  @Column(columnDefinition = "timestamp with time zone")
+  private OffsetDateTime eventDate;
 
   @Column private String eventDescription;
 
