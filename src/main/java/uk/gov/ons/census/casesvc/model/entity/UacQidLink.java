@@ -30,4 +30,6 @@ public class UacQidLink {
   private List<Event> events;
 
   @Column private UUID batchId;
+
+  @Column private boolean active;
 }

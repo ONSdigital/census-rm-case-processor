@@ -39,6 +39,7 @@ public class ReceiptProcessor {
     // This nice long path and the 'random' get(0) will dissapear when we get QID
     UacQidLink uacQidLink = cazeOpt.get().getUacQidLinks().get(0);
     uacProcessor.emitUacUpdatedEvent(uacQidLink, cazeOpt.get(), false);
+    caseRepository.setReceiptReceived(UUID.fromString(receipt.getCaseId()));
     uacProcessor.logEvent(
         uacQidLink, QID_RECEIPTED, EventType.UAC_UPDATED, receipt.getResponseDateTime());
   }
