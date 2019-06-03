@@ -1,15 +1,22 @@
 package uk.gov.ons.census.casesvc.service;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import uk.gov.ons.census.casesvc.model.dto.*;
+import uk.gov.ons.census.casesvc.model.dto.Event;
+import uk.gov.ons.census.casesvc.model.dto.EventType;
+import uk.gov.ons.census.casesvc.model.dto.Payload;
+import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
+import uk.gov.ons.census.casesvc.model.dto.Uac;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
+import uk.gov.ons.census.casesvc.utility.DateUtils;
 import uk.gov.ons.census.casesvc.utility.EventHelper;
 import uk.gov.ons.census.casesvc.utility.IacDispenser;
 import uk.gov.ons.census.casesvc.utility.QidCreator;
@@ -25,6 +32,7 @@ public class UacProcessor {
   private final RabbitTemplate rabbitTemplate;
   private final IacDispenser iacDispenser;
   private final QidCreator qidCreator;
+  private final DateUtils dateUtils;
 
   @Value("${queueconfig.outbound-exchange}")
   private String outboundExchange;
@@ -34,12 +42,14 @@ public class UacProcessor {
       EventRepository eventRepository,
       RabbitTemplate rabbitTemplate,
       IacDispenser iacDispenser,
-      QidCreator qidCreator) {
+      QidCreator qidCreator,
+      DateUtils dateUtils) {
     this.rabbitTemplate = rabbitTemplate;
     this.iacDispenser = iacDispenser;
     this.uacQidLinkRepository = uacQidLinkRepository;
     this.eventRepository = eventRepository;
     this.qidCreator = qidCreator;
+    this.dateUtils = dateUtils;
   }
 
   public UacQidLink saveUacQidLink(Case caze, int questionnaireType) {
@@ -72,7 +82,13 @@ public class UacProcessor {
     uk.gov.ons.census.casesvc.model.entity.Event loggedEvent =
         new uk.gov.ons.census.casesvc.model.entity.Event();
     loggedEvent.setId(UUID.randomUUID());
-    loggedEvent.setEventDate(eventMetaDataDateTime);
+
+    if (eventMetaDataDateTime != null) {
+      ZoneOffset zoneOffset = OffsetDateTime.now().getOffset();
+      loggedEvent.setEventDate(
+          dateUtils.convertLocalDateTimeToOffsetDateTime(eventMetaDataDateTime, zoneOffset));
+    }
+
     loggedEvent.setRmEventProcessed(LocalDateTime.now());
     loggedEvent.setEventDescription(eventDescription);
     loggedEvent.setUacQidLink(uacQidLink);
