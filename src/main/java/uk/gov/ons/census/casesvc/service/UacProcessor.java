@@ -106,6 +106,7 @@ public class UacProcessor {
     uac.setUacHash(Sha256Helper.hash(uacQidLink.getUac()));
     uac.setUac(uacQidLink.getUac());
     uac.setActive(active);
+    uac.setRegion(caze.getRegion());
 
     if (caze != null) {
       uac.setCaseId(caze.getCaseId().toString());
