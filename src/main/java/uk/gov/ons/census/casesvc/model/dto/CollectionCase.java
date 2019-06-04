@@ -1,5 +1,6 @@
 package uk.gov.ons.census.casesvc.model.dto;
 
+import java.time.OffsetDateTime;
 import lombok.Data;
 
 @Data
@@ -10,7 +11,7 @@ public class CollectionCase {
   private String collectionExerciseId;
   private Address address;
   private String state;
-  private String actionableFrom;
+  private OffsetDateTime actionableFrom;
 
   // Below this line is extra data potentially needed by Action Scheduler - can be ignored by RH
   private String actionPlanId;

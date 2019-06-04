@@ -1,8 +1,6 @@
 package uk.gov.ons.census.casesvc.service;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.UUID;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,7 +14,6 @@ import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
-import uk.gov.ons.census.casesvc.utility.DateUtils;
 import uk.gov.ons.census.casesvc.utility.EventHelper;
 import uk.gov.ons.census.casesvc.utility.IacDispenser;
 import uk.gov.ons.census.casesvc.utility.QidCreator;
@@ -32,7 +29,6 @@ public class UacProcessor {
   private final RabbitTemplate rabbitTemplate;
   private final IacDispenser iacDispenser;
   private final QidCreator qidCreator;
-  private final DateUtils dateUtils;
 
   @Value("${queueconfig.outbound-exchange}")
   private String outboundExchange;
@@ -42,14 +38,12 @@ public class UacProcessor {
       EventRepository eventRepository,
       RabbitTemplate rabbitTemplate,
       IacDispenser iacDispenser,
-      QidCreator qidCreator,
-      DateUtils dateUtils) {
+      QidCreator qidCreator) {
     this.rabbitTemplate = rabbitTemplate;
     this.iacDispenser = iacDispenser;
     this.uacQidLinkRepository = uacQidLinkRepository;
     this.eventRepository = eventRepository;
     this.qidCreator = qidCreator;
-    this.dateUtils = dateUtils;
   }
 
   public UacQidLink saveUacQidLink(Case caze, int questionnaireType) {
@@ -83,18 +77,17 @@ public class UacProcessor {
       UacQidLink uacQidLink,
       String eventDescription,
       uk.gov.ons.census.casesvc.model.entity.EventType eventType,
-      LocalDateTime eventMetaDataDateTime) {
+      OffsetDateTime eventMetaDataDateTime) {
     uk.gov.ons.census.casesvc.model.entity.Event loggedEvent =
         new uk.gov.ons.census.casesvc.model.entity.Event();
     loggedEvent.setId(UUID.randomUUID());
 
     if (eventMetaDataDateTime != null) {
-      ZoneOffset zoneOffset = OffsetDateTime.now().getOffset();
-      loggedEvent.setEventDate(
-          dateUtils.convertLocalDateTimeToOffsetDateTime(eventMetaDataDateTime, zoneOffset));
+      loggedEvent.setEventDate(eventMetaDataDateTime);
     }
 
-    loggedEvent.setRmEventProcessed(LocalDateTime.now());
+    loggedEvent.setEventDate(OffsetDateTime.now());
+    loggedEvent.setRmEventProcessed(OffsetDateTime.now());
     loggedEvent.setEventDescription(eventDescription);
     loggedEvent.setUacQidLink(uacQidLink);
     loggedEvent.setEventType(eventType);
@@ -109,7 +102,6 @@ public class UacProcessor {
     Event event = EventHelper.createEvent(EventType.UAC_UPDATED);
 
     Uac uac = new Uac();
-    uac.setActive(true);
     uac.setQuestionnaireId(uacQidLink.getQid());
     uac.setUacHash(Sha256Helper.hash(uacQidLink.getUac()));
     uac.setUac(uacQidLink.getUac());
@@ -119,6 +111,7 @@ public class UacProcessor {
       uac.setCaseId(caze.getCaseId().toString());
       uac.setCaseType(caze.getAddressType());
       uac.setCollectionExerciseId(caze.getCollectionExerciseId());
+      uac.setRegion(caze.getRegion());
     }
 
     Payload payload = new Payload();
