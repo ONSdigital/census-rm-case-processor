@@ -1,6 +1,5 @@
 package uk.gov.ons.census.casesvc.service;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import ma.glasnost.orika.MapperFacade;
@@ -98,7 +97,7 @@ public class CaseProcessor {
 
   private CollectionCase createCollectionCase(Case caze, Address address) {
     CollectionCase collectionCase = new CollectionCase();
-    collectionCase.setActionableFrom(LocalDateTime.now().toString());
+    collectionCase.setActionableFrom(OffsetDateTime.now());
     collectionCase.setAddress(address);
     collectionCase.setCaseRef(Long.toString(caze.getCaseRef()));
     collectionCase.setCollectionExerciseId(caze.getCollectionExerciseId());

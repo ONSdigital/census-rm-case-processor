@@ -3,8 +3,7 @@ package uk.gov.ons.census.casesvc.service;
 import static org.mockito.Mockito.*;
 import static uk.gov.ons.census.casesvc.service.ReceiptProcessor.QID_RECEIPTED;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
@@ -38,9 +37,8 @@ public class ReceiptProcessorTest {
     Receipt receipt = new Receipt();
     receipt.setCaseId(TEST_CASE_ID.toString());
 
-    String dateTime = "2016-03-04 11:30";
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-    LocalDateTime expectedReceiptDateTime = LocalDateTime.parse(dateTime, formatter);
+    String dateTime = "2016-03-04T11:30Z";
+    OffsetDateTime expectedReceiptDateTime = OffsetDateTime.parse(dateTime);
     receipt.setResponseDateTime(expectedReceiptDateTime);
 
     ReceiptProcessor receiptProcessor =

@@ -1,6 +1,6 @@
 package uk.gov.ons.census.casesvc.utility;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 import uk.gov.ons.census.casesvc.model.dto.Event;
 import uk.gov.ons.census.casesvc.model.dto.EventType;
@@ -14,7 +14,7 @@ public class EventHelper {
     Event event = new Event();
     event.setChannel(EVENT_CHANNEL);
     event.setSource(EVENT_SOURCE);
-    event.setDateTime(LocalDateTime.now().toString());
+    event.setDateTime(OffsetDateTime.now());
     event.setTransactionId(UUID.randomUUID().toString());
     event.setType(eventType);
     return event;
