@@ -52,7 +52,7 @@ public class CaseProcessor {
     Event event = EventHelper.createEvent(EventType.CASE_CREATED);
     ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, event);
     rabbitTemplate.convertAndSend(
-            outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
+        outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
   }
 
   public void emitCaseUpdatedEvent(Case caze) {
@@ -60,7 +60,7 @@ public class CaseProcessor {
     event.setReceiptReceived(caze.isReceiptReceived());
     ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, event);
     rabbitTemplate.convertAndSend(
-            outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
+        outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
   }
 
   private ResponseManagementEvent prepareCaseEvent(Case caze, Event event) {

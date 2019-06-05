@@ -43,7 +43,8 @@ public class ReceiptProcessorTest {
     LocalDateTime expectedReceiptDateTime = LocalDateTime.parse(dateTime, formatter);
     receipt.setResponseDateTime(expectedReceiptDateTime);
 
-    ReceiptProcessor receiptProcessor = new ReceiptProcessor(caseProcessor, caseRepository, uacProcessor);
+    ReceiptProcessor receiptProcessor =
+        new ReceiptProcessor(caseProcessor, caseRepository, uacProcessor);
     receiptProcessor.processReceipt(receipt);
 
     // then
@@ -69,7 +70,8 @@ public class ReceiptProcessorTest {
     Receipt receipt = new Receipt();
     receipt.setCaseId(TEST_CASE_ID.toString());
 
-    ReceiptProcessor receiptProcessor = new ReceiptProcessor(caseProcessor, caseRepository, uacProcessor);
+    ReceiptProcessor receiptProcessor =
+        new ReceiptProcessor(caseProcessor, caseRepository, uacProcessor);
     receiptProcessor.processReceipt(receipt);
 
     // Then

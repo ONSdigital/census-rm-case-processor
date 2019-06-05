@@ -21,7 +21,8 @@ public class ReceiptProcessor {
   private final CaseRepository caseRepository;
   private final UacProcessor uacProcessor;
 
-  public ReceiptProcessor(CaseProcessor caseProcessor, CaseRepository caseRepository, UacProcessor uacProcessor) {
+  public ReceiptProcessor(
+      CaseProcessor caseProcessor, CaseRepository caseRepository, UacProcessor uacProcessor) {
     this.caseProcessor = caseProcessor;
     this.caseRepository = caseRepository;
     this.uacProcessor = uacProcessor;
@@ -46,6 +47,7 @@ public class ReceiptProcessor {
     Case caze = cazeOpt.get();
     caze.setReceiptReceived(true);
     caseProcessor.emitCaseUpdatedEvent(cazeOpt.get());
-    uacProcessor.logEvent(uacQidLink, QID_RECEIPTED, EventType.UAC_UPDATED, receipt.getResponseDateTime());
+    uacProcessor.logEvent(
+        uacQidLink, QID_RECEIPTED, EventType.UAC_UPDATED, receipt.getResponseDateTime());
   }
 }
