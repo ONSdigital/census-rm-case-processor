@@ -11,7 +11,4 @@ import uk.gov.ons.census.casesvc.model.entity.Case;
 public interface CaseRepository extends JpaRepository<Case, UUID> {
   Optional<Case> findByCaseId(UUID caseId);
 
-  @Modifying
-  @Query("update Case c set c.receiptReceived = true where c.caseId = :caseId")
-  void setReceiptReceived(@Param("caseId") UUID caseId);
 }
