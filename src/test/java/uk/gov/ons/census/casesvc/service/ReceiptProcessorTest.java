@@ -31,6 +31,7 @@ public class ReceiptProcessorTest {
     when(caseRepository.findByCaseId(TEST_CASE_ID)).thenReturn(Optional.of(expectedCase));
 
     UacProcessor uacProcessor = mock(UacProcessor.class);
+    CaseProcessor caseProcessor = mock(CaseProcessor.class);
 
     // when
     Receipt receipt = new Receipt();
@@ -40,7 +41,8 @@ public class ReceiptProcessorTest {
     OffsetDateTime expectedReceiptDateTime = OffsetDateTime.parse(dateTime);
     receipt.setResponseDateTime(expectedReceiptDateTime);
 
-    ReceiptProcessor receiptProcessor = new ReceiptProcessor(caseRepository, uacProcessor);
+    ReceiptProcessor receiptProcessor =
+        new ReceiptProcessor(caseProcessor, caseRepository, uacProcessor);
     receiptProcessor.processReceipt(receipt);
 
     // then
@@ -57,6 +59,7 @@ public class ReceiptProcessorTest {
   public void testReceiptedCaseNotFound() {
     // Given
     CaseRepository caseRepository = mock(CaseRepository.class);
+    CaseProcessor caseProcessor = mock(CaseProcessor.class);
     when(caseRepository.findById(TEST_CASE_ID)).thenReturn(Optional.empty());
 
     UacProcessor uacProcessor = mock(UacProcessor.class);
@@ -65,7 +68,8 @@ public class ReceiptProcessorTest {
     Receipt receipt = new Receipt();
     receipt.setCaseId(TEST_CASE_ID.toString());
 
-    ReceiptProcessor receiptProcessor = new ReceiptProcessor(caseRepository, uacProcessor);
+    ReceiptProcessor receiptProcessor =
+        new ReceiptProcessor(caseProcessor, caseRepository, uacProcessor);
     receiptProcessor.processReceipt(receipt);
 
     // Then

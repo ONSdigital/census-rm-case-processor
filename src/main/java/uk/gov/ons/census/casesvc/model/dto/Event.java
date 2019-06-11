@@ -10,4 +10,5 @@ public class Event {
   private String channel;
   private OffsetDateTime dateTime;
   private String transactionId;
+  private boolean receiptReceived;
 }

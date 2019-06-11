@@ -16,10 +16,14 @@ public class ReceiptProcessor {
   private static final Logger log = LoggerFactory.getLogger(ReceiptProcessor.class);
   public static final String QID_RECEIPTED = "QID Receipted";
   private static final String CASE_NOT_FOUND_ERROR = "Failed to find case by receipt id";
+  private static final String CASE_CREATED_EVENT_DESCRIPTION = "Case updated";
+  private final CaseProcessor caseProcessor;
   private final CaseRepository caseRepository;
   private final UacProcessor uacProcessor;
 
-  public ReceiptProcessor(CaseRepository caseRepository, UacProcessor uacProcessor) {
+  public ReceiptProcessor(
+      CaseProcessor caseProcessor, CaseRepository caseRepository, UacProcessor uacProcessor) {
+    this.caseProcessor = caseProcessor;
     this.caseRepository = caseRepository;
     this.uacProcessor = uacProcessor;
   }
@@ -39,6 +43,10 @@ public class ReceiptProcessor {
     // This nice long path and the 'random' get(0) will dissapear when we get QID
     UacQidLink uacQidLink = cazeOpt.get().getUacQidLinks().get(0);
     uacProcessor.emitUacUpdatedEvent(uacQidLink, cazeOpt.get(), false);
+    Case caze = cazeOpt.get();
+    caze.setReceiptReceived(true);
+    caseRepository.saveAndFlush(caze);
+    caseProcessor.emitCaseUpdatedEvent(cazeOpt.get());
     uacProcessor.logEvent(
         uacQidLink, QID_RECEIPTED, EventType.UAC_UPDATED, receipt.getResponseDateTime());
   }
