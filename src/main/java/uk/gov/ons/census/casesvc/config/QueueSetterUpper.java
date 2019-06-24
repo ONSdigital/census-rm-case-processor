@@ -33,8 +33,11 @@ public class QueueSetterUpper {
   @Value("${queueconfig.action-scheduler-queue}")
   private String actionSchedulerQueue;
 
-  @Value("${queueconfig.action-scheduler-routing-key}")
-  private String actionSchedulerRoutingKey;
+  @Value("${queueconfig.action-scheduler-routing-key-uac}")
+  private String actionSchedulerRoutingKeyUac;
+
+  @Value("${queueconfig.action-scheduler-routing-key-case}")
+  private String actionSchedulerRoutingKeyCase;
 
   @Value("${queueconfig.unaddressed-inbound-queue}")
   private String unaddressedQueue;
@@ -83,9 +86,15 @@ public class QueueSetterUpper {
   }
 
   @Bean
-  public Binding bindingAction() {
+  public Binding bindingActionUac() {
     return new Binding(
-        actionSchedulerQueue, QUEUE, outboundExchange, actionSchedulerRoutingKey, null);
+        actionSchedulerQueue, QUEUE, outboundExchange, actionSchedulerRoutingKeyUac, null);
+  }
+
+  @Bean
+  public Binding bindingActionCase() {
+    return new Binding(
+        actionSchedulerQueue, QUEUE, outboundExchange, actionSchedulerRoutingKeyCase, null);
   }
 
   @Bean

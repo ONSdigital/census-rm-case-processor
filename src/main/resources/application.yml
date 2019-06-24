@@ -34,7 +34,8 @@ queueconfig:
   rh-uac-queue: case.rh.uac
   rh-uac-routing-key: event.uac.*
   action-scheduler-queue: case.action
-  action-scheduler-routing-key: "#"
+  action-scheduler-routing-key-uac: event.uac.*
+  action-scheduler-routing-key-case: event.case.*
   unaddressed-inbound-queue: unaddressedRequestQueue
   receipt-response-inbound-queue: Case.Responses
   consumers: 50
