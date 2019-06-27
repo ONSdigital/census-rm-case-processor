@@ -80,7 +80,6 @@ public class ReceiptProcessorTest {
   private UacQidLink getUacQidLink() {
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setCaze(null);
-    uacQidLink.setUniqueNumber(123459876L);
     uacQidLink.setUac(TEST_UAC);
     uacQidLink.setId(UUID.randomUUID());
     uacQidLink.setQid(TEST_QID);

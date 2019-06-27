@@ -2,6 +2,7 @@ package uk.gov.ons.census.casesvc.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,19 +14,18 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
+import uk.gov.ons.census.casesvc.client.UacQidServiceClient;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
+import uk.gov.ons.census.casesvc.model.dto.UacQidDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
-import uk.gov.ons.census.casesvc.utility.IacDispenser;
-import uk.gov.ons.census.casesvc.utility.QidCreator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UacProcessorTest {
@@ -36,9 +36,7 @@ public class UacProcessorTest {
 
   @Mock RabbitTemplate rabbitTemplate;
 
-  @Mock IacDispenser iacDispenser;
-
-  @Spy QidCreator qidCreator;
+  @Mock UacQidServiceClient uacQidServiceClient;
 
   @InjectMocks UacProcessor underTest;
 
@@ -46,15 +44,11 @@ public class UacProcessorTest {
   public void testSaveUacQidLinkEnglandHousehold() {
     // Given
     Case caze = new Case();
-    ReflectionTestUtils.setField(qidCreator, "modulus", 33);
-    ReflectionTestUtils.setField(qidCreator, "factor", 802);
-    ReflectionTestUtils.setField(qidCreator, "trancheIdentifier", 2);
 
-    when(iacDispenser.getIacCode()).thenReturn("TEST_IAC");
-    UacQidLink uacQidLink = new UacQidLink();
-    uacQidLink.setId(UUID.fromString("7dc53df5-703e-49b3-8670-b1c468f47f1f"));
-    uacQidLink.setUniqueNumber(12345L);
-    when(uacQidLinkRepository.saveAndFlush(any(UacQidLink.class))).thenReturn(uacQidLink);
+    UacQidDTO uacQidDTO = new UacQidDTO();
+    uacQidDTO.setUac("testuac");
+    uacQidDTO.setQid("01testqid");
+    when(uacQidServiceClient.generateUacQid(anyInt())).thenReturn(uacQidDTO);
 
     // When
     UacQidLink result;
@@ -62,14 +56,13 @@ public class UacProcessorTest {
 
     // Then
     assertEquals("01", result.getQid().substring(0, 2));
-    verify(iacDispenser).getIacCode();
+    verify(uacQidServiceClient).generateUacQid(eq(1));
   }
 
   @Test
   public void testLogEventWithoutEventMetaDataDateTime() {
     // Given
     UacQidLink uacQuidLink = new UacQidLink();
-    uacQuidLink.setUniqueNumber(12345L);
 
     // When
     underTest.logEvent(uacQuidLink, "TEST_LOGGED_EVENT", EventType.UAC_UPDATED);
@@ -85,7 +78,6 @@ public class UacProcessorTest {
   public void testLogEventWithEventMetaDataDateTime() {
     // Given
     UacQidLink uacQuidLink = new UacQidLink();
-    uacQuidLink.setUniqueNumber(12345L);
     OffsetDateTime now = OffsetDateTime.now();
 
     // When

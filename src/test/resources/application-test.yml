@@ -5,10 +5,6 @@ spring:
   rabbitmq:
     port: 35672
 
-iacservice:
+uacservice:
   connection:
-    port: 18121
-
-qid:
-  modulus: 1
-  factor: 1
+    port: 18164

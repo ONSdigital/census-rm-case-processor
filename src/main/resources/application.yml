@@ -44,16 +44,8 @@ healthcheck:
   frequency: 1000 #milliseconds
   filename: /tmp/case-service-healthy
 
-iacservice:
-  generate-iacs-path: /iacs
-  pool-size-min: 500
-  pool-size-max: 1000
+uacservice:
   connection:
     scheme: http
     host: localhost
-    port: 8121
-    username: admin
-    password: secret
-
-qid:
-  tranche-identifier: 2
+    port: 8164
