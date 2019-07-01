@@ -26,7 +26,7 @@ services:
 
  uac-qid:
   container_name: uac-qid-case-it
-  image: eu.gcr.io/census-rm-ci/rm/census-rm-uac-qid-service
+  image: eu.gcr.io/census-rm-ci/rm/census-rm-uac-qid-service:ade_test
   ports:
   - "18164:8164"
   external_links:
