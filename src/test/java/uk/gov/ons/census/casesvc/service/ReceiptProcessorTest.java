@@ -5,10 +5,12 @@ import static uk.gov.ons.census.casesvc.service.ReceiptProcessor.QID_RECEIPTED;
 
 import java.time.OffsetDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
+import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.Receipt;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
@@ -21,17 +23,21 @@ public class ReceiptProcessorTest {
   private static final String TEST_UAC = "test_uac";
 
   @Test
-  public void testGoodReceipt() {
+  public void testGoodReceipt() throws Exception{
     // Given
     UacQidLink expectedUacQidLink = getUacQidLink();
 
     Case expectedCase = getRandomCase();
-    expectedCase.setUacQidLinks(Arrays.asList(expectedUacQidLink));
+    expectedCase.setUacQidLinks(Collections.singletonList(expectedUacQidLink));
     CaseRepository caseRepository = mock(CaseRepository.class);
     when(caseRepository.findByCaseId(TEST_CASE_ID)).thenReturn(Optional.of(expectedCase));
 
     UacProcessor uacProcessor = mock(UacProcessor.class);
     CaseProcessor caseProcessor = mock(CaseProcessor.class);
+    PayloadDTO payloadDTO =  new PayloadDTO();
+
+    when(uacProcessor.emitUacUpdatedEvent(any(UacQidLink.class), any(Case.class), anyBoolean())).thenReturn(payloadDTO);
+    when(caseProcessor.emitCaseCreatedEvent(any(Case.class))).thenReturn(new PayloadDTO());
 
     // when
     Receipt receipt = new Receipt();
@@ -52,11 +58,12 @@ public class ReceiptProcessorTest {
             expectedUacQidLink,
             QID_RECEIPTED,
             EventType.UAC_UPDATED,
+            payloadDTO,
             receipt.getResponseDateTime());
   }
 
   @Test(expected = RuntimeException.class)
-  public void testReceiptedCaseNotFound() {
+  public void testReceiptedCaseNotFound()throws Exception {
     // Given
     CaseRepository caseRepository = mock(CaseRepository.class);
     CaseProcessor caseProcessor = mock(CaseProcessor.class);

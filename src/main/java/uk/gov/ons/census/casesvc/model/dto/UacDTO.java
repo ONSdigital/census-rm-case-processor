@@ -1,11 +1,15 @@
 package uk.gov.ons.census.casesvc.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 @Data
-public class Uac {
+public class UacDTO {
   private String uacHash;
+
+  @JsonIgnore
   private String uac;
+
   private boolean active;
   private String questionnaireId;
   private String caseType;

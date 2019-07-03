@@ -75,7 +75,7 @@ public class RabbitQueueHelper {
     ResponseManagementEvent responseManagementEvent =
         objectMapper.readValue(actualMessage, ResponseManagementEvent.class);
     assertNotNull(responseManagementEvent);
-    assertEquals("RM", responseManagementEvent.getEvent().getChannel());
+    assertEquals("RM", responseManagementEvent.getEventDTO().getChannel());
     return responseManagementEvent;
   }
 }

@@ -19,10 +19,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.ons.census.casesvc.model.dto.EventType;
+import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.Receipt;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
-import uk.gov.ons.census.casesvc.model.dto.Uac;
+import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
@@ -87,16 +87,16 @@ public class ReceiptReceiverIT {
     // WHEN
     rabbitQueueHelper.sendMessage(inboundQueue, receipt);
 
-    // check the emitted event
+    // check the emitted eventDTO
     ResponseManagementEvent responseManagementEvent =
         rabbitQueueHelper.checkExpectedMessageReceived(outboundQueue);
-    assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventType.UAC_UPDATED);
-    Uac actualUacObject = responseManagementEvent.getPayload().getUac();
-    assertThat(actualUacObject.getUac()).isEqualTo(TEST_UAC);
-    assertThat(actualUacObject.getQuestionnaireId()).isEqualTo(TEST_QID);
-    assertThat(actualUacObject.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
+    assertThat(responseManagementEvent.getEventDTO().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
+    UacDTO actualUacDTOObject = responseManagementEvent.getPayloadDTO().getUac();
+    assertThat(actualUacDTOObject.getUac()).isEqualTo(TEST_UAC);
+    assertThat(actualUacDTOObject.getQuestionnaireId()).isEqualTo(TEST_QID);
+    assertThat(actualUacDTOObject.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
 
-    // check database for log event
+    // check database for log eventDTO
     List<Event> events = eventRepository.findAll();
     assertThat(events.size()).isEqualTo(1);
     Event event = events.get(0);

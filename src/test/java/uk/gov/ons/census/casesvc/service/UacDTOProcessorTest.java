@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.junit.Test;
@@ -18,6 +19,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.ons.census.casesvc.client.UacQidServiceClient;
+import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.UacQidDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -28,7 +30,7 @@ import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
 @RunWith(MockitoJUnitRunner.class)
-public class UacProcessorTest {
+public class UacDTOProcessorTest {
 
   @Mock UacQidLinkRepository uacQidLinkRepository;
 
@@ -37,6 +39,8 @@ public class UacProcessorTest {
   @Mock RabbitTemplate rabbitTemplate;
 
   @Mock UacQidServiceClient uacQidServiceClient;
+
+  @Mock ObjectMapper objectMapper;
 
   @InjectMocks UacProcessor underTest;
 
@@ -60,12 +64,16 @@ public class UacProcessorTest {
   }
 
   @Test
-  public void testLogEventWithoutEventMetaDataDateTime() {
+  public void testLogEventWithoutEventMetaDataDateTime() throws Exception {
     // Given
     UacQidLink uacQuidLink = new UacQidLink();
+    Case caze = new Case();
+    UUID caseUuid = UUID.randomUUID();
+    caze.setCaseId(caseUuid);
+    uacQuidLink.setCaze(caze);
 
     // When
-    underTest.logEvent(uacQuidLink, "TEST_LOGGED_EVENT", EventType.UAC_UPDATED);
+    underTest.logEvent(uacQuidLink, "TEST_LOGGED_EVENT", EventType.UAC_UPDATED, new PayloadDTO());
 
     // Then
     ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
@@ -75,14 +83,18 @@ public class UacProcessorTest {
   }
 
   @Test
-  public void testLogEventWithEventMetaDataDateTime() {
+  public void testLogEventWithEventMetaDataDateTime() throws Exception {
     // Given
     UacQidLink uacQuidLink = new UacQidLink();
     OffsetDateTime now = OffsetDateTime.now();
+    Case caze = new Case();
+    UUID caseUuid = UUID.randomUUID();
+    caze.setCaseId(caseUuid);
+    uacQuidLink.setCaze(caze);
 
     // When
     underTest.logEvent(
-        uacQuidLink, "TEST_LOGGED_EVENT", EventType.UAC_UPDATED, any(OffsetDateTime.class));
+        uacQuidLink, "TEST_LOGGED_EVENT", EventType.UAC_UPDATED, new PayloadDTO(), any(OffsetDateTime.class));
 
     // Then
     ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
@@ -116,6 +128,7 @@ public class UacProcessorTest {
             eq("event.uac.update"),
             responseManagementEventArgumentCaptor.capture());
     assertEquals(
-        "12345", responseManagementEventArgumentCaptor.getValue().getPayload().getUac().getUac());
+        "12345",
+        responseManagementEventArgumentCaptor.getValue().getPayloadDTO().getUac().getUac());
   }
 }

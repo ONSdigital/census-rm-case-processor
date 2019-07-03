@@ -1,5 +1,6 @@
 package uk.gov.ons.census.casesvc.model.entity;
 
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import javax.persistence.Column;
@@ -12,7 +13,6 @@ import lombok.Data;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 
 @Data
 @TypeDefs({@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)})
