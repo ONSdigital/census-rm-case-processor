@@ -17,6 +17,7 @@ import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.CaseState;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.utility.EventHelper;
+import uk.gov.ons.census.casesvc.utility.RandomCaseRefGenerator;
 
 @Component
 public class CaseProcessor {
@@ -40,10 +41,11 @@ public class CaseProcessor {
 
   public Case saveCase(CreateCaseSample createCaseSample) {
     Case caze = mapperFacade.map(createCaseSample, Case.class);
+    caze.setCaseRef(RandomCaseRefGenerator.getCaseRef());
     caze.setCaseId(UUID.randomUUID());
     caze.setState(CaseState.ACTIONABLE);
     caze.setCreatedDateTime(OffsetDateTime.now());
-    caze = caseRepository.saveAndFlush(caze);
+    caze = caseRepository.save(caze);
     return caze;
   }
 
