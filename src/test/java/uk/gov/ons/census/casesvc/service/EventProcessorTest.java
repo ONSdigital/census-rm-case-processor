@@ -18,7 +18,7 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
 @RunWith(MockitoJUnitRunner.class)
-public class EventDTOProcessorTest {
+public class EventProcessorTest {
 
   @Mock CaseProcessor caseProcessor;
 

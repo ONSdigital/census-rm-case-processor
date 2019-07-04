@@ -30,7 +30,7 @@ import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
 @RunWith(MockitoJUnitRunner.class)
-public class UacDTOProcessorTest {
+public class UacProcessorTest {
 
   @Mock UacQidLinkRepository uacQidLinkRepository;
 
