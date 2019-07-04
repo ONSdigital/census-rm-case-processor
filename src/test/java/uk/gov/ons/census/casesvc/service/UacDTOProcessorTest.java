@@ -94,7 +94,11 @@ public class UacDTOProcessorTest {
 
     // When
     underTest.logEvent(
-        uacQuidLink, "TEST_LOGGED_EVENT", EventType.UAC_UPDATED, new PayloadDTO(), any(OffsetDateTime.class));
+        uacQuidLink,
+        "TEST_LOGGED_EVENT",
+        EventType.UAC_UPDATED,
+        new PayloadDTO(),
+        any(OffsetDateTime.class));
 
     // Then
     ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);

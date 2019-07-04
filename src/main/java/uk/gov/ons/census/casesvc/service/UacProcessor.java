@@ -74,10 +74,8 @@ public class UacProcessor {
   }
 
   public void logEvent(
-      UacQidLink uacQidLink,
-      String eventDescription,
-      EventType eventType,
-      PayloadDTO payloadDTO) throws JsonProcessingException {
+      UacQidLink uacQidLink, String eventDescription, EventType eventType, PayloadDTO payloadDTO)
+      throws JsonProcessingException {
     logEvent(uacQidLink, eventDescription, eventType, payloadDTO, null);
   }
 
@@ -86,7 +84,8 @@ public class UacProcessor {
       String eventDescription,
       EventType eventType,
       PayloadDTO payloadDTO,
-      OffsetDateTime eventMetaDataDateTime) throws JsonProcessingException {
+      OffsetDateTime eventMetaDataDateTime)
+      throws JsonProcessingException {
 
     Event loggedEvent = new Event();
     loggedEvent.setId(UUID.randomUUID());
@@ -101,11 +100,13 @@ public class UacProcessor {
     loggedEvent.setUacQidLink(uacQidLink);
     loggedEvent.setEventType(eventType);
 
-    loggedEvent.setCaseId(uacQidLink.getCaze().getCaseId());
+    if (uacQidLink.getCaze() != null) {
+      loggedEvent.setCaseId(uacQidLink.getCaze().getCaseId());
+    }
     loggedEvent.setEventChannel(EVENT_CHANNEL);
     loggedEvent.setEventSource(EVENT_SOURCE);
     loggedEvent.setEventTransactionId(UUID.randomUUID());
-    loggedEvent.setEventPayload(convertPayloadToJson(payloadDTO));
+    loggedEvent.setEventPayload(convertPayloadDTOToJson(payloadDTO));
 
     eventRepository.save(loggedEvent);
   }
@@ -142,7 +143,7 @@ public class UacProcessor {
     return payloadDTO;
   }
 
-  private String convertPayloadToJson(PayloadDTO payloadDTO) throws JsonProcessingException {
+  private String convertPayloadDTOToJson(PayloadDTO payloadDTO) throws JsonProcessingException {
     return objectMapper.writeValueAsString(payloadDTO);
   }
 }

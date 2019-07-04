@@ -1,10 +1,14 @@
 package uk.gov.ons.census.casesvc.service;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.service.ReceiptProcessor.QID_RECEIPTED;
 
 import java.time.OffsetDateTime;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,7 +27,7 @@ public class ReceiptProcessorTest {
   private static final String TEST_UAC = "test_uac";
 
   @Test
-  public void testGoodReceipt() throws Exception{
+  public void testGoodReceipt() throws Exception {
     // Given
     UacQidLink expectedUacQidLink = getUacQidLink();
 
@@ -34,9 +38,10 @@ public class ReceiptProcessorTest {
 
     UacProcessor uacProcessor = mock(UacProcessor.class);
     CaseProcessor caseProcessor = mock(CaseProcessor.class);
-    PayloadDTO payloadDTO =  new PayloadDTO();
+    PayloadDTO payloadDTO = new PayloadDTO();
 
-    when(uacProcessor.emitUacUpdatedEvent(any(UacQidLink.class), any(Case.class), anyBoolean())).thenReturn(payloadDTO);
+    when(uacProcessor.emitUacUpdatedEvent(any(UacQidLink.class), any(Case.class), anyBoolean()))
+        .thenReturn(payloadDTO);
     when(caseProcessor.emitCaseCreatedEvent(any(Case.class))).thenReturn(new PayloadDTO());
 
     // when
@@ -63,7 +68,7 @@ public class ReceiptProcessorTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void testReceiptedCaseNotFound()throws Exception {
+  public void testReceiptedCaseNotFound() throws Exception {
     // Given
     CaseRepository caseRepository = mock(CaseRepository.class);
     CaseProcessor caseProcessor = mock(CaseProcessor.class);

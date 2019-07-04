@@ -6,7 +6,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -36,7 +35,8 @@ public class EventDTOProcessorTest {
     when(caseProcessor.saveCase(createCaseSample)).thenReturn(caze);
     UacQidLink uacQidLink = new UacQidLink();
     when(uacProcessor.saveUacQidLink(caze, 1)).thenReturn(uacQidLink);
-    when(uacProcessor.emitUacUpdatedEvent(any(UacQidLink.class), any(Case.class))).thenReturn(new PayloadDTO());
+    when(uacProcessor.emitUacUpdatedEvent(any(UacQidLink.class), any(Case.class)))
+        .thenReturn(new PayloadDTO());
     when(caseProcessor.emitCaseCreatedEvent(any(Case.class))).thenReturn(new PayloadDTO());
 
     // When
@@ -52,7 +52,7 @@ public class EventDTOProcessorTest {
   }
 
   @Test
-  public void testWelshQuestionnaire()throws Exception {
+  public void testWelshQuestionnaire() throws Exception {
     // Given
     CreateCaseSample createCaseSample = new CreateCaseSample();
     Case caze = new Case();
@@ -62,7 +62,8 @@ public class EventDTOProcessorTest {
     UacQidLink secondUacQidLink = new UacQidLink();
     when(uacProcessor.saveUacQidLink(caze, 2)).thenReturn(uacQidLink);
     when(uacProcessor.saveUacQidLink(caze, 3)).thenReturn(secondUacQidLink);
-    when(uacProcessor.emitUacUpdatedEvent(any(UacQidLink.class), any(Case.class))).thenReturn(new PayloadDTO());
+    when(uacProcessor.emitUacUpdatedEvent(any(UacQidLink.class), any(Case.class)))
+        .thenReturn(new PayloadDTO());
     when(caseProcessor.emitCaseCreatedEvent(any(Case.class))).thenReturn(new PayloadDTO());
 
     // When

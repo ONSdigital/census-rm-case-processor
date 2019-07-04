@@ -25,6 +25,7 @@ public class UnaddressedReceiver {
         uacProcessor.saveUacQidLink(
             null, Integer.parseInt(createUacQid.getQuestionnaireType()), createUacQid.getBatchId());
     PayloadDTO uacPayloadDTO = uacProcessor.emitUacUpdatedEvent(uacQidLink, null);
-    uacProcessor.logEvent(uacQidLink, "Unaddressed UAC/QID pair created", EventType.UAC_UPDATED, uacPayloadDTO);
+    uacProcessor.logEvent(
+        uacQidLink, "Unaddressed UAC/QID pair created", EventType.UAC_UPDATED, uacPayloadDTO);
   }
 }

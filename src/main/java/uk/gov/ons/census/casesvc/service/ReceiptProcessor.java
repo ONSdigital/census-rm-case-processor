@@ -50,6 +50,10 @@ public class ReceiptProcessor {
     caseRepository.saveAndFlush(caze);
     caseProcessor.emitCaseUpdatedEvent(cazeOpt.get());
     uacProcessor.logEvent(
-        uacQidLink, QID_RECEIPTED, EventType.UAC_UPDATED, uacPayloadDTO, receipt.getResponseDateTime());
+        uacQidLink,
+        QID_RECEIPTED,
+        EventType.UAC_UPDATED,
+        uacPayloadDTO,
+        receipt.getResponseDateTime());
   }
 }

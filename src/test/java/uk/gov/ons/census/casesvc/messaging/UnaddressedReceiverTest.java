@@ -24,14 +24,15 @@ public class UnaddressedReceiverTest {
   @InjectMocks UnaddressedReceiver underTest;
 
   @Test
-  public void testReceiveCreateUacQid()throws Exception {
+  public void testReceiveCreateUacQid() throws Exception {
     // Given
     CreateUacQid createUacQid = new CreateUacQid();
     createUacQid.setQuestionnaireType("21");
     createUacQid.setBatchId(UUID.randomUUID());
     UacQidLink uacQidLink = new UacQidLink();
     when(uacProcessor.saveUacQidLink(null, 21, createUacQid.getBatchId())).thenReturn(uacQidLink);
-    when(uacProcessor.emitUacUpdatedEvent(any(UacQidLink.class), any())).thenReturn(new PayloadDTO());
+    when(uacProcessor.emitUacUpdatedEvent(any(UacQidLink.class), any()))
+        .thenReturn(new PayloadDTO());
 
     // When
     underTest.receiveMessage(createUacQid);
@@ -39,6 +40,10 @@ public class UnaddressedReceiverTest {
     // Then
     verify(uacProcessor).emitUacUpdatedEvent(eq(uacQidLink), eq(null));
     verify(uacProcessor)
-        .logEvent(eq(uacQidLink), eq("Unaddressed UAC/QID pair created"), any(EventType.class), any(PayloadDTO.class));
+        .logEvent(
+            eq(uacQidLink),
+            eq("Unaddressed UAC/QID pair created"),
+            any(EventType.class),
+            any(PayloadDTO.class));
   }
 }

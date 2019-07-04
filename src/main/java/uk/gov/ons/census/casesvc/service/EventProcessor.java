@@ -22,20 +22,24 @@ public class EventProcessor {
     this.uacProcessor = uacProcessor;
   }
 
-  public void processSampleReceivedMessage(CreateCaseSample createCaseSample) throws JsonProcessingException {
+  public void processSampleReceivedMessage(CreateCaseSample createCaseSample)
+      throws JsonProcessingException {
     Case caze = caseProcessor.saveCase(createCaseSample);
     int questionnaireType =
         QuestionnaireTypeHelper.calculateQuestionnaireType(caze.getTreatmentCode());
     UacQidLink uacQidLink = uacProcessor.saveUacQidLink(caze, questionnaireType);
     PayloadDTO uacPayloadDTO = uacProcessor.emitUacUpdatedEvent(uacQidLink, caze);
     PayloadDTO casePayloadDTO = caseProcessor.emitCaseCreatedEvent(caze);
-    uacProcessor.logEvent(uacQidLink, CASE_CREATED_EVENT_DESCRIPTION, EventType.CASE_CREATED, casePayloadDTO);
-    uacProcessor.logEvent(uacQidLink, UAC_QID_LINKED_EVENT_DESCRIPTION, EventType.UAC_UPDATED, uacPayloadDTO);
+    uacProcessor.logEvent(
+        uacQidLink, CASE_CREATED_EVENT_DESCRIPTION, EventType.CASE_CREATED, casePayloadDTO);
+    uacProcessor.logEvent(
+        uacQidLink, UAC_QID_LINKED_EVENT_DESCRIPTION, EventType.UAC_UPDATED, uacPayloadDTO);
 
     if (QuestionnaireTypeHelper.isQuestionnaireWelsh(caze.getTreatmentCode())) {
       uacQidLink = uacProcessor.saveUacQidLink(caze, 3);
       uacPayloadDTO = uacProcessor.emitUacUpdatedEvent(uacQidLink, caze);
-      uacProcessor.logEvent(uacQidLink, UAC_QID_LINKED_EVENT_DESCRIPTION, EventType.UAC_UPDATED, uacPayloadDTO);
+      uacProcessor.logEvent(
+          uacQidLink, UAC_QID_LINKED_EVENT_DESCRIPTION, EventType.UAC_UPDATED, uacPayloadDTO);
     }
   }
 }
