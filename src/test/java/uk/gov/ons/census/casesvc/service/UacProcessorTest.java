@@ -1,5 +1,6 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -66,14 +67,14 @@ public class UacProcessorTest {
   @Test
   public void testLogEventWithoutEventMetaDataDateTime() throws Exception {
     // Given
-    UacQidLink uacQuidLink = new UacQidLink();
+    UacQidLink uacQidLink = new UacQidLink();
     Case caze = new Case();
     UUID caseUuid = UUID.randomUUID();
     caze.setCaseId(caseUuid);
-    uacQuidLink.setCaze(caze);
+    uacQidLink.setCaze(caze);
 
     // When
-    underTest.logEvent(uacQuidLink, "TEST_LOGGED_EVENT", EventType.UAC_UPDATED, new PayloadDTO());
+    underTest.logEvent(uacQidLink, "TEST_LOGGED_EVENT", EventType.UAC_UPDATED, new PayloadDTO());
 
     // Then
     ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
@@ -85,16 +86,16 @@ public class UacProcessorTest {
   @Test
   public void testLogEventWithEventMetaDataDateTime() throws Exception {
     // Given
-    UacQidLink uacQuidLink = new UacQidLink();
+    UacQidLink uacQidLink = new UacQidLink();
     OffsetDateTime now = OffsetDateTime.now();
     Case caze = new Case();
     UUID caseUuid = UUID.randomUUID();
     caze.setCaseId(caseUuid);
-    uacQuidLink.setCaze(caze);
+    uacQidLink.setCaze(caze);
 
     // When
     underTest.logEvent(
-        uacQuidLink,
+        uacQidLink,
         "TEST_LOGGED_EVENT",
         EventType.UAC_UPDATED,
         new PayloadDTO(),
@@ -134,5 +135,48 @@ public class UacProcessorTest {
     assertEquals(
         "12345",
         responseManagementEventArgumentCaptor.getValue().getPayloadDTO().getUac().getUac());
+  }
+
+  @Test
+  public void testLogEventAddressed() throws Exception {
+    // Given
+    UacQidLink uacQidLink = new UacQidLink();
+    OffsetDateTime now = OffsetDateTime.now();
+    Case caze = new Case();
+    UUID caseUuid = UUID.randomUUID();
+    caze.setCaseId(caseUuid);
+    uacQidLink.setCaze(caze);
+
+    // When
+    underTest.logEvent(
+        uacQidLink,
+        "TEST_LOGGED_EVENT",
+        EventType.UAC_UPDATED,
+        new PayloadDTO(),
+        any(OffsetDateTime.class));
+
+    // Then
+    ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
+    verify(eventRepository).save(eventArgumentCaptor.capture());
+    assertThat(eventArgumentCaptor.getValue().getCaseId()).isEqualTo(caseUuid);
+  }
+
+  @Test
+  public void testLogEventUnaddressed() throws Exception {
+    // Given
+    UacQidLink uacQidLink = new UacQidLink();
+
+    // When
+    underTest.logEvent(
+        uacQidLink,
+        "TEST_LOGGED_EVENT",
+        EventType.UAC_UPDATED,
+        new PayloadDTO(),
+        any(OffsetDateTime.class));
+
+    // Then
+    ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
+    verify(eventRepository).save(eventArgumentCaptor.capture());
+    assertThat(eventArgumentCaptor.getValue().getCaseId()).isNull();
   }
 }
