@@ -101,9 +101,9 @@ public class ReceiptReceiverIT {
     assertThat(events.size()).isEqualTo(1);
     Event event = events.get(0);
     assertThat(event.getEventDescription()).isEqualTo(QID_RECEIPTED);
-    UacQidLink actualUacQuidLink = event.getUacQidLink();
-    assertThat(actualUacQuidLink.getQid()).isEqualTo(TEST_QID);
-    assertThat(actualUacQuidLink.getUac()).isEqualTo(TEST_UAC);
-    assertThat(actualUacQuidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
+    UacQidLink actualUacQidLink = event.getUacQidLink();
+    assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID);
+    assertThat(actualUacQidLink.getUac()).isEqualTo(TEST_UAC);
+    assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
   }
 }
