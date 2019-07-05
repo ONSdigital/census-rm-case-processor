@@ -1,6 +1,8 @@
 package uk.gov.ons.census.casesvc.messaging;
 
+import static net.minidev.json.JSONValue.isValidJson;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
@@ -23,6 +25,7 @@ import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
+import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
@@ -98,5 +101,10 @@ public class SampleReceiverIT {
     List<Case> caseList = caseRepository.findAll();
     assertEquals(1, caseList.size());
     assertEquals("ABC123", caseList.get(0).getPostcode());
+
+    List<Event> eventList = eventRepository.findAll();
+    assertThat(eventList.size(), is(2));
+    assertThat(isValidJson(eventList.get(0).getEventPayload()), is(true));
+    assertThat(isValidJson(eventList.get(1).getEventPayload()), is(true));
   }
 }
