@@ -27,7 +27,7 @@ public class ReceiptProcessorTest {
   private static final String TEST_UAC = "test_uac";
 
   @Test
-  public void testGoodReceipt() throws Exception {
+  public void testGoodReceipt() {
     // Given
     UacQidLink expectedUacQidLink = getUacQidLink();
 
@@ -68,7 +68,7 @@ public class ReceiptProcessorTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void testReceiptedCaseNotFound() throws Exception {
+  public void testReceiptedCaseNotFound() {
     // Given
     CaseRepository caseRepository = mock(CaseRepository.class);
     CaseProcessor caseProcessor = mock(CaseProcessor.class);

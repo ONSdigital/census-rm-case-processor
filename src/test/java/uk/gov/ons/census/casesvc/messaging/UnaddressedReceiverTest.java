@@ -24,7 +24,7 @@ public class UnaddressedReceiverTest {
   @InjectMocks UnaddressedReceiver underTest;
 
   @Test
-  public void testReceiveCreateUacQid() throws Exception {
+  public void testReceiveCreateUacQid() {
     // Given
     CreateUacQid createUacQid = new CreateUacQid();
     createUacQid.setQuestionnaireType("21");

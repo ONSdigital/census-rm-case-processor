@@ -1,6 +1,5 @@
 package uk.gov.ons.census.casesvc.messaging;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +16,7 @@ public class ReceiptReceiver {
 
   @Transactional
   @ServiceActivator(inputChannel = "receiptInputChannel")
-  public void receiveMessage(Receipt receipt) throws JsonProcessingException {
+  public void receiveMessage(Receipt receipt) {
     receiptProcessor.processReceipt(receipt);
   }
 }

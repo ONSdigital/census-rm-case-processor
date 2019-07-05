@@ -1,6 +1,5 @@
 package uk.gov.ons.census.casesvc.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
@@ -22,8 +21,7 @@ public class EventProcessor {
     this.uacProcessor = uacProcessor;
   }
 
-  public void processSampleReceivedMessage(CreateCaseSample createCaseSample)
-      throws JsonProcessingException {
+  public void processSampleReceivedMessage(CreateCaseSample createCaseSample) {
     Case caze = caseProcessor.saveCase(createCaseSample);
     int questionnaireType =
         QuestionnaireTypeHelper.calculateQuestionnaireType(caze.getTreatmentCode());

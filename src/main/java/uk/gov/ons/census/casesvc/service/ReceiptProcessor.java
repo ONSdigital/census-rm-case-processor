@@ -1,6 +1,5 @@
 package uk.gov.ons.census.casesvc.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import java.util.Optional;
@@ -30,7 +29,7 @@ public class ReceiptProcessor {
     this.uacProcessor = uacProcessor;
   }
 
-  public void processReceipt(Receipt receipt) throws JsonProcessingException {
+  public void processReceipt(Receipt receipt) {
     // HERE BE DRAGONS, THIS IS A HACK.  IN THE LONG RUN WE WILL RECEIVE JUST A QID
     // HOWEVER THIS CODE IS WRITTEN IN A WAY TO MAKE THE PROMISED LAND OF RECEIVING A QID EASY
     // JUST HAVE A QIDREPOSITORY RATHER THAN A CASE RESPOSITORY AND WORK OF THAT (AND THE QID)

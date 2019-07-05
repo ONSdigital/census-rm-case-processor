@@ -27,7 +27,7 @@ public class EventProcessorTest {
   @InjectMocks EventProcessor underTest;
 
   @Test
-  public void testHappyPath() throws Exception {
+  public void testHappyPath() {
     // Given
     CreateCaseSample createCaseSample = new CreateCaseSample();
     Case caze = new Case();
@@ -52,7 +52,7 @@ public class EventProcessorTest {
   }
 
   @Test
-  public void testWelshQuestionnaire() throws Exception {
+  public void testWelshQuestionnaire() {
     // Given
     CreateCaseSample createCaseSample = new CreateCaseSample();
     Case caze = new Case();

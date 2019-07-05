@@ -65,7 +65,7 @@ public class UacProcessorTest {
   }
 
   @Test
-  public void testLogEventWithoutEventMetaDataDateTime() throws Exception {
+  public void testLogEventWithoutEventMetaDataDateTime() {
     // Given
     UacQidLink uacQidLink = new UacQidLink();
     Case caze = new Case();
@@ -84,7 +84,7 @@ public class UacProcessorTest {
   }
 
   @Test
-  public void testLogEventWithEventMetaDataDateTime() throws Exception {
+  public void testLogEventWithEventMetaDataDateTime() {
     // Given
     UacQidLink uacQidLink = new UacQidLink();
     OffsetDateTime now = OffsetDateTime.now();
@@ -138,7 +138,7 @@ public class UacProcessorTest {
   }
 
   @Test
-  public void testLogEventAddressed() throws Exception {
+  public void testLogEventAddressed() {
     // Given
     UacQidLink uacQidLink = new UacQidLink();
     OffsetDateTime now = OffsetDateTime.now();
@@ -162,7 +162,7 @@ public class UacProcessorTest {
   }
 
   @Test
-  public void testLogEventUnaddressed() throws Exception {
+  public void testLogEventUnaddressed() {
     // Given
     UacQidLink uacQidLink = new UacQidLink();
 
