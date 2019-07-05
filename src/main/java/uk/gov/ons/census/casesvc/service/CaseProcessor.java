@@ -1,6 +1,7 @@
 package uk.gov.ons.census.casesvc.service;
 
 import java.time.OffsetDateTime;
+import java.util.Optional;
 import java.util.UUID;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -45,8 +46,13 @@ public class CaseProcessor {
     caze.setCaseId(UUID.randomUUID());
     caze.setState(CaseState.ACTIONABLE);
     caze.setCreatedDateTime(OffsetDateTime.now());
+    caze.setReceiptReceived(false);
     caze = caseRepository.save(caze);
     return caze;
+  }
+
+  public Optional<Case> findCase(int caseRef) {
+    return caseRepository.findById(caseRef);
   }
 
   public PayloadDTO emitCaseCreatedEvent(Case caze) {
@@ -54,12 +60,11 @@ public class CaseProcessor {
     ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
     rabbitTemplate.convertAndSend(
         outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
-    return responseManagementEvent.getPayloadDTO();
+    return responseManagementEvent.getPayload();
   }
 
   public void emitCaseUpdatedEvent(Case caze) {
     EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_UPDATED);
-    eventDTO.setReceiptReceived(caze.isReceiptReceived());
     ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
     rabbitTemplate.convertAndSend(
         outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
@@ -71,8 +76,8 @@ public class CaseProcessor {
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setCollectionCase(collectionCase);
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-    responseManagementEvent.setEventDTO(eventDTO);
-    responseManagementEvent.setPayloadDTO(payloadDTO);
+    responseManagementEvent.setEvent(eventDTO);
+    responseManagementEvent.setPayload(payloadDTO);
     return responseManagementEvent;
   }
 
@@ -120,6 +125,7 @@ public class CaseProcessor {
     collectionCase.setFieldCoordinatorId(caze.getFieldCoordinatorId());
     collectionCase.setFieldOfficerId(caze.getFieldOfficerId());
     collectionCase.setCeExpectedCapacity(caze.getCeExpectedCapacity());
+    collectionCase.setReceiptReceived(caze.isReceiptReceived());
 
     return collectionCase;
   }

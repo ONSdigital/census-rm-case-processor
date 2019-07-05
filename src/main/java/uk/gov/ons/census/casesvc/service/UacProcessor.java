@@ -136,8 +136,8 @@ public class UacProcessor {
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setUac(uac);
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-    responseManagementEvent.setEventDTO(eventDTO);
-    responseManagementEvent.setPayloadDTO(payloadDTO);
+    responseManagementEvent.setEvent(eventDTO);
+    responseManagementEvent.setPayload(payloadDTO);
 
     rabbitTemplate.convertAndSend(
         outboundExchange, UAC_UPDATE_ROUTING_KEY, responseManagementEvent);

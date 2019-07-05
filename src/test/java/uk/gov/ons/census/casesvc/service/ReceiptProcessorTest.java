@@ -72,8 +72,6 @@ public class ReceiptProcessorTest {
     // Given
     CaseRepository caseRepository = mock(CaseRepository.class);
     CaseProcessor caseProcessor = mock(CaseProcessor.class);
-    when(caseRepository.findById(TEST_CASE_ID)).thenReturn(Optional.empty());
-
     UacProcessor uacProcessor = mock(UacProcessor.class);
 
     // Given

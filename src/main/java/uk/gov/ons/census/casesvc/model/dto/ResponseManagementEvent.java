@@ -1,14 +1,11 @@
 package uk.gov.ons.census.casesvc.model.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
 public class ResponseManagementEvent {
 
-  @JsonProperty("event")
-  private EventDTO eventDTO;
+  private EventDTO event;
 
-  @JsonProperty("payload")
-  private PayloadDTO payloadDTO;
+  private PayloadDTO payload;
 }

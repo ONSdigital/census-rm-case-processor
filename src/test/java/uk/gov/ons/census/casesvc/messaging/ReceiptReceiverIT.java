@@ -72,6 +72,7 @@ public class ReceiptReceiverIT {
     Case caze = easyRandom.nextObject(Case.class);
     caze.setCaseId(TEST_CASE_ID);
     caze.setUacQidLinks(null);
+    caze.setEvents(null);
     caze = caseRepository.saveAndFlush(caze);
 
     UacQidLink uacQidLink = new UacQidLink();
@@ -87,16 +88,16 @@ public class ReceiptReceiverIT {
     // WHEN
     rabbitQueueHelper.sendMessage(inboundQueue, receipt);
 
-    // check the emitted eventDTO
+    // check the emitted event
     ResponseManagementEvent responseManagementEvent =
         rabbitQueueHelper.checkExpectedMessageReceived(outboundQueue);
-    assertThat(responseManagementEvent.getEventDTO().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
-    UacDTO actualUacDTOObject = responseManagementEvent.getPayloadDTO().getUac();
+    assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
+    UacDTO actualUacDTOObject = responseManagementEvent.getPayload().getUac();
     assertThat(actualUacDTOObject.getUac()).isEqualTo(TEST_UAC);
     assertThat(actualUacDTOObject.getQuestionnaireId()).isEqualTo(TEST_QID);
     assertThat(actualUacDTOObject.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
 
-    // check database for log eventDTO
+    // check database for log event
     List<Event> events = eventRepository.findAll();
     assertThat(events.size()).isEqualTo(1);
     Event event = events.get(0);

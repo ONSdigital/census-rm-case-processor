@@ -38,6 +38,7 @@ queueconfig:
   action-scheduler-routing-key-case: event.case.*
   unaddressed-inbound-queue: unaddressedRequestQueue
   receipt-response-inbound-queue: Case.Responses
+  action-case-queue: action.events
   consumers: 50
 
 healthcheck:

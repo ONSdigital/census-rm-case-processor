@@ -94,8 +94,7 @@ public class CaseProcessorTest {
         .convertAndSend(
             eq(TEST_EXCHANGE), eq(CASE_UPDATE_ROUTING_KEY), rmeArgumentCaptor.capture());
 
-    CollectionCase collectionCase =
-        rmeArgumentCaptor.getValue().getPayloadDTO().getCollectionCase();
+    CollectionCase collectionCase = rmeArgumentCaptor.getValue().getPayload().getCollectionCase();
 
     assertEquals(TEST_POSTCODE, collectionCase.getAddress().getPostcode());
     assertThat(collectionCase.getFieldCoordinatorId()).isEqualTo(FIELD_CORD_ID);

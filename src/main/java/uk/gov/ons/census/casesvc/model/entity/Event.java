@@ -22,6 +22,8 @@ public class Event {
 
   @ManyToOne private UacQidLink uacQidLink;
 
+  @ManyToOne private Case caze;
+
   @Column(columnDefinition = "timestamp with time zone")
   private OffsetDateTime eventDate;
 
