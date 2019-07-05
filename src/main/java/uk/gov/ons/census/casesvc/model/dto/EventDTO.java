@@ -13,8 +13,5 @@ public class EventDTO {
   private String transactionId;
   private boolean receiptReceived;
   private UUID caseId;
-  private String eventChannel;
-  private String eventSource;
-  private UUID eventTransactionId;
   private String eventPayload;
 }
