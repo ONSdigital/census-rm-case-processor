@@ -8,7 +8,7 @@ public class RandomCaseRefGenerator {
   private static final int HIGHEST_POSSIBLE_CASE_REF = 99999999;
   private static final Random random = new SecureRandom();
 
-  public static int testGetCaseRef() {
+  public static int getCaseRef() {
     int caseRef = random.nextInt(HIGHEST_POSSIBLE_CASE_REF - LOWEST_POSSIBLE_CASE_REF);
     caseRef += LOWEST_POSSIBLE_CASE_REF;
     return caseRef;
