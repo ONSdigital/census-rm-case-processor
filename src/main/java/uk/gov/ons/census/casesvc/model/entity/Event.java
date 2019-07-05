@@ -1,5 +1,6 @@
 package uk.gov.ons.census.casesvc.model.entity;
 
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import javax.persistence.Column;
@@ -9,8 +10,12 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import lombok.Data;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
 
 @Data
+@TypeDefs({@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)})
 @Entity
 public class Event {
   @Id private UUID id;
@@ -28,4 +33,13 @@ public class Event {
   @Column
   @Enumerated(EnumType.STRING)
   private EventType eventType;
+
+  @Column private UUID caseId;
+  @Column private String eventChannel;
+  @Column private String eventSource;
+  @Column private UUID eventTransactionId;
+
+  @Type(type = "jsonb")
+  @Column(columnDefinition = "jsonb")
+  private String eventPayload;
 }

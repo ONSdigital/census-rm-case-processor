@@ -1,18 +1,22 @@
 package uk.gov.ons.census.casesvc.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.client.UacQidServiceClient;
-import uk.gov.ons.census.casesvc.model.dto.Event;
-import uk.gov.ons.census.casesvc.model.dto.EventType;
-import uk.gov.ons.census.casesvc.model.dto.Payload;
+import uk.gov.ons.census.casesvc.model.dto.EventDTO;
+import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
+import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
-import uk.gov.ons.census.casesvc.model.dto.Uac;
+import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.dto.UacQidDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
+import uk.gov.ons.census.casesvc.model.entity.Event;
+import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
@@ -24,10 +28,14 @@ public class UacProcessor {
 
   private static final String UAC_UPDATE_ROUTING_KEY = "event.uac.update";
 
+  private static final String EVENT_SOURCE = "CASE_SERVICE";
+  private static final String EVENT_CHANNEL = "RM";
+
   private final UacQidLinkRepository uacQidLinkRepository;
   private final EventRepository eventRepository;
   private final RabbitTemplate rabbitTemplate;
   private final UacQidServiceClient uacQidServiceClient;
+  private final ObjectMapper objectMapper;
 
   @Value("${queueconfig.outbound-exchange}")
   private String outboundExchange;
@@ -36,11 +44,13 @@ public class UacProcessor {
       UacQidLinkRepository uacQidLinkRepository,
       EventRepository eventRepository,
       RabbitTemplate rabbitTemplate,
-      UacQidServiceClient uacQidServiceClient) {
+      UacQidServiceClient uacQidServiceClient,
+      ObjectMapper objectMapper) {
     this.rabbitTemplate = rabbitTemplate;
     this.uacQidServiceClient = uacQidServiceClient;
     this.uacQidLinkRepository = uacQidLinkRepository;
     this.eventRepository = eventRepository;
+    this.objectMapper = objectMapper;
   }
 
   public UacQidLink saveUacQidLink(Case caze, int questionnaireType) {
@@ -64,19 +74,20 @@ public class UacProcessor {
   }
 
   public void logEvent(
-      UacQidLink uacQidLink,
-      String eventDescription,
-      uk.gov.ons.census.casesvc.model.entity.EventType eventType) {
-    logEvent(uacQidLink, eventDescription, eventType, null);
+      UacQidLink uacQidLink, String eventDescription, EventType eventType, PayloadDTO payloadDTO)
+      throws JsonProcessingException {
+    logEvent(uacQidLink, eventDescription, eventType, payloadDTO, null);
   }
 
   public void logEvent(
       UacQidLink uacQidLink,
       String eventDescription,
-      uk.gov.ons.census.casesvc.model.entity.EventType eventType,
-      OffsetDateTime eventMetaDataDateTime) {
-    uk.gov.ons.census.casesvc.model.entity.Event loggedEvent =
-        new uk.gov.ons.census.casesvc.model.entity.Event();
+      EventType eventType,
+      PayloadDTO payloadDTO,
+      OffsetDateTime eventMetaDataDateTime)
+      throws JsonProcessingException {
+
+    Event loggedEvent = new Event();
     loggedEvent.setId(UUID.randomUUID());
 
     if (eventMetaDataDateTime != null) {
@@ -88,17 +99,28 @@ public class UacProcessor {
     loggedEvent.setEventDescription(eventDescription);
     loggedEvent.setUacQidLink(uacQidLink);
     loggedEvent.setEventType(eventType);
+
+    // Only set Case Id if Addressed
+    if (uacQidLink.getCaze() != null) {
+      loggedEvent.setCaseId(uacQidLink.getCaze().getCaseId());
+    }
+
+    loggedEvent.setEventChannel(EVENT_CHANNEL);
+    loggedEvent.setEventSource(EVENT_SOURCE);
+    loggedEvent.setEventTransactionId(UUID.randomUUID());
+    loggedEvent.setEventPayload(convertPayloadDTOToJson(payloadDTO));
+
     eventRepository.save(loggedEvent);
   }
 
-  public void emitUacUpdatedEvent(UacQidLink uacQidLink, Case caze) {
-    emitUacUpdatedEvent(uacQidLink, caze, true);
+  public PayloadDTO emitUacUpdatedEvent(UacQidLink uacQidLink, Case caze) {
+    return emitUacUpdatedEvent(uacQidLink, caze, true);
   }
 
-  public void emitUacUpdatedEvent(UacQidLink uacQidLink, Case caze, boolean active) {
-    Event event = EventHelper.createEvent(EventType.UAC_UPDATED);
+  public PayloadDTO emitUacUpdatedEvent(UacQidLink uacQidLink, Case caze, boolean active) {
+    EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.UAC_UPDATED);
 
-    Uac uac = new Uac();
+    UacDTO uac = new UacDTO();
     uac.setQuestionnaireId(uacQidLink.getQid());
     uac.setUacHash(Sha256Helper.hash(uacQidLink.getUac()));
     uac.setUac(uacQidLink.getUac());
@@ -111,13 +133,19 @@ public class UacProcessor {
       uac.setRegion(caze.getRegion());
     }
 
-    Payload payload = new Payload();
-    payload.setUac(uac);
+    PayloadDTO payloadDTO = new PayloadDTO();
+    payloadDTO.setUac(uac);
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-    responseManagementEvent.setEvent(event);
-    responseManagementEvent.setPayload(payload);
+    responseManagementEvent.setEventDTO(eventDTO);
+    responseManagementEvent.setPayloadDTO(payloadDTO);
 
     rabbitTemplate.convertAndSend(
         outboundExchange, UAC_UPDATE_ROUTING_KEY, responseManagementEvent);
+
+    return payloadDTO;
+  }
+
+  private String convertPayloadDTOToJson(PayloadDTO payloadDTO) throws JsonProcessingException {
+    return objectMapper.writeValueAsString(payloadDTO);
   }
 }
