@@ -12,6 +12,4 @@ public class EventDTO {
   private OffsetDateTime dateTime;
   private String transactionId;
   private boolean receiptReceived;
-  private UUID caseId;
-  private String eventPayload;
 }
