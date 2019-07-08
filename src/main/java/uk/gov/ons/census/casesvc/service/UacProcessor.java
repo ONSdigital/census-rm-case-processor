@@ -3,6 +3,8 @@ package uk.gov.ons.census.casesvc.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.OffsetDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -75,7 +77,13 @@ public class UacProcessor {
 
   public void logEvent(
       UacQidLink uacQidLink, String eventDescription, EventType eventType, PayloadDTO payloadDTO) {
-    logEvent(uacQidLink, eventDescription, eventType, payloadDTO, null);
+
+    // Hardcoded for now
+    Map<String, String> headers = new HashMap<>();
+    headers.put("source", EVENT_SOURCE);
+    headers.put("channel", EVENT_CHANNEL);
+
+    logEvent(uacQidLink, eventDescription, eventType, payloadDTO, headers, null);
   }
 
   public void logEvent(
@@ -83,7 +91,10 @@ public class UacProcessor {
       String eventDescription,
       EventType eventType,
       PayloadDTO payloadDTO,
+      Map<String, String> headers,
       OffsetDateTime eventMetaDataDateTime) {
+
+    validateHeaders(headers);
 
     Event loggedEvent = new Event();
     loggedEvent.setId(UUID.randomUUID());
@@ -103,12 +114,25 @@ public class UacProcessor {
       loggedEvent.setCaseId(uacQidLink.getCaze().getCaseId());
     }
 
-    loggedEvent.setEventChannel(EVENT_CHANNEL);
-    loggedEvent.setEventSource(EVENT_SOURCE);
+    loggedEvent.setEventChannel(headers.get("channel"));
+    loggedEvent.setEventSource(headers.get("source"));
+
     loggedEvent.setEventTransactionId(UUID.randomUUID());
     loggedEvent.setEventPayload(convertPayloadDTOToJson(payloadDTO));
 
     eventRepository.save(loggedEvent);
+  }
+
+  private boolean validateHeaders(Map<String, String> headers) {
+    if (!headers.containsKey("source")) {
+      throw new RuntimeException("Missing 'source' header value");
+    }
+
+    if (!headers.containsKey("channel")) {
+      throw new RuntimeException("Missing 'channel' header value");
+    }
+
+    return true;
   }
 
   public PayloadDTO emitUacUpdatedEvent(UacQidLink uacQidLink, Case caze) {
