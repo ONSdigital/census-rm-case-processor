@@ -142,53 +142,6 @@ public class UacProcessorTest {
   }
 
   @Test
-  public void testLogEventAddressed() {
-    // Given
-    UacQidLink uacQidLink = new UacQidLink();
-    OffsetDateTime now = OffsetDateTime.now();
-    Case caze = new Case();
-    UUID caseUuid = UUID.randomUUID();
-    caze.setCaseId(caseUuid);
-    uacQidLink.setCaze(caze);
-    Map<String, String> headers = createTestDefaultHeaders();
-
-    // When
-    underTest.logEvent(
-        uacQidLink,
-        "TEST_LOGGED_EVENT",
-        EventType.UAC_UPDATED,
-        new PayloadDTO(),
-        headers,
-        any(OffsetDateTime.class));
-
-    // Then
-    ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
-    verify(eventRepository).save(eventArgumentCaptor.capture());
-    assertThat(eventArgumentCaptor.getValue().getCaseId()).isEqualTo(caseUuid);
-  }
-
-  @Test
-  public void testLogEventUnaddressed() {
-    // Given
-    UacQidLink uacQidLink = new UacQidLink();
-    Map<String, String> headers = createTestDefaultHeaders();
-
-    // When
-    underTest.logEvent(
-        uacQidLink,
-        "TEST_LOGGED_EVENT",
-        EventType.UAC_UPDATED,
-        new PayloadDTO(),
-        headers,
-        any(OffsetDateTime.class));
-
-    // Then
-    ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
-    verify(eventRepository).save(eventArgumentCaptor.capture());
-    assertThat(eventArgumentCaptor.getValue().getCaseId()).isNull();
-  }
-
-  @Test
   public void testLogEventWithDefaultHeaders() {
     // Given
     UacQidLink uacQidLink = new UacQidLink();
