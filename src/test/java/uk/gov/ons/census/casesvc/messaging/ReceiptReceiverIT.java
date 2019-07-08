@@ -2,6 +2,7 @@ package uk.gov.ons.census.casesvc.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ons.census.casesvc.service.ReceiptProcessor.QID_RECEIPTED;
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.io.IOException;
 import java.util.List;
@@ -11,6 +12,9 @@ import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageBuilder;
+import org.springframework.amqp.core.MessageProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -45,6 +49,12 @@ public class ReceiptReceiverIT {
   @Value("${queueconfig.receipt-response-inbound-queue}")
   private String inboundQueue;
 
+  @Value("${queueconfig.action-scheduler-queue}")
+  private String actionQueue;
+
+  @Value("${queueconfig.rh-case-queue}")
+  private String rhCaseQueue;
+
   @Value("${queueconfig.rh-uac-queue}")
   private String rhUacQueue;
 
@@ -57,6 +67,8 @@ public class ReceiptReceiverIT {
   @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(inboundQueue);
+    rabbitQueueHelper.purgeQueue(actionQueue);
+    rabbitQueueHelper.purgeQueue(rhCaseQueue);
     rabbitQueueHelper.purgeQueue(rhUacQueue);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
@@ -84,8 +96,14 @@ public class ReceiptReceiverIT {
     Receipt receipt = new Receipt();
     receipt.setCaseId(TEST_CASE_ID.toString());
 
-    // WHEN
-    rabbitQueueHelper.sendMessage(inboundQueue, receipt);
+    String json = convertObjectToJson(receipt);
+    Message message =
+        MessageBuilder.withBody(json.getBytes())
+            .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+            .setHeader("source", "any source")
+            .setHeader("channel", "any channel")
+            .build();
+    rabbitQueueHelper.sendMessage(inboundQueue, message);
 
     // check the emitted eventDTO
     ResponseManagementEvent responseManagementEvent =

@@ -78,7 +78,7 @@ public class UacProcessor {
   public void logEvent(
       UacQidLink uacQidLink, String eventDescription, EventType eventType, PayloadDTO payloadDTO) {
 
-    // Hardcoded for now
+    // Keep hardcoded for non-receipting calls for now
     Map<String, String> headers = new HashMap<>();
     headers.put("source", EVENT_SOURCE);
     headers.put("channel", EVENT_CHANNEL);
