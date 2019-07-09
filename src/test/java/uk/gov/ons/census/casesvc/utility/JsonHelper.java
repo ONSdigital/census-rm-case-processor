@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.ons.census.casesvc.model.dto.Receipt;
 
 public class JsonHelper {
-  private static ObjectMapper objectMapper;
+  private static final ObjectMapper objectMapper;
 
   static {
     objectMapper = new ObjectMapper();
