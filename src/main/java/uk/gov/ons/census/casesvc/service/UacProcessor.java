@@ -1,6 +1,7 @@
 package uk.gov.ons.census.casesvc.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
@@ -113,7 +114,7 @@ public class UacProcessor {
     loggedEvent.setEventSource(headers.get("source"));
 
     loggedEvent.setEventTransactionId(UUID.randomUUID());
-    loggedEvent.setEventPayload(convertPayloadDTOToJson(payloadDTO));
+    loggedEvent.setEventPayload(convertObjectToJson(payloadDTO));
 
     eventRepository.save(loggedEvent);
   }
@@ -160,13 +161,5 @@ public class UacProcessor {
         outboundExchange, UAC_UPDATE_ROUTING_KEY, responseManagementEvent);
 
     return payloadDTO;
-  }
-
-  private String convertPayloadDTOToJson(PayloadDTO payloadDTO) {
-    try {
-      return objectMapper.writeValueAsString(payloadDTO);
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException("Failed converting PayloadDTO To Json");
-    }
   }
 }
