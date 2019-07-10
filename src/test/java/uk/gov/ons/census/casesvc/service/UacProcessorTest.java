@@ -137,8 +137,7 @@ public class UacProcessorTest {
             eq("event.uac.update"),
             responseManagementEventArgumentCaptor.capture());
     assertEquals(
-        "12345",
-        responseManagementEventArgumentCaptor.getValue().getPayloadDTO().getUac().getUac());
+        "12345", responseManagementEventArgumentCaptor.getValue().getPayload().getUac().getUac());
   }
 
   @Test

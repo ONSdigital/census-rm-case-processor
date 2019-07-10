@@ -108,8 +108,8 @@ public class ReceiptReceiverIT {
     // check the emitted eventDTO
     ResponseManagementEvent responseManagementEvent =
         rabbitQueueHelper.checkExpectedMessageReceived(outboundQueue);
-    assertThat(responseManagementEvent.getEventDTO().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
-    UacDTO actualUacDTOObject = responseManagementEvent.getPayloadDTO().getUac();
+    assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
+    UacDTO actualUacDTOObject = responseManagementEvent.getPayload().getUac();
     assertThat(actualUacDTOObject.getUac()).isEqualTo(TEST_UAC);
     assertThat(actualUacDTOObject.getQuestionnaireId()).isEqualTo(TEST_QID);
     assertThat(actualUacDTOObject.getCaseId()).isEqualTo(TEST_CASE_ID.toString());

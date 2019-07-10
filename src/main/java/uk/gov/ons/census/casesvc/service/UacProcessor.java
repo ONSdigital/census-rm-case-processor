@@ -119,7 +119,7 @@ public class UacProcessor {
     eventRepository.save(loggedEvent);
   }
 
-  private boolean validateHeaders(Map<String, String> headers) {
+  private void validateHeaders(Map<String, String> headers) {
     if (!headers.containsKey("source")) {
       throw new RuntimeException("Missing 'source' header value");
     }
@@ -127,8 +127,6 @@ public class UacProcessor {
     if (!headers.containsKey("channel")) {
       throw new RuntimeException("Missing 'channel' header value");
     }
-
-    return true;
   }
 
   public PayloadDTO emitUacUpdatedEvent(UacQidLink uacQidLink, Case caze) {
@@ -154,8 +152,8 @@ public class UacProcessor {
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setUac(uac);
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-    responseManagementEvent.setEventDTO(eventDTO);
-    responseManagementEvent.setPayloadDTO(payloadDTO);
+    responseManagementEvent.setEvent(eventDTO);
+    responseManagementEvent.setPayload(payloadDTO);
 
     rabbitTemplate.convertAndSend(
         outboundExchange, UAC_UPDATE_ROUTING_KEY, responseManagementEvent);

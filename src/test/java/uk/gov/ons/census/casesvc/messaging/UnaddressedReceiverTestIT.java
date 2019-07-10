@@ -63,8 +63,7 @@ public class UnaddressedReceiverTestIT {
     // THEN
     ResponseManagementEvent responseManagementEvent =
         rabbitQueueHelper.checkExpectedMessageReceived(queue);
-    assertEquals(EventTypeDTO.UAC_UPDATED, responseManagementEvent.getEventDTO().getType());
-    assertThat(responseManagementEvent.getPayloadDTO().getUac().getQuestionnaireId())
-        .startsWith("21");
+    assertEquals(EventTypeDTO.UAC_UPDATED, responseManagementEvent.getEvent().getType());
+    assertThat(responseManagementEvent.getPayload().getUac().getQuestionnaireId()).startsWith("21");
   }
 }

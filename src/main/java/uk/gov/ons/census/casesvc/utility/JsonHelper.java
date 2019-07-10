@@ -14,7 +14,7 @@ public class JsonHelper {
     try {
       return objectMapper.writeValueAsString(receipt);
     } catch (JsonProcessingException e) {
-      throw new RuntimeException("Failed converting Object To Json");
+      throw new RuntimeException("Failed converting Object To Json", e);
     }
   }
 }
