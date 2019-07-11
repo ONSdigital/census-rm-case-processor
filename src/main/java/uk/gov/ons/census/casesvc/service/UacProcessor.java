@@ -110,6 +110,11 @@ public class UacProcessor {
     loggedEvent.setUacQidLink(uacQidLink);
     loggedEvent.setEventType(eventType);
 
+    // Only set Case Id if Addressed
+    if (uacQidLink.getCaze() != null) {
+      loggedEvent.setCaseId(uacQidLink.getCaze().getCaseId());
+    }
+
     loggedEvent.setEventChannel(headers.get("channel"));
     loggedEvent.setEventSource(headers.get("source"));
 

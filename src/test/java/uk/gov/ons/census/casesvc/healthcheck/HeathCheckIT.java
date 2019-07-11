@@ -30,7 +30,7 @@ public class HeathCheckIT {
       String fileLine = bufferedReader.readLine();
       String now = LocalDateTime.now().toString();
 
-      assertEquals(now.substring(0, 16), fileLine.substring(0, 16));
+      assertEquals(now.substring(0, 15), fileLine.substring(0, 15));
     }
   }
 }

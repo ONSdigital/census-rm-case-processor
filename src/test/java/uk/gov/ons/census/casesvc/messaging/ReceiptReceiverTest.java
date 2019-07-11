@@ -13,7 +13,7 @@ import uk.gov.ons.census.casesvc.service.ReceiptProcessor;
 public class ReceiptReceiverTest {
 
   @Test
-  public void testReceipting() {
+  public void testReceipting() throws Exception {
     ReceiptProcessor receiptProcessor = mock(ReceiptProcessor.class);
 
     Map<String, String> headers = new HashMap<>();

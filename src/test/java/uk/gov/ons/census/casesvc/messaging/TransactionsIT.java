@@ -93,6 +93,7 @@ public class TransactionsIT {
     Case caze = easyRandom.nextObject(Case.class);
     caze.setCaseId(TEST_CASE_ID);
     caze.setUacQidLinks(null);
+    caze.setEvents(null);
     caze = caseRepository.saveAndFlush(caze);
 
     UacQidLink uacQidLink = new UacQidLink();
