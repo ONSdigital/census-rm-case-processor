@@ -2,6 +2,7 @@ package uk.gov.ons.census.casesvc.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNull;
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -11,6 +12,9 @@ import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageBuilder;
+import org.springframework.amqp.core.MessageProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -68,7 +72,14 @@ public class TransactionsIT {
     receipt.setCaseId(TEST_CASE_ID.toString());
 
     // WHEN
-    rabbitQueueHelper.sendMessage(inboundQueue, receipt);
+    String json = convertObjectToJson(receipt);
+    Message message =
+        MessageBuilder.withBody(json.getBytes())
+            .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+            .setHeader("source", "any source")
+            .setHeader("channel", "any channel")
+            .build();
+    rabbitQueueHelper.sendMessage(inboundQueue, message);
 
     // Poll Queue, expected failure
     String actualMessage = outboundQueue.poll(5, TimeUnit.SECONDS);

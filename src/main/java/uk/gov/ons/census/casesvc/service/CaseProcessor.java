@@ -9,9 +9,9 @@ import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.model.dto.Address;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
-import uk.gov.ons.census.casesvc.model.dto.Event;
-import uk.gov.ons.census.casesvc.model.dto.EventType;
-import uk.gov.ons.census.casesvc.model.dto.Payload;
+import uk.gov.ons.census.casesvc.model.dto.EventDTO;
+import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
+import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.CaseState;
@@ -49,29 +49,30 @@ public class CaseProcessor {
     return caze;
   }
 
-  public void emitCaseCreatedEvent(Case caze) {
-    Event event = EventHelper.createEvent(EventType.CASE_CREATED);
-    ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, event);
+  public PayloadDTO emitCaseCreatedEvent(Case caze) {
+    EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_CREATED);
+    ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
     rabbitTemplate.convertAndSend(
         outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
+    return responseManagementEvent.getPayload();
   }
 
   public void emitCaseUpdatedEvent(Case caze) {
-    Event event = EventHelper.createEvent(EventType.CASE_UPDATED);
-    event.setReceiptReceived(caze.isReceiptReceived());
-    ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, event);
+    EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_UPDATED);
+    eventDTO.setReceiptReceived(caze.isReceiptReceived());
+    ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
     rabbitTemplate.convertAndSend(
         outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
   }
 
-  private ResponseManagementEvent prepareCaseEvent(Case caze, Event event) {
+  private ResponseManagementEvent prepareCaseEvent(Case caze, EventDTO eventDTO) {
     Address address = createAddress(caze);
     CollectionCase collectionCase = createCollectionCase(caze, address);
-    Payload payload = new Payload();
-    payload.setCollectionCase(collectionCase);
+    PayloadDTO payloadDTO = new PayloadDTO();
+    payloadDTO.setCollectionCase(collectionCase);
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-    responseManagementEvent.setEvent(event);
-    responseManagementEvent.setPayload(payload);
+    responseManagementEvent.setEvent(eventDTO);
+    responseManagementEvent.setPayload(payloadDTO);
     return responseManagementEvent;
   }
 

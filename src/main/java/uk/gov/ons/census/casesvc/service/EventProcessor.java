@@ -2,6 +2,7 @@ package uk.gov.ons.census.casesvc.service;
 
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
+import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
@@ -25,15 +26,18 @@ public class EventProcessor {
     int questionnaireType =
         QuestionnaireTypeHelper.calculateQuestionnaireType(caze.getTreatmentCode());
     UacQidLink uacQidLink = uacProcessor.saveUacQidLink(caze, questionnaireType);
-    uacProcessor.emitUacUpdatedEvent(uacQidLink, caze);
-    caseProcessor.emitCaseCreatedEvent(caze);
-    uacProcessor.logEvent(uacQidLink, CASE_CREATED_EVENT_DESCRIPTION, EventType.CASE_CREATED);
-    uacProcessor.logEvent(uacQidLink, UAC_QID_LINKED_EVENT_DESCRIPTION, EventType.UAC_UPDATED);
+    PayloadDTO uacPayloadDTO = uacProcessor.emitUacUpdatedEvent(uacQidLink, caze);
+    PayloadDTO casePayloadDTO = caseProcessor.emitCaseCreatedEvent(caze);
+    uacProcessor.logEvent(
+        uacQidLink, CASE_CREATED_EVENT_DESCRIPTION, EventType.CASE_CREATED, casePayloadDTO);
+    uacProcessor.logEvent(
+        uacQidLink, UAC_QID_LINKED_EVENT_DESCRIPTION, EventType.UAC_UPDATED, uacPayloadDTO);
 
     if (QuestionnaireTypeHelper.isQuestionnaireWelsh(caze.getTreatmentCode())) {
       uacQidLink = uacProcessor.saveUacQidLink(caze, 3);
-      uacProcessor.emitUacUpdatedEvent(uacQidLink, caze);
-      uacProcessor.logEvent(uacQidLink, UAC_QID_LINKED_EVENT_DESCRIPTION, EventType.UAC_UPDATED);
+      uacPayloadDTO = uacProcessor.emitUacUpdatedEvent(uacQidLink, caze);
+      uacProcessor.logEvent(
+          uacQidLink, UAC_QID_LINKED_EVENT_DESCRIPTION, EventType.UAC_UPDATED, uacPayloadDTO);
     }
   }
 }

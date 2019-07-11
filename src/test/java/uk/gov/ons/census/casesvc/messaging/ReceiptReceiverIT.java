@@ -2,6 +2,7 @@ package uk.gov.ons.census.casesvc.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ons.census.casesvc.service.ReceiptProcessor.QID_RECEIPTED;
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.io.IOException;
 import java.util.List;
@@ -11,6 +12,9 @@ import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageBuilder;
+import org.springframework.amqp.core.MessageProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,10 +23,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.ons.census.casesvc.model.dto.EventType;
+import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.Receipt;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
-import uk.gov.ons.census.casesvc.model.dto.Uac;
+import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
@@ -45,6 +49,12 @@ public class ReceiptReceiverIT {
   @Value("${queueconfig.receipt-response-inbound-queue}")
   private String inboundQueue;
 
+  @Value("${queueconfig.action-scheduler-queue}")
+  private String actionQueue;
+
+  @Value("${queueconfig.rh-case-queue}")
+  private String rhCaseQueue;
+
   @Value("${queueconfig.rh-uac-queue}")
   private String rhUacQueue;
 
@@ -57,6 +67,8 @@ public class ReceiptReceiverIT {
   @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(inboundQueue);
+    rabbitQueueHelper.purgeQueue(actionQueue);
+    rabbitQueueHelper.purgeQueue(rhCaseQueue);
     rabbitQueueHelper.purgeQueue(rhUacQueue);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
@@ -84,26 +96,32 @@ public class ReceiptReceiverIT {
     Receipt receipt = new Receipt();
     receipt.setCaseId(TEST_CASE_ID.toString());
 
-    // WHEN
-    rabbitQueueHelper.sendMessage(inboundQueue, receipt);
+    String json = convertObjectToJson(receipt);
+    Message message =
+        MessageBuilder.withBody(json.getBytes())
+            .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+            .setHeader("source", "any source")
+            .setHeader("channel", "any channel")
+            .build();
+    rabbitQueueHelper.sendMessage(inboundQueue, message);
 
-    // check the emitted event
+    // check the emitted eventDTO
     ResponseManagementEvent responseManagementEvent =
         rabbitQueueHelper.checkExpectedMessageReceived(outboundQueue);
-    assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventType.UAC_UPDATED);
-    Uac actualUacObject = responseManagementEvent.getPayload().getUac();
-    assertThat(actualUacObject.getUac()).isEqualTo(TEST_UAC);
-    assertThat(actualUacObject.getQuestionnaireId()).isEqualTo(TEST_QID);
-    assertThat(actualUacObject.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
+    assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
+    UacDTO actualUacDTOObject = responseManagementEvent.getPayload().getUac();
+    assertThat(actualUacDTOObject.getUac()).isEqualTo(TEST_UAC);
+    assertThat(actualUacDTOObject.getQuestionnaireId()).isEqualTo(TEST_QID);
+    assertThat(actualUacDTOObject.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
 
-    // check database for log event
+    // check database for log eventDTO
     List<Event> events = eventRepository.findAll();
     assertThat(events.size()).isEqualTo(1);
     Event event = events.get(0);
     assertThat(event.getEventDescription()).isEqualTo(QID_RECEIPTED);
-    UacQidLink actualUacQuidLink = event.getUacQidLink();
-    assertThat(actualUacQuidLink.getQid()).isEqualTo(TEST_QID);
-    assertThat(actualUacQuidLink.getUac()).isEqualTo(TEST_UAC);
-    assertThat(actualUacQuidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
+    UacQidLink actualUacQidLink = event.getUacQidLink();
+    assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID);
+    assertThat(actualUacQidLink.getUac()).isEqualTo(TEST_UAC);
+    assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
   }
 }

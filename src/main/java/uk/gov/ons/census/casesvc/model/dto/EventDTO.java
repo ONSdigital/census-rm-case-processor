@@ -4,8 +4,8 @@ import java.time.OffsetDateTime;
 import lombok.Data;
 
 @Data
-public class Event {
-  private EventType type;
+public class EventDTO {
+  private EventTypeDTO type;
   private String source;
   private String channel;
   private OffsetDateTime dateTime;

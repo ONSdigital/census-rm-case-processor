@@ -1,18 +1,25 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.OffsetDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.client.UacQidServiceClient;
-import uk.gov.ons.census.casesvc.model.dto.Event;
-import uk.gov.ons.census.casesvc.model.dto.EventType;
-import uk.gov.ons.census.casesvc.model.dto.Payload;
+import uk.gov.ons.census.casesvc.model.dto.EventDTO;
+import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
+import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
-import uk.gov.ons.census.casesvc.model.dto.Uac;
+import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.dto.UacQidDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
+import uk.gov.ons.census.casesvc.model.entity.Event;
+import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
@@ -24,10 +31,14 @@ public class UacProcessor {
 
   private static final String UAC_UPDATE_ROUTING_KEY = "event.uac.update";
 
+  private static final String EVENT_SOURCE = "CASE_SERVICE";
+  private static final String EVENT_CHANNEL = "RM";
+
   private final UacQidLinkRepository uacQidLinkRepository;
   private final EventRepository eventRepository;
   private final RabbitTemplate rabbitTemplate;
   private final UacQidServiceClient uacQidServiceClient;
+  private final ObjectMapper objectMapper;
 
   @Value("${queueconfig.outbound-exchange}")
   private String outboundExchange;
@@ -36,11 +47,13 @@ public class UacProcessor {
       UacQidLinkRepository uacQidLinkRepository,
       EventRepository eventRepository,
       RabbitTemplate rabbitTemplate,
-      UacQidServiceClient uacQidServiceClient) {
+      UacQidServiceClient uacQidServiceClient,
+      ObjectMapper objectMapper) {
     this.rabbitTemplate = rabbitTemplate;
     this.uacQidServiceClient = uacQidServiceClient;
     this.uacQidLinkRepository = uacQidLinkRepository;
     this.eventRepository = eventRepository;
+    this.objectMapper = objectMapper;
   }
 
   public UacQidLink saveUacQidLink(Case caze, int questionnaireType) {
@@ -64,19 +77,27 @@ public class UacProcessor {
   }
 
   public void logEvent(
-      UacQidLink uacQidLink,
-      String eventDescription,
-      uk.gov.ons.census.casesvc.model.entity.EventType eventType) {
-    logEvent(uacQidLink, eventDescription, eventType, null);
+      UacQidLink uacQidLink, String eventDescription, EventType eventType, PayloadDTO payloadDTO) {
+
+    // Keep hardcoded for non-receipting calls for now
+    Map<String, String> headers = new HashMap<>();
+    headers.put("source", EVENT_SOURCE);
+    headers.put("channel", EVENT_CHANNEL);
+
+    logEvent(uacQidLink, eventDescription, eventType, payloadDTO, headers, null);
   }
 
   public void logEvent(
       UacQidLink uacQidLink,
       String eventDescription,
-      uk.gov.ons.census.casesvc.model.entity.EventType eventType,
+      EventType eventType,
+      PayloadDTO payloadDTO,
+      Map<String, String> headers,
       OffsetDateTime eventMetaDataDateTime) {
-    uk.gov.ons.census.casesvc.model.entity.Event loggedEvent =
-        new uk.gov.ons.census.casesvc.model.entity.Event();
+
+    validateHeaders(headers);
+
+    Event loggedEvent = new Event();
     loggedEvent.setId(UUID.randomUUID());
 
     if (eventMetaDataDateTime != null) {
@@ -88,17 +109,34 @@ public class UacProcessor {
     loggedEvent.setEventDescription(eventDescription);
     loggedEvent.setUacQidLink(uacQidLink);
     loggedEvent.setEventType(eventType);
+
+    loggedEvent.setEventChannel(headers.get("channel"));
+    loggedEvent.setEventSource(headers.get("source"));
+
+    loggedEvent.setEventTransactionId(UUID.randomUUID());
+    loggedEvent.setEventPayload(convertObjectToJson(payloadDTO));
+
     eventRepository.save(loggedEvent);
   }
 
-  public void emitUacUpdatedEvent(UacQidLink uacQidLink, Case caze) {
-    emitUacUpdatedEvent(uacQidLink, caze, true);
+  private void validateHeaders(Map<String, String> headers) {
+    if (!headers.containsKey("source")) {
+      throw new RuntimeException("Missing 'source' header value");
+    }
+
+    if (!headers.containsKey("channel")) {
+      throw new RuntimeException("Missing 'channel' header value");
+    }
   }
 
-  public void emitUacUpdatedEvent(UacQidLink uacQidLink, Case caze, boolean active) {
-    Event event = EventHelper.createEvent(EventType.UAC_UPDATED);
+  public PayloadDTO emitUacUpdatedEvent(UacQidLink uacQidLink, Case caze) {
+    return emitUacUpdatedEvent(uacQidLink, caze, true);
+  }
 
-    Uac uac = new Uac();
+  public PayloadDTO emitUacUpdatedEvent(UacQidLink uacQidLink, Case caze, boolean active) {
+    EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.UAC_UPDATED);
+
+    UacDTO uac = new UacDTO();
     uac.setQuestionnaireId(uacQidLink.getQid());
     uac.setUacHash(Sha256Helper.hash(uacQidLink.getUac()));
     uac.setUac(uacQidLink.getUac());
@@ -111,13 +149,15 @@ public class UacProcessor {
       uac.setRegion(caze.getRegion());
     }
 
-    Payload payload = new Payload();
-    payload.setUac(uac);
+    PayloadDTO payloadDTO = new PayloadDTO();
+    payloadDTO.setUac(uac);
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-    responseManagementEvent.setEvent(event);
-    responseManagementEvent.setPayload(payload);
+    responseManagementEvent.setEvent(eventDTO);
+    responseManagementEvent.setPayload(payloadDTO);
 
     rabbitTemplate.convertAndSend(
         outboundExchange, UAC_UPDATE_ROUTING_KEY, responseManagementEvent);
+
+    return payloadDTO;
   }
 }
