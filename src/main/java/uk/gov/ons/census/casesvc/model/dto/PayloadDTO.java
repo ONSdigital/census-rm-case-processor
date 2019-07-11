@@ -13,5 +13,6 @@ public class PayloadDTO {
   @JsonInclude(Include.NON_NULL)
   private UacDTO uac;
 
+  @JsonInclude(Include.NON_NULL)
   private PrintCaseSelected printCaseSelected;
 }
