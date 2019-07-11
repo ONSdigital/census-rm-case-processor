@@ -1,12 +1,12 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyInt;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -19,9 +19,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
-import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
+import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.PrintCaseSelected;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -134,7 +134,7 @@ public class EventProcessorTest {
     assertThat(event.getType().toString()).isEqualTo(actualEvent.getEventType().toString());
     assertThat(event.getDateTime()).isEqualTo(actualEvent.getEventDate());
     assertThat(
-            "{\"collectionCase\":null,\"uac\":null,\"printCaseSelected\":{\"caseRef\":123,\"packCode\":\"Test packCode\",\"actionRuleId\":\"Test actionRuleId\",\"batchId\":\"Test batchId\"}}")
+            "{\"printCaseSelected\":{\"caseRef\":123,\"packCode\":\"Test packCode\",\"actionRuleId\":\"Test actionRuleId\",\"batchId\":\"Test batchId\"}}")
         .isEqualTo(actualEvent.getEventPayload());
     assertThat(actualEvent.getRmEventProcessed()).isNotNull();
     assertThat("Case selected by Action Rule for print Pack Code Test packCode")
