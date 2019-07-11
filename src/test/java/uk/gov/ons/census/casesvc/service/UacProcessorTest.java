@@ -10,6 +10,8 @@ import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.OffsetDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,7 +67,7 @@ public class UacProcessorTest {
   }
 
   @Test
-  public void testLogEventWithoutEventMetaDataDateTime() throws Exception {
+  public void testLogEventWithoutEventMetaDataDateTime() {
     // Given
     UacQidLink uacQidLink = new UacQidLink();
     Case caze = new Case();
@@ -84,7 +86,7 @@ public class UacProcessorTest {
   }
 
   @Test
-  public void testLogEventWithEventMetaDataDateTime() throws Exception {
+  public void testLogEventWithEventMetaDataDateTime() {
     // Given
     UacQidLink uacQidLink = new UacQidLink();
     OffsetDateTime now = OffsetDateTime.now();
@@ -92,6 +94,7 @@ public class UacProcessorTest {
     UUID caseUuid = UUID.randomUUID();
     caze.setCaseId(caseUuid);
     uacQidLink.setCaze(caze);
+    Map<String, String> headers = createTestDefaultHeaders();
 
     // When
     underTest.logEvent(
@@ -99,6 +102,7 @@ public class UacProcessorTest {
         "TEST_LOGGED_EVENT",
         EventType.UAC_UPDATED,
         new PayloadDTO(),
+        headers,
         any(OffsetDateTime.class));
 
     // Then
@@ -137,7 +141,86 @@ public class UacProcessorTest {
   }
 
   @Test
-  public void testLogEventAddressed() throws Exception {
+  public void testLogEventWithDefaultHeaders() {
+    // Given
+    UacQidLink uacQidLink = new UacQidLink();
+    Map<String, String> headers = createTestDefaultHeaders();
+
+    // When
+    underTest.logEvent(
+        uacQidLink,
+        "TEST_LOGGED_EVENT",
+        EventType.UAC_UPDATED,
+        new PayloadDTO(),
+        headers,
+        any(OffsetDateTime.class));
+
+    // Then
+    ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
+    verify(eventRepository).save(eventArgumentCaptor.capture());
+    assertThat(eventArgumentCaptor.getValue().getEventSource()).isEqualTo("any default source");
+    assertThat(eventArgumentCaptor.getValue().getEventChannel()).isEqualTo("any default channel");
+  }
+
+  @Test
+  public void testLogEventWithNonDefaultHeaders() {
+    // Given
+    UacQidLink uacQidLink = new UacQidLink();
+    Map<String, String> headers = createTestNonDefaultHeaders();
+
+    // When
+    underTest.logEvent(
+        uacQidLink,
+        "TEST_LOGGED_EVENT",
+        EventType.UAC_UPDATED,
+        new PayloadDTO(),
+        headers,
+        any(OffsetDateTime.class));
+
+    // Then
+    ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
+    verify(eventRepository).save(eventArgumentCaptor.capture());
+    assertThat(eventArgumentCaptor.getValue().getEventSource()).isEqualTo("any non-default source");
+    assertThat(eventArgumentCaptor.getValue().getEventChannel())
+        .isEqualTo("any non-default channel");
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testLogEventWithInvalidHeaders() {
+
+    // When
+    underTest.logEvent(
+        null, "TEST_LOGGED_EVENT", EventType.UAC_UPDATED, null, createTestInvalidHeaders(), null);
+  }
+
+  private Map<String, String> createTestDefaultHeaders() {
+    Map<String, String> headers = new HashMap<>();
+
+    headers.put("channel", "any default channel");
+    headers.put("source", "any default source");
+
+    return headers;
+  }
+
+  private Map<String, String> createTestNonDefaultHeaders() {
+    Map<String, String> headers = new HashMap<>();
+
+    headers.put("channel", "any non-default channel");
+    headers.put("source", "any non-default source");
+
+    return headers;
+  }
+
+  private Map<String, String> createTestInvalidHeaders() {
+    Map<String, String> headers = new HashMap<>();
+
+    headers.put("not expected key", "anything");
+
+    return headers;
+  }
+
+  @Test
+  public void testLogEventAddressed() {
     // Given
     UacQidLink uacQidLink = new UacQidLink();
     OffsetDateTime now = OffsetDateTime.now();
@@ -146,13 +229,16 @@ public class UacProcessorTest {
     caze.setCaseId(caseUuid);
     uacQidLink.setCaze(caze);
 
+    Map<String, String> headers = createTestNonDefaultHeaders();
+
     // When
     underTest.logEvent(
         uacQidLink,
         "TEST_LOGGED_EVENT",
         EventType.UAC_UPDATED,
         new PayloadDTO(),
-        any(OffsetDateTime.class));
+        headers,
+        OffsetDateTime.now());
 
     // Then
     ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
@@ -161,9 +247,10 @@ public class UacProcessorTest {
   }
 
   @Test
-  public void testLogEventUnaddressed() throws Exception {
+  public void testLogEventUnaddressed() {
     // Given
     UacQidLink uacQidLink = new UacQidLink();
+    Map<String, String> headers = createTestNonDefaultHeaders();
 
     // When
     underTest.logEvent(
@@ -171,7 +258,8 @@ public class UacProcessorTest {
         "TEST_LOGGED_EVENT",
         EventType.UAC_UPDATED,
         new PayloadDTO(),
-        any(OffsetDateTime.class));
+        headers,
+        OffsetDateTime.now());
 
     // Then
     ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);

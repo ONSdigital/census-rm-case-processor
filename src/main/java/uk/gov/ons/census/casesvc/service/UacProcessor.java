@@ -1,8 +1,11 @@
 package uk.gov.ons.census.casesvc.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.OffsetDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -74,9 +77,14 @@ public class UacProcessor {
   }
 
   public void logEvent(
-      UacQidLink uacQidLink, String eventDescription, EventType eventType, PayloadDTO payloadDTO)
-      throws JsonProcessingException {
-    logEvent(uacQidLink, eventDescription, eventType, payloadDTO, null);
+      UacQidLink uacQidLink, String eventDescription, EventType eventType, PayloadDTO payloadDTO) {
+
+    // Keep hardcoded for non-receipting calls for now
+    Map<String, String> headers = new HashMap<>();
+    headers.put("source", EVENT_SOURCE);
+    headers.put("channel", EVENT_CHANNEL);
+
+    logEvent(uacQidLink, eventDescription, eventType, payloadDTO, headers, null);
   }
 
   public void logEvent(
@@ -84,8 +92,10 @@ public class UacProcessor {
       String eventDescription,
       EventType eventType,
       PayloadDTO payloadDTO,
-      OffsetDateTime eventMetaDataDateTime)
-      throws JsonProcessingException {
+      Map<String, String> headers,
+      OffsetDateTime eventMetaDataDateTime) {
+
+    validateHeaders(headers);
 
     Event loggedEvent = new Event();
     loggedEvent.setId(UUID.randomUUID());
@@ -105,12 +115,23 @@ public class UacProcessor {
       loggedEvent.setCaseId(uacQidLink.getCaze().getCaseId());
     }
 
-    loggedEvent.setEventChannel(EVENT_CHANNEL);
-    loggedEvent.setEventSource(EVENT_SOURCE);
+    loggedEvent.setEventChannel(headers.get("channel"));
+    loggedEvent.setEventSource(headers.get("source"));
+
     loggedEvent.setEventTransactionId(UUID.randomUUID());
-    loggedEvent.setEventPayload(convertPayloadDTOToJson(payloadDTO));
+    loggedEvent.setEventPayload(convertObjectToJson(payloadDTO));
 
     eventRepository.save(loggedEvent);
+  }
+
+  private void validateHeaders(Map<String, String> headers) {
+    if (!headers.containsKey("source")) {
+      throw new RuntimeException("Missing 'source' header value");
+    }
+
+    if (!headers.containsKey("channel")) {
+      throw new RuntimeException("Missing 'channel' header value");
+    }
   }
 
   public PayloadDTO emitUacUpdatedEvent(UacQidLink uacQidLink, Case caze) {
@@ -143,9 +164,5 @@ public class UacProcessor {
         outboundExchange, UAC_UPDATE_ROUTING_KEY, responseManagementEvent);
 
     return payloadDTO;
-  }
-
-  private String convertPayloadDTOToJson(PayloadDTO payloadDTO) throws JsonProcessingException {
-    return objectMapper.writeValueAsString(payloadDTO);
   }
 }

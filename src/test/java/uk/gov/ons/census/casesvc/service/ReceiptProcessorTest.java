@@ -10,6 +10,8 @@ import static uk.gov.ons.census.casesvc.service.ReceiptProcessor.QID_RECEIPTED;
 
 import java.time.OffsetDateTime;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.jeasy.random.EasyRandom;
@@ -27,7 +29,7 @@ public class ReceiptProcessorTest {
   private static final String TEST_UAC = "test_uac";
 
   @Test
-  public void testGoodReceipt() throws Exception {
+  public void testGoodReceipt() {
     // Given
     UacQidLink expectedUacQidLink = getUacQidLink();
 
@@ -44,6 +46,8 @@ public class ReceiptProcessorTest {
         .thenReturn(payloadDTO);
     when(caseProcessor.emitCaseCreatedEvent(any(Case.class))).thenReturn(new PayloadDTO());
 
+    Map<String, String> headers = createTestHeaders();
+
     // when
     Receipt receipt = new Receipt();
     receipt.setCaseId(TEST_CASE_ID.toString());
@@ -54,7 +58,7 @@ public class ReceiptProcessorTest {
 
     ReceiptProcessor receiptProcessor =
         new ReceiptProcessor(caseProcessor, caseRepository, uacProcessor);
-    receiptProcessor.processReceipt(receipt);
+    receiptProcessor.processReceipt(receipt, headers);
 
     // then
     verify(uacProcessor, times(1)).emitUacUpdatedEvent(expectedUacQidLink, expectedCase, false);
@@ -64,11 +68,12 @@ public class ReceiptProcessorTest {
             QID_RECEIPTED,
             EventType.UAC_UPDATED,
             payloadDTO,
+            headers,
             receipt.getResponseDateTime());
   }
 
   @Test(expected = RuntimeException.class)
-  public void testReceiptedCaseNotFound() throws Exception {
+  public void testReceiptedCaseNotFound() {
     // Given
     CaseRepository caseRepository = mock(CaseRepository.class);
     CaseProcessor caseProcessor = mock(CaseProcessor.class);
@@ -80,7 +85,7 @@ public class ReceiptProcessorTest {
 
     ReceiptProcessor receiptProcessor =
         new ReceiptProcessor(caseProcessor, caseRepository, uacProcessor);
-    receiptProcessor.processReceipt(receipt);
+    receiptProcessor.processReceipt(receipt, createTestHeaders());
 
     // Then
     // Expected Exception is raised
@@ -102,5 +107,14 @@ public class ReceiptProcessorTest {
     caze.setCaseId(TEST_CASE_ID);
 
     return caze;
+  }
+
+  private Map<String, String> createTestHeaders() {
+    Map<String, String> headers = new HashMap<>();
+
+    headers.put("channel", "any receipt channel");
+    headers.put("source", "any receipt source");
+
+    return headers;
   }
 }

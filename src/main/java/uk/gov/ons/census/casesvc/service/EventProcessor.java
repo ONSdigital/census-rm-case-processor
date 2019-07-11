@@ -35,8 +35,7 @@ public class EventProcessor {
     this.eventRepository = eventRepository;
   }
 
-  public void processSampleReceivedMessage(CreateCaseSample createCaseSample)
-      throws JsonProcessingException {
+  public void processSampleReceivedMessage(CreateCaseSample createCaseSample) {
     Case caze = caseProcessor.saveCase(createCaseSample);
     int questionnaireType =
         QuestionnaireTypeHelper.calculateQuestionnaireType(caze.getTreatmentCode());

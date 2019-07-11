@@ -1,12 +1,12 @@
 package uk.gov.ons.census.casesvc.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyInt;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -19,9 +19,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
+import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
-import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.PrintCaseSelected;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -42,7 +42,7 @@ public class EventProcessorTest {
   @InjectMocks EventProcessor underTest;
 
   @Test
-  public void testHappyPath() throws Exception {
+  public void testHappyPath() {
     // Given
     CreateCaseSample createCaseSample = new CreateCaseSample();
     Case caze = new Case();
@@ -67,7 +67,7 @@ public class EventProcessorTest {
   }
 
   @Test
-  public void testWelshQuestionnaire() throws Exception {
+  public void testWelshQuestionnaire() {
     // Given
     CreateCaseSample createCaseSample = new CreateCaseSample();
     Case caze = new Case();
