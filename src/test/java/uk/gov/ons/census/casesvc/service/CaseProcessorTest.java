@@ -54,7 +54,7 @@ public class CaseProcessorTest {
     createCaseSample.setFieldOfficerId(FIELD_OFFICER_ID);
     createCaseSample.setCeExpectedCapacity(CE_CAPACITY);
     // Given
-    when(caseRepository.save(any(Case.class))).then(obj -> obj.getArgument(0));
+    when(caseRepository.saveAndFlush(any(Case.class))).then(obj -> obj.getArgument(0));
 
     // When
     underTest.saveCase(createCaseSample);
@@ -62,7 +62,7 @@ public class CaseProcessorTest {
     // Then
     verify(mapperFacade).map(createCaseSample, Case.class);
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(caseRepository).save(caseArgumentCaptor.capture());
+    verify(caseRepository).saveAndFlush(caseArgumentCaptor.capture());
 
     Case savedCase = caseArgumentCaptor.getValue();
     assertThat(savedCase.getTreatmentCode()).isEqualTo(TEST_TREATMENT_CODE);
