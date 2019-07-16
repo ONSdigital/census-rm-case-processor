@@ -38,6 +38,8 @@ queueconfig:
   action-scheduler-routing-key-case: event.case.*
   unaddressed-inbound-queue: unaddressedRequestQueue
   receipt-response-inbound-queue: Case.Responses
+  #todo check name
+  refusal-response-inbound-queue: Case.Refusals
   action-case-queue: action.events
   consumers: 50
 

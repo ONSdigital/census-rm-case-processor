@@ -45,6 +45,9 @@ public class QueueSetterUpper {
   @Value("${queueconfig.receipt-response-inbound-queue}")
   private String receiptInboundQueue;
 
+  @Value("${queueconfig.refusal-response-inbound-queue}")
+  private String refusalInboundQueue;
+
   @Value("${queueconfig.action-case-queue}")
   private String actionCaseQueue;
 
@@ -103,6 +106,11 @@ public class QueueSetterUpper {
   @Bean
   public Queue receiptInboundQueue() {
     return new Queue(receiptInboundQueue, true);
+  }
+
+  @Bean
+  public Queue refusalInboundQueue() {
+    return new Queue(refusalInboundQueue, true);
   }
 
   @Bean
