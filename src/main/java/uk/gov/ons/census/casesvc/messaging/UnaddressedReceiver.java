@@ -1,6 +1,5 @@
 package uk.gov.ons.census.casesvc.messaging;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +19,7 @@ public class UnaddressedReceiver {
 
   @Transactional
   @ServiceActivator(inputChannel = "unaddressedInputChannel")
-  public void receiveMessage(CreateUacQid createUacQid) throws JsonProcessingException {
+  public void receiveMessage(CreateUacQid createUacQid) {
     UacQidLink uacQidLink =
         uacProcessor.saveUacQidLink(
             null, Integer.parseInt(createUacQid.getQuestionnaireType()), createUacQid.getBatchId());

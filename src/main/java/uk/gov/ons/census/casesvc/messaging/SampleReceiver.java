@@ -1,6 +1,5 @@
 package uk.gov.ons.census.casesvc.messaging;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +17,7 @@ public class SampleReceiver {
 
   @Transactional
   @ServiceActivator(inputChannel = "caseSampleInputChannel")
-  public void receiveMessage(CreateCaseSample createCaseSample) throws JsonProcessingException {
+  public void receiveMessage(CreateCaseSample createCaseSample) {
     eventProcessor.processSampleReceivedMessage(createCaseSample);
   }
 }
