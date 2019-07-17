@@ -12,6 +12,8 @@ public class CollectionCase {
   private Address address;
   private String state;
   private OffsetDateTime actionableFrom;
+  private Boolean receiptReceived;
+  private Boolean refusalReceived;
 
   // Below this line is extra data potentially needed by Action Scheduler - can be ignored by RH
   private String actionPlanId;
@@ -25,5 +27,4 @@ public class CollectionCase {
   private String fieldCoordinatorId;
   private String fieldOfficerId;
   private String ceExpectedCapacity;
-  private Boolean receiptReceived;
 }

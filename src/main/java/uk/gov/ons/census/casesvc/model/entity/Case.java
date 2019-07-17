@@ -91,4 +91,6 @@ public class Case {
   List<Event> events;
 
   @Column private boolean receiptReceived;
+
+  @Column private boolean refusalReceived;
 }

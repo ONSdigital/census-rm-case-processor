@@ -63,11 +63,12 @@ public class CaseProcessor {
     return responseManagementEvent.getPayload();
   }
 
-  public void emitCaseUpdatedEvent(Case caze) {
+  public PayloadDTO emitCaseUpdatedEvent(Case caze) {
     EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_UPDATED);
     ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
     rabbitTemplate.convertAndSend(
         outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
+    return responseManagementEvent.getPayload();
   }
 
   private ResponseManagementEvent prepareCaseEvent(Case caze, EventDTO eventDTO) {
@@ -112,6 +113,8 @@ public class CaseProcessor {
     collectionCase.setId(caze.getCaseId().toString());
     collectionCase.setState(caze.getState().toString());
     collectionCase.setSurvey(SURVEY);
+    collectionCase.setReceiptReceived(caze.isReceiptReceived());
+    collectionCase.setRefusalReceived(caze.isRefusalReceived());
 
     // Below this line is extra data potentially needed by Action Scheduler - can be ignored by RM
     collectionCase.setActionPlanId(caze.getActionPlanId());
@@ -125,7 +128,6 @@ public class CaseProcessor {
     collectionCase.setFieldCoordinatorId(caze.getFieldCoordinatorId());
     collectionCase.setFieldOfficerId(caze.getFieldOfficerId());
     collectionCase.setCeExpectedCapacity(caze.getCeExpectedCapacity());
-    collectionCase.setReceiptReceived(caze.isReceiptReceived());
 
     return collectionCase;
   }
