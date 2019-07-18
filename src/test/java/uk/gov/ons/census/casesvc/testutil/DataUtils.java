@@ -1,4 +1,4 @@
-package uk.gov.ons.census.casesvc.utility;
+package uk.gov.ons.census.casesvc.testutil;
 
 import java.util.UUID;
 import org.jeasy.random.EasyRandom;

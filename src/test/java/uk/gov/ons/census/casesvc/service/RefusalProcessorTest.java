@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.ons.census.casesvc.utility.DataUtils.getRandomCase;
-import static uk.gov.ons.census.casesvc.utility.DataUtils.getTestRefusal;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestRefusal;
 
 import java.util.HashMap;
 import java.util.Optional;
