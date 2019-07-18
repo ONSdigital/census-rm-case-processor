@@ -69,7 +69,7 @@ public class TransactionsIT {
     BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhUacQueue);
 
     Receipt receipt = new Receipt();
-    receipt.setCaseId(TEST_CASE_ID.toString());
+    receipt.setQuestionnaire_Id(TEST_QID);
 
     // WHEN
     String json = convertObjectToJson(receipt);

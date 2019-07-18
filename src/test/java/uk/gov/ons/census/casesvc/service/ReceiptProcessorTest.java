@@ -1,15 +1,9 @@
 package uk.gov.ons.census.casesvc.service;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyBoolean;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static uk.gov.ons.census.casesvc.service.ReceiptProcessor.QID_RECEIPTED;
 
 import java.time.OffsetDateTime;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -22,6 +16,7 @@ import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
+import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
 public class ReceiptProcessorTest {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
@@ -30,13 +25,15 @@ public class ReceiptProcessorTest {
 
   @Test
   public void testGoodReceipt() {
+    CaseRepository caseRepository = mock(CaseRepository.class);
+    UacQidLinkRepository uacQidLinkRepository = mock(UacQidLinkRepository.class);
+
     // Given
     UacQidLink expectedUacQidLink = getUacQidLink();
-
     Case expectedCase = getRandomCase();
-    expectedCase.setUacQidLinks(Collections.singletonList(expectedUacQidLink));
-    CaseRepository caseRepository = mock(CaseRepository.class);
-    when(caseRepository.findByCaseId(TEST_CASE_ID)).thenReturn(Optional.of(expectedCase));
+    expectedUacQidLink.setCaze(expectedCase);
+
+    when(uacQidLinkRepository.findByQid(TEST_QID)).thenReturn(Optional.of(expectedUacQidLink));
 
     UacProcessor uacProcessor = mock(UacProcessor.class);
     CaseProcessor caseProcessor = mock(CaseProcessor.class);
@@ -50,14 +47,14 @@ public class ReceiptProcessorTest {
 
     // when
     Receipt receipt = new Receipt();
-    receipt.setCaseId(TEST_CASE_ID.toString());
+    receipt.setQuestionnaire_Id(TEST_QID);
 
     String dateTime = "2016-03-04T11:30Z";
     OffsetDateTime expectedReceiptDateTime = OffsetDateTime.parse(dateTime);
     receipt.setResponseDateTime(expectedReceiptDateTime);
 
     ReceiptProcessor receiptProcessor =
-        new ReceiptProcessor(caseProcessor, caseRepository, uacProcessor);
+        new ReceiptProcessor(caseProcessor, uacQidLinkRepository, caseRepository, uacProcessor);
     receiptProcessor.processReceipt(receipt, headers);
 
     // then
@@ -73,18 +70,19 @@ public class ReceiptProcessorTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void testReceiptedCaseNotFound() {
+  public void testReceiptedQidNotFound() {
     // Given
     CaseRepository caseRepository = mock(CaseRepository.class);
     CaseProcessor caseProcessor = mock(CaseProcessor.class);
     UacProcessor uacProcessor = mock(UacProcessor.class);
+    UacQidLinkRepository uacQidLinkRepository = mock(UacQidLinkRepository.class);
 
     // Given
     Receipt receipt = new Receipt();
     receipt.setCaseId(TEST_CASE_ID.toString());
 
     ReceiptProcessor receiptProcessor =
-        new ReceiptProcessor(caseProcessor, caseRepository, uacProcessor);
+        new ReceiptProcessor(caseProcessor, uacQidLinkRepository, caseRepository, uacProcessor);
     receiptProcessor.processReceipt(receipt, createTestHeaders());
 
     // Then

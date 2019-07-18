@@ -95,7 +95,7 @@ public class ReceiptReceiverIT {
     uacQidLinkRepository.saveAndFlush(uacQidLink);
 
     Receipt receipt = new Receipt();
-    receipt.setCaseId(TEST_CASE_ID.toString());
+    receipt.setQuestionnaire_Id(TEST_QID);
 
     String json = convertObjectToJson(receipt);
     Message message =
