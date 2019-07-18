@@ -41,13 +41,20 @@ public class CaseProcessor {
   }
 
   public Case saveCase(CreateCaseSample createCaseSample) {
+    int caseRef = RandomCaseRefGenerator.getCaseRef();
+
+    // Check for collisions
+    if (caseRepository.existsById(caseRef)) {
+      throw new RuntimeException();
+    }
+
     Case caze = mapperFacade.map(createCaseSample, Case.class);
-    caze.setCaseRef(RandomCaseRefGenerator.getCaseRef());
+    caze.setCaseRef(caseRef);
     caze.setCaseId(UUID.randomUUID());
     caze.setState(CaseState.ACTIONABLE);
     caze.setCreatedDateTime(OffsetDateTime.now());
     caze.setReceiptReceived(false);
-    caze = caseRepository.save(caze);
+    caze = caseRepository.saveAndFlush(caze);
     return caze;
   }
 
