@@ -48,7 +48,6 @@ public class ReceiptProcessor {
     Case caze = cazeOpt.get();
     caze.setReceiptReceived(true);
     caseRepository.saveAndFlush(caze);
-    //todo should this be logged?
     caseProcessor.emitCaseUpdatedEvent(cazeOpt.get());
     uacProcessor.logEvent(
         uacQidLink,

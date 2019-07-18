@@ -4,12 +4,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.OffsetDateTime;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.ons.census.casesvc.model.entity.RefusalType;
 
 @Data
 @NoArgsConstructor
 public class Refusal {
-  @JsonProperty("case_id")
-  private String caseId;
+
+  private RefusalType type;
+
+  private String report;
+
+  private String agentId;
+
+  private CollectionCase collectionCase;
 
   @JsonProperty("tx_id")
   private String txId;

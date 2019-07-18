@@ -26,7 +26,9 @@ public class RefusalProcessor {
   private final UacProcessor uacProcessor;
 
   public RefusalProcessor(
-      CaseProcessor caseProcessor, CaseRepository caseRepository, UacProcessor uacProcessor,
+      CaseProcessor caseProcessor,
+      CaseRepository caseRepository,
+      UacProcessor uacProcessor,
       UacQidLinkRepository uacQidLinkRepository) {
     this.caseProcessor = caseProcessor;
     this.caseRepository = caseRepository;
@@ -35,19 +37,22 @@ public class RefusalProcessor {
   }
 
   public void processRefusal(Refusal refusal, Map<String, String> headers) {
+    String caseId = refusal.getCollectionCase().getId();
 
-    Optional<Case> cazeOpt = caseRepository.findByCaseId(UUID.fromString(refusal.getCaseId()));
+    Optional<Case> cazeOpt = caseRepository.findByCaseId(UUID.fromString(caseId));
 
     if (cazeOpt.isEmpty()) {
       log.error(CASE_NOT_FOUND_ERROR);
-      throw new RuntimeException();
+      throw new RuntimeException(String.format("Case Id '%s' not found!", caseId));
     }
 
     Case caze = cazeOpt.get();
     caze.setRefusalReceived(true);
     caseRepository.saveAndFlush(caze);
+
     UacQidLink uacQidLink = caze.getUacQidLinks().get(0);
     PayloadDTO casePayloadDTO = caseProcessor.emitCaseUpdatedEvent(caze);
+
     uacProcessor.logEvent(
         uacQidLink,
         REFUSAL_RECEIVED,
