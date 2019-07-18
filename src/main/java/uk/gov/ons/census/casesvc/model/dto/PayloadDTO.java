@@ -8,14 +8,14 @@ import uk.gov.ons.census.casesvc.model.entity.RefusalType;
 @Data
 public class PayloadDTO {
 
-  @JsonInclude(Include.NON_NULL)
-  private RefusalType type;
-
-  @JsonInclude(Include.NON_NULL)
-  private String report;
-
-  @JsonInclude(Include.NON_NULL)
-  private String agentId;
+//  @JsonInclude(Include.NON_NULL)
+//  private RefusalType type;
+//
+//  @JsonInclude(Include.NON_NULL)
+//  private String report;
+//
+//  @JsonInclude(Include.NON_NULL)
+//  private String agentId;
 
   @JsonInclude(Include.NON_NULL)
   private CollectionCase collectionCase;
