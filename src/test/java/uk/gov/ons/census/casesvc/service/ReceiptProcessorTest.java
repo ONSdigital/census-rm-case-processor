@@ -20,6 +20,7 @@ import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
 public class ReceiptProcessorTest {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
+  private static final String TEST_QUESTIONNAIRE_ID = "123";
   private static final String TEST_QID = "test_qid";
   private static final String TEST_UAC = "test_uac";
 
@@ -60,11 +61,11 @@ public class ReceiptProcessorTest {
     // then
     verify(uacProcessor, times(1)).emitUacUpdatedEvent(expectedUacQidLink, expectedCase, false);
     verify(uacProcessor, times(1))
-        .logEvent(
+        .logReceiptEvent(
             expectedUacQidLink,
             QID_RECEIPTED,
             EventType.UAC_UPDATED,
-            payloadDTO,
+            receipt,
             headers,
             receipt.getResponseDateTime());
   }
@@ -79,7 +80,7 @@ public class ReceiptProcessorTest {
 
     // Given
     Receipt receipt = new Receipt();
-    receipt.setCaseId(TEST_CASE_ID.toString());
+    receipt.setQuestionnaire_Id(TEST_QUESTIONNAIRE_ID);
 
     ReceiptProcessor receiptProcessor =
         new ReceiptProcessor(caseProcessor, uacQidLinkRepository, caseRepository, uacProcessor);

@@ -14,6 +14,7 @@ import uk.gov.ons.census.casesvc.client.UacQidServiceClient;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
+import uk.gov.ons.census.casesvc.model.dto.Receipt;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.dto.UacQidDTO;
@@ -85,6 +86,43 @@ public class UacProcessor {
     headers.put("channel", EVENT_CHANNEL);
 
     logEvent(uacQidLink, eventDescription, eventType, payloadDTO, headers, null);
+  }
+
+  public void logReceiptEvent(
+      UacQidLink uacQidLink,
+      String eventDescription,
+      EventType eventType,
+      Receipt payload,
+      Map<String, String> headers,
+      OffsetDateTime eventMetaDataDateTime) {
+
+    validateHeaders(headers);
+
+    Event loggedEvent = new Event();
+    loggedEvent.setId(UUID.randomUUID());
+
+    if (eventMetaDataDateTime != null) {
+      loggedEvent.setEventDate(eventMetaDataDateTime);
+    }
+
+    loggedEvent.setEventDate(OffsetDateTime.now());
+    loggedEvent.setRmEventProcessed(OffsetDateTime.now());
+    loggedEvent.setEventDescription(eventDescription);
+    loggedEvent.setUacQidLink(uacQidLink);
+    loggedEvent.setEventType(eventType);
+
+    // Only set Case Id if Addressed
+    if (uacQidLink.getCaze() != null) {
+      loggedEvent.setCaseId(uacQidLink.getCaze().getCaseId());
+    }
+
+    loggedEvent.setEventChannel(headers.get("channel"));
+    loggedEvent.setEventSource(headers.get("source"));
+
+    loggedEvent.setEventTransactionId(UUID.randomUUID());
+    loggedEvent.setEventPayload(convertObjectToJson(payload));
+
+    eventRepository.save(loggedEvent);
   }
 
   public void logEvent(
