@@ -11,6 +11,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Receipt {
 
+  @JsonInclude(Include.NON_NULL)
+  @JsonProperty("case_id")
+  private String caseId;
+
   @JsonProperty("questionnaire_id")
   private String questionnaire_Id;
 
