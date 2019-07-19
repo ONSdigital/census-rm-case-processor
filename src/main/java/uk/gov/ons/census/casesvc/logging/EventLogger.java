@@ -7,9 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
-import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
-import uk.gov.ons.census.casesvc.model.dto.ReceiptDTO;
-import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
+import uk.gov.ons.census.casesvc.model.dto.BaseDTO;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
@@ -28,7 +26,7 @@ public class EventLogger {
   }
 
   public void logEvent(
-      UacQidLink uacQidLink, String eventDescription, EventType eventType, PayloadDTO payloadDTO) {
+      UacQidLink uacQidLink, String eventDescription, EventType eventType, BaseDTO payloadDTO) {
 
     // Keep hardcoded for non-receipting calls for now
     Map<String, String> headers = new HashMap<>();
@@ -38,11 +36,11 @@ public class EventLogger {
     logEvent(uacQidLink, eventDescription, eventType, payloadDTO, headers, null);
   }
 
-  public void logReceiptEvent(
+  public void logEvent(
       UacQidLink uacQidLink,
       String eventDescription,
       EventType eventType,
-      ReceiptDTO payload,
+      BaseDTO payload,
       Map<String, String> headers,
       OffsetDateTime eventMetaDataDateTime) {
 
@@ -71,80 +69,6 @@ public class EventLogger {
 
     loggedEvent.setEventTransactionId(UUID.randomUUID());
     loggedEvent.setEventPayload(convertObjectToJson(payload));
-
-    eventRepository.save(loggedEvent);
-  }
-
-  public void logRefusalEvent(
-      UacQidLink uacQidLink,
-      String eventDescription,
-      EventType eventType,
-      RefusalDTO refusal,
-      Map<String, String> headers,
-      OffsetDateTime eventMetaDataDateTime) {
-
-    validateHeaders(headers);
-
-    Event loggedEvent = new Event();
-    loggedEvent.setId(UUID.randomUUID());
-
-    if (eventMetaDataDateTime != null) {
-      loggedEvent.setEventDate(eventMetaDataDateTime);
-    }
-
-    loggedEvent.setEventDate(OffsetDateTime.now());
-    loggedEvent.setRmEventProcessed(OffsetDateTime.now());
-    loggedEvent.setEventDescription(eventDescription);
-    loggedEvent.setUacQidLink(uacQidLink);
-    loggedEvent.setEventType(eventType);
-
-    // Only set Case Id if Addressed
-    if (uacQidLink.getCaze() != null) {
-      loggedEvent.setCaseId(uacQidLink.getCaze().getCaseId());
-    }
-
-    loggedEvent.setEventChannel(headers.get("channel"));
-    loggedEvent.setEventSource(headers.get("source"));
-
-    loggedEvent.setEventTransactionId(UUID.randomUUID());
-    loggedEvent.setEventPayload(convertObjectToJson(refusal));
-
-    eventRepository.save(loggedEvent);
-  }
-
-  public void logEvent(
-      UacQidLink uacQidLink,
-      String eventDescription,
-      EventType eventType,
-      PayloadDTO payloadDTO,
-      Map<String, String> headers,
-      OffsetDateTime eventMetaDataDateTime) {
-
-    validateHeaders(headers);
-
-    Event loggedEvent = new Event();
-    loggedEvent.setId(UUID.randomUUID());
-
-    if (eventMetaDataDateTime != null) {
-      loggedEvent.setEventDate(eventMetaDataDateTime);
-    }
-
-    loggedEvent.setEventDate(OffsetDateTime.now());
-    loggedEvent.setRmEventProcessed(OffsetDateTime.now());
-    loggedEvent.setEventDescription(eventDescription);
-    loggedEvent.setUacQidLink(uacQidLink);
-    loggedEvent.setEventType(eventType);
-
-    // Only set Case Id if Addressed
-    if (uacQidLink.getCaze() != null) {
-      loggedEvent.setCaseId(uacQidLink.getCaze().getCaseId());
-    }
-
-    loggedEvent.setEventChannel(headers.get("channel"));
-    loggedEvent.setEventSource(headers.get("source"));
-
-    loggedEvent.setEventTransactionId(UUID.randomUUID());
-    loggedEvent.setEventPayload(convertObjectToJson(payloadDTO));
 
     eventRepository.save(loggedEvent);
   }

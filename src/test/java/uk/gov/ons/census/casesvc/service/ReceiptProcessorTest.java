@@ -84,7 +84,7 @@ public class ReceiptProcessorTest {
     // then
     verify(uacProcessor, times(1)).emitUacUpdatedEvent(expectedUacQidLink, expectedCase, false);
     verify(eventLogger, times(1))
-        .logReceiptEvent(
+        .logEvent(
             expectedUacQidLink,
             QID_RECEIPTED,
             EventType.UAC_UPDATED,

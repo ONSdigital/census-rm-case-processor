@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.Data;
 
 @Data
-public class PayloadDTO {
+public class PayloadDTO extends BaseDTO {
 
   @JsonInclude(Include.NON_NULL)
   private CollectionCase collectionCase;

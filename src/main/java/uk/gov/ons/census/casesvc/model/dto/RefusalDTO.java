@@ -10,7 +10,7 @@ import uk.gov.ons.census.casesvc.model.entity.RefusalType;
 
 @Data
 @NoArgsConstructor
-public class RefusalDTO {
+public class RefusalDTO extends BaseDTO {
 
   @JsonInclude(Include.NON_NULL)
   @JsonProperty("case_id")

@@ -57,7 +57,7 @@ public class RefusalProcessor {
 
     caseProcessor.emitCaseUpdatedEvent(caze);
 
-    eventLogger.logRefusalEvent(
+    eventLogger.logEvent(
         uacQidLink,
         REFUSAL_RECEIVED,
         EventType.CASE_UPDATED,
