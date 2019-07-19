@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.Receipt;
+import uk.gov.ons.census.casesvc.model.dto.Refusal;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
@@ -70,6 +71,43 @@ public class EventLogger {
 
     loggedEvent.setEventTransactionId(UUID.randomUUID());
     loggedEvent.setEventPayload(convertObjectToJson(payload));
+
+    eventRepository.save(loggedEvent);
+  }
+
+  public void logRefusalEvent(
+      UacQidLink uacQidLink,
+      String eventDescription,
+      EventType eventType,
+      Refusal refusal,
+      Map<String, String> headers,
+      OffsetDateTime eventMetaDataDateTime) {
+
+    validateHeaders(headers);
+
+    Event loggedEvent = new Event();
+    loggedEvent.setId(UUID.randomUUID());
+
+    if (eventMetaDataDateTime != null) {
+      loggedEvent.setEventDate(eventMetaDataDateTime);
+    }
+
+    loggedEvent.setEventDate(OffsetDateTime.now());
+    loggedEvent.setRmEventProcessed(OffsetDateTime.now());
+    loggedEvent.setEventDescription(eventDescription);
+    loggedEvent.setUacQidLink(uacQidLink);
+    loggedEvent.setEventType(eventType);
+
+    // Only set Case Id if Addressed
+    if (uacQidLink.getCaze() != null) {
+      loggedEvent.setCaseId(uacQidLink.getCaze().getCaseId());
+    }
+
+    loggedEvent.setEventChannel(headers.get("channel"));
+    loggedEvent.setEventSource(headers.get("source"));
+
+    loggedEvent.setEventTransactionId(UUID.randomUUID());
+    loggedEvent.setEventPayload(convertObjectToJson(refusal));
 
     eventRepository.save(loggedEvent);
   }

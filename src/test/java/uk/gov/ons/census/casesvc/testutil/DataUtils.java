@@ -25,7 +25,6 @@ public class DataUtils {
 
   public static Refusal getTestRefusal() {
     CollectionCase collectionCase = easyRandom.nextObject(CollectionCase.class);
-    collectionCase.setId(UUID.randomUUID().toString());
     collectionCase.setRefusalReceived(false);
 
     Refusal refusal = easyRandom.nextObject(Refusal.class);

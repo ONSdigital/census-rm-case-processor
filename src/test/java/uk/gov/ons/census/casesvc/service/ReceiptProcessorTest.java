@@ -65,7 +65,6 @@ public class ReceiptProcessorTest {
 
     when(uacProcessor.emitUacUpdatedEvent(any(UacQidLink.class), any(Case.class), anyBoolean()))
         .thenReturn(payloadDTO);
-    when(caseProcessor.emitCaseCreatedEvent(any(Case.class))).thenReturn(new PayloadDTO());
 
     Map<String, String> headers = createTestHeaders();
 

@@ -1,7 +1,7 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
@@ -9,7 +9,6 @@ import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestRefusal;
 
 import java.util.HashMap;
 import java.util.Optional;
-import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -17,14 +16,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
-import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.Refusal;
 import uk.gov.ons.census.casesvc.model.entity.Case;
+import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
+import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RefusalProcessorTest {
 
+  @Mock private UacQidLinkRepository uacQidLinkRepository;
   @Mock private CaseRepository caseRepository;
 
   @Mock private CaseProcessor caseProcessor;
@@ -38,22 +39,13 @@ public class RefusalProcessorTest {
   @Test
   public void shouldProcessARefusalReceivedMessageSuccessfully() {
     // GIVEN
-    Refusal expectedRefusal = new Refusal();
-    CollectionCase expectedCollectionCase = new CollectionCase();
-    String expectedCaseId = UUID.randomUUID().toString();
+    Case testCase = getRandomCase();
+    Optional<UacQidLink> uacQidLink = Optional.of(testCase.getUacQidLinks().get(0));
 
-    expectedCollectionCase.setId(expectedCaseId);
-    expectedRefusal.setCollectionCase(expectedCollectionCase);
-
-    Case expectedCase = getRandomCase();
-    expectedCase.setCaseId(UUID.randomUUID());
-    expectedCase.setRefusalReceived(false);
-
-    when(caseRepository.findByCaseId(any(UUID.class))).thenReturn(Optional.of(expectedCase));
-    when(caseRepository.saveAndFlush(expectedCase)).thenReturn(expectedCase);
+    when(uacQidLinkRepository.findByQid(anyString())).thenReturn(uacQidLink);
 
     // WHEN
-    underTest.processRefusal(expectedRefusal, new HashMap<>());
+    underTest.processRefusal(getTestRefusal(), new HashMap<>());
 
     // THEN
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
@@ -67,17 +59,17 @@ public class RefusalProcessorTest {
   public void shouldThrowRuntimeExceptionWhenCaseNotFound() {
     // GIVEN
     Refusal testRefusal = getTestRefusal();
-    String expectedMessage =
-        String.format("Case Id '%s' not found!", testRefusal.getCollectionCase().getId());
+    String expectedErrorMessage =
+        String.format("Questionnaire Id '%s' not found!", testRefusal.getQuestionnaire_Id());
 
-    when(caseRepository.findByCaseId(any(UUID.class))).thenReturn(Optional.empty());
+    when(uacQidLinkRepository.findByQid(anyString())).thenReturn(Optional.empty());
 
-    // WHEN
-    // THEN
     try {
+      // WHEN
       underTest.processRefusal(testRefusal, new HashMap<>());
     } catch (RuntimeException e) {
-      assertThat(e.getMessage()).isEqualTo(expectedMessage);
+      // THEN
+      assertThat(e.getMessage()).isEqualTo(expectedErrorMessage);
     }
   }
 }

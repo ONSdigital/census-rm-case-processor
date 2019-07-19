@@ -4,10 +4,8 @@ import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
-import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.Refusal;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
@@ -20,7 +18,7 @@ public class RefusalProcessor {
   private static final Logger log = LoggerFactory.getLogger(RefusalProcessor.class);
   public static final String REFUSAL_RECEIVED = "REFUSAL_RECEIVED";
   private static final String CASE_NOT_FOUND_ERROR = "Failed to find case by receipt id";
-  private static final String CASE_CREATED_EVENT_DESCRIPTION = "Case updated";
+  private static final String QID_NOT_FOUND_ERROR = "Qid not found error";
   private final CaseProcessor caseProcessor;
   private final CaseRepository caseRepository;
   private final UacQidLinkRepository uacQidLinkRepository;
@@ -41,27 +39,29 @@ public class RefusalProcessor {
   }
 
   public void processRefusal(Refusal refusal, Map<String, String> headers) {
-    String caseId = refusal.getCollectionCase().getId();
+    String questionnaireId = refusal.getQuestionnaire_Id();
 
-    Optional<Case> cazeOpt = caseRepository.findByCaseId(UUID.fromString(caseId));
+    Optional<UacQidLink> uacQidLinkOpt = uacQidLinkRepository.findByQid(questionnaireId);
 
-    if (cazeOpt.isEmpty()) {
-      log.error(CASE_NOT_FOUND_ERROR);
-      throw new RuntimeException(String.format("Case Id '%s' not found!", caseId));
+    if (uacQidLinkOpt.isEmpty()) {
+      log.error(QID_NOT_FOUND_ERROR);
+      throw new RuntimeException(
+          String.format("Questionnaire Id '%s' not found!", questionnaireId));
     }
 
-    Case caze = cazeOpt.get();
+    UacQidLink uacQidLink = uacQidLinkOpt.get();
+    Case caze = uacQidLink.getCaze();
+
     caze.setRefusalReceived(true);
     caseRepository.saveAndFlush(caze);
 
-    UacQidLink uacQidLink = caze.getUacQidLinks().get(0);
-    PayloadDTO casePayloadDTO = caseProcessor.emitCaseUpdatedEvent(caze);
+    caseProcessor.emitCaseUpdatedEvent(caze);
 
-    eventLogger.logEvent(
+    eventLogger.logRefusalEvent(
         uacQidLink,
         REFUSAL_RECEIVED,
         EventType.CASE_UPDATED,
-        casePayloadDTO,
+        refusal,
         headers,
         refusal.getResponseDateTime());
   }
