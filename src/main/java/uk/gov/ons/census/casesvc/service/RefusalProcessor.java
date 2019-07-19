@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
+import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.Refusal;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -24,16 +25,19 @@ public class RefusalProcessor {
   private final CaseRepository caseRepository;
   private final UacQidLinkRepository uacQidLinkRepository;
   private final UacProcessor uacProcessor;
+  private final EventLogger eventLogger;
 
   public RefusalProcessor(
       CaseProcessor caseProcessor,
       CaseRepository caseRepository,
       UacProcessor uacProcessor,
-      UacQidLinkRepository uacQidLinkRepository) {
+      UacQidLinkRepository uacQidLinkRepository,
+      EventLogger eventLogger) {
     this.caseProcessor = caseProcessor;
     this.caseRepository = caseRepository;
     this.uacProcessor = uacProcessor;
     this.uacQidLinkRepository = uacQidLinkRepository;
+    this.eventLogger = eventLogger;
   }
 
   public void processRefusal(Refusal refusal, Map<String, String> headers) {
@@ -53,7 +57,7 @@ public class RefusalProcessor {
     UacQidLink uacQidLink = caze.getUacQidLinks().get(0);
     PayloadDTO casePayloadDTO = caseProcessor.emitCaseUpdatedEvent(caze);
 
-    uacProcessor.logEvent(
+    eventLogger.logEvent(
         uacQidLink,
         REFUSAL_RECEIVED,
         EventType.CASE_UPDATED,

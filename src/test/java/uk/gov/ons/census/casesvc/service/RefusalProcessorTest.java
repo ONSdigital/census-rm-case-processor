@@ -16,6 +16,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.Refusal;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -29,6 +30,8 @@ public class RefusalProcessorTest {
   @Mock private CaseProcessor caseProcessor;
 
   @Mock private UacProcessor uacProcessor;
+
+  @Mock private EventLogger eventLogger;
 
   @InjectMocks RefusalProcessor underTest;
 

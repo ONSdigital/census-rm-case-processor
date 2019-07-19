@@ -11,6 +11,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.CreateUacQid;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
@@ -20,6 +21,7 @@ import uk.gov.ons.census.casesvc.service.UacProcessor;
 @RunWith(MockitoJUnitRunner.class)
 public class UnaddressedReceiverTest {
   @Mock UacProcessor uacProcessor;
+  @Mock EventLogger eventLogger;
 
   @InjectMocks UnaddressedReceiver underTest;
 
@@ -39,7 +41,7 @@ public class UnaddressedReceiverTest {
 
     // Then
     verify(uacProcessor).emitUacUpdatedEvent(eq(uacQidLink), eq(null));
-    verify(uacProcessor)
+    verify(eventLogger)
         .logEvent(
             eq(uacQidLink),
             eq("Unaddressed UAC/QID pair created"),

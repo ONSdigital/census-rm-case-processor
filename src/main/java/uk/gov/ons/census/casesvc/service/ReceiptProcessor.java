@@ -5,7 +5,7 @@ import com.godaddy.logging.LoggerFactory;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
-import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
+import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.Receipt;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
@@ -22,16 +22,19 @@ public class ReceiptProcessor {
   private final UacQidLinkRepository uacQidLinkRepository;
   private final CaseRepository caseRepository;
   private final UacProcessor uacProcessor;
+  private final EventLogger eventLogger;
 
   public ReceiptProcessor(
       CaseProcessor caseProcessor,
       UacQidLinkRepository uacQidLinkRepository,
       CaseRepository caseRepository,
-      UacProcessor uacProcessor) {
+      UacProcessor uacProcessor,
+      EventLogger eventLogger) {
     this.caseProcessor = caseProcessor;
     this.uacQidLinkRepository = uacQidLinkRepository;
     this.caseRepository = caseRepository;
     this.uacProcessor = uacProcessor;
+    this.eventLogger = eventLogger;
   }
 
   public void processReceipt(Receipt receipt, Map<String, String> headers) {
@@ -50,7 +53,7 @@ public class ReceiptProcessor {
     caze.setReceiptReceived(true);
     caseRepository.saveAndFlush(caze);
     caseProcessor.emitCaseUpdatedEvent(caze);
-    uacProcessor.logReceiptEvent(
+    eventLogger.logReceiptEvent(
         uacQidLink,
         QID_RECEIPTED,
         EventType.UAC_UPDATED,

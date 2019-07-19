@@ -7,15 +7,6 @@ import lombok.Data;
 @Data
 public class PayloadDTO {
 
-  //  @JsonInclude(Include.NON_NULL)
-  //  private RefusalType type;
-  //
-  //  @JsonInclude(Include.NON_NULL)
-  //  private String report;
-  //
-  //  @JsonInclude(Include.NON_NULL)
-  //  private String agentId;
-
   @JsonInclude(Include.NON_NULL)
   private CollectionCase collectionCase;
 
