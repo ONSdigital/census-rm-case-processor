@@ -3,7 +3,7 @@ package uk.gov.ons.census.casesvc.testutil;
 import java.util.UUID;
 import org.jeasy.random.EasyRandom;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
-import uk.gov.ons.census.casesvc.model.dto.Refusal;
+import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 
 public class DataUtils {
@@ -23,11 +23,11 @@ public class DataUtils {
     return caze;
   }
 
-  public static Refusal getTestRefusal() {
+  public static RefusalDTO getTestRefusal() {
     CollectionCase collectionCase = easyRandom.nextObject(CollectionCase.class);
     collectionCase.setRefusalReceived(false);
 
-    Refusal refusal = easyRandom.nextObject(Refusal.class);
+    RefusalDTO refusal = easyRandom.nextObject(RefusalDTO.class);
     refusal.setCollectionCase(collectionCase);
 
     return refusal;

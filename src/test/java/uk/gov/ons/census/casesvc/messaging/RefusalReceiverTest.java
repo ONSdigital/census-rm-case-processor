@@ -14,7 +14,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.ons.census.casesvc.model.dto.Refusal;
+import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
 import uk.gov.ons.census.casesvc.service.RefusalProcessor;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -31,21 +31,21 @@ public class RefusalReceiverTest {
     headers.put("channel", "any receipt channel");
     headers.put("source", "any receipt source");
 
-    Refusal testRefusal = getTestRefusal();
+    RefusalDTO testRefusal = getTestRefusal();
     String expectedCaseId = testRefusal.getCollectionCase().getId();
 
-    doNothing().when(refusalProcessor).processRefusal(any(Refusal.class), any(Map.class));
+    doNothing().when(refusalProcessor).processRefusal(any(RefusalDTO.class), any(Map.class));
 
     // WHEN
     underTest.refusalMessage(testRefusal, headers);
 
     // THEN
-    ArgumentCaptor<Refusal> refusalArgumentCaptor = ArgumentCaptor.forClass(Refusal.class);
+    ArgumentCaptor<RefusalDTO> refusalArgumentCaptor = ArgumentCaptor.forClass(RefusalDTO.class);
     ArgumentCaptor<Map> headersArgumentCaptor = ArgumentCaptor.forClass(Map.class);
     verify(refusalProcessor)
         .processRefusal(refusalArgumentCaptor.capture(), headersArgumentCaptor.capture());
 
-    Refusal actualRefusal = refusalArgumentCaptor.getValue();
+    RefusalDTO actualRefusal = refusalArgumentCaptor.getValue();
     assertThat(actualRefusal.getCollectionCase().getId()).isEqualTo(expectedCaseId);
 
     Map<String, String> actualHeaders = headersArgumentCaptor.getValue();

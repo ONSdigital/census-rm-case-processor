@@ -9,7 +9,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.Receipt;
-import uk.gov.ons.census.casesvc.model.dto.Refusal;
+import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
@@ -79,7 +79,7 @@ public class EventLogger {
       UacQidLink uacQidLink,
       String eventDescription,
       EventType eventType,
-      Refusal refusal,
+      RefusalDTO refusal,
       Map<String, String> headers,
       OffsetDateTime eventMetaDataDateTime) {
 

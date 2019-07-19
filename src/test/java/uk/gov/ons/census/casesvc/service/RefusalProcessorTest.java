@@ -16,7 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
-import uk.gov.ons.census.casesvc.model.dto.Refusal;
+import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
@@ -58,7 +58,7 @@ public class RefusalProcessorTest {
   @Test
   public void shouldThrowRuntimeExceptionWhenCaseNotFound() {
     // GIVEN
-    Refusal testRefusal = getTestRefusal();
+    RefusalDTO testRefusal = getTestRefusal();
     String expectedErrorMessage =
         String.format("Questionnaire Id '%s' not found!", testRefusal.getQuestionnaire_Id());
 

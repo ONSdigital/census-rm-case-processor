@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
-import uk.gov.ons.census.casesvc.model.dto.Refusal;
+import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
@@ -38,7 +38,7 @@ public class RefusalProcessor {
     this.eventLogger = eventLogger;
   }
 
-  public void processRefusal(Refusal refusal, Map<String, String> headers) {
+  public void processRefusal(RefusalDTO refusal, Map<String, String> headers) {
     String questionnaireId = refusal.getQuestionnaire_Id();
 
     Optional<UacQidLink> uacQidLinkOpt = uacQidLinkRepository.findByQid(questionnaireId);
