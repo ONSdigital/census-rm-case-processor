@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class Receipt {
+public class ReceiptDTO {
 
   @JsonInclude(Include.NON_NULL)
   @JsonProperty("case_id")

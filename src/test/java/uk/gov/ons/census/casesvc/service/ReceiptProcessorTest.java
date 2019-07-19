@@ -21,7 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
-import uk.gov.ons.census.casesvc.model.dto.Receipt;
+import uk.gov.ons.census.casesvc.model.dto.ReceiptDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
@@ -69,7 +69,7 @@ public class ReceiptProcessorTest {
     Map<String, String> headers = createTestHeaders();
 
     // when
-    Receipt receipt = new Receipt();
+    ReceiptDTO receipt = new ReceiptDTO();
     receipt.setQuestionnaire_Id(TEST_QID);
 
     String dateTime = "2016-03-04T11:30Z";
@@ -102,7 +102,7 @@ public class ReceiptProcessorTest {
     UacQidLinkRepository uacQidLinkRepository = mock(UacQidLinkRepository.class);
 
     // Given
-    Receipt receipt = new Receipt();
+    ReceiptDTO receipt = new ReceiptDTO();
     receipt.setQuestionnaire_Id(TEST_QUESTIONNAIRE_ID);
 
     ReceiptProcessor receiptProcessor =

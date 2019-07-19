@@ -24,7 +24,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
-import uk.gov.ons.census.casesvc.model.dto.Receipt;
+import uk.gov.ons.census.casesvc.model.dto.ReceiptDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -94,7 +94,7 @@ public class ReceiptReceiverIT {
     uacQidLink.setUac(TEST_UAC);
     uacQidLinkRepository.saveAndFlush(uacQidLink);
 
-    Receipt receipt = new Receipt();
+    ReceiptDTO receipt = new ReceiptDTO();
     receipt.setQuestionnaire_Id(TEST_QID);
 
     String json = convertObjectToJson(receipt);

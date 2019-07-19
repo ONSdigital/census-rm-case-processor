@@ -7,7 +7,7 @@ import static org.mockito.Mockito.verify;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Test;
-import uk.gov.ons.census.casesvc.model.dto.Receipt;
+import uk.gov.ons.census.casesvc.model.dto.ReceiptDTO;
 import uk.gov.ons.census.casesvc.service.ReceiptProcessor;
 
 public class ReceiptReceiverTest {
@@ -21,7 +21,7 @@ public class ReceiptReceiverTest {
     headers.put("source", "any receipt source");
 
     ReceiptReceiver receiptReceiver = new ReceiptReceiver(receiptProcessor);
-    Receipt receipt = new Receipt();
+    ReceiptDTO receipt = new ReceiptDTO();
     receiptReceiver.receiveMessage(receipt, headers);
 
     verify(receiptProcessor, times(1)).processReceipt(receipt, headers);
