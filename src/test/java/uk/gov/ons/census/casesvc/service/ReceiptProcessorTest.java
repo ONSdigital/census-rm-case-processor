@@ -1,5 +1,6 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.mock;
@@ -7,10 +8,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.service.ReceiptProcessor.QID_RECEIPTED;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementEvent;
 
-import java.time.OffsetDateTime;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.jeasy.random.EasyRandom;
@@ -22,6 +21,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ReceiptDTO;
+import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
@@ -49,15 +49,17 @@ public class ReceiptProcessorTest {
 
   @Test
   public void testGoodReceipt() {
+    ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
+    ReceiptDTO receipt = managementEvent.getPayload().getReceipt();
     CaseRepository caseRepository = mock(CaseRepository.class);
     UacQidLinkRepository uacQidLinkRepository = mock(UacQidLinkRepository.class);
 
     // Given
-    UacQidLink expectedUacQidLink = getUacQidLink();
     Case expectedCase = getRandomCase();
+    UacQidLink expectedUacQidLink = expectedCase.getUacQidLinks().get(0);
     expectedUacQidLink.setCaze(expectedCase);
 
-    when(uacQidLinkRepository.findByQid(TEST_QID)).thenReturn(Optional.of(expectedUacQidLink));
+    when(uacQidLinkRepository.findByQid(anyString())).thenReturn(Optional.of(expectedUacQidLink));
 
     UacProcessor uacProcessor = mock(UacProcessor.class);
     CaseProcessor caseProcessor = mock(CaseProcessor.class);
@@ -66,20 +68,11 @@ public class ReceiptProcessorTest {
     when(uacProcessor.emitUacUpdatedEvent(any(UacQidLink.class), any(Case.class), anyBoolean()))
         .thenReturn(payloadDTO);
 
-    Map<String, String> headers = createTestHeaders();
-
     // when
-    ReceiptDTO receipt = new ReceiptDTO();
-    receipt.setQuestionnaire_Id(TEST_QID);
-
-    String dateTime = "2016-03-04T11:30Z";
-    OffsetDateTime expectedReceiptDateTime = OffsetDateTime.parse(dateTime);
-    receipt.setResponseDateTime(expectedReceiptDateTime);
-
     ReceiptProcessor receiptProcessor =
         new ReceiptProcessor(
             caseProcessor, uacQidLinkRepository, caseRepository, uacProcessor, eventLogger);
-    receiptProcessor.processReceipt(receipt, headers);
+    receiptProcessor.processReceipt(managementEvent);
 
     // then
     verify(uacProcessor, times(1)).emitUacUpdatedEvent(expectedUacQidLink, expectedCase, false);
@@ -88,8 +81,8 @@ public class ReceiptProcessorTest {
             expectedUacQidLink,
             QID_RECEIPTED,
             EventType.UAC_UPDATED,
-            receipt,
-            headers,
+            managementEvent.getPayload().getReceipt(),
+            managementEvent.getEvent(),
             receipt.getResponseDateTime());
   }
 
@@ -103,25 +96,16 @@ public class ReceiptProcessorTest {
 
     // Given
     ReceiptDTO receipt = new ReceiptDTO();
-    receipt.setQuestionnaire_Id(TEST_QUESTIONNAIRE_ID);
+    receipt.setQuestionnaireId(TEST_QUESTIONNAIRE_ID);
 
     ReceiptProcessor receiptProcessor =
         new ReceiptProcessor(
             caseProcessor, uacQidLinkRepository, caseRepository, uacProcessor, eventLogger);
-    receiptProcessor.processReceipt(receipt, createTestHeaders());
+    receiptProcessor.processReceipt(new ResponseManagementEvent());
 
     // Then
     // Expected Exception is raised
 
-  }
-
-  private UacQidLink getUacQidLink() {
-    UacQidLink uacQidLink = new UacQidLink();
-    uacQidLink.setCaze(null);
-    uacQidLink.setUac(TEST_UAC);
-    uacQidLink.setId(UUID.randomUUID());
-    uacQidLink.setQid(TEST_QID);
-    return uacQidLink;
   }
 
   private Case getRandomCase() {
@@ -130,14 +114,5 @@ public class ReceiptProcessorTest {
     caze.setCaseId(TEST_CASE_ID);
 
     return caze;
-  }
-
-  private Map<String, String> createTestHeaders() {
-    Map<String, String> headers = new HashMap<>();
-
-    headers.put("channel", "any receipt channel");
-    headers.put("source", "any receipt source");
-
-    return headers;
   }
 }

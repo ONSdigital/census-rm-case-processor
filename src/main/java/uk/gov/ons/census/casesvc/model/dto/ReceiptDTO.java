@@ -12,15 +12,14 @@ import lombok.NoArgsConstructor;
 public class ReceiptDTO extends BaseDTO {
 
   @JsonInclude(Include.NON_NULL)
-  @JsonProperty("case_id")
+  @JsonProperty("caseId")
   private String caseId;
 
-  @JsonProperty("questionnaire_id")
-  private String questionnaire_Id;
+  private String questionnaireId;
 
   private boolean unreceipt;
 
   @JsonInclude(Include.NON_NULL)
-  @JsonProperty("response_dateTime")
+  @JsonProperty("dateTime")
   private OffsetDateTime responseDateTime;
 }

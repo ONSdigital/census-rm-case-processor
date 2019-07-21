@@ -1,20 +1,17 @@
 package uk.gov.ons.census.casesvc.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestRefusal;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementEvent;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
+import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.service.RefusalProcessor;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -27,29 +24,21 @@ public class RefusalReceiverTest {
   @Test
   public void shouldProcessARefusalReceivedMessageSuccessfully() {
     // GIVEN
-    Map<String, String> headers = new HashMap<>();
-    headers.put("channel", "any receipt channel");
-    headers.put("source", "any receipt source");
+    ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
+    String expectedCaseId = managementEvent.getPayload().getCollectionCase().getId();
 
-    RefusalDTO testRefusal = getTestRefusal();
-    String expectedCaseId = testRefusal.getCollectionCase().getId();
-
-    doNothing().when(refusalProcessor).processRefusal(any(RefusalDTO.class), any(Map.class));
+    doNothing().when(refusalProcessor).processRefusal(managementEvent);
 
     // WHEN
-    underTest.refusalMessage(testRefusal, headers);
+    underTest.receiveMessage(managementEvent);
 
     // THEN
-    ArgumentCaptor<RefusalDTO> refusalArgumentCaptor = ArgumentCaptor.forClass(RefusalDTO.class);
-    ArgumentCaptor<Map> headersArgumentCaptor = ArgumentCaptor.forClass(Map.class);
-    verify(refusalProcessor)
-        .processRefusal(refusalArgumentCaptor.capture(), headersArgumentCaptor.capture());
+    ArgumentCaptor<ResponseManagementEvent> managementEventArgumentCaptor =
+        ArgumentCaptor.forClass(ResponseManagementEvent.class);
+    verify(refusalProcessor).processRefusal(managementEventArgumentCaptor.capture());
 
-    RefusalDTO actualRefusal = refusalArgumentCaptor.getValue();
-    assertThat(actualRefusal.getCollectionCase().getId()).isEqualTo(expectedCaseId);
-
-    Map<String, String> actualHeaders = headersArgumentCaptor.getValue();
-    assertThat(actualHeaders.containsKey("source")).isTrue();
-    assertThat(actualHeaders.containsKey("channel")).isTrue();
+    String actualCaseId =
+        managementEventArgumentCaptor.getValue().getPayload().getCollectionCase().getId();
+    assertThat(actualCaseId).isEqualTo(expectedCaseId);
   }
 }

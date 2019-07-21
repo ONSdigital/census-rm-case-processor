@@ -3,11 +3,10 @@ package uk.gov.ons.census.casesvc.logging;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.time.OffsetDateTime;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.model.dto.BaseDTO;
+import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
@@ -29,11 +28,11 @@ public class EventLogger {
       UacQidLink uacQidLink, String eventDescription, EventType eventType, BaseDTO payloadDTO) {
 
     // Keep hardcoded for non-receipting calls for now
-    Map<String, String> headers = new HashMap<>();
-    headers.put("source", EVENT_SOURCE);
-    headers.put("channel", EVENT_CHANNEL);
+    EventDTO event = new EventDTO();
+    event.setSource(EVENT_SOURCE);
+    event.setChannel(EVENT_CHANNEL);
 
-    logEvent(uacQidLink, eventDescription, eventType, payloadDTO, headers, null);
+    logEvent(uacQidLink, eventDescription, eventType, payloadDTO, event, null);
   }
 
   public void logEvent(
@@ -41,10 +40,8 @@ public class EventLogger {
       String eventDescription,
       EventType eventType,
       BaseDTO payload,
-      Map<String, String> headers,
+      EventDTO event,
       OffsetDateTime eventMetaDataDateTime) {
-
-    validateHeaders(headers);
 
     Event loggedEvent = new Event();
     loggedEvent.setId(UUID.randomUUID());
@@ -64,22 +61,12 @@ public class EventLogger {
       loggedEvent.setCaseId(uacQidLink.getCaze().getCaseId());
     }
 
-    loggedEvent.setEventChannel(headers.get("channel"));
-    loggedEvent.setEventSource(headers.get("source"));
+    loggedEvent.setEventChannel(event.getChannel());
+    loggedEvent.setEventSource(event.getSource());
 
     loggedEvent.setEventTransactionId(UUID.randomUUID());
     loggedEvent.setEventPayload(convertObjectToJson(payload));
 
     eventRepository.save(loggedEvent);
-  }
-
-  private static void validateHeaders(Map<String, String> headers) {
-    if (!headers.containsKey("source")) {
-      throw new RuntimeException("Missing 'source' header value");
-    }
-
-    if (!headers.containsKey("channel")) {
-      throw new RuntimeException("Missing 'channel' header value");
-    }
   }
 }

@@ -13,7 +13,7 @@ import uk.gov.ons.census.casesvc.model.entity.RefusalType;
 public class RefusalDTO extends BaseDTO {
 
   @JsonInclude(Include.NON_NULL)
-  @JsonProperty("case_id")
+  @JsonProperty("caseId")
   private String caseId;
 
   private RefusalType type;
@@ -24,10 +24,9 @@ public class RefusalDTO extends BaseDTO {
 
   private CollectionCase collectionCase;
 
-  @JsonProperty("questionnaire_id")
-  private String questionnaire_Id;
+  private String questionnaireId;
 
   @JsonInclude(Include.NON_NULL)
-  @JsonProperty("response_dateTime")
+  @JsonProperty("dateTime")
   private OffsetDateTime responseDateTime;
 }

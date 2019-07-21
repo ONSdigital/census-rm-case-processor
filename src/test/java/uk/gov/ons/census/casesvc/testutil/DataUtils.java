@@ -2,8 +2,10 @@ package uk.gov.ons.census.casesvc.testutil;
 
 import java.util.UUID;
 import org.jeasy.random.EasyRandom;
-import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
-import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
+import uk.gov.ons.census.casesvc.model.dto.EventDTO;
+import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
+import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
+import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 
 public class DataUtils {
@@ -23,13 +25,28 @@ public class DataUtils {
     return caze;
   }
 
-  public static RefusalDTO getTestRefusal() {
-    CollectionCase collectionCase = easyRandom.nextObject(CollectionCase.class);
-    collectionCase.setRefusalReceived(false);
+  public static ResponseManagementEvent getTestResponseManagementEvent() {
+    ResponseManagementEvent managementEvent = easyRandom.nextObject(ResponseManagementEvent.class);
+    managementEvent.getEvent().setChannel("EQ");
+    managementEvent.getEvent().setSource("RECEIPTING");
 
-    RefusalDTO refusal = easyRandom.nextObject(RefusalDTO.class);
-    refusal.setCollectionCase(collectionCase);
+    return managementEvent;
+  }
 
-    return refusal;
+  public static ResponseManagementEvent getTestResponseManagementReceiptEvent() {
+    ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
+
+    EventDTO event = managementEvent.getEvent();
+    event.setType(EventTypeDTO.UAC_UPDATED);
+    event.setSource("RECEIPTING");
+    event.setChannel("EQ");
+
+    PayloadDTO payload = managementEvent.getPayload();
+    payload.setUac(null);
+    payload.setCollectionCase(null);
+    payload.setRefusal(null);
+    payload.setPrintCaseSelected(null);
+
+    return managementEvent;
   }
 }

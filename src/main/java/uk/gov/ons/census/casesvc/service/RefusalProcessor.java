@@ -2,11 +2,11 @@ package uk.gov.ons.census.casesvc.service;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
-import java.util.Map;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
+import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
@@ -22,31 +22,28 @@ public class RefusalProcessor {
   private final CaseProcessor caseProcessor;
   private final CaseRepository caseRepository;
   private final UacQidLinkRepository uacQidLinkRepository;
-  private final UacProcessor uacProcessor;
   private final EventLogger eventLogger;
 
   public RefusalProcessor(
       CaseProcessor caseProcessor,
       CaseRepository caseRepository,
-      UacProcessor uacProcessor,
       UacQidLinkRepository uacQidLinkRepository,
       EventLogger eventLogger) {
     this.caseProcessor = caseProcessor;
     this.caseRepository = caseRepository;
-    this.uacProcessor = uacProcessor;
     this.uacQidLinkRepository = uacQidLinkRepository;
     this.eventLogger = eventLogger;
   }
 
-  public void processRefusal(RefusalDTO refusal, Map<String, String> headers) {
-    String questionnaireId = refusal.getQuestionnaire_Id();
-
-    Optional<UacQidLink> uacQidLinkOpt = uacQidLinkRepository.findByQid(questionnaireId);
+  public void processRefusal(ResponseManagementEvent refusalEvent) {
+    RefusalDTO refusal = refusalEvent.getPayload().getRefusal();
+    Optional<UacQidLink> uacQidLinkOpt =
+        uacQidLinkRepository.findByQid(refusal.getQuestionnaireId());
 
     if (uacQidLinkOpt.isEmpty()) {
       log.error(QID_NOT_FOUND_ERROR);
       throw new RuntimeException(
-          String.format("Questionnaire Id '%s' not found!", questionnaireId));
+          String.format("Questionnaire Id '%s' not found!", refusal.getQuestionnaireId()));
     }
 
     UacQidLink uacQidLink = uacQidLinkOpt.get();
@@ -62,7 +59,7 @@ public class RefusalProcessor {
         REFUSAL_RECEIVED,
         EventType.CASE_UPDATED,
         refusal,
-        headers,
+        refusalEvent.getEvent(),
         refusal.getResponseDateTime());
   }
 }
