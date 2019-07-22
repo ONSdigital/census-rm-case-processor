@@ -37,8 +37,8 @@ public class DataUtils {
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
 
     EventDTO event = managementEvent.getEvent();
-    event.setType(EventTypeDTO.UAC_UPDATED);
-    event.setSource("RECEIPTING");
+    event.setType(EventTypeDTO.RESPONSE_RECEIVED);
+    event.setSource("RECEIPT_SERVICE");
     event.setChannel("EQ");
 
     PayloadDTO payload = managementEvent.getPayload();
