@@ -5,8 +5,8 @@ import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
-import uk.gov.ons.census.casesvc.model.dto.BaseDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
+import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
@@ -25,7 +25,7 @@ public class EventLogger {
   }
 
   public void logEvent(
-      UacQidLink uacQidLink, String eventDescription, EventType eventType, BaseDTO payloadDTO) {
+      UacQidLink uacQidLink, String eventDescription, EventType eventType, PayloadDTO payloadDTO) {
 
     // Keep hardcoded for non-receipting calls for now
     EventDTO event = new EventDTO();
@@ -39,7 +39,7 @@ public class EventLogger {
       UacQidLink uacQidLink,
       String eventDescription,
       EventType eventType,
-      BaseDTO payload,
+      Object payload,
       EventDTO event,
       OffsetDateTime eventMetaDataDateTime) {
 

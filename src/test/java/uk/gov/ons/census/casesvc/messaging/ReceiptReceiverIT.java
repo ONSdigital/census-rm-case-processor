@@ -1,6 +1,5 @@
 package uk.gov.ons.census.casesvc.messaging;
 
-
 import java.io.IOException;
 import java.util.UUID;
 import org.jeasy.random.EasyRandom;

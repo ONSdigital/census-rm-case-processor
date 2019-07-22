@@ -81,7 +81,7 @@ public class ReceiptProcessorTest {
             expectedUacQidLink,
             QID_RECEIPTED,
             EventType.UAC_UPDATED,
-            managementEvent.getPayload().getReceipt(),
+            receipt,
             managementEvent.getEvent(),
             receipt.getResponseDateTime());
   }
