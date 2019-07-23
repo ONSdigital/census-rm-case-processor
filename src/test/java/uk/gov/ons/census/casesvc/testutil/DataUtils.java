@@ -12,6 +12,7 @@ import uk.gov.ons.census.casesvc.model.dto.ReceiptDTO;
 import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
+import uk.gov.ons.census.casesvc.model.entity.RefusalType;
 
 public class DataUtils {
 
@@ -53,6 +54,26 @@ public class DataUtils {
     payload.setCollectionCase(null);
     payload.setRefusal(null);
     payload.setPrintCaseSelected(null);
+
+    return managementEvent;
+  }
+
+  public static ResponseManagementEvent getTestResponseManagementRefusalEvent() {
+    ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
+
+    EventDTO event = managementEvent.getEvent();
+    event.setType(EventTypeDTO.REFUSAL_RECEIVED);
+    event.setSource("CONTACT CENTRE API");
+    event.setChannel("CC");
+
+    PayloadDTO payload = managementEvent.getPayload();
+    payload.setUac(null);
+    payload.setCollectionCase(null);
+    payload.setReceipt(null);
+    payload.setPrintCaseSelected(null);
+
+    RefusalDTO refusal = payload.getRefusal();
+    refusal.setType(RefusalType.HARD_REFUSAL);
 
     return managementEvent;
   }
