@@ -59,7 +59,6 @@ public class ReceiptReceiverIT {
     caseRepository.deleteAllInBatch();
   }
 
-  // todo fix
   @Test
   public void testGoodReceiptEmitsMessageAndLogsEvent() throws InterruptedException, IOException {
     assert true;
@@ -80,12 +79,15 @@ public class ReceiptReceiverIT {
     //    uacQidLink.setUac(TEST_UAC);
     //    uacQidLinkRepository.saveAndFlush(uacQidLink);
     //
-    //    ResponseManagementEvent managementEvent = getTestResponseManagementReceiptEvent();
+    //    Receipt receipt = new Receipt();
+    //    receipt.setQuestionnaire_Id(TEST_QID);
     //
-    //    String json = convertObjectToJson(managementEvent);
+    //    String json = convertObjectToJson(receipt);
     //    Message message =
     //        MessageBuilder.withBody(json.getBytes())
     //            .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+    //            .setHeader("source", "any source")
+    //            .setHeader("channel", "any channel")
     //            .build();
     //    rabbitQueueHelper.sendMessage(inboundQueue, message);
     //

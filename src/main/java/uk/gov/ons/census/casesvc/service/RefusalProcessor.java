@@ -17,7 +17,6 @@ import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 public class RefusalProcessor {
   private static final Logger log = LoggerFactory.getLogger(RefusalProcessor.class);
   public static final String REFUSAL_RECEIVED = "REFUSAL_RECEIVED";
-  private static final String CASE_NOT_FOUND_ERROR = "Failed to find case by receipt id";
   private static final String QID_NOT_FOUND_ERROR = "Qid not found error";
   private final CaseProcessor caseProcessor;
   private final CaseRepository caseRepository;
@@ -54,7 +53,7 @@ public class RefusalProcessor {
 
     caseProcessor.emitCaseUpdatedEvent(caze);
 
-    eventLogger.logEvent(
+    eventLogger.logRefusalEvent(
         uacQidLink,
         REFUSAL_RECEIVED,
         EventType.CASE_UPDATED,

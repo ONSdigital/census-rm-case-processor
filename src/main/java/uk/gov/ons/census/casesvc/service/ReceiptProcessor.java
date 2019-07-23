@@ -54,7 +54,7 @@ public class ReceiptProcessor {
     caze.setReceiptReceived(true);
     caseRepository.saveAndFlush(caze);
     caseProcessor.emitCaseUpdatedEvent(caze);
-    eventLogger.logEvent(
+    eventLogger.logReceiptEvent(
         uacQidLink,
         QID_RECEIPTED,
         EventType.UAC_UPDATED,

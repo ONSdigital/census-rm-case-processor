@@ -4,9 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToReceiptDTO;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToRefusalDTO;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -15,6 +18,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
+import uk.gov.ons.census.casesvc.model.dto.ReceiptDTO;
+import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
@@ -27,6 +32,8 @@ public class EventLoggerTest {
   @Mock EventRepository eventRepository;
 
   @InjectMocks EventLogger underTest;
+
+  EasyRandom easyRandom = new EasyRandom();
 
   @Test
   public void testLogEventWithoutEventMetaDataDateTime() {
@@ -62,7 +69,7 @@ public class EventLoggerTest {
         uacQidLink,
         "TEST_LOGGED_EVENT",
         EventType.UAC_UPDATED,
-        new PayloadDTO(),
+        "",
         new EventDTO(),
         any(OffsetDateTime.class));
 
@@ -90,7 +97,7 @@ public class EventLoggerTest {
         uacQidLink,
         "TEST_LOGGED_EVENT",
         EventType.UAC_UPDATED,
-        new PayloadDTO(),
+        "",
         new EventDTO(),
         OffsetDateTime.now());
 
@@ -110,7 +117,7 @@ public class EventLoggerTest {
         uacQidLink,
         "TEST_LOGGED_EVENT",
         EventType.UAC_UPDATED,
-        new PayloadDTO(),
+        "",
         new EventDTO(),
         OffsetDateTime.now());
 
@@ -120,20 +127,49 @@ public class EventLoggerTest {
     assertThat(eventArgumentCaptor.getValue().getCaseId()).isNull();
   }
 
-  //    private Map<String, String> createTestNonDefaultHeaders() {
-  //      Map<String, String> headers = new HashMap<>();
-  //
-  //      headers.put("channel", "any non-default channel");
-  //      headers.put("source", "any non-default source");
-  //
-  //      return headers;
-  //    }
-  //
-  //    private Map<String, String> createTestInvalidHeaders() {
-  //      Map<String, String> headers = new HashMap<>();
-  //
-  //      headers.put("not expected key", "anything");
-  //
-  //      return headers;
-  //    }
+  @Test
+  public void testLogReceiptEvent() {
+    // Given
+    ReceiptDTO expectedReceipt = easyRandom.nextObject(ReceiptDTO.class);
+
+    // When
+    underTest.logReceiptEvent(
+        new UacQidLink(),
+        "TEST_LOGGED_EVENT",
+        EventType.UAC_UPDATED,
+        expectedReceipt,
+        new EventDTO(),
+        OffsetDateTime.now());
+
+    // Then
+    ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
+    verify(eventRepository).save(eventArgumentCaptor.capture());
+    ReceiptDTO actualReceipt =
+        convertJsonToReceiptDTO(eventArgumentCaptor.getValue().getEventPayload());
+
+    assertThat(actualReceipt).isEqualTo(expectedReceipt);
+  }
+
+  @Test
+  public void testLogRefusalEvent() {
+    // Given
+    RefusalDTO expectedRefusal = easyRandom.nextObject(RefusalDTO.class);
+
+    // When
+    underTest.logRefusalEvent(
+        new UacQidLink(),
+        "TEST_LOGGED_EVENT",
+        EventType.UAC_UPDATED,
+        expectedRefusal,
+        new EventDTO(),
+        OffsetDateTime.now());
+
+    // Then
+    ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
+    verify(eventRepository).save(eventArgumentCaptor.capture());
+    RefusalDTO actualRefusal =
+        convertJsonToRefusalDTO(eventArgumentCaptor.getValue().getEventPayload());
+
+    assertThat(actualRefusal).isEqualTo(expectedRefusal);
+  }
 }
