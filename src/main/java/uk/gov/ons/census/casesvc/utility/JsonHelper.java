@@ -9,7 +9,6 @@ public class JsonHelper {
 
   static {
     objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
-    ;
   }
 
   public static String convertObjectToJson(Object receipt) {

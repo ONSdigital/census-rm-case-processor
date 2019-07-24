@@ -65,7 +65,6 @@ public class TransactionsIT {
     caseRepository.deleteAllInBatch();
   }
 
-  // todo fix
   @Test
   public void testTransactionality() throws InterruptedException, IOException {
     // no cases on the database

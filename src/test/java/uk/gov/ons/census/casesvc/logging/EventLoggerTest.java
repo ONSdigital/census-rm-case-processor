@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToReceiptDTO;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToRefusalDTO;
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -130,8 +131,8 @@ public class EventLoggerTest {
   @Test
   public void testLogReceiptEvent() {
     // Given
-    ReceiptDTO expectedReceipt = easyRandom.nextObject(ReceiptDTO.class);
-    expectedReceipt.setResponseDateTime(OffsetDateTime.now());
+    ReceiptDTO expectedReceipt =
+        convertJsonToReceiptDTO(convertObjectToJson(easyRandom.nextObject(ReceiptDTO.class)));
 
     // When
     underTest.logReceiptEvent(
@@ -151,15 +152,15 @@ public class EventLoggerTest {
     assertThat(actualReceipt.getCaseId()).isEqualTo(expectedReceipt.getCaseId());
     assertThat(actualReceipt.getQuestionnaireId()).isEqualTo(expectedReceipt.getQuestionnaireId());
     assertThat(actualReceipt.isUnreceipt()).isEqualTo(expectedReceipt.isUnreceipt());
-    // todo fix below when date defect below fixed
-    // https://trello.com/c/eF4c7Q7e/979-dates-in-case-event-payload-json-not-being-stored-correctly
-    // assertThat(actualReceipt.getResponseDateTime()).isEqualTo(expectedReceipt.getResponseDateTime());
+    assertThat(actualReceipt.getResponseDateTime())
+        .isEqualTo(expectedReceipt.getResponseDateTime());
   }
 
   @Test
   public void testLogRefusalEvent() {
     // Given
-    RefusalDTO expectedRefusal = easyRandom.nextObject(RefusalDTO.class);
+    RefusalDTO expectedRefusal =
+        convertJsonToRefusalDTO(convertObjectToJson(easyRandom.nextObject(RefusalDTO.class)));
 
     // When
     underTest.logRefusalEvent(
@@ -178,8 +179,7 @@ public class EventLoggerTest {
 
     assertThat(actualRefusal.getCaseId()).isEqualTo(expectedRefusal.getCaseId());
     assertThat(actualRefusal.getQuestionnaireId()).isEqualTo(expectedRefusal.getQuestionnaireId());
-    // todo fix below when date defect below fixed
-    // https://trello.com/c/eF4c7Q7e/979-dates-in-case-event-payload-json-not-being-stored-correctly
-    // assertThat(actualRefusal.getResponseDateTime()).isEqualTo(expectedRefusal.getResponseDateTime());
+    assertThat(actualRefusal.getResponseDateTime())
+        .isEqualTo(expectedRefusal.getResponseDateTime());
   }
 }
