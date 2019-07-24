@@ -21,7 +21,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
-import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.PrintCaseSelected;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
@@ -106,7 +105,7 @@ public class EventProcessorTest {
     // When
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
     EventDTO event = new EventDTO();
-    event.setType(EventTypeDTO.PRINT_CASE_SELECTED);
+    event.setType(EventType.PRINT_CASE_SELECTED);
     event.setChannel("Test channel");
     event.setDateTime(OffsetDateTime.now());
     event.setSource("Test source");

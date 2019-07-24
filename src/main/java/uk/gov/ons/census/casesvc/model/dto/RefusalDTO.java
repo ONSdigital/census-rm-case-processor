@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.OffsetDateTime;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.ons.census.casesvc.model.entity.RefusalType;
+import uk.gov.ons.census.casesvc.type.RefusalType;
 
 @Data
 @NoArgsConstructor

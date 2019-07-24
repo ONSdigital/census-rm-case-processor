@@ -1,4 +1,4 @@
-package uk.gov.ons.census.casesvc.model.entity;
+package uk.gov.ons.census.casesvc.type;
 
 public enum RefusalType {
   SOFT_REFUSAL,

@@ -6,13 +6,13 @@ import java.io.IOException;
 import java.util.UUID;
 import org.jeasy.random.EasyRandom;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
-import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ReceiptDTO;
 import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
-import uk.gov.ons.census.casesvc.model.entity.RefusalType;
+import uk.gov.ons.census.casesvc.model.entity.EventType;
+import uk.gov.ons.census.casesvc.type.RefusalType;
 
 public class DataUtils {
 
@@ -45,7 +45,7 @@ public class DataUtils {
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
 
     EventDTO event = managementEvent.getEvent();
-    event.setType(EventTypeDTO.RESPONSE_RECEIVED);
+    event.setType(EventType.RESPONSE_RECEIVED);
     event.setSource("RECEIPT_SERVICE");
     event.setChannel("EQ");
 
@@ -62,7 +62,7 @@ public class DataUtils {
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
 
     EventDTO event = managementEvent.getEvent();
-    event.setType(EventTypeDTO.REFUSAL_RECEIVED);
+    event.setType(EventType.REFUSAL_RECEIVED);
     event.setSource("CONTACT CENTRE API");
     event.setChannel("CC");
 
