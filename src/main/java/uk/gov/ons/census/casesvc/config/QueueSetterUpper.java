@@ -15,8 +15,8 @@ public class QueueSetterUpper {
   @Value("${queueconfig.inbound-queue}")
   private String inboundQueue;
 
-  @Value("${queueconfig.outbound-exchange}")
-  private String outboundExchange;
+  @Value("${queueconfig.case-event-exchange}")
+  private String caseEventExchange;
 
   @Value("${queueconfig.rh-case-queue}")
   private String rhCaseQueue;
@@ -38,6 +38,9 @@ public class QueueSetterUpper {
 
   @Value("${queueconfig.action-scheduler-routing-key-case}")
   private String actionSchedulerRoutingKeyCase;
+
+  @Value("${queueconfig.refusal-routing-key}")
+  private String caseProcessorRefusalRoutingKeyCase;
 
   @Value("${queueconfig.unaddressed-inbound-queue}")
   private String unaddressedQueue;
@@ -78,29 +81,35 @@ public class QueueSetterUpper {
 
   @Bean
   public Exchange myTopicExchange() {
-    return new TopicExchange(outboundExchange, true, false);
+    return new TopicExchange(caseEventExchange, true, false);
   }
 
   @Bean
   public Binding bindingRhCase() {
-    return new Binding(rhCaseQueue, QUEUE, outboundExchange, rhCaseRoutingKey, null);
+    return new Binding(rhCaseQueue, QUEUE, caseEventExchange, rhCaseRoutingKey, null);
   }
 
   @Bean
   public Binding bindingRhUac() {
-    return new Binding(rhUacQueue, QUEUE, outboundExchange, rhUacRoutingKey, null);
+    return new Binding(rhUacQueue, QUEUE, caseEventExchange, rhUacRoutingKey, null);
   }
 
   @Bean
   public Binding bindingActionUac() {
     return new Binding(
-        actionSchedulerQueue, QUEUE, outboundExchange, actionSchedulerRoutingKeyUac, null);
+        actionSchedulerQueue, QUEUE, caseEventExchange, actionSchedulerRoutingKeyUac, null);
   }
 
   @Bean
   public Binding bindingActionCase() {
     return new Binding(
-        actionSchedulerQueue, QUEUE, outboundExchange, actionSchedulerRoutingKeyCase, null);
+        actionSchedulerQueue, QUEUE, caseEventExchange, actionSchedulerRoutingKeyCase, null);
+  }
+
+  @Bean
+  public Binding bindingRefusalCase() {
+    return new Binding(
+        refusalInboundQueue, QUEUE, caseEventExchange, caseProcessorRefusalRoutingKeyCase, null);
   }
 
   @Bean

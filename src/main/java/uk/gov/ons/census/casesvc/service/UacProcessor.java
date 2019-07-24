@@ -31,7 +31,7 @@ public class UacProcessor {
   private final ObjectMapper objectMapper;
   private final EventLogger eventLogger;
 
-  @Value("${queueconfig.outbound-exchange}")
+  @Value("${queueconfig.case-event-exchange}")
   private String outboundExchange;
 
   public UacProcessor(

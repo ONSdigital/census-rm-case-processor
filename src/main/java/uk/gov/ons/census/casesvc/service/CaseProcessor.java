@@ -30,7 +30,7 @@ public class CaseProcessor {
   private final MapperFacade mapperFacade;
   private final RabbitTemplate rabbitTemplate;
 
-  @Value("${queueconfig.outbound-exchange}")
+  @Value("${queueconfig.case-event-exchange}")
   private String outboundExchange;
 
   public CaseProcessor(
