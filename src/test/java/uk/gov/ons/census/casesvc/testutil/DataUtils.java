@@ -18,8 +18,8 @@ public class DataUtils {
 
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
 
-  private static EasyRandom easyRandom;
-  private static ObjectMapper objectMapper;
+  private static final EasyRandom easyRandom;
+  private static final ObjectMapper objectMapper;
 
   static {
     easyRandom = new EasyRandom();

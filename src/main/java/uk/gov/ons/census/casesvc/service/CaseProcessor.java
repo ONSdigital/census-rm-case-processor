@@ -70,12 +70,11 @@ public class CaseProcessor {
     return responseManagementEvent.getPayload();
   }
 
-  public PayloadDTO emitCaseUpdatedEvent(Case caze) {
+  public void emitCaseUpdatedEvent(Case caze) {
     EventDTO eventDTO = EventHelper.createEventDTO(EventType.CASE_UPDATED);
     ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
     rabbitTemplate.convertAndSend(
         outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
-    return responseManagementEvent.getPayload();
   }
 
   private ResponseManagementEvent prepareCaseEvent(Case caze, EventDTO eventDTO) {

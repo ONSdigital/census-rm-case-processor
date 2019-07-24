@@ -34,7 +34,7 @@ public class EventLoggerTest {
 
   @InjectMocks EventLogger underTest;
 
-  EasyRandom easyRandom = new EasyRandom();
+  private final EasyRandom easyRandom = new EasyRandom();
 
   @Test
   public void testLogEventWithoutEventMetaDataDateTime() {

@@ -16,7 +16,7 @@ import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 @Service
 public class RefusalProcessor {
   private static final Logger log = LoggerFactory.getLogger(RefusalProcessor.class);
-  public static final String REFUSAL_RECEIVED = "Refusal Received";
+  private static final String REFUSAL_RECEIVED = "Refusal Received";
   private static final String QID_NOT_FOUND_ERROR = "Qid not found error";
   private final CaseProcessor caseProcessor;
   private final CaseRepository caseRepository;

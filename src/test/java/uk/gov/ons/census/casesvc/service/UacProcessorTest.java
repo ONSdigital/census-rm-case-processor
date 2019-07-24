@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,7 +20,6 @@ import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.UacQidDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
-import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -29,13 +27,9 @@ public class UacProcessorTest {
 
   @Mock UacQidLinkRepository uacQidLinkRepository;
 
-  @Mock EventRepository eventRepository;
-
   @Mock RabbitTemplate rabbitTemplate;
 
   @Mock UacQidServiceClient uacQidServiceClient;
-
-  @Mock ObjectMapper objectMapper;
 
   @InjectMocks UacProcessor underTest;
 

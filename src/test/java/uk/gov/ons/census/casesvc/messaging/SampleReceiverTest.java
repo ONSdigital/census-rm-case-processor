@@ -18,7 +18,7 @@ public class SampleReceiverTest {
   @Mock private EventProcessor eventProcessor;
 
   @Test
-  public void testHappyPath() throws Exception {
+  public void testHappyPath() {
     // Given
     CreateCaseSample createCaseSample = new CreateCaseSample();
 

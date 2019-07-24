@@ -6,7 +6,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.client.UacQidServiceClient;
-import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
@@ -15,7 +14,6 @@ import uk.gov.ons.census.casesvc.model.dto.UacQidDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
-import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 import uk.gov.ons.census.casesvc.utility.EventHelper;
 import uk.gov.ons.census.casesvc.utility.Sha256Helper;
@@ -28,24 +26,18 @@ public class UacProcessor {
   private final UacQidLinkRepository uacQidLinkRepository;
   private final RabbitTemplate rabbitTemplate;
   private final UacQidServiceClient uacQidServiceClient;
-  private final ObjectMapper objectMapper;
-  private final EventLogger eventLogger;
 
   @Value("${queueconfig.case-event-exchange}")
   private String outboundExchange;
 
   public UacProcessor(
       UacQidLinkRepository uacQidLinkRepository,
-      EventRepository eventRepository,
       RabbitTemplate rabbitTemplate,
       UacQidServiceClient uacQidServiceClient,
-      EventLogger eventLogger,
       ObjectMapper objectMapper) {
     this.rabbitTemplate = rabbitTemplate;
     this.uacQidServiceClient = uacQidServiceClient;
     this.uacQidLinkRepository = uacQidLinkRepository;
-    this.eventLogger = eventLogger;
-    this.objectMapper = objectMapper;
   }
 
   public UacQidLink saveUacQidLink(Case caze, int questionnaireType) {

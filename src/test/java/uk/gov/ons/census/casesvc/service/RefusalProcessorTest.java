@@ -27,7 +27,7 @@ import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 @RunWith(MockitoJUnitRunner.class)
 public class RefusalProcessorTest {
 
-  public static final String REFUSAL_RECEIVED = "Refusal Received";
+  private static final String REFUSAL_RECEIVED = "Refusal Received";
 
   @Mock private UacQidLinkRepository uacQidLinkRepository;
   @Mock private CaseRepository caseRepository;
