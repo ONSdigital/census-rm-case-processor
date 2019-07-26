@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementEvent;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,6 +43,7 @@ public class RefusalProcessorTest {
   public void shouldProcessARefusalReceivedMessageSuccessfully() {
     // GIVEN
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
+    managementEvent.getPayload().getRefusal().setResponseDateTime(OffsetDateTime.now().toString());
     Case testCase = getRandomCase();
     testCase.setRefusalReceived(false);
     UacQidLink expectedUacQidLink = testCase.getUacQidLinks().get(0);
@@ -68,7 +70,7 @@ public class RefusalProcessorTest {
             EventType.CASE_UPDATED,
             expectedRefusal,
             managementEvent.getEvent(),
-            expectedRefusal.getResponseDateTime());
+            OffsetDateTime.parse(expectedRefusal.getResponseDateTime()));
   }
 
   @Test

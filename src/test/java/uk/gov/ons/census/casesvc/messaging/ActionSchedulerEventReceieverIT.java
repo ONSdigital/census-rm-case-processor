@@ -71,7 +71,7 @@ public class ActionSchedulerEventReceieverIT {
     EventDTO event = new EventDTO();
     event.setType(EventType.PRINT_CASE_SELECTED);
     event.setChannel("Test channel");
-    event.setDateTime(OffsetDateTime.now());
+    event.setDateTime(OffsetDateTime.now().toString());
     event.setSource("Test source");
     event.setTransactionId(UUID.randomUUID().toString());
     responseManagementEvent.setEvent(event);
@@ -99,7 +99,7 @@ public class ActionSchedulerEventReceieverIT {
     assertThat("Test source").isEqualTo(actualEvent.getEventSource());
     assertThat(event.getTransactionId()).isEqualTo(actualEvent.getEventTransactionId().toString());
     assertThat(event.getType().toString()).isEqualTo(actualEvent.getEventType().toString());
-    assertThat(event.getDateTime()).isEqualTo(actualEvent.getEventDate());
+    assertThat(event.getDateTime()).isEqualTo(actualEvent.getEventDate().toString());
 
     ObjectMapper objectMapper = new ObjectMapper();
     PayloadDTO actualPayload =

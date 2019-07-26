@@ -6,6 +6,7 @@ import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManage
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -76,6 +77,7 @@ public class TransactionsIT {
     // WHEN
     ResponseManagementEvent managementEvent = getTestResponseManagementReceiptEvent();
     managementEvent.getPayload().getReceipt().setQuestionnaireId(TEST_QID);
+    managementEvent.getPayload().getReceipt().setResponseDateTime(OffsetDateTime.now().toString());
 
     String json = convertObjectToJson(managementEvent);
     Message message =

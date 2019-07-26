@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.service.ReceiptProcessor.QID_RECEIPTED;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementEvent;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import org.jeasy.random.EasyRandom;
@@ -54,6 +55,8 @@ public class ReceiptProcessorTest {
     UacQidLink expectedUacQidLink = expectedCase.getUacQidLinks().get(0);
     expectedUacQidLink.setCaze(expectedCase);
 
+    managementEvent.getPayload().getReceipt().setResponseDateTime(OffsetDateTime.now().toString());
+
     when(uacQidLinkRepository.findByQid(anyString())).thenReturn(Optional.of(expectedUacQidLink));
 
     UacProcessor uacProcessor = mock(UacProcessor.class);
@@ -74,7 +77,7 @@ public class ReceiptProcessorTest {
             EventType.UAC_UPDATED,
             expectedReceipt,
             managementEvent.getEvent(),
-            expectedReceipt.getResponseDateTime());
+            OffsetDateTime.parse(expectedReceipt.getResponseDateTime()));
   }
 
   @Test(expected = RuntimeException.class)

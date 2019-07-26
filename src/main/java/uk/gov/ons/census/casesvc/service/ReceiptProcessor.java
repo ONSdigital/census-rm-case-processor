@@ -2,6 +2,7 @@ package uk.gov.ons.census.casesvc.service;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
@@ -60,6 +61,6 @@ public class ReceiptProcessor {
         EventType.UAC_UPDATED,
         receipt,
         receiptEvent.getEvent(),
-        receipt.getResponseDateTime());
+        OffsetDateTime.parse(receipt.getResponseDateTime()));
   }
 }

@@ -5,6 +5,7 @@ import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManage
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
@@ -91,6 +92,7 @@ public class RefusalReceiverIT {
 
     ResponseManagementEvent managementEvent = getTestResponseManagementRefusalEvent();
     managementEvent.getPayload().getRefusal().setQuestionnaireId(uacQidLink.getQid());
+    managementEvent.getPayload().getRefusal().setResponseDateTime(OffsetDateTime.now().toString());
 
     String json = convertObjectToJson(managementEvent);
     Message message =
