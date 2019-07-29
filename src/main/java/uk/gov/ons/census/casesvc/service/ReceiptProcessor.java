@@ -55,12 +55,19 @@ public class ReceiptProcessor {
     caze.setReceiptReceived(true);
     caseRepository.saveAndFlush(caze);
     caseProcessor.emitCaseUpdatedEvent(caze);
+
+    OffsetDateTime responseDateTime = null;
+    Optional<String> optResponseDateTime = Optional.ofNullable(receipt.getResponseDateTime());
+    if (optResponseDateTime.isPresent()) {
+      responseDateTime = OffsetDateTime.parse(optResponseDateTime.get());
+    }
+
     eventLogger.logReceiptEvent(
         uacQidLink,
         QID_RECEIPTED,
         EventType.UAC_UPDATED,
         receipt,
         receiptEvent.getEvent(),
-        OffsetDateTime.parse(receipt.getResponseDateTime()));
+        responseDateTime);
   }
 }
