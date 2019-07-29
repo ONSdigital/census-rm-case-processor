@@ -45,7 +45,8 @@ public class ReceiptProcessor {
 
     if (uacQidLinkOpt.isEmpty()) {
       log.error(QID_NOT_FOUND_ERROR);
-      throw new RuntimeException();
+      throw new RuntimeException(
+          String.format("Questionnaire Id '%s' not found!", receipt.getQuestionnaireId()));
     }
 
     UacQidLink uacQidLink = uacQidLinkOpt.get();

@@ -1,7 +1,6 @@
 package uk.gov.ons.census.casesvc.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementEvent;
 
@@ -26,8 +25,6 @@ public class RefusalReceiverTest {
     // GIVEN
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
     String expectedCaseId = managementEvent.getPayload().getCollectionCase().getId();
-
-    doNothing().when(refusalProcessor).processRefusal(managementEvent);
 
     // WHEN
     underTest.receiveMessage(managementEvent);
