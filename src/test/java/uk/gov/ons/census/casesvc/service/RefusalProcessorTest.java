@@ -1,6 +1,7 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -73,7 +74,7 @@ public class RefusalProcessorTest {
             OffsetDateTime.parse(expectedRefusal.getResponseDateTime()));
   }
 
-  @Test
+  @Test(expected = RuntimeException.class)
   public void shouldThrowRuntimeExceptionWhenCaseNotFound() {
     // GIVEN
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
@@ -86,9 +87,12 @@ public class RefusalProcessorTest {
     try {
       // WHEN
       underTest.processRefusal(managementEvent);
-    } catch (RuntimeException e) {
+    } catch (RuntimeException re) {
       // THEN
-      assertThat(e.getMessage()).isEqualTo(expectedErrorMessage);
+      assertThat(re.getMessage()).isEqualTo(expectedErrorMessage);
+      throw re;
     }
+
+    fail("Questionnaire Id runtime exception did not throw!");
   }
 }
