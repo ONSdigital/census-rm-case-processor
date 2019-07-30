@@ -1,6 +1,7 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -8,6 +9,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementEvent;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,6 +44,7 @@ public class RefusalProcessorTest {
   public void shouldProcessARefusalReceivedMessageSuccessfully() {
     // GIVEN
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
+    managementEvent.getPayload().getRefusal().setResponseDateTime(OffsetDateTime.now());
     Case testCase = getRandomCase();
     testCase.setRefusalReceived(false);
     UacQidLink expectedUacQidLink = testCase.getUacQidLinks().get(0);
@@ -71,7 +74,7 @@ public class RefusalProcessorTest {
             expectedRefusal.getResponseDateTime());
   }
 
-  @Test
+  @Test(expected = RuntimeException.class)
   public void shouldThrowRuntimeExceptionWhenCaseNotFound() {
     // GIVEN
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
@@ -84,9 +87,12 @@ public class RefusalProcessorTest {
     try {
       // WHEN
       underTest.processRefusal(managementEvent);
-    } catch (RuntimeException e) {
+    } catch (RuntimeException re) {
       // THEN
-      assertThat(e.getMessage()).isEqualTo(expectedErrorMessage);
+      assertThat(re.getMessage()).isEqualTo(expectedErrorMessage);
+      throw re;
     }
+
+    fail("Questionnaire Id runtime exception did not throw!");
   }
 }
