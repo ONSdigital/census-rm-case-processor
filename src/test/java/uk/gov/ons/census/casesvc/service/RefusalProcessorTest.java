@@ -1,7 +1,6 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -51,7 +50,8 @@ public class RefusalProcessorTest {
     Case expectedCase = expectedUacQidLink.getCaze();
     RefusalDTO expectedRefusal = managementEvent.getPayload().getRefusal();
 
-    when(uacQidLinkRepository.findByQid(anyString())).thenReturn(Optional.of(expectedUacQidLink));
+    when(uacQidLinkRepository.findByQid(expectedRefusal.getQuestionnaireId()))
+        .thenReturn(Optional.of(expectedUacQidLink));
 
     // WHEN
     underTest.processRefusal(managementEvent);
@@ -92,7 +92,5 @@ public class RefusalProcessorTest {
       assertThat(re.getMessage()).isEqualTo(expectedErrorMessage);
       throw re;
     }
-
-    fail("Questionnaire Id runtime exception did not throw!");
   }
 }

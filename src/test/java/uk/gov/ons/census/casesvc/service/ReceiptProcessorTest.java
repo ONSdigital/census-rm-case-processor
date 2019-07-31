@@ -1,7 +1,6 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -12,7 +11,6 @@ import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManage
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
-import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -29,9 +27,6 @@ import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReceiptProcessorTest {
-  private static final UUID TEST_CASE_ID = UUID.randomUUID();
-  private static final String TEST_QUESTIONNAIRE_ID = "123";
-
   @Mock private CaseProcessor caseProcessor;
 
   @Mock private UacQidLinkRepository uacQidLinkRepository;
@@ -56,7 +51,8 @@ public class ReceiptProcessorTest {
 
     managementEvent.getPayload().getReceipt().setResponseDateTime(OffsetDateTime.now());
 
-    when(uacQidLinkRepository.findByQid(anyString())).thenReturn(Optional.of(expectedUacQidLink));
+    when(uacQidLinkRepository.findByQid(expectedReceipt.getQuestionnaireId()))
+        .thenReturn(Optional.of(expectedUacQidLink));
 
     // when
     underTest.processReceipt(managementEvent);
@@ -91,7 +87,5 @@ public class ReceiptProcessorTest {
       assertThat(re.getMessage()).isEqualTo(expectedErrorMessage);
       throw re;
     }
-
-    fail("Questionnaire Id runtime exception did not throw!");
   }
 }
