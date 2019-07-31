@@ -42,8 +42,7 @@ public class ReceiptProcessorTest {
 
   @Mock private EventLogger eventLogger;
 
-  @InjectMocks
-  ReceiptProcessor underTest;
+  @InjectMocks ReceiptProcessor underTest;
 
   @Test
   public void testGoodReceipt() {
