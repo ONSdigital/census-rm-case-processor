@@ -28,7 +28,7 @@ spring:
 
 queueconfig:
   inbound-queue: case.sample.inbound
-  outbound-exchange: events
+  case-event-exchange: events
   rh-case-queue: case.rh.case
   rh-case-routing-key: event.case.*
   rh-uac-queue: case.rh.uac
@@ -36,8 +36,10 @@ queueconfig:
   action-scheduler-queue: case.action
   action-scheduler-routing-key-uac: event.uac.*
   action-scheduler-routing-key-case: event.case.*
+  refusal-routing-key: event.respondent.refusal
   unaddressed-inbound-queue: unaddressedRequestQueue
   receipt-response-inbound-queue: Case.Responses
+  refusal-response-inbound-queue: case.refusals
   action-case-queue: action.events
   consumers: 50
 

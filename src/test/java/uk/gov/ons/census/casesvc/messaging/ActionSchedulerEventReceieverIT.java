@@ -20,12 +20,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
-import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.PrintCaseSelected;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
+import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
@@ -69,7 +69,7 @@ public class ActionSchedulerEventReceieverIT {
 
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
     EventDTO event = new EventDTO();
-    event.setType(EventTypeDTO.PRINT_CASE_SELECTED);
+    event.setType(EventType.PRINT_CASE_SELECTED);
     event.setChannel("Test channel");
     event.setDateTime(OffsetDateTime.now());
     event.setSource("Test source");

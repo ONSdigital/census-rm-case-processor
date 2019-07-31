@@ -22,10 +22,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
-import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
+import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
@@ -85,18 +85,18 @@ public class SampleReceiverIT {
     // THEN
     ResponseManagementEvent responseManagementEvent =
         rabbitQueueHelper.checkExpectedMessageReceived(rhCaseMessages);
-    assertEquals(EventTypeDTO.CASE_CREATED, responseManagementEvent.getEvent().getType());
+    assertEquals(EventType.CASE_CREATED, responseManagementEvent.getEvent().getType());
     responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(rhUacMessages);
-    assertEquals(EventTypeDTO.UAC_UPDATED, responseManagementEvent.getEvent().getType());
+    assertEquals(EventType.UAC_UPDATED, responseManagementEvent.getEvent().getType());
 
-    List<EventTypeDTO> eventTypesSeenDTO = new LinkedList<>();
+    List<EventType> eventTypesSeenDTO = new LinkedList<>();
     responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(actionMessages);
     eventTypesSeenDTO.add(responseManagementEvent.getEvent().getType());
     responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(actionMessages);
     eventTypesSeenDTO.add(responseManagementEvent.getEvent().getType());
 
     assertThat(
-        eventTypesSeenDTO, containsInAnyOrder(EventTypeDTO.CASE_CREATED, EventTypeDTO.UAC_UPDATED));
+        eventTypesSeenDTO, containsInAnyOrder(EventType.CASE_CREATED, EventType.UAC_UPDATED));
 
     List<Case> caseList = caseRepository.findAll();
     assertEquals(1, caseList.size());

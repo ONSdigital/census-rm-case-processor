@@ -11,11 +11,11 @@ import uk.gov.ons.census.casesvc.model.dto.Address;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
-import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.CaseState;
+import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.utility.EventHelper;
 import uk.gov.ons.census.casesvc.utility.RandomCaseRefGenerator;
@@ -30,7 +30,7 @@ public class CaseProcessor {
   private final MapperFacade mapperFacade;
   private final RabbitTemplate rabbitTemplate;
 
-  @Value("${queueconfig.outbound-exchange}")
+  @Value("${queueconfig.case-event-exchange}")
   private String outboundExchange;
 
   public CaseProcessor(
@@ -63,7 +63,7 @@ public class CaseProcessor {
   }
 
   public PayloadDTO emitCaseCreatedEvent(Case caze) {
-    EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_CREATED);
+    EventDTO eventDTO = EventHelper.createEventDTO(EventType.CASE_CREATED);
     ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
     rabbitTemplate.convertAndSend(
         outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
@@ -71,7 +71,7 @@ public class CaseProcessor {
   }
 
   public void emitCaseUpdatedEvent(Case caze) {
-    EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_UPDATED);
+    EventDTO eventDTO = EventHelper.createEventDTO(EventType.CASE_UPDATED);
     ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
     rabbitTemplate.convertAndSend(
         outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
@@ -119,6 +119,8 @@ public class CaseProcessor {
     collectionCase.setId(caze.getCaseId().toString());
     collectionCase.setState(caze.getState().toString());
     collectionCase.setSurvey(SURVEY);
+    collectionCase.setReceiptReceived(caze.isReceiptReceived());
+    collectionCase.setRefusalReceived(caze.isRefusalReceived());
 
     // Below this line is extra data potentially needed by Action Scheduler - can be ignored by RM
     collectionCase.setActionPlanId(caze.getActionPlanId());
@@ -132,7 +134,6 @@ public class CaseProcessor {
     collectionCase.setFieldCoordinatorId(caze.getFieldCoordinatorId());
     collectionCase.setFieldOfficerId(caze.getFieldOfficerId());
     collectionCase.setCeExpectedCapacity(caze.getCeExpectedCapacity());
-    collectionCase.setReceiptReceived(caze.isReceiptReceived());
 
     return collectionCase;
   }

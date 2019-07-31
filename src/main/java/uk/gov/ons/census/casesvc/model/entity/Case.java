@@ -90,5 +90,9 @@ public class Case {
   @OneToMany(mappedBy = "caze")
   List<Event> events;
 
-  @Column private boolean receiptReceived;
+  @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+  private boolean receiptReceived;
+
+  @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+  private boolean refusalReceived;
 }

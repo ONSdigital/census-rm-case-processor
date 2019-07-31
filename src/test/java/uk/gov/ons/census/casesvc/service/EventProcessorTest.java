@@ -18,9 +18,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
-import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.PrintCaseSelected;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
@@ -38,6 +38,8 @@ public class EventProcessorTest {
   @Mock UacProcessor uacProcessor;
 
   @Mock EventRepository eventRepository;
+
+  @Mock EventLogger eventLogger;
 
   @InjectMocks EventProcessor underTest;
 
@@ -62,7 +64,7 @@ public class EventProcessorTest {
     verify(uacProcessor).saveUacQidLink(eq(caze), eq(1));
     verify(uacProcessor).emitUacUpdatedEvent(uacQidLink, caze);
     verify(caseProcessor).emitCaseCreatedEvent(caze);
-    verify(uacProcessor, times(2))
+    verify(eventLogger, times(2))
         .logEvent(eq(uacQidLink), any(String.class), any(EventType.class), any(PayloadDTO.class));
   }
 
@@ -89,7 +91,7 @@ public class EventProcessorTest {
     verify(uacProcessor, times(1)).saveUacQidLink(eq(caze), eq(2));
     verify(uacProcessor, times(2)).emitUacUpdatedEvent(uacQidLink, caze);
     verify(caseProcessor).emitCaseCreatedEvent(caze);
-    verify(uacProcessor, times(3))
+    verify(eventLogger, times(3))
         .logEvent(eq(uacQidLink), any(String.class), any(EventType.class), any(PayloadDTO.class));
   }
 
@@ -103,7 +105,7 @@ public class EventProcessorTest {
     // When
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
     EventDTO event = new EventDTO();
-    event.setType(EventTypeDTO.PRINT_CASE_SELECTED);
+    event.setType(EventType.PRINT_CASE_SELECTED);
     event.setChannel("Test channel");
     event.setDateTime(OffsetDateTime.now());
     event.setSource("Test source");

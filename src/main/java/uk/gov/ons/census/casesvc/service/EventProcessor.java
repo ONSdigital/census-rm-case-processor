@@ -8,6 +8,7 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
+import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
@@ -27,12 +28,17 @@ public class EventProcessor {
   private final CaseProcessor caseProcessor;
   private final UacProcessor uacProcessor;
   private final EventRepository eventRepository;
+  private final EventLogger eventLogger;
 
   public EventProcessor(
-      CaseProcessor caseProcessor, UacProcessor uacProcessor, EventRepository eventRepository) {
+      CaseProcessor caseProcessor,
+      UacProcessor uacProcessor,
+      EventRepository eventRepository,
+      EventLogger eventLogger) {
     this.caseProcessor = caseProcessor;
     this.uacProcessor = uacProcessor;
     this.eventRepository = eventRepository;
+    this.eventLogger = eventLogger;
   }
 
   public void processSampleReceivedMessage(CreateCaseSample createCaseSample) {
@@ -42,15 +48,15 @@ public class EventProcessor {
     UacQidLink uacQidLink = uacProcessor.saveUacQidLink(caze, questionnaireType);
     PayloadDTO uacPayloadDTO = uacProcessor.emitUacUpdatedEvent(uacQidLink, caze);
     PayloadDTO casePayloadDTO = caseProcessor.emitCaseCreatedEvent(caze);
-    uacProcessor.logEvent(
+    eventLogger.logEvent(
         uacQidLink, CASE_CREATED_EVENT_DESCRIPTION, EventType.CASE_CREATED, casePayloadDTO);
-    uacProcessor.logEvent(
+    eventLogger.logEvent(
         uacQidLink, UAC_QID_LINKED_EVENT_DESCRIPTION, EventType.UAC_UPDATED, uacPayloadDTO);
 
     if (QuestionnaireTypeHelper.isQuestionnaireWelsh(caze.getTreatmentCode())) {
       uacQidLink = uacProcessor.saveUacQidLink(caze, 3);
       uacPayloadDTO = uacProcessor.emitUacUpdatedEvent(uacQidLink, caze);
-      uacProcessor.logEvent(
+      eventLogger.logEvent(
           uacQidLink, UAC_QID_LINKED_EVENT_DESCRIPTION, EventType.UAC_UPDATED, uacPayloadDTO);
     }
   }

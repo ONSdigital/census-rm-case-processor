@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.ons.census.casesvc.service.ReceiptProcessor.QID_RECEIPTED;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementEvent;
 
@@ -13,11 +12,12 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
-import uk.gov.ons.census.casesvc.model.dto.ReceiptDTO;
+import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
@@ -26,54 +26,59 @@ import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ReceiptProcessorTest {
-  @Mock private CaseProcessor caseProcessor;
+public class RefusalProcessorTest {
+
+  private static final String REFUSAL_RECEIVED = "Refusal Received";
 
   @Mock private UacQidLinkRepository uacQidLinkRepository;
-
   @Mock private CaseRepository caseRepository;
 
-  @Mock private UacProcessor uacProcessor;
+  @Mock private CaseProcessor caseProcessor;
 
   @Mock private EventLogger eventLogger;
 
-  @InjectMocks ReceiptProcessor underTest;
+  @InjectMocks RefusalProcessor underTest;
 
   @Test
-  public void testGoodReceipt() {
+  public void shouldProcessARefusalReceivedMessageSuccessfully() {
+    // GIVEN
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
-    ReceiptDTO expectedReceipt = managementEvent.getPayload().getReceipt();
+    managementEvent.getPayload().getRefusal().setResponseDateTime(OffsetDateTime.now());
+    Case testCase = getRandomCase();
+    testCase.setRefusalReceived(false);
+    UacQidLink expectedUacQidLink = testCase.getUacQidLinks().get(0);
+    Case expectedCase = expectedUacQidLink.getCaze();
+    RefusalDTO expectedRefusal = managementEvent.getPayload().getRefusal();
 
-    // Given
-    Case expectedCase = getRandomCase();
-    UacQidLink expectedUacQidLink = expectedCase.getUacQidLinks().get(0);
-    expectedUacQidLink.setCaze(expectedCase);
-
-    managementEvent.getPayload().getReceipt().setResponseDateTime(OffsetDateTime.now());
-
-    when(uacQidLinkRepository.findByQid(expectedReceipt.getQuestionnaireId()))
+    when(uacQidLinkRepository.findByQid(expectedRefusal.getQuestionnaireId()))
         .thenReturn(Optional.of(expectedUacQidLink));
 
-    // when
-    underTest.processReceipt(managementEvent);
+    // WHEN
+    underTest.processRefusal(managementEvent);
 
-    // then
-    verify(uacProcessor, times(1)).emitUacUpdatedEvent(expectedUacQidLink, expectedCase, false);
+    // THEN
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseRepository).saveAndFlush(caseArgumentCaptor.capture());
+    Case actualCase = caseArgumentCaptor.getValue();
+
+    assertThat(actualCase.isRefusalReceived()).isTrue();
+
+    verify(caseProcessor, times(1)).emitCaseUpdatedEvent(expectedCase);
     verify(eventLogger, times(1))
-        .logReceiptEvent(
+        .logRefusalEvent(
             expectedUacQidLink,
-            QID_RECEIPTED,
-            EventType.UAC_UPDATED,
-            expectedReceipt,
+            REFUSAL_RECEIVED,
+            EventType.CASE_UPDATED,
+            expectedRefusal,
             managementEvent.getEvent(),
-            expectedReceipt.getResponseDateTime());
+            expectedRefusal.getResponseDateTime());
   }
 
   @Test(expected = RuntimeException.class)
-  public void testReceiptedQidNotFound() {
+  public void shouldThrowRuntimeExceptionWhenCaseNotFound() {
     // GIVEN
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
-    String expectedQuestionnaireId = managementEvent.getPayload().getReceipt().getQuestionnaireId();
+    String expectedQuestionnaireId = managementEvent.getPayload().getRefusal().getQuestionnaireId();
     String expectedErrorMessage =
         String.format("Questionnaire Id '%s' not found!", expectedQuestionnaireId);
 
@@ -81,7 +86,7 @@ public class ReceiptProcessorTest {
 
     try {
       // WHEN
-      underTest.processReceipt(managementEvent);
+      underTest.processRefusal(managementEvent);
     } catch (RuntimeException re) {
       // THEN
       assertThat(re.getMessage()).isEqualTo(expectedErrorMessage);

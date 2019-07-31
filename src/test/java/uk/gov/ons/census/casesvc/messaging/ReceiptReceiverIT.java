@@ -2,6 +2,7 @@ package uk.gov.ons.census.casesvc.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ons.census.casesvc.service.ReceiptProcessor.QID_RECEIPTED;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementReceiptEvent;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.io.IOException;
@@ -23,12 +24,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
-import uk.gov.ons.census.casesvc.model.dto.Receipt;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
+import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
@@ -94,22 +94,21 @@ public class ReceiptReceiverIT {
     uacQidLink.setUac(TEST_UAC);
     uacQidLinkRepository.saveAndFlush(uacQidLink);
 
-    Receipt receipt = new Receipt();
-    receipt.setQuestionnaire_Id(TEST_QID);
+    ResponseManagementEvent managementEvent = getTestResponseManagementReceiptEvent();
+    managementEvent.getPayload().getReceipt().setQuestionnaireId(uacQidLink.getQid());
 
-    String json = convertObjectToJson(receipt);
+    String json = convertObjectToJson(managementEvent);
     Message message =
         MessageBuilder.withBody(json.getBytes())
             .setContentType(MessageProperties.CONTENT_TYPE_JSON)
-            .setHeader("source", "any source")
-            .setHeader("channel", "any channel")
             .build();
     rabbitQueueHelper.sendMessage(inboundQueue, message);
 
     // check the emitted eventDTO
     ResponseManagementEvent responseManagementEvent =
         rabbitQueueHelper.checkExpectedMessageReceived(outboundQueue);
-    assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
+
+    assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventType.UAC_UPDATED);
     UacDTO actualUacDTOObject = responseManagementEvent.getPayload().getUac();
     assertThat(actualUacDTOObject.getUac()).isEqualTo(TEST_UAC);
     assertThat(actualUacDTOObject.getQuestionnaireId()).isEqualTo(TEST_QID);
