@@ -6,9 +6,11 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
+import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ReceiptDTO;
 import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
+import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
@@ -69,6 +71,30 @@ public class EventLogger {
         convertObjectToJson(payload),
         event,
         eventMetaDataDateTime);
+  }
+
+  public void logFulfilmentRequestedEvent(
+      Case caze,
+      UUID caseId,
+      String eventDescription,
+      EventType eventType,
+      FulfilmentRequestDTO payload,
+      EventDTO event) {
+
+    Event loggedEvent = new Event();
+    loggedEvent.setCaze(caze);
+    loggedEvent.setId(UUID.randomUUID());
+    loggedEvent.setCaseId(caseId);
+    loggedEvent.setEventDate(OffsetDateTime.now());
+    loggedEvent.setEventDescription(eventDescription);
+    loggedEvent.setEventType(eventType);
+    loggedEvent.setEventPayload(convertObjectToJson(payload));
+    loggedEvent.setEventChannel(event.getChannel());
+    loggedEvent.setEventSource(event.getSource());
+    loggedEvent.setEventTransactionId(UUID.randomUUID());
+    loggedEvent.setRmEventProcessed(OffsetDateTime.now());
+
+    eventRepository.save(loggedEvent);
   }
 
   public void logEvent(
