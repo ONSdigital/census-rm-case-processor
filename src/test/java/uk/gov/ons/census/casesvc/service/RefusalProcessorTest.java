@@ -43,15 +43,14 @@ public class RefusalProcessorTest {
   public void shouldProcessARefusalReceivedMessageSuccessfully() {
     // GIVEN
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
-    managementEvent.getPayload().getRefusal().setResponseDateTime(OffsetDateTime.now());
+    managementEvent.getPayload().getRefusal().setResponseDateTime(OffsetDateTime.now().toString());
     Case testCase = getRandomCase();
     testCase.setRefusalReceived(false);
     UacQidLink expectedUacQidLink = testCase.getUacQidLinks().get(0);
     Case expectedCase = expectedUacQidLink.getCaze();
     RefusalDTO expectedRefusal = managementEvent.getPayload().getRefusal();
 
-    when(uacQidLinkRepository.findByQid(expectedRefusal.getQuestionnaireId()))
-        .thenReturn(Optional.of(expectedUacQidLink));
+    when(uacQidLinkRepository.findByQid(anyString())).thenReturn(Optional.of(expectedUacQidLink));
 
     // WHEN
     underTest.processRefusal(managementEvent);
@@ -71,10 +70,10 @@ public class RefusalProcessorTest {
             EventType.CASE_UPDATED,
             expectedRefusal,
             managementEvent.getEvent(),
-            expectedRefusal.getResponseDateTime());
+            OffsetDateTime.parse(expectedRefusal.getResponseDateTime()));
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void shouldThrowRuntimeExceptionWhenCaseNotFound() {
     // GIVEN
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
@@ -87,10 +86,9 @@ public class RefusalProcessorTest {
     try {
       // WHEN
       underTest.processRefusal(managementEvent);
-    } catch (RuntimeException re) {
+    } catch (RuntimeException e) {
       // THEN
-      assertThat(re.getMessage()).isEqualTo(expectedErrorMessage);
-      throw re;
+      assertThat(e.getMessage()).isEqualTo(expectedErrorMessage);
     }
   }
 }
