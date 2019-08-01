@@ -41,6 +41,9 @@ public class AppConfig {
   @Value("${queueconfig.refusal-response-inbound-queue}")
   private String refusalInboundQueue;
 
+  @Value("${queueconfig.questionnaire-linked-inbound-queue}")
+  private String questionnaireLinkedInboundQueue;
+
   @Value("${queueconfig.action-case-queue}")
   private String actionCaseQueue;
 
@@ -61,6 +64,11 @@ public class AppConfig {
 
   @Bean
   public MessageChannel refusalInputChannel() {
+    return new DirectChannel();
+  }
+
+  @Bean
+  public MessageChannel questionnaireLinkedInputChannel() {
     return new DirectChannel();
   }
 
@@ -100,6 +108,15 @@ public class AppConfig {
   public AmqpInboundChannelAdapter refusalInbound(
       @Qualifier("refusalContainer") SimpleMessageListenerContainer listenerContainer,
       @Qualifier("refusalInputChannel") MessageChannel channel) {
+    AmqpInboundChannelAdapter adapter = new AmqpInboundChannelAdapter(listenerContainer);
+    adapter.setOutputChannel(channel);
+    return adapter;
+  }
+
+  @Bean
+  public AmqpInboundChannelAdapter questionnaireLinkedInbound(
+      @Qualifier("questionnaireLinkedContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("questionnaireLinkedInputChannel") MessageChannel channel) {
     AmqpInboundChannelAdapter adapter = new AmqpInboundChannelAdapter(listenerContainer);
     adapter.setOutputChannel(channel);
     return adapter;
@@ -163,6 +180,16 @@ public class AppConfig {
     SimpleMessageListenerContainer container =
         new SimpleMessageListenerContainer(connectionFactory);
     container.setQueueNames(refusalInboundQueue);
+    container.setConcurrentConsumers(consumers);
+    return container;
+  }
+
+  @Bean
+  public SimpleMessageListenerContainer questionnaireLinkedContainer(
+      ConnectionFactory connectionFactory) {
+    SimpleMessageListenerContainer container =
+        new SimpleMessageListenerContainer(connectionFactory);
+    container.setQueueNames(questionnaireLinkedInboundQueue);
     container.setConcurrentConsumers(consumers);
     return container;
   }
