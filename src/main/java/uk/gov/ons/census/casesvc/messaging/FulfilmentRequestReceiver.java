@@ -4,19 +4,19 @@ import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
-import uk.gov.ons.census.casesvc.service.FulfilmentProcessor;
+import uk.gov.ons.census.casesvc.service.FulfilmentRequestProcessor;
 
 @MessageEndpoint
-public class FulfilmentReceiver {
-  private final FulfilmentProcessor fulfilmentProcessor;
+public class FulfilmentRequestReceiver {
+  private final FulfilmentRequestProcessor fulfilmentRequestProcessor;
 
-  public FulfilmentReceiver(FulfilmentProcessor fulfilmentProcessor) {
-    this.fulfilmentProcessor = fulfilmentProcessor;
+  public FulfilmentRequestReceiver(FulfilmentRequestProcessor fulfilmentRequestProcessor) {
+    this.fulfilmentRequestProcessor = fulfilmentRequestProcessor;
   }
 
   @Transactional
   @ServiceActivator(inputChannel = "fulfilmentInputChannel")
   public void receiveMessage(ResponseManagementEvent fulfilmentEvent) {
-    fulfilmentProcessor.processFulfilmentRequest(fulfilmentEvent);
+    fulfilmentRequestProcessor.processFulfilmentRequest(fulfilmentEvent);
   }
 }

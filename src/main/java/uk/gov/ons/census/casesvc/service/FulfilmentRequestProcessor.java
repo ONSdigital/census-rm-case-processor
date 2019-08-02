@@ -15,9 +15,9 @@ import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 
 @Service
-public class FulfilmentProcessor {
+public class FulfilmentRequestProcessor {
 
-  private static final Logger log = LoggerFactory.getLogger(FulfilmentProcessor.class);
+  private static final Logger log = LoggerFactory.getLogger(FulfilmentRequestProcessor.class);
 
   private static final String CASE_NOT_FOUND_ERROR = "Case not found error";
 
@@ -25,7 +25,7 @@ public class FulfilmentProcessor {
   private final EventLogger eventLogger;
   private final EventRepository eventRepository;
 
-  public FulfilmentProcessor(
+  public FulfilmentRequestProcessor(
       CaseRepository caseRepository, EventLogger eventLogger, EventRepository eventRepository) {
     this.caseRepository = caseRepository;
     this.eventLogger = eventLogger;

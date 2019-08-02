@@ -10,11 +10,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class FulfilmentRequestDTO {
 
-  private String fulfilmentCode;
-
   @JsonInclude(Include.NON_NULL)
   @JsonProperty("caseId")
   private String caseId;
+
+  private String fulfilmentCode;
 
   private String individualCaseId;
 }
