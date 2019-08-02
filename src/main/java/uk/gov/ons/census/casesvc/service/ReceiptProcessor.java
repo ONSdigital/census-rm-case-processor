@@ -2,7 +2,6 @@ package uk.gov.ons.census.casesvc.service;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
-import java.time.OffsetDateTime;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
@@ -49,12 +48,6 @@ public class ReceiptProcessor {
           String.format("Questionnaire Id '%s' not found!", receipt.getQuestionnaireId()));
     }
 
-    OffsetDateTime responseDateTime = null;
-    Optional<String> optResponseDateTime = Optional.ofNullable(receipt.getResponseDateTime());
-    if (optResponseDateTime.isPresent()) {
-      responseDateTime = OffsetDateTime.parse(optResponseDateTime.get());
-    }
-
     UacQidLink uacQidLink = uacQidLinkOpt.get();
     Case caze = uacQidLink.getCaze();
 
@@ -68,6 +61,6 @@ public class ReceiptProcessor {
         EventType.UAC_UPDATED,
         receipt,
         receiptEvent.getEvent(),
-        responseDateTime);
+        receipt.getResponseDateTime());
   }
 }

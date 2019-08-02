@@ -2,6 +2,7 @@ package uk.gov.ons.census.casesvc.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import java.time.OffsetDateTime;
 import lombok.Data;
 
 @Data
@@ -13,7 +14,7 @@ public class CollectionCase {
   private String collectionExerciseId;
   private Address address;
   private String state;
-  private String actionableFrom;
+  private OffsetDateTime actionableFrom;
   private Boolean receiptReceived;
   private Boolean refusalReceived;
 

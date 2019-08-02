@@ -112,7 +112,7 @@ public class CaseProcessor {
 
   private CollectionCase createCollectionCase(Case caze, Address address) {
     CollectionCase collectionCase = new CollectionCase();
-    collectionCase.setActionableFrom(OffsetDateTime.now().toString());
+    collectionCase.setActionableFrom(OffsetDateTime.now());
     collectionCase.setAddress(address);
     collectionCase.setCaseRef(Long.toString(caze.getCaseRef()));
     collectionCase.setCollectionExerciseId(caze.getCollectionExerciseId());

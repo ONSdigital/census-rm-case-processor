@@ -2,7 +2,6 @@ package uk.gov.ons.census.casesvc.service;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
-import java.time.OffsetDateTime;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
@@ -60,6 +59,6 @@ public class RefusalProcessor {
         EventType.CASE_UPDATED,
         refusal,
         refusalEvent.getEvent(),
-        OffsetDateTime.parse(refusal.getResponseDateTime()));
+        refusal.getResponseDateTime());
   }
 }

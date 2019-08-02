@@ -107,7 +107,7 @@ public class EventProcessorTest {
     EventDTO event = new EventDTO();
     event.setType(EventType.PRINT_CASE_SELECTED);
     event.setChannel("Test channel");
-    event.setDateTime(OffsetDateTime.now().toString());
+    event.setDateTime(OffsetDateTime.now());
     event.setSource("Test source");
     event.setTransactionId(UUID.randomUUID().toString());
     responseManagementEvent.setEvent(event);
@@ -134,7 +134,7 @@ public class EventProcessorTest {
     assertThat("Test source").isEqualTo(actualEvent.getEventSource());
     assertThat(event.getTransactionId()).isEqualTo(actualEvent.getEventTransactionId().toString());
     assertThat(event.getType().toString()).isEqualTo(actualEvent.getEventType().toString());
-    assertThat(event.getDateTime()).isEqualTo(actualEvent.getEventDate().toString());
+    assertThat(event.getDateTime()).isEqualTo(actualEvent.getEventDate());
     assertThat(
             "{\"printCaseSelected\":{\"caseRef\":123,\"packCode\":\"Test packCode\",\"actionRuleId\":\"Test actionRuleId\",\"batchId\":\"Test batchId\"}}")
         .isEqualTo(actualEvent.getEventPayload());

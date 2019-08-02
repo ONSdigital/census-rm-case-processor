@@ -49,7 +49,7 @@ public class ReceiptProcessorTest {
     UacQidLink expectedUacQidLink = expectedCase.getUacQidLinks().get(0);
     expectedUacQidLink.setCaze(expectedCase);
 
-    managementEvent.getPayload().getReceipt().setResponseDateTime(OffsetDateTime.now().toString());
+    managementEvent.getPayload().getReceipt().setResponseDateTime(OffsetDateTime.now());
 
     when(uacQidLinkRepository.findByQid(expectedReceipt.getQuestionnaireId()))
         .thenReturn(Optional.of(expectedUacQidLink));
@@ -66,7 +66,7 @@ public class ReceiptProcessorTest {
             EventType.UAC_UPDATED,
             expectedReceipt,
             managementEvent.getEvent(),
-            OffsetDateTime.parse(expectedReceipt.getResponseDateTime()));
+            expectedReceipt.getResponseDateTime());
   }
 
   @Test(expected = RuntimeException.class)
