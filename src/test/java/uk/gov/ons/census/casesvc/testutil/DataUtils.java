@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.UUID;
 import org.jeasy.random.EasyRandom;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
+import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ReceiptDTO;
 import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
@@ -78,6 +79,28 @@ public class DataUtils {
     return managementEvent;
   }
 
+  public static ResponseManagementEvent getTestResponseManagementFulfilmentRequestedEvent() {
+    ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
+
+    EventDTO event = managementEvent.getEvent();
+    event.setType(EventType.REFUSAL_RECEIVED);
+    event.setSource("CONTACT CENTRE API");
+    event.setChannel("CC");
+
+    PayloadDTO payload = managementEvent.getPayload();
+    payload.setUac(null);
+    payload.setCollectionCase(null);
+    payload.setReceipt(null);
+    payload.setPrintCaseSelected(null);
+    payload.setRefusal(null);
+
+    FulfilmentRequestDTO fulfilmentRequest = payload.getFulfilmentRequest();
+    fulfilmentRequest.setCaseId(null);
+    fulfilmentRequest.setFulfilmentCode(null);
+
+    return managementEvent;
+  }
+
   public static ReceiptDTO convertJsonToReceiptDTO(String json) {
     try {
       return objectMapper.readValue(json, ReceiptDTO.class);
@@ -91,6 +114,14 @@ public class DataUtils {
       return objectMapper.readValue(json, RefusalDTO.class);
     } catch (IOException e) {
       throw new RuntimeException("Failed converting Json To ReceiptDTO", e);
+    }
+  }
+
+  public static FulfilmentRequestDTO convertJsonToFulfilmentRequestDTO(String json) {
+    try {
+      return objectMapper.readValue(json, FulfilmentRequestDTO.class);
+    } catch (IOException e) {
+      throw new RuntimeException("Failed converting Json To FulfilmentRequestDTO", e);
     }
   }
 }
