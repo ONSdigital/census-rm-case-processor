@@ -9,6 +9,7 @@ import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ReceiptDTO;
 import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
+import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
@@ -69,6 +70,16 @@ public class EventLogger {
         convertObjectToJson(payload),
         event,
         eventMetaDataDateTime);
+  }
+
+  public void logQuestionnaireLinkedEvent(
+      UacQidLink uacQidLink,
+      String eventDescription,
+      EventType eventType,
+      UacDTO payload,
+      EventDTO event) {
+
+    logEvent(uacQidLink, eventDescription, eventType, convertObjectToJson(payload), event, null);
   }
 
   public void logEvent(
