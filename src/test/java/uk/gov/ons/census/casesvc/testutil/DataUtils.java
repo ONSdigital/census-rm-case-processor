@@ -83,7 +83,7 @@ public class DataUtils {
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
 
     EventDTO event = managementEvent.getEvent();
-    event.setType(EventType.REFUSAL_RECEIVED);
+    event.setType(EventType.FULFILMENT_REQUESTED);
     event.setSource("CONTACT CENTRE API");
     event.setChannel("CC");
 
@@ -113,7 +113,7 @@ public class DataUtils {
     try {
       return objectMapper.readValue(json, RefusalDTO.class);
     } catch (IOException e) {
-      throw new RuntimeException("Failed converting Json To ReceiptDTO", e);
+      throw new RuntimeException("Failed converting Json To RefusalDTO", e);
     }
   }
 

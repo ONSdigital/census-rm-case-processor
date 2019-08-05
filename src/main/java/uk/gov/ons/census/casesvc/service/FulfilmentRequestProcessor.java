@@ -44,8 +44,6 @@ public class FulfilmentRequestProcessor {
 
     Case caze = cazeResult.get();
 
-    int caseRef = caze.getCaseRef();
-
     eventLogger.logFulfilmentRequestedEvent(
         caze,
         UUID.fromString(request.getCaseId()),
