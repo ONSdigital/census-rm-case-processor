@@ -1,6 +1,5 @@
 package uk.gov.ons.census.casesvc.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.UUID;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,8 +32,7 @@ public class UacProcessor {
   public UacProcessor(
       UacQidLinkRepository uacQidLinkRepository,
       RabbitTemplate rabbitTemplate,
-      UacQidServiceClient uacQidServiceClient,
-      ObjectMapper objectMapper) {
+      UacQidServiceClient uacQidServiceClient) {
     this.rabbitTemplate = rabbitTemplate;
     this.uacQidServiceClient = uacQidServiceClient;
     this.uacQidLinkRepository = uacQidLinkRepository;
