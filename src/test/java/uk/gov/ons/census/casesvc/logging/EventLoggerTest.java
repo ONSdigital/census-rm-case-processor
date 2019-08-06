@@ -30,6 +30,8 @@ import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 @RunWith(MockitoJUnitRunner.class)
 public class EventLoggerTest {
 
+  private static final UUID TEST_CASE_ID = UUID.randomUUID();
+
   @Mock EventRepository eventRepository;
 
   @InjectMocks EventLogger underTest;
@@ -159,17 +161,12 @@ public class EventLoggerTest {
   @Test
   public void testLogRefusalEvent() {
     // Given
-    RefusalDTO expectedRefusal =
-        convertJsonToRefusalDTO(convertObjectToJson(easyRandom.nextObject(RefusalDTO.class)));
+    RefusalDTO expectedRefusal = easyRandom.nextObject(RefusalDTO.class);
+    expectedRefusal.getCollectionCase().setId(TEST_CASE_ID.toString());
 
     // When
     underTest.logRefusalEvent(
-        new UacQidLink(),
-        "TEST_LOGGED_EVENT",
-        EventType.UAC_UPDATED,
-        expectedRefusal,
-        new EventDTO(),
-        OffsetDateTime.now());
+        new Case(), "TEST_LOGGED_EVENT", EventType.UAC_UPDATED, expectedRefusal, new EventDTO());
 
     // Then
     ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
@@ -177,9 +174,10 @@ public class EventLoggerTest {
     RefusalDTO actualRefusal =
         convertJsonToRefusalDTO(eventArgumentCaptor.getValue().getEventPayload());
 
-    assertThat(actualRefusal.getCaseId()).isEqualTo(expectedRefusal.getCaseId());
-    assertThat(actualRefusal.getQuestionnaireId()).isEqualTo(expectedRefusal.getQuestionnaireId());
-    assertThat(actualRefusal.getResponseDateTime())
-        .isEqualTo(expectedRefusal.getResponseDateTime());
+    assertThat(actualRefusal.getType()).isEqualTo(expectedRefusal.getType());
+    assertThat(actualRefusal.getReport()).isEqualTo(expectedRefusal.getReport());
+    assertThat(actualRefusal.getAgentId()).isEqualTo(expectedRefusal.getAgentId());
+    assertThat(actualRefusal.getCollectionCase().getId())
+        .isEqualTo(expectedRefusal.getCollectionCase().getId());
   }
 }

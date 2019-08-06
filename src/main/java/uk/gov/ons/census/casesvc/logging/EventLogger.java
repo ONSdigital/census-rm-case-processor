@@ -56,15 +56,11 @@ public class EventLogger {
   }
 
   public void logRefusalEvent(
-      Case caze,
-      String eventDescription,
-      EventType eventType,
-      RefusalDTO payload,
-      EventDTO event) {
+      Case caze, String eventDescription, EventType eventType, RefusalDTO payload, EventDTO event) {
 
     Event loggedEvent = new Event();
 
-   loggedEvent.setId(UUID.randomUUID());
+    loggedEvent.setId(UUID.randomUUID());
     loggedEvent.setCaze(caze);
     loggedEvent.setCaseId(UUID.fromString(payload.getCollectionCase().getId()));
     loggedEvent.setEventDate(event.getDateTime());
