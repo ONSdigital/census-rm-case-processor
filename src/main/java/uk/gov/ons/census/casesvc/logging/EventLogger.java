@@ -9,6 +9,7 @@ import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ReceiptDTO;
 import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
+import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
@@ -55,20 +56,27 @@ public class EventLogger {
   }
 
   public void logRefusalEvent(
-      UacQidLink uacQidLink,
+      Case caze,
       String eventDescription,
       EventType eventType,
       RefusalDTO payload,
-      EventDTO event,
-      OffsetDateTime eventMetaDataDateTime) {
+      EventDTO event) {
 
-    logEvent(
-        uacQidLink,
-        eventDescription,
-        eventType,
-        convertObjectToJson(payload),
-        event,
-        eventMetaDataDateTime);
+    Event loggedEvent = new Event();
+
+   loggedEvent.setId(UUID.randomUUID());
+    loggedEvent.setCaze(caze);
+    loggedEvent.setCaseId(UUID.fromString(payload.getCollectionCase().getId()));
+    loggedEvent.setEventDate(event.getDateTime());
+    loggedEvent.setRmEventProcessed(OffsetDateTime.now());
+    loggedEvent.setEventDescription(eventDescription);
+    loggedEvent.setEventType(eventType);
+    loggedEvent.setEventChannel(event.getChannel());
+    loggedEvent.setEventSource(event.getSource());
+    loggedEvent.setEventTransactionId(UUID.randomUUID());
+    loggedEvent.setEventPayload(convertObjectToJson(payload));
+
+    eventRepository.save(loggedEvent);
   }
 
   public void logEvent(

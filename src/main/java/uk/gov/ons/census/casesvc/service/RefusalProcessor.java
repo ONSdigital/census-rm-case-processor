@@ -3,6 +3,7 @@ package uk.gov.ons.census.casesvc.service;
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
@@ -17,7 +18,7 @@ import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 public class RefusalProcessor {
   private static final Logger log = LoggerFactory.getLogger(RefusalProcessor.class);
   private static final String REFUSAL_RECEIVED = "Refusal Received";
-  private static final String QID_NOT_FOUND_ERROR = "Qid not found error";
+  private static final String CASE_NOT_FOUND_ERROR = "Case Id not found error";
   private final CaseProcessor caseProcessor;
   private final CaseRepository caseRepository;
   private final UacQidLinkRepository uacQidLinkRepository;
@@ -36,17 +37,16 @@ public class RefusalProcessor {
 
   public void processRefusal(ResponseManagementEvent refusalEvent) {
     RefusalDTO refusal = refusalEvent.getPayload().getRefusal();
-    Optional<UacQidLink> uacQidLinkOpt =
-        uacQidLinkRepository.findByQid(refusal.getQuestionnaireId());
+    UUID caseId = UUID.fromString(refusal.getCollectionCase().getId());
+    Optional<Case> optCase  = caseRepository.findByCaseId(caseId);
 
-    if (uacQidLinkOpt.isEmpty()) {
-      log.error(QID_NOT_FOUND_ERROR);
+    if (optCase.isEmpty()) {
+      log.error(CASE_NOT_FOUND_ERROR);
       throw new RuntimeException(
-          String.format("Questionnaire Id '%s' not found!", refusal.getQuestionnaireId()));
+          String.format("Case Id '%s' not found!", caseId.toString()));
     }
 
-    UacQidLink uacQidLink = uacQidLinkOpt.get();
-    Case caze = uacQidLink.getCaze();
+    Case caze = optCase.get();
 
     caze.setRefusalReceived(true);
     caseRepository.saveAndFlush(caze);
@@ -54,11 +54,10 @@ public class RefusalProcessor {
     caseProcessor.emitCaseUpdatedEvent(caze);
 
     eventLogger.logRefusalEvent(
-        uacQidLink,
+        caze,
         REFUSAL_RECEIVED,
         EventType.CASE_UPDATED,
         refusal,
-        refusalEvent.getEvent(),
-        refusal.getResponseDateTime());
+        refusalEvent.getEvent());
   }
 }
