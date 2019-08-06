@@ -10,9 +10,7 @@ import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
-import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
-import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
 @Service
 public class RefusalProcessor {
@@ -21,29 +19,23 @@ public class RefusalProcessor {
   private static final String CASE_NOT_FOUND_ERROR = "Case Id not found error";
   private final CaseProcessor caseProcessor;
   private final CaseRepository caseRepository;
-  private final UacQidLinkRepository uacQidLinkRepository;
   private final EventLogger eventLogger;
 
   public RefusalProcessor(
-      CaseProcessor caseProcessor,
-      CaseRepository caseRepository,
-      UacQidLinkRepository uacQidLinkRepository,
-      EventLogger eventLogger) {
+      CaseProcessor caseProcessor, CaseRepository caseRepository, EventLogger eventLogger) {
     this.caseProcessor = caseProcessor;
     this.caseRepository = caseRepository;
-    this.uacQidLinkRepository = uacQidLinkRepository;
     this.eventLogger = eventLogger;
   }
 
   public void processRefusal(ResponseManagementEvent refusalEvent) {
     RefusalDTO refusal = refusalEvent.getPayload().getRefusal();
     UUID caseId = UUID.fromString(refusal.getCollectionCase().getId());
-    Optional<Case> optCase  = caseRepository.findByCaseId(caseId);
+    Optional<Case> optCase = caseRepository.findByCaseId(caseId);
 
     if (optCase.isEmpty()) {
       log.error(CASE_NOT_FOUND_ERROR);
-      throw new RuntimeException(
-          String.format("Case Id '%s' not found!", caseId.toString()));
+      throw new RuntimeException(String.format("Case Id '%s' not found!", caseId.toString()));
     }
 
     Case caze = optCase.get();
@@ -54,10 +46,6 @@ public class RefusalProcessor {
     caseProcessor.emitCaseUpdatedEvent(caze);
 
     eventLogger.logRefusalEvent(
-        caze,
-        REFUSAL_RECEIVED,
-        EventType.CASE_UPDATED,
-        refusal,
-        refusalEvent.getEvent());
+        caze, REFUSAL_RECEIVED, EventType.CASE_UPDATED, refusal, refusalEvent.getEvent());
   }
 }
