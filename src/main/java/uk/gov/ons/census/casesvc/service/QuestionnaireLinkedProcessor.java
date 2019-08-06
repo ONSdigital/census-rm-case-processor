@@ -59,7 +59,6 @@ public class QuestionnaireLinkedProcessor {
     Case caze = caseOpt.get();
 
     uacQidLink.setCaze(caze);
-    uacQidLinkRepository.saveAndFlush(uacQidLink);
 
     uacProcessor.emitUacUpdatedEvent(uacQidLink, caze);
 
