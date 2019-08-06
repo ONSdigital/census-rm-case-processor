@@ -70,8 +70,7 @@ public class RefusalProcessorTest {
             REFUSAL_RECEIVED,
             EventType.CASE_UPDATED,
             expectedRefusal,
-            managementEvent.getEvent(),
-            expectedRefusal.getResponseDateTime());
+            managementEvent.getEvent());
   }
 
   @Test(expected = RuntimeException.class)

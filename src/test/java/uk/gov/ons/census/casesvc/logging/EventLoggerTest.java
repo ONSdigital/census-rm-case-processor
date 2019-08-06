@@ -2,13 +2,11 @@ package uk.gov.ons.census.casesvc.logging;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToReceiptDTO;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToRefusalDTO;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
-import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
@@ -37,7 +35,7 @@ public class EventLoggerTest {
   private final EasyRandom easyRandom = new EasyRandom();
 
   @Test
-  public void testLogEventWithoutEventMetaDataDateTime() {
+  public void testLogEvent() {
     // Given
     UacQidLink uacQidLink = new UacQidLink();
     Case caze = new Case();
@@ -56,35 +54,6 @@ public class EventLoggerTest {
   }
 
   @Test
-  public void testLogEventWithEventMetaDataDateTime() {
-    // Given
-    UacQidLink uacQidLink = new UacQidLink();
-    OffsetDateTime now = OffsetDateTime.now();
-    Case caze = new Case();
-    UUID caseUuid = UUID.randomUUID();
-    caze.setCaseId(caseUuid);
-    uacQidLink.setCaze(caze);
-
-    // When
-    underTest.logEvent(
-        uacQidLink,
-        "TEST_LOGGED_EVENT",
-        EventType.UAC_UPDATED,
-        "",
-        new EventDTO(),
-        any(OffsetDateTime.class));
-
-    // Then
-    ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
-    verify(eventRepository).save(eventArgumentCaptor.capture());
-    assertEquals("TEST_LOGGED_EVENT", eventArgumentCaptor.getValue().getEventDescription());
-    assertEquals(EventType.UAC_UPDATED, eventArgumentCaptor.getValue().getEventType());
-    assertEquals(
-        now.toString().substring(0, 17),
-        eventArgumentCaptor.getValue().getEventDate().toString().substring(0, 17));
-  }
-
-  @Test
   public void testLogEventAddressed() {
     // Given
     UacQidLink uacQidLink = new UacQidLink();
@@ -94,13 +63,7 @@ public class EventLoggerTest {
     uacQidLink.setCaze(caze);
 
     // When
-    underTest.logEvent(
-        uacQidLink,
-        "TEST_LOGGED_EVENT",
-        EventType.UAC_UPDATED,
-        "",
-        new EventDTO(),
-        OffsetDateTime.now());
+    underTest.logEvent(uacQidLink, "TEST_LOGGED_EVENT", EventType.UAC_UPDATED, "", new EventDTO());
 
     // Then
     ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
@@ -114,13 +77,7 @@ public class EventLoggerTest {
     UacQidLink uacQidLink = new UacQidLink();
 
     // When
-    underTest.logEvent(
-        uacQidLink,
-        "TEST_LOGGED_EVENT",
-        EventType.UAC_UPDATED,
-        "",
-        new EventDTO(),
-        OffsetDateTime.now());
+    underTest.logEvent(uacQidLink, "TEST_LOGGED_EVENT", EventType.UAC_UPDATED, "", new EventDTO());
 
     // Then
     ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
@@ -140,8 +97,7 @@ public class EventLoggerTest {
         "TEST_LOGGED_EVENT",
         EventType.UAC_UPDATED,
         expectedReceipt,
-        new EventDTO(),
-        OffsetDateTime.now());
+        new EventDTO());
 
     // Then
     ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
@@ -168,8 +124,7 @@ public class EventLoggerTest {
         "TEST_LOGGED_EVENT",
         EventType.UAC_UPDATED,
         expectedRefusal,
-        new EventDTO(),
-        OffsetDateTime.now());
+        new EventDTO());
 
     // Then
     ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);

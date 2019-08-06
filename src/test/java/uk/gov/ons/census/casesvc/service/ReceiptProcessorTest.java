@@ -65,8 +65,7 @@ public class ReceiptProcessorTest {
             QID_RECEIPTED,
             EventType.UAC_UPDATED,
             expectedReceipt,
-            managementEvent.getEvent(),
-            expectedReceipt.getResponseDateTime());
+            managementEvent.getEvent());
   }
 
   @Test(expected = RuntimeException.class)

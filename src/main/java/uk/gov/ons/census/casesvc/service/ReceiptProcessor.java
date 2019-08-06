@@ -18,6 +18,7 @@ public class ReceiptProcessor {
   private static final Logger log = LoggerFactory.getLogger(ReceiptProcessor.class);
   public static final String QID_RECEIPTED = "QID Receipted";
   private static final String QID_NOT_FOUND_ERROR = "Qid not found error";
+  private static final String DATETIME_NOT_PRESENT = "Date time not in event error";
   private final CaseProcessor caseProcessor;
   private final UacQidLinkRepository uacQidLinkRepository;
   private final CaseRepository caseRepository;
@@ -38,14 +39,22 @@ public class ReceiptProcessor {
   }
 
   public void processReceipt(ResponseManagementEvent receiptEvent) {
-    ReceiptDTO receipt = receiptEvent.getPayload().getReceipt();
+    ReceiptDTO receiptPayload = receiptEvent.getPayload().getReceipt();
     Optional<UacQidLink> uacQidLinkOpt =
-        uacQidLinkRepository.findByQid(receipt.getQuestionnaireId());
+        uacQidLinkRepository.findByQid(receiptPayload.getQuestionnaireId());
 
     if (uacQidLinkOpt.isEmpty()) {
       log.error(QID_NOT_FOUND_ERROR);
       throw new RuntimeException(
-          String.format("Questionnaire Id '%s' not found!", receipt.getQuestionnaireId()));
+          String.format("Questionnaire Id '%s' not found!", receiptPayload.getQuestionnaireId()));
+    }
+
+    if (receiptEvent.getEvent().getDateTime() == null) {
+      log.error(DATETIME_NOT_PRESENT);
+      throw new RuntimeException(
+          String.format(
+              "Date time not found in fulfilment receipt request event for QID '%s",
+              receiptPayload.getQuestionnaireId()));
     }
 
     UacQidLink uacQidLink = uacQidLinkOpt.get();
@@ -56,11 +65,6 @@ public class ReceiptProcessor {
     caseRepository.saveAndFlush(caze);
     caseProcessor.emitCaseUpdatedEvent(caze);
     eventLogger.logReceiptEvent(
-        uacQidLink,
-        QID_RECEIPTED,
-        EventType.UAC_UPDATED,
-        receipt,
-        receiptEvent.getEvent(),
-        receipt.getResponseDateTime());
+        uacQidLink, QID_RECEIPTED, EventType.UAC_UPDATED, receiptPayload, receiptEvent.getEvent());
   }
 }

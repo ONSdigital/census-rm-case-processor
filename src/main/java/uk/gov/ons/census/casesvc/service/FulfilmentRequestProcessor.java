@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
+import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -20,6 +21,7 @@ public class FulfilmentRequestProcessor {
   private static final Logger log = LoggerFactory.getLogger(FulfilmentRequestProcessor.class);
 
   private static final String CASE_NOT_FOUND_ERROR = "Case not found error";
+  private static final String DATETIME_NOT_PRESENT = "Date time not in event error";
 
   private final CaseRepository caseRepository;
   private final EventLogger eventLogger;
@@ -33,23 +35,35 @@ public class FulfilmentRequestProcessor {
   }
 
   public void processFulfilmentRequest(ResponseManagementEvent fulfilmentRequest) {
-    FulfilmentRequestDTO request = fulfilmentRequest.getPayload().getFulfilmentRequest();
+    EventDTO event = fulfilmentRequest.getEvent();
+    FulfilmentRequestDTO fulfilmentRequestPayload =
+        fulfilmentRequest.getPayload().getFulfilmentRequest();
 
-    Optional<Case> cazeResult = caseRepository.findByCaseId(UUID.fromString(request.getCaseId()));
+    String caseId = fulfilmentRequestPayload.getCaseId();
+
+    Optional<Case> cazeResult = caseRepository.findByCaseId(UUID.fromString(caseId));
 
     if (cazeResult.isEmpty()) {
       log.error(CASE_NOT_FOUND_ERROR);
-      throw new RuntimeException(String.format("Case ID '%s' not found!", request.getCaseId()));
+      throw new RuntimeException(
+          String.format("Case ID '%s' not found!", fulfilmentRequestPayload.getCaseId()));
+    }
+
+    if (event.getDateTime() == null) {
+      log.error(DATETIME_NOT_PRESENT);
+      throw new RuntimeException(
+          String.format("Date time not found in fulfilment request event for case '%s", caseId));
     }
 
     Case caze = cazeResult.get();
 
     eventLogger.logFulfilmentRequestedEvent(
         caze,
-        UUID.fromString(request.getCaseId()),
+        UUID.fromString(fulfilmentRequestPayload.getCaseId()),
+        event.getDateTime(),
         "Fulfilment Request Received",
         FULFILMENT_REQUESTED,
-        request,
+        fulfilmentRequestPayload,
         fulfilmentRequest.getEvent());
   }
 }

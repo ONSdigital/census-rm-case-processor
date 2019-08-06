@@ -36,7 +36,7 @@ public class EventLogger {
     event.setSource(EVENT_SOURCE);
     event.setChannel(EVENT_CHANNEL);
 
-    logEvent(uacQidLink, eventDescription, eventType, convertObjectToJson(payload), event, null);
+    logEvent(uacQidLink, eventDescription, eventType, convertObjectToJson(payload), event);
   }
 
   public void logReceiptEvent(
@@ -44,16 +44,9 @@ public class EventLogger {
       String eventDescription,
       EventType eventType,
       ReceiptDTO payload,
-      EventDTO event,
-      OffsetDateTime eventMetaDataDateTime) {
+      EventDTO event) {
 
-    logEvent(
-        uacQidLink,
-        eventDescription,
-        eventType,
-        convertObjectToJson(payload),
-        event,
-        eventMetaDataDateTime);
+    logEvent(uacQidLink, eventDescription, eventType, convertObjectToJson(payload), event);
   }
 
   public void logRefusalEvent(
@@ -61,21 +54,15 @@ public class EventLogger {
       String eventDescription,
       EventType eventType,
       RefusalDTO payload,
-      EventDTO event,
-      OffsetDateTime eventMetaDataDateTime) {
+      EventDTO event) {
 
-    logEvent(
-        uacQidLink,
-        eventDescription,
-        eventType,
-        convertObjectToJson(payload),
-        event,
-        eventMetaDataDateTime);
+    logEvent(uacQidLink, eventDescription, eventType, convertObjectToJson(payload), event);
   }
 
   public void logFulfilmentRequestedEvent(
       Case caze,
       UUID caseId,
+      OffsetDateTime eventMetaDataDateTime,
       String eventDescription,
       EventType eventType,
       FulfilmentRequestDTO payload,
@@ -85,7 +72,7 @@ public class EventLogger {
     loggedEvent.setCaze(caze);
     loggedEvent.setId(UUID.randomUUID());
     loggedEvent.setCaseId(caseId);
-    loggedEvent.setEventDate(OffsetDateTime.now());
+    loggedEvent.setEventDate(eventMetaDataDateTime);
     loggedEvent.setEventDescription(eventDescription);
     loggedEvent.setEventType(eventType);
     loggedEvent.setEventPayload(convertObjectToJson(payload));
@@ -102,17 +89,12 @@ public class EventLogger {
       String eventDescription,
       EventType eventType,
       String jsonPayload,
-      EventDTO event,
-      OffsetDateTime eventMetaDataDateTime) {
+      EventDTO event) {
 
     Event loggedEvent = new Event();
     loggedEvent.setId(UUID.randomUUID());
 
-    if (eventMetaDataDateTime != null) {
-      loggedEvent.setEventDate(eventMetaDataDateTime);
-    }
-
-    loggedEvent.setEventDate(OffsetDateTime.now());
+    loggedEvent.setEventDate(event.getDateTime());
     loggedEvent.setRmEventProcessed(OffsetDateTime.now());
     loggedEvent.setEventDescription(eventDescription);
     loggedEvent.setUacQidLink(uacQidLink);
