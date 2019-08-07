@@ -3,6 +3,7 @@ package uk.gov.ons.census.casesvc.logging;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToFulfilmentRequestDTO;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToReceiptDTO;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToRefusalDTO;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
@@ -16,9 +17,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
+import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ReceiptDTO;
 import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
+import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
@@ -136,5 +139,36 @@ public class EventLoggerTest {
     assertThat(actualRefusal.getQuestionnaireId()).isEqualTo(expectedRefusal.getQuestionnaireId());
     assertThat(actualRefusal.getResponseDateTime())
         .isEqualTo(expectedRefusal.getResponseDateTime());
+  }
+
+  @Test
+  public void testLogFulfilmentRequestEvent() {
+    // Given
+    ResponseManagementEvent managementEvent = easyRandom.nextObject(ResponseManagementEvent.class);
+    EventDTO fulfilmentRequestEvent = managementEvent.getEvent();
+    FulfilmentRequestDTO fulfilmentRequestPayload =
+        managementEvent.getPayload().getFulfilmentRequest();
+    fulfilmentRequestPayload.setCaseId(UUID.randomUUID().toString());
+    fulfilmentRequestEvent.setTransactionId(UUID.randomUUID().toString());
+
+    // When
+    underTest.logFulfilmentRequestedEvent(
+        new Case(),
+        UUID.fromString(fulfilmentRequestPayload.getCaseId()),
+        fulfilmentRequestEvent.getDateTime(),
+        "Fulfilment Request Received",
+        EventType.FULFILMENT_REQUESTED,
+        fulfilmentRequestPayload,
+        fulfilmentRequestEvent);
+
+    // Then
+    ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
+    verify(eventRepository).save(eventArgumentCaptor.capture());
+    FulfilmentRequestDTO actualFulfilment =
+        convertJsonToFulfilmentRequestDTO(eventArgumentCaptor.getValue().getEventPayload());
+
+    assertThat(actualFulfilment.getCaseId()).isEqualTo(fulfilmentRequestPayload.getCaseId());
+    assertThat(actualFulfilment.getFulfilmentCode())
+        .isEqualTo(fulfilmentRequestPayload.getFulfilmentCode());
   }
 }
