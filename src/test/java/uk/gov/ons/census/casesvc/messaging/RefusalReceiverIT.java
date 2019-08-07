@@ -91,6 +91,7 @@ public class RefusalReceiverIT {
 
     ResponseManagementEvent managementEvent = getTestResponseManagementRefusalEvent();
     managementEvent.getPayload().getRefusal().setQuestionnaireId(uacQidLink.getQid());
+    managementEvent.getEvent().setTransactionId(UUID.randomUUID().toString());
 
     String json = convertObjectToJson(managementEvent);
     Message message =

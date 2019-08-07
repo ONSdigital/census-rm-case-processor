@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
+import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -68,6 +69,34 @@ public class FulfilmentRequestProcessorTest {
     UUID expectedCaseIdNotFound =
         UUID.fromString(managementEvent.getPayload().getFulfilmentRequest().getCaseId());
     String expectedErrorMessage = String.format("Case ID '%s' not found!", expectedCaseIdNotFound);
+
+    try {
+      // WHEN
+      underTest.processFulfilmentRequest(managementEvent);
+    } catch (RuntimeException re) {
+      // THEN
+      assertThat(re.getMessage()).isEqualTo(expectedErrorMessage);
+      throw re;
+    }
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testNullDateTime() {
+    ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
+    FulfilmentRequestDTO expectedFulfilmentRequest =
+        managementEvent.getPayload().getFulfilmentRequest();
+    EventDTO event = managementEvent.getEvent();
+    event.setDateTime(null);
+
+    // Given
+    Case expectedCase = getRandomCase();
+    expectedFulfilmentRequest.setCaseId(expectedCase.getCaseId().toString());
+    UUID caseId = expectedCase.getCaseId();
+
+    when(caseRepository.findByCaseId(caseId)).thenReturn(Optional.of(expectedCase));
+
+    String expectedErrorMessage =
+        String.format("Date time not found in fulfilment request event for case '%s", caseId);
 
     try {
       // WHEN

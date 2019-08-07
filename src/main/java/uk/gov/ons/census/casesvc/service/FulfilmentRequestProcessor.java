@@ -22,16 +22,15 @@ public class FulfilmentRequestProcessor {
 
   private static final String CASE_NOT_FOUND_ERROR = "Case not found error";
   private static final String DATETIME_NOT_PRESENT = "Date time not in event error";
+  private static final String FULFILMENT_REQUEST_RECEIVED = "Fulfilment Request Received";
 
   private final CaseRepository caseRepository;
   private final EventLogger eventLogger;
-  private final EventRepository eventRepository;
 
   public FulfilmentRequestProcessor(
       CaseRepository caseRepository, EventLogger eventLogger, EventRepository eventRepository) {
     this.caseRepository = caseRepository;
     this.eventLogger = eventLogger;
-    this.eventRepository = eventRepository;
   }
 
   public void processFulfilmentRequest(ResponseManagementEvent fulfilmentRequest) {
@@ -61,7 +60,7 @@ public class FulfilmentRequestProcessor {
         caze,
         UUID.fromString(fulfilmentRequestPayload.getCaseId()),
         event.getDateTime(),
-        "Fulfilment Request Received",
+        FULFILMENT_REQUEST_RECEIVED,
         FULFILMENT_REQUESTED,
         fulfilmentRequestPayload,
         fulfilmentRequest.getEvent());

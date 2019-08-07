@@ -5,6 +5,7 @@ import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
@@ -78,7 +79,7 @@ public class EventLogger {
     loggedEvent.setEventPayload(convertObjectToJson(payload));
     loggedEvent.setEventChannel(event.getChannel());
     loggedEvent.setEventSource(event.getSource());
-    loggedEvent.setEventTransactionId(UUID.randomUUID());
+    loggedEvent.setEventTransactionId(UUID.fromString(event.getTransactionId()));
     loggedEvent.setRmEventProcessed(OffsetDateTime.now());
 
     eventRepository.save(loggedEvent);
@@ -108,7 +109,12 @@ public class EventLogger {
     loggedEvent.setEventChannel(event.getChannel());
     loggedEvent.setEventSource(event.getSource());
 
-    loggedEvent.setEventTransactionId(UUID.randomUUID());
+    if (StringUtils.isEmpty(event.getTransactionId())) {
+      loggedEvent.setEventTransactionId(UUID.randomUUID());
+    } else {
+      loggedEvent.setEventTransactionId(UUID.fromString(event.getTransactionId()));
+    }
+
     loggedEvent.setEventPayload(jsonPayload);
 
     eventRepository.save(loggedEvent);

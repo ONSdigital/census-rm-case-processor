@@ -27,6 +27,7 @@ import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReceiptProcessorTest {
+
   @Mock private CaseProcessor caseProcessor;
 
   @Mock private UacQidLinkRepository uacQidLinkRepository;
@@ -77,6 +78,36 @@ public class ReceiptProcessorTest {
         String.format("Questionnaire Id '%s' not found!", expectedQuestionnaireId);
 
     when(uacQidLinkRepository.findByQid(anyString())).thenReturn(Optional.empty());
+
+    try {
+      // WHEN
+      underTest.processReceipt(managementEvent);
+    } catch (RuntimeException re) {
+      // THEN
+      assertThat(re.getMessage()).isEqualTo(expectedErrorMessage);
+      throw re;
+    }
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testNullDateTime() {
+    ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
+    ReceiptDTO expectedReceipt = managementEvent.getPayload().getReceipt();
+
+    // Given
+    Case expectedCase = getRandomCase();
+    UacQidLink expectedUacQidLink = expectedCase.getUacQidLinks().get(0);
+    expectedUacQidLink.setCaze(expectedCase);
+
+    managementEvent.getEvent().setDateTime(null);
+
+    when(uacQidLinkRepository.findByQid(expectedReceipt.getQuestionnaireId()))
+        .thenReturn(Optional.of(expectedUacQidLink));
+
+    String expectedErrorMessage =
+        String.format(
+            "Date time not found in fulfilment receipt request event for QID '%s",
+            expectedReceipt.getQuestionnaireId());
 
     try {
       // WHEN

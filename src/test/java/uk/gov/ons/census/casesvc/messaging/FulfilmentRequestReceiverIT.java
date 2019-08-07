@@ -5,7 +5,6 @@ import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToFulfilme
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementFulfilmentRequestedEvent;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import org.jeasy.random.EasyRandom;
@@ -41,7 +40,6 @@ public class FulfilmentRequestReceiverIT {
 
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final String TEST_FULFILMENT_CODE = "P_IC_ICL1";
-  private static final EasyRandom easyRandom = new EasyRandom();
 
   @Value("${queueconfig.fulfilment-request-inbound-queue}")
   private String inboundQueue;
@@ -61,7 +59,7 @@ public class FulfilmentRequestReceiverIT {
   }
 
   @Test
-  public void testFulfilmentRequestLogged() throws IOException, InterruptedException {
+  public void testFulfilmentRequestLogged() throws InterruptedException {
     // GIVEN
     EasyRandom easyRandom = new EasyRandom();
     Case caze = easyRandom.nextObject(Case.class);
@@ -73,6 +71,7 @@ public class FulfilmentRequestReceiverIT {
     ResponseManagementEvent managementEvent = getTestResponseManagementFulfilmentRequestedEvent();
     managementEvent.getPayload().getFulfilmentRequest().setCaseId(TEST_CASE_ID.toString());
     managementEvent.getPayload().getFulfilmentRequest().setFulfilmentCode(TEST_FULFILMENT_CODE);
+    managementEvent.getEvent().setTransactionId(UUID.randomUUID().toString());
 
     // WHEN
     String json = convertObjectToJson(managementEvent);
