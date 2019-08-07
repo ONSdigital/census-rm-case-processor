@@ -13,7 +13,6 @@ import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
-import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 
 @Service
 public class FulfilmentRequestProcessor {
@@ -27,8 +26,7 @@ public class FulfilmentRequestProcessor {
   private final CaseRepository caseRepository;
   private final EventLogger eventLogger;
 
-  public FulfilmentRequestProcessor(
-      CaseRepository caseRepository, EventLogger eventLogger) {
+  public FulfilmentRequestProcessor(CaseRepository caseRepository, EventLogger eventLogger) {
     this.caseRepository = caseRepository;
     this.eventLogger = eventLogger;
   }
