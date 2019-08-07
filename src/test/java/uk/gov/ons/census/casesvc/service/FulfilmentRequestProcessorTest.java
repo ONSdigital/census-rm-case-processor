@@ -25,8 +25,6 @@ import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 @RunWith(MockitoJUnitRunner.class)
 public class FulfilmentRequestProcessorTest {
 
-  @Mock private CaseProcessor caseProcessor;
-
   @Mock private CaseRepository caseRepository;
 
   @Mock private EventLogger eventLogger;

@@ -28,7 +28,7 @@ public class FulfilmentRequestProcessor {
   private final EventLogger eventLogger;
 
   public FulfilmentRequestProcessor(
-      CaseRepository caseRepository, EventLogger eventLogger, EventRepository eventRepository) {
+      CaseRepository caseRepository, EventLogger eventLogger) {
     this.caseRepository = caseRepository;
     this.eventLogger = eventLogger;
   }
