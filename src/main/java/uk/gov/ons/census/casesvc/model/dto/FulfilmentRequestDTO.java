@@ -2,7 +2,6 @@ package uk.gov.ons.census.casesvc.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,10 +10,10 @@ import lombok.NoArgsConstructor;
 public class FulfilmentRequestDTO {
 
   @JsonInclude(Include.NON_NULL)
-  @JsonProperty("caseId")
   private String caseId;
 
   private String fulfilmentCode;
 
+  @JsonInclude(Include.NON_NULL)
   private String individualCaseId;
 }

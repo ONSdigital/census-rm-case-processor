@@ -13,7 +13,6 @@ import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
-import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 
 @Service
 public class FulfilmentRequestProcessor {
@@ -27,14 +26,13 @@ public class FulfilmentRequestProcessor {
   private final CaseRepository caseRepository;
   private final EventLogger eventLogger;
 
-  public FulfilmentRequestProcessor(
-      CaseRepository caseRepository, EventLogger eventLogger) {
+  public FulfilmentRequestProcessor(CaseRepository caseRepository, EventLogger eventLogger) {
     this.caseRepository = caseRepository;
     this.eventLogger = eventLogger;
   }
 
   public void processFulfilmentRequest(ResponseManagementEvent fulfilmentRequest) {
-    EventDTO event = fulfilmentRequest.getEvent();
+    EventDTO fulfilmentRequestEvent = fulfilmentRequest.getEvent();
     FulfilmentRequestDTO fulfilmentRequestPayload =
         fulfilmentRequest.getPayload().getFulfilmentRequest();
 
@@ -44,25 +42,24 @@ public class FulfilmentRequestProcessor {
 
     if (cazeResult.isEmpty()) {
       log.error(CASE_NOT_FOUND_ERROR);
-      throw new RuntimeException(
-          String.format("Case ID '%s' not found!", fulfilmentRequestPayload.getCaseId()));
+      throw new RuntimeException(String.format("Case ID '%s' not found!", caseId));
     }
 
-    if (event.getDateTime() == null) {
+    if (fulfilmentRequestEvent.getDateTime() == null) {
       log.error(DATETIME_NOT_PRESENT);
       throw new RuntimeException(
-          String.format("Date time not found in fulfilment request event for case '%s", caseId));
+          String.format("Date time not found in fulfilment request event for Case ID '%s", caseId));
     }
 
     Case caze = cazeResult.get();
 
     eventLogger.logFulfilmentRequestedEvent(
         caze,
-        UUID.fromString(fulfilmentRequestPayload.getCaseId()),
-        event.getDateTime(),
+        UUID.fromString(caseId),
+        fulfilmentRequestEvent.getDateTime(),
         FULFILMENT_REQUEST_RECEIVED,
         FULFILMENT_REQUESTED,
         fulfilmentRequestPayload,
-        fulfilmentRequest.getEvent());
+        fulfilmentRequestEvent);
   }
 }

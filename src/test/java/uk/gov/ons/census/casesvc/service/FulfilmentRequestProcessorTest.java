@@ -94,7 +94,7 @@ public class FulfilmentRequestProcessorTest {
     when(caseRepository.findByCaseId(caseId)).thenReturn(Optional.of(expectedCase));
 
     String expectedErrorMessage =
-        String.format("Date time not found in fulfilment request event for case '%s", caseId);
+        String.format("Date time not found in fulfilment request event for Case ID '%s", caseId);
 
     try {
       // WHEN
