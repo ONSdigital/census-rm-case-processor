@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 public class ReceiptDTO {
 
   @JsonInclude(Include.NON_NULL)
-  @JsonProperty("caseId")
   private String caseId;
 
   private String questionnaireId;
