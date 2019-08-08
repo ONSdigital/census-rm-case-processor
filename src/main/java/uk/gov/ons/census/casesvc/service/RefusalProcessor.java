@@ -46,6 +46,6 @@ public class RefusalProcessor {
     caseProcessor.emitCaseUpdatedEvent(caze);
 
     eventLogger.logRefusalEvent(
-        caze, REFUSAL_RECEIVED, EventType.CASE_UPDATED, refusal, refusalEvent.getEvent());
+        caze, REFUSAL_RECEIVED, EventType.REFUSAL_RECEIVED, refusal, refusalEvent.getEvent());
   }
 }

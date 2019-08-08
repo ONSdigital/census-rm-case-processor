@@ -65,7 +65,7 @@ public class RefusalProcessorTest {
         .logRefusalEvent(
             testCase,
             REFUSAL_RECEIVED,
-            EventType.CASE_UPDATED,
+            EventType.REFUSAL_RECEIVED,
             expectedRefusal,
             managementEvent.getEvent());
   }
