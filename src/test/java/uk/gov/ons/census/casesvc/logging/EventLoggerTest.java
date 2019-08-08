@@ -42,7 +42,7 @@ public class EventLoggerTest {
   private final EasyRandom easyRandom = new EasyRandom();
 
   @Test
-  public void testLogEventWithoutTransactionEventMetaDataDateTime() {
+  public void testLogEvent() {
     // Given
     UacQidLink uacQidLink = new UacQidLink();
     Case caze = new Case();
