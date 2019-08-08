@@ -17,6 +17,7 @@ public class RefusalProcessor {
   private static final Logger log = LoggerFactory.getLogger(RefusalProcessor.class);
   private static final String REFUSAL_RECEIVED = "Refusal Received";
   private static final String CASE_NOT_FOUND_ERROR = "Case Id not found error";
+  private static final String DATETIME_NOT_PRESENT = "Date time not in event error";
   private final CaseProcessor caseProcessor;
   private final CaseRepository caseRepository;
   private final EventLogger eventLogger;
@@ -36,6 +37,13 @@ public class RefusalProcessor {
     if (optCase.isEmpty()) {
       log.error(CASE_NOT_FOUND_ERROR);
       throw new RuntimeException(String.format("Case Id '%s' not found!", caseId.toString()));
+    }
+
+    if (refusalEvent.getEvent().getDateTime() == null) {
+      log.error(DATETIME_NOT_PRESENT);
+      throw new RuntimeException(
+          String.format(
+              "Date time not found in refusal request event for Case Id '%s", caseId.toString()));
     }
 
     Case caze = optCase.get();

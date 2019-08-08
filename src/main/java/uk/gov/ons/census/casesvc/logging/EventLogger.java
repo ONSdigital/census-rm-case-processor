@@ -5,10 +5,13 @@ import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
+import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ReceiptDTO;
 import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
+import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
@@ -35,7 +38,7 @@ public class EventLogger {
     event.setSource(EVENT_SOURCE);
     event.setChannel(EVENT_CHANNEL);
 
-    logEvent(uacQidLink, eventDescription, eventType, convertObjectToJson(payload), event, null);
+    logEvent(uacQidLink, eventDescription, eventType, convertObjectToJson(payload), event);
   }
 
   public void logReceiptEvent(
@@ -43,16 +46,9 @@ public class EventLogger {
       String eventDescription,
       EventType eventType,
       ReceiptDTO payload,
-      EventDTO event,
-      OffsetDateTime eventMetaDataDateTime) {
+      EventDTO event) {
 
-    logEvent(
-        uacQidLink,
-        eventDescription,
-        eventType,
-        convertObjectToJson(payload),
-        event,
-        eventMetaDataDateTime);
+    logEvent(uacQidLink, eventDescription, eventType, convertObjectToJson(payload), event);
   }
 
   public void logRefusalEvent(
@@ -75,22 +71,52 @@ public class EventLogger {
     eventRepository.save(loggedEvent);
   }
 
+  public void logFulfilmentRequestedEvent(
+      Case caze,
+      UUID caseId,
+      OffsetDateTime eventMetaDataDateTime,
+      String eventDescription,
+      EventType eventType,
+      FulfilmentRequestDTO payload,
+      EventDTO event) {
+
+    Event loggedEvent = new Event();
+    loggedEvent.setCaze(caze);
+    loggedEvent.setId(UUID.randomUUID());
+    loggedEvent.setCaseId(caseId);
+    loggedEvent.setEventDate(eventMetaDataDateTime);
+    loggedEvent.setEventDescription(eventDescription);
+    loggedEvent.setEventType(eventType);
+    loggedEvent.setEventPayload(convertObjectToJson(payload));
+    loggedEvent.setEventChannel(event.getChannel());
+    loggedEvent.setEventSource(event.getSource());
+    loggedEvent.setEventTransactionId(UUID.fromString(event.getTransactionId()));
+    loggedEvent.setRmEventProcessed(OffsetDateTime.now());
+
+    eventRepository.save(loggedEvent);
+  }
+
+  public void logQuestionnaireLinkedEvent(
+      UacQidLink uacQidLink,
+      String eventDescription,
+      EventType eventType,
+      UacDTO payload,
+      EventDTO event) {
+
+    logEvent(uacQidLink, eventDescription, eventType, convertObjectToJson(payload), event);
+  }
+
   public void logEvent(
       UacQidLink uacQidLink,
       String eventDescription,
       EventType eventType,
       String jsonPayload,
-      EventDTO event,
-      OffsetDateTime eventMetaDataDateTime) {
+      EventDTO event) {
 
     Event loggedEvent = new Event();
     loggedEvent.setId(UUID.randomUUID());
 
-    if (eventMetaDataDateTime != null) {
-      loggedEvent.setEventDate(eventMetaDataDateTime);
-    }
-
-    loggedEvent.setEventDate(OffsetDateTime.now());
+    loggedEvent.setEventDate(event.getDateTime());
     loggedEvent.setRmEventProcessed(OffsetDateTime.now());
     loggedEvent.setEventDescription(eventDescription);
     loggedEvent.setUacQidLink(uacQidLink);
@@ -104,7 +130,12 @@ public class EventLogger {
     loggedEvent.setEventChannel(event.getChannel());
     loggedEvent.setEventSource(event.getSource());
 
-    loggedEvent.setEventTransactionId(UUID.randomUUID());
+    if (StringUtils.isEmpty(event.getTransactionId())) {
+      loggedEvent.setEventTransactionId(UUID.randomUUID());
+    } else {
+      loggedEvent.setEventTransactionId(UUID.fromString(event.getTransactionId()));
+    }
+
     loggedEvent.setEventPayload(jsonPayload);
 
     eventRepository.save(loggedEvent);
