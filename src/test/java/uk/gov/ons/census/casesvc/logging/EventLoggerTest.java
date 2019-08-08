@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToFulfilmentRequestDTO;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToReceiptDTO;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToRefusalDTO;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToUacDTO;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.util.UUID;
@@ -22,6 +23,7 @@ import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ReceiptDTO;
 import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
+import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
@@ -40,7 +42,7 @@ public class EventLoggerTest {
   private final EasyRandom easyRandom = new EasyRandom();
 
   @Test
-  public void testLogEventWithoutEventMetaDataDateTime() {
+  public void testLogEventWithoutTransactionEventMetaDataDateTime() {
     // Given
     UacQidLink uacQidLink = new UacQidLink();
     Case caze = new Case();
@@ -169,5 +171,29 @@ public class EventLoggerTest {
     assertThat(actualFulfilment.getCaseId()).isEqualTo(fulfilmentRequestPayload.getCaseId());
     assertThat(actualFulfilment.getFulfilmentCode())
         .isEqualTo(fulfilmentRequestPayload.getFulfilmentCode());
+  }
+
+  @Test
+  public void testLogQuestionnaireLinkedEvent() {
+    // Given
+    ResponseManagementEvent managementEvent = easyRandom.nextObject(ResponseManagementEvent.class);
+    UacDTO expectedUac = managementEvent.getPayload().getUac();
+    expectedUac.setCaseId(UUID.randomUUID().toString());
+
+    // When
+    underTest.logQuestionnaireLinkedEvent(
+        new UacQidLink(),
+        "Questionnaire Linked",
+        EventType.QUESTIONNAIRE_LINKED,
+        expectedUac,
+        new EventDTO());
+
+    // Then
+    ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
+    verify(eventRepository).save(eventArgumentCaptor.capture());
+    UacDTO actualUac = convertJsonToUacDTO(eventArgumentCaptor.getValue().getEventPayload());
+
+    assertThat(actualUac.getCaseId()).isEqualTo(expectedUac.getCaseId());
+    assertThat(actualUac.getQuestionnaireId()).isEqualTo(expectedUac.getQuestionnaireId());
   }
 }
