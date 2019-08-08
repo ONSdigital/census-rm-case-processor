@@ -38,10 +38,12 @@ queueconfig:
   action-scheduler-routing-key-case: event.case.*
   refusal-routing-key: event.respondent.refusal
   fulfilment-routing-key: event.fulfilment.request
+  questionnaire-linked-routing-key: event.respondent.questionnaire.linked
   unaddressed-inbound-queue: unaddressedRequestQueue
   receipt-response-inbound-queue: Case.Responses
   refusal-response-inbound-queue: case.refusals
   fulfilment-request-inbound-queue: case.fulfilments
+  questionnaire-linked-inbound-queue: case.questionnairelinked
   action-case-queue: action.events
   consumers: 50
 

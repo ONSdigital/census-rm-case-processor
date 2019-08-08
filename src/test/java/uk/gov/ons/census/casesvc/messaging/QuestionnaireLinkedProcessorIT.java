@@ -1,15 +1,13 @@
 package uk.gov.ons.census.casesvc.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNull;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementQuestionnaireLinkedEvent;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementReceiptEvent;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
+import uk.gov.ons.census.casesvc.model.entity.Event;
+import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
@@ -35,21 +35,20 @@ import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 
 @ContextConfiguration
-@ActiveProfiles("nologging")
+@ActiveProfiles("test")
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @RunWith(SpringJUnit4ClassRunner.class)
-public class TransactionsIT {
+public class QuestionnaireLinkedProcessorIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final EasyRandom easyRandom = new EasyRandom();
   private static final String TEST_QID = easyRandom.nextObject(String.class);
-  private static final String TEST_UAC = easyRandom.nextObject(String.class);
-
-  @Value("${queueconfig.receipt-response-inbound-queue}")
-  private String receiptInboundQueue;
 
   @Value("${queueconfig.questionnaire-linked-inbound-queue}")
-  private String questionnaireLinkedInboundQueue;
+  private String inboundQueue;
+
+  @Value("${queueconfig.action-scheduler-queue}")
+  private String actionQueue;
 
   @Value("${queueconfig.rh-uac-queue}")
   private String rhUacQueue;
@@ -62,8 +61,8 @@ public class TransactionsIT {
   @Before
   @Transactional
   public void setUp() {
-    rabbitQueueHelper.purgeQueue(receiptInboundQueue);
-    rabbitQueueHelper.purgeQueue(questionnaireLinkedInboundQueue);
+    rabbitQueueHelper.purgeQueue(inboundQueue);
+    rabbitQueueHelper.purgeQueue(actionQueue);
     rabbitQueueHelper.purgeQueue(rhUacQueue);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
@@ -71,57 +70,24 @@ public class TransactionsIT {
   }
 
   @Test
-  public void testReceiptTransactionality() throws InterruptedException, IOException {
-    // no cases on the database
+  public void testGoodQuestionnaireLinkedEmitsMessageAndLogsEvent()
+      throws InterruptedException, IOException {
+    // GIVEN
     BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhUacQueue);
 
-    // WHEN
-    ResponseManagementEvent managementEvent = getTestResponseManagementReceiptEvent();
-    managementEvent.getPayload().getReceipt().setQuestionnaireId(TEST_QID);
-    managementEvent.getEvent().setTransactionId(UUID.randomUUID().toString());
-
-    String json = convertObjectToJson(managementEvent);
-    Message message =
-        MessageBuilder.withBody(json.getBytes())
-            .setContentType(MessageProperties.CONTENT_TYPE_JSON)
-            .build();
-    rabbitQueueHelper.sendMessage(receiptInboundQueue, message);
-
-    // Poll Queue, expected failure
-    String actualMessage = outboundQueue.poll(5, TimeUnit.SECONDS);
-    assertNull(actualMessage);
-
-    // Log events empty
-    assertThat(eventRepository.findAll().size()).isEqualTo(0);
-
-    // Save case and UacQidLink
     EasyRandom easyRandom = new EasyRandom();
     Case caze = easyRandom.nextObject(Case.class);
     caze.setCaseId(TEST_CASE_ID);
     caze.setUacQidLinks(null);
     caze.setEvents(null);
-    caze = caseRepository.saveAndFlush(caze);
+    caseRepository.saveAndFlush(caze);
 
-    UacQidLink uacQidLink = new UacQidLink();
-    uacQidLink.setId(UUID.randomUUID());
-    uacQidLink.setCaze(caze);
+    UacQidLink uacQidLink = easyRandom.nextObject(UacQidLink.class);
     uacQidLink.setQid(TEST_QID);
-    uacQidLink.setUac(TEST_UAC);
+    uacQidLink.setCaze(null);
+    uacQidLink.setEvents(null);
     uacQidLinkRepository.saveAndFlush(uacQidLink);
 
-    // Poll Queue, expected message to be there
-    rabbitQueueHelper.checkExpectedMessageReceived(outboundQueue);
-
-    // check Log Events
-    assertThat(eventRepository.findAll().size()).isEqualTo(1);
-  }
-
-  @Test
-  public void testQuestionnaireLinkedTransactionality() throws InterruptedException, IOException {
-    // no cases on the database
-    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhUacQueue);
-
-    // WHEN
     ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
     managementEvent.getEvent().setTransactionId(UUID.randomUUID().toString());
     UacDTO uac = managementEvent.getPayload().getUac();
@@ -133,33 +99,22 @@ public class TransactionsIT {
         MessageBuilder.withBody(json.getBytes())
             .setContentType(MessageProperties.CONTENT_TYPE_JSON)
             .build();
-    rabbitQueueHelper.sendMessage(questionnaireLinkedInboundQueue, message);
+    rabbitQueueHelper.sendMessage(inboundQueue, message);
 
-    // Poll Queue, expected failure
-    String actualMessage = outboundQueue.poll(5, TimeUnit.SECONDS);
-    assertNull(actualMessage);
+    // check the emitted eventDTO
+    ResponseManagementEvent responseManagementEvent =
+        rabbitQueueHelper.checkExpectedMessageReceived(outboundQueue);
 
-    // Log events empty
-    assertThat(eventRepository.findAll().size()).isEqualTo(0);
+    assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventType.UAC_UPDATED);
+    UacDTO actualUacDTOObject = responseManagementEvent.getPayload().getUac();
+    assertThat(actualUacDTOObject.getQuestionnaireId()).isEqualTo(TEST_QID);
+    assertThat(actualUacDTOObject.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
 
-    // Save case and UacQidLink
-    EasyRandom easyRandom = new EasyRandom();
-    Case caze = easyRandom.nextObject(Case.class);
-    caze.setCaseId(TEST_CASE_ID);
-    caze.setUacQidLinks(null);
-    caze.setEvents(null);
-    caseRepository.saveAndFlush(caze);
-
-    UacQidLink uacQidLink = new UacQidLink();
-    uacQidLink.setId(UUID.randomUUID());
-    uacQidLink.setQid(TEST_QID);
-    uacQidLink.setUac(TEST_UAC);
-    uacQidLinkRepository.saveAndFlush(uacQidLink);
-
-    // Poll Queue, expected message to be there
-    rabbitQueueHelper.checkExpectedMessageReceived(outboundQueue);
-
-    // check Log Events
-    assertThat(eventRepository.findAll().size()).isEqualTo(1);
+    // check database for log eventDTO
+    List<Event> events = eventRepository.findAll();
+    assertThat(events.size()).isEqualTo(1);
+    Event event = events.get(0);
+    assertThat(event.getEventType()).isEqualTo(EventType.QUESTIONNAIRE_LINKED);
+    assertThat(event.getEventDescription()).isEqualTo("Questionnaire Linked");
   }
 }

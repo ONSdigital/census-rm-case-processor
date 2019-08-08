@@ -105,6 +105,24 @@ public class DataUtils {
     return managementEvent;
   }
 
+  public static ResponseManagementEvent getTestResponseManagementQuestionnaireLinkedEvent() {
+    ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
+
+    EventDTO event = managementEvent.getEvent();
+    event.setType(EventType.QUESTIONNAIRE_LINKED);
+    event.setSource("FIELDWORK_GATEWAY");
+    event.setChannel("FIELD");
+
+    PayloadDTO payload = managementEvent.getPayload();
+    payload.setRefusal(null);
+    payload.setCollectionCase(null);
+    payload.setReceipt(null);
+    payload.setPrintCaseSelected(null);
+    payload.setFulfilmentRequest(null);
+
+    return managementEvent;
+  }
+
   public static ReceiptDTO convertJsonToReceiptDTO(String json) {
     try {
       return objectMapper.readValue(json, ReceiptDTO.class);

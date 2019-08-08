@@ -11,6 +11,7 @@ import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ReceiptDTO;
 import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
+import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
@@ -83,6 +84,16 @@ public class EventLogger {
     loggedEvent.setRmEventProcessed(OffsetDateTime.now());
 
     eventRepository.save(loggedEvent);
+  }
+
+  public void logQuestionnaireLinkedEvent(
+      UacQidLink uacQidLink,
+      String eventDescription,
+      EventType eventType,
+      UacDTO payload,
+      EventDTO event) {
+
+    logEvent(uacQidLink, eventDescription, eventType, convertObjectToJson(payload), event);
   }
 
   public void logEvent(
