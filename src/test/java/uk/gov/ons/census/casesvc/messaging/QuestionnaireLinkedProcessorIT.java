@@ -70,7 +70,8 @@ public class QuestionnaireLinkedProcessorIT {
   }
 
   @Test
-  public void testGoodRefusalEmitsMessageAndLogsEvent() throws InterruptedException, IOException {
+  public void testGoodQuestionnaireLinkedEmitsMessageAndLogsEvent()
+      throws InterruptedException, IOException {
     // GIVEN
     BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhUacQueue);
 
@@ -88,6 +89,7 @@ public class QuestionnaireLinkedProcessorIT {
     uacQidLinkRepository.saveAndFlush(uacQidLink);
 
     ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
+    managementEvent.getEvent().setTransactionId(UUID.randomUUID().toString());
     UacDTO uac = managementEvent.getPayload().getUac();
     uac.setCaseId(TEST_CASE_ID.toString());
     uac.setQuestionnaireId(TEST_QID);
@@ -112,6 +114,7 @@ public class QuestionnaireLinkedProcessorIT {
     List<Event> events = eventRepository.findAll();
     assertThat(events.size()).isEqualTo(1);
     Event event = events.get(0);
+    assertThat(event.getEventType()).isEqualTo(EventType.QUESTIONNAIRE_LINKED);
     assertThat(event.getEventDescription()).isEqualTo("Questionnaire Linked");
   }
 }
