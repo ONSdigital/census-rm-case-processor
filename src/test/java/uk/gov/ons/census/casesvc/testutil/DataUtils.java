@@ -118,6 +118,7 @@ public class DataUtils {
     payload.setCollectionCase(null);
     payload.setReceipt(null);
     payload.setPrintCaseSelected(null);
+    payload.setFulfilmentRequest(null);
 
     return managementEvent;
   }
