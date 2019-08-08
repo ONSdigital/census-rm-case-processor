@@ -127,7 +127,11 @@ public class EventLoggerTest {
 
     // When
     underTest.logRefusalEvent(
-        new Case(), "TEST_LOGGED_EVENT", EventType.UAC_UPDATED, expectedRefusal, new EventDTO());
+        new Case(),
+        "TEST_LOGGED_EVENT",
+        EventType.REFUSAL_RECEIVED,
+        expectedRefusal,
+        new EventDTO());
 
     // Then
     ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
