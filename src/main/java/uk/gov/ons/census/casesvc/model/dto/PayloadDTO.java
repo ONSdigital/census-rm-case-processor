@@ -23,4 +23,7 @@ public class PayloadDTO {
 
   @JsonInclude(Include.NON_NULL)
   private RefusalDTO refusal;
+
+  @JsonInclude(Include.NON_NULL)
+  private FulfilmentRequestDTO fulfilmentRequest;
 }

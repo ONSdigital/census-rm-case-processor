@@ -31,6 +31,7 @@ public class RefusalProcessorTest {
   private static final String REFUSAL_RECEIVED = "Refusal Received";
 
   @Mock private UacQidLinkRepository uacQidLinkRepository;
+
   @Mock private CaseRepository caseRepository;
 
   @Mock private CaseProcessor caseProcessor;
@@ -70,8 +71,7 @@ public class RefusalProcessorTest {
             REFUSAL_RECEIVED,
             EventType.CASE_UPDATED,
             expectedRefusal,
-            managementEvent.getEvent(),
-            expectedRefusal.getResponseDateTime());
+            managementEvent.getEvent());
   }
 
   @Test(expected = RuntimeException.class)
@@ -83,6 +83,36 @@ public class RefusalProcessorTest {
         String.format("Questionnaire Id '%s' not found!", expectedQuestionnaireId);
 
     when(uacQidLinkRepository.findByQid(anyString())).thenReturn(Optional.empty());
+
+    try {
+      // WHEN
+      underTest.processRefusal(managementEvent);
+    } catch (RuntimeException re) {
+      // THEN
+      assertThat(re.getMessage()).isEqualTo(expectedErrorMessage);
+      throw re;
+    }
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testNullDateTime() {
+    ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
+    RefusalDTO expectedRefusal = managementEvent.getPayload().getRefusal();
+
+    // Given
+    Case expectedCase = getRandomCase();
+    UacQidLink expectedUacQidLink = expectedCase.getUacQidLinks().get(0);
+    expectedUacQidLink.setCaze(expectedCase);
+
+    managementEvent.getEvent().setDateTime(null);
+
+    when(uacQidLinkRepository.findByQid(expectedRefusal.getQuestionnaireId()))
+        .thenReturn(Optional.of(expectedUacQidLink));
+
+    String expectedErrorMessage =
+        String.format(
+            "Date time not found in refusal request event for QID '%s",
+            expectedRefusal.getQuestionnaireId());
 
     try {
       // WHEN
