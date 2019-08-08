@@ -13,7 +13,6 @@ import uk.gov.ons.census.casesvc.type.RefusalType;
 public class RefusalDTO {
 
   @JsonInclude(Include.NON_NULL)
-  @JsonProperty("caseId")
   private String caseId;
 
   private RefusalType type;

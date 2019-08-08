@@ -42,6 +42,9 @@ public class QueueSetterUpper {
   @Value("${queueconfig.refusal-routing-key}")
   private String caseProcessorRefusalRoutingKeyCase;
 
+  @Value("${queueconfig.fulfilment-routing-key}")
+  private String caseProcessorFulfilmentRoutingKeyCase;
+
   @Value("${queueconfig.questionnaire-linked-routing-key}")
   private String caseProcessorQuestionnaireLinkedRoutingKey;
 
@@ -53,6 +56,9 @@ public class QueueSetterUpper {
 
   @Value("${queueconfig.refusal-response-inbound-queue}")
   private String refusalInboundQueue;
+
+  @Value("${queueconfig.fulfilment-request-inbound-queue}")
+  private String fulfilmentInboundQueue;
 
   @Value("${queueconfig.questionnaire-linked-inbound-queue}")
   private String questionnaireLinkedInboundQueue;
@@ -119,6 +125,16 @@ public class QueueSetterUpper {
   }
 
   @Bean
+  public Binding bindingFulfilmentCase() {
+    return new Binding(
+        fulfilmentInboundQueue,
+        QUEUE,
+        caseEventExchange,
+        caseProcessorFulfilmentRoutingKeyCase,
+        null);
+  }
+
+  @Bean
   public Binding bindingQuestionnaireLinked() {
     return new Binding(
         questionnaireLinkedInboundQueue,
@@ -136,6 +152,11 @@ public class QueueSetterUpper {
   @Bean
   public Queue refusalInboundQueue() {
     return new Queue(refusalInboundQueue, true);
+  }
+
+  @Bean
+  public Queue fulfilmentInboundQueue() {
+    return new Queue(fulfilmentInboundQueue, true);
   }
 
   @Bean

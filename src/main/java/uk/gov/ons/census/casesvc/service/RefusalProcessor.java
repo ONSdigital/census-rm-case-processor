@@ -18,6 +18,7 @@ public class RefusalProcessor {
   private static final Logger log = LoggerFactory.getLogger(RefusalProcessor.class);
   private static final String REFUSAL_RECEIVED = "Refusal Received";
   private static final String QID_NOT_FOUND_ERROR = "Qid not found error";
+  private static final String DATETIME_NOT_PRESENT = "Date time not in event error";
   private final CaseProcessor caseProcessor;
   private final CaseRepository caseRepository;
   private final UacQidLinkRepository uacQidLinkRepository;
@@ -35,14 +36,22 @@ public class RefusalProcessor {
   }
 
   public void processRefusal(ResponseManagementEvent refusalEvent) {
-    RefusalDTO refusal = refusalEvent.getPayload().getRefusal();
+    RefusalDTO refusalPayload = refusalEvent.getPayload().getRefusal();
     Optional<UacQidLink> uacQidLinkOpt =
-        uacQidLinkRepository.findByQid(refusal.getQuestionnaireId());
+        uacQidLinkRepository.findByQid(refusalPayload.getQuestionnaireId());
 
     if (uacQidLinkOpt.isEmpty()) {
       log.error(QID_NOT_FOUND_ERROR);
       throw new RuntimeException(
-          String.format("Questionnaire Id '%s' not found!", refusal.getQuestionnaireId()));
+          String.format("Questionnaire Id '%s' not found!", refusalPayload.getQuestionnaireId()));
+    }
+
+    if (refusalEvent.getEvent().getDateTime() == null) {
+      log.error(DATETIME_NOT_PRESENT);
+      throw new RuntimeException(
+          String.format(
+              "Date time not found in refusal request event for QID '%s",
+              refusalPayload.getQuestionnaireId()));
     }
 
     UacQidLink uacQidLink = uacQidLinkOpt.get();
@@ -57,8 +66,7 @@ public class RefusalProcessor {
         uacQidLink,
         REFUSAL_RECEIVED,
         EventType.CASE_UPDATED,
-        refusal,
-        refusalEvent.getEvent(),
-        refusal.getResponseDateTime());
+        refusalPayload,
+        refusalEvent.getEvent());
   }
 }
