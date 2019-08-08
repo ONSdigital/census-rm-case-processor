@@ -65,7 +65,7 @@ public class QuestionnaireLinkedProcessor {
     eventLogger.logQuestionnaireLinkedEvent(
         uacQidLink,
         QUESTIONNAIRE_LINKED,
-        EventType.UAC_UPDATED,
+        EventType.QUESTIONNAIRE_LINKED,
         uac,
         questionnaireLinkedEvent.getEvent());
   }

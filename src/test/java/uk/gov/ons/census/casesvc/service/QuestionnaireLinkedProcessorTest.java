@@ -60,7 +60,7 @@ public class QuestionnaireLinkedProcessorTest {
         .logQuestionnaireLinkedEvent(
             uacQidLink,
             "Questionnaire Linked",
-            EventType.UAC_UPDATED,
+            EventType.QUESTIONNAIRE_LINKED,
             uac,
             managementEvent.getEvent());
   }
