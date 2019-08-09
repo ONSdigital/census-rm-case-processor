@@ -7,6 +7,8 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.ons.census.casesvc.service.EventProcessor.*;
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -64,8 +66,14 @@ public class EventProcessorTest {
     verify(uacProcessor).saveUacQidLink(eq(caze), eq(1));
     verify(uacProcessor).emitUacUpdatedEvent(uacQidLink, caze);
     verify(caseProcessor).emitCaseCreatedEvent(caze);
-    verify(eventLogger, times(2))
-        .logEvent(eq(uacQidLink), any(String.class), any(EventType.class), any(PayloadDTO.class));
+
+    verify(eventLogger, times(1))
+        .logEvent(
+            uacQidLink,
+            CREATE_CASE_SAMPLE_RECEIVED,
+            EventType.SAMPLE_UNIT_VALIDATED,
+            convertObjectToJson(createCaseSample),
+            createCaseEventDto());
   }
 
   @Test
@@ -91,8 +99,14 @@ public class EventProcessorTest {
     verify(uacProcessor, times(1)).saveUacQidLink(eq(caze), eq(2));
     verify(uacProcessor, times(2)).emitUacUpdatedEvent(uacQidLink, caze);
     verify(caseProcessor).emitCaseCreatedEvent(caze);
-    verify(eventLogger, times(3))
-        .logEvent(eq(uacQidLink), any(String.class), any(EventType.class), any(PayloadDTO.class));
+
+    verify(eventLogger, times(1))
+        .logEvent(
+            uacQidLink,
+            CREATE_CASE_SAMPLE_RECEIVED,
+            EventType.SAMPLE_UNIT_VALIDATED,
+            convertObjectToJson(createCaseSample),
+            createCaseEventDto());
   }
 
   @Test
@@ -141,5 +155,12 @@ public class EventProcessorTest {
     assertThat(actualEvent.getRmEventProcessed()).isNotNull();
     assertThat("Case selected by Action Rule for print Pack Code Test packCode")
         .isEqualTo(actualEvent.getEventDescription());
+  }
+
+  private EventDTO createCaseEventDto() {
+    EventDTO eventDTO = new EventDTO();
+    eventDTO.setSource(CREATE_CASE_SOURCE);
+    eventDTO.setChannel(CREATE_CASE_CHANNEL);
+    return eventDTO;
   }
 }

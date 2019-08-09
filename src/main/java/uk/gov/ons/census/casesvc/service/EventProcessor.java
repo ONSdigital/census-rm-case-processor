@@ -1,6 +1,7 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.model.entity.EventType.PRINT_CASE_SELECTED;
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,6 +11,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
+import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -21,14 +23,16 @@ import uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper;
 
 @Component
 public class EventProcessor {
-  private static final String CASE_CREATED_EVENT_DESCRIPTION = "Case created";
-  private static final String UAC_QID_LINKED_EVENT_DESCRIPTION = "UAC QID linked";
+  public static final String CREATE_CASE_SAMPLE_RECEIVED = "Create case sample received";
+  public static final String CREATE_CASE_SOURCE = "CASE_SERVICE";
+  public static final String CREATE_CASE_CHANNEL = "RM";
   private static final ObjectMapper objectMapper = new ObjectMapper();
 
   private final CaseProcessor caseProcessor;
   private final UacProcessor uacProcessor;
   private final EventRepository eventRepository;
   private final EventLogger eventLogger;
+  private final EventDTO createCaseEventDto;
 
   public EventProcessor(
       CaseProcessor caseProcessor,
@@ -39,6 +43,10 @@ public class EventProcessor {
     this.uacProcessor = uacProcessor;
     this.eventRepository = eventRepository;
     this.eventLogger = eventLogger;
+
+    this.createCaseEventDto = new EventDTO();
+    this.createCaseEventDto.setSource(CREATE_CASE_SOURCE);
+    this.createCaseEventDto.setChannel(CREATE_CASE_CHANNEL);
   }
 
   public void processSampleReceivedMessage(CreateCaseSample createCaseSample) {
@@ -46,18 +54,19 @@ public class EventProcessor {
     int questionnaireType =
         QuestionnaireTypeHelper.calculateQuestionnaireType(caze.getTreatmentCode());
     UacQidLink uacQidLink = uacProcessor.saveUacQidLink(caze, questionnaireType);
-    PayloadDTO uacPayloadDTO = uacProcessor.emitUacUpdatedEvent(uacQidLink, caze);
-    PayloadDTO casePayloadDTO = caseProcessor.emitCaseCreatedEvent(caze);
+    uacProcessor.emitUacUpdatedEvent(uacQidLink, caze);
+    caseProcessor.emitCaseCreatedEvent(caze);
+
     eventLogger.logEvent(
-        uacQidLink, CASE_CREATED_EVENT_DESCRIPTION, EventType.CASE_CREATED, casePayloadDTO);
-    eventLogger.logEvent(
-        uacQidLink, UAC_QID_LINKED_EVENT_DESCRIPTION, EventType.UAC_UPDATED, uacPayloadDTO);
+            uacQidLink,
+            CREATE_CASE_SAMPLE_RECEIVED,
+            EventType.SAMPLE_UNIT_VALIDATED,
+            convertObjectToJson(createCaseSample),
+            createCaseEventDto);
 
     if (QuestionnaireTypeHelper.isQuestionnaireWelsh(caze.getTreatmentCode())) {
       uacQidLink = uacProcessor.saveUacQidLink(caze, 3);
-      uacPayloadDTO = uacProcessor.emitUacUpdatedEvent(uacQidLink, caze);
-      eventLogger.logEvent(
-          uacQidLink, UAC_QID_LINKED_EVENT_DESCRIPTION, EventType.UAC_UPDATED, uacPayloadDTO);
+      uacProcessor.emitUacUpdatedEvent(uacQidLink, caze);
     }
   }
 

@@ -65,6 +65,6 @@ public class ReceiptProcessor {
     caseRepository.saveAndFlush(caze);
     caseProcessor.emitCaseUpdatedEvent(caze);
     eventLogger.logReceiptEvent(
-        uacQidLink, QID_RECEIPTED, EventType.UAC_UPDATED, receiptPayload, receiptEvent.getEvent());
+        uacQidLink, QID_RECEIPTED, EventType.RESPONSE_RECEIVED, receiptPayload, receiptEvent.getEvent());
   }
 }
