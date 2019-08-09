@@ -1,6 +1,8 @@
 package uk.gov.ons.census.casesvc.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToRefusalDTO;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementRefusalEvent;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
@@ -8,7 +10,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
-import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,11 +25,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
+import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
-import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
@@ -41,9 +42,6 @@ import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class RefusalReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
-  private static final EasyRandom easyRandom = new EasyRandom();
-  private static final String TEST_QID = easyRandom.nextObject(String.class);
-  private static final String TEST_UAC = easyRandom.nextObject(String.class);
 
   @Value("${queueconfig.refusal-response-inbound-queue}")
   private String inboundQueue;
@@ -75,32 +73,28 @@ public class RefusalReceiverIT {
     // GIVEN
     BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
 
-    EasyRandom easyRandom = new EasyRandom();
-    Case caze = easyRandom.nextObject(Case.class);
+    Case caze = getRandomCase();
     caze.setCaseId(TEST_CASE_ID);
+    caze.setRefusalReceived(false);
     caze.setUacQidLinks(null);
     caze.setEvents(null);
-    caze = caseRepository.saveAndFlush(caze);
-
-    UacQidLink uacQidLink = new UacQidLink();
-    uacQidLink.setId(UUID.randomUUID());
-    uacQidLink.setCaze(caze);
-    uacQidLink.setQid(TEST_QID);
-    uacQidLink.setUac(TEST_UAC);
-    uacQidLinkRepository.saveAndFlush(uacQidLink);
+    caseRepository.saveAndFlush(caze);
 
     ResponseManagementEvent managementEvent = getTestResponseManagementRefusalEvent();
-    managementEvent.getPayload().getRefusal().setQuestionnaireId(uacQidLink.getQid());
     managementEvent.getEvent().setTransactionId(UUID.randomUUID().toString());
+    RefusalDTO expectedRefusal = managementEvent.getPayload().getRefusal();
+    expectedRefusal.getCollectionCase().setId(TEST_CASE_ID.toString());
 
     String json = convertObjectToJson(managementEvent);
     Message message =
         MessageBuilder.withBody(json.getBytes())
             .setContentType(MessageProperties.CONTENT_TYPE_JSON)
             .build();
+
+    // WHEN
     rabbitQueueHelper.sendMessage(inboundQueue, message);
 
-    // check the emitted eventDTO
+    // THEN
     ResponseManagementEvent responseManagementEvent =
         rabbitQueueHelper.checkExpectedMessageReceived(outboundQueue);
 
@@ -109,14 +103,14 @@ public class RefusalReceiverIT {
     assertThat(eventDTO.getSource()).isEqualTo("CASE_SERVICE");
     assertThat(eventDTO.getChannel()).isEqualTo("RM");
 
-    // check database for log eventDTO
     List<Event> events = eventRepository.findAll();
     assertThat(events.size()).isEqualTo(1);
-    Event event = events.get(0);
 
-    UacQidLink actualUacQidLink = event.getUacQidLink();
-    assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID);
-    assertThat(actualUacQidLink.getUac()).isEqualTo(TEST_UAC);
-    assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
+    RefusalDTO actualRefusal = convertJsonToRefusalDTO(events.get(0).getEventPayload());
+    assertThat(actualRefusal.getType()).isEqualTo(expectedRefusal.getType());
+    assertThat(actualRefusal.getReport()).isEqualTo(expectedRefusal.getReport());
+    assertThat(actualRefusal.getAgentId()).isEqualTo(expectedRefusal.getAgentId());
+    assertThat(actualRefusal.getCollectionCase().getId())
+        .isEqualTo(expectedRefusal.getCollectionCase().getId());
   }
 }

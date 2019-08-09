@@ -52,13 +52,29 @@ public class EventLogger {
   }
 
   public void logRefusalEvent(
-      UacQidLink uacQidLink,
-      String eventDescription,
-      EventType eventType,
-      RefusalDTO payload,
-      EventDTO event) {
+      Case caze, String eventDescription, EventType eventType, RefusalDTO payload, EventDTO event) {
 
-    logEvent(uacQidLink, eventDescription, eventType, convertObjectToJson(payload), event);
+    Event loggedEvent = new Event();
+
+    loggedEvent.setId(UUID.randomUUID());
+    loggedEvent.setCaze(caze);
+    loggedEvent.setCaseId(UUID.fromString(payload.getCollectionCase().getId()));
+    loggedEvent.setEventDate(event.getDateTime());
+    loggedEvent.setRmEventProcessed(OffsetDateTime.now());
+    loggedEvent.setEventDescription(eventDescription);
+    loggedEvent.setEventType(eventType);
+    loggedEvent.setEventChannel(event.getChannel());
+    loggedEvent.setEventSource(event.getSource());
+
+    if (StringUtils.isEmpty(event.getTransactionId())) {
+      loggedEvent.setEventTransactionId(UUID.randomUUID());
+    } else {
+      loggedEvent.setEventTransactionId(UUID.fromString(event.getTransactionId()));
+    }
+
+    loggedEvent.setEventPayload(convertObjectToJson(payload));
+
+    eventRepository.save(loggedEvent);
   }
 
   public void logFulfilmentRequestedEvent(
@@ -80,7 +96,13 @@ public class EventLogger {
     loggedEvent.setEventPayload(convertObjectToJson(payload));
     loggedEvent.setEventChannel(event.getChannel());
     loggedEvent.setEventSource(event.getSource());
-    loggedEvent.setEventTransactionId(UUID.fromString(event.getTransactionId()));
+
+    if (StringUtils.isEmpty(event.getTransactionId())) {
+      loggedEvent.setEventTransactionId(UUID.randomUUID());
+    } else {
+      loggedEvent.setEventTransactionId(UUID.fromString(event.getTransactionId()));
+    }
+
     loggedEvent.setRmEventProcessed(OffsetDateTime.now());
 
     eventRepository.save(loggedEvent);
