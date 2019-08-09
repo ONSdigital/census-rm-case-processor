@@ -65,7 +65,13 @@ public class EventLogger {
     loggedEvent.setEventType(eventType);
     loggedEvent.setEventChannel(event.getChannel());
     loggedEvent.setEventSource(event.getSource());
-    loggedEvent.setEventTransactionId(UUID.randomUUID());
+
+    if (StringUtils.isEmpty(event.getTransactionId())) {
+      loggedEvent.setEventTransactionId(UUID.randomUUID());
+    } else {
+      loggedEvent.setEventTransactionId(UUID.fromString(event.getTransactionId()));
+    }
+
     loggedEvent.setEventPayload(convertObjectToJson(payload));
 
     eventRepository.save(loggedEvent);
@@ -90,7 +96,13 @@ public class EventLogger {
     loggedEvent.setEventPayload(convertObjectToJson(payload));
     loggedEvent.setEventChannel(event.getChannel());
     loggedEvent.setEventSource(event.getSource());
-    loggedEvent.setEventTransactionId(UUID.fromString(event.getTransactionId()));
+
+    if (StringUtils.isEmpty(event.getTransactionId())) {
+      loggedEvent.setEventTransactionId(UUID.randomUUID());
+    } else {
+      loggedEvent.setEventTransactionId(UUID.fromString(event.getTransactionId()));
+    }
+
     loggedEvent.setRmEventProcessed(OffsetDateTime.now());
 
     eventRepository.save(loggedEvent);
