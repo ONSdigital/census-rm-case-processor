@@ -13,6 +13,8 @@ import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+
 @Service
 public class ReceiptProcessor {
   private static final Logger log = LoggerFactory.getLogger(ReceiptProcessor.class);
@@ -64,7 +66,12 @@ public class ReceiptProcessor {
     caze.setReceiptReceived(true);
     caseRepository.saveAndFlush(caze);
     caseProcessor.emitCaseUpdatedEvent(caze);
-    eventLogger.logReceiptEvent(
-        uacQidLink, QID_RECEIPTED, EventType.RESPONSE_RECEIVED, receiptPayload, receiptEvent.getEvent());
+
+    eventLogger.logEvent(
+        uacQidLink,
+        QID_RECEIPTED,
+        EventType.RESPONSE_RECEIVED,
+        convertObjectToJson(receiptPayload),
+        receiptEvent.getEvent());
   }
 }

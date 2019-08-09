@@ -41,16 +41,6 @@ public class EventLogger {
     logEvent(uacQidLink, eventDescription, eventType, convertObjectToJson(payload), event);
   }
 
-  public void logReceiptEvent(
-      UacQidLink uacQidLink,
-      String eventDescription,
-      EventType eventType,
-      ReceiptDTO payload,
-      EventDTO event) {
-
-    logEvent(uacQidLink, eventDescription, eventType, convertObjectToJson(payload), event);
-  }
-
   public void logRefusalEvent(
       Case caze, String eventDescription, EventType eventType, RefusalDTO payload, EventDTO event) {
 
@@ -106,16 +96,6 @@ public class EventLogger {
     loggedEvent.setRmEventProcessed(OffsetDateTime.now());
 
     eventRepository.save(loggedEvent);
-  }
-
-  public void logQuestionnaireLinkedEvent(
-      UacQidLink uacQidLink,
-      String eventDescription,
-      EventType eventType,
-      UacDTO payload,
-      EventDTO event) {
-
-    logEvent(uacQidLink, eventDescription, eventType, convertObjectToJson(payload), event);
   }
 
   public void logEvent(

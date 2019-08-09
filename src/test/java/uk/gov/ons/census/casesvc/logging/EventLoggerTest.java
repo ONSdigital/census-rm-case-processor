@@ -93,33 +93,6 @@ public class EventLoggerTest {
   }
 
   @Test
-  public void testLogReceiptEvent() {
-    // Given
-    ReceiptDTO expectedReceipt =
-        convertJsonToReceiptDTO(convertObjectToJson(easyRandom.nextObject(ReceiptDTO.class)));
-
-    // When
-    underTest.logReceiptEvent(
-        new UacQidLink(),
-        "TEST_LOGGED_EVENT",
-        EventType.UAC_UPDATED,
-        expectedReceipt,
-        new EventDTO());
-
-    // Then
-    ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
-    verify(eventRepository).save(eventArgumentCaptor.capture());
-    ReceiptDTO actualReceipt =
-        convertJsonToReceiptDTO(eventArgumentCaptor.getValue().getEventPayload());
-
-    assertThat(actualReceipt.getCaseId()).isEqualTo(expectedReceipt.getCaseId());
-    assertThat(actualReceipt.getQuestionnaireId()).isEqualTo(expectedReceipt.getQuestionnaireId());
-    assertThat(actualReceipt.isUnreceipt()).isEqualTo(expectedReceipt.isUnreceipt());
-    assertThat(actualReceipt.getResponseDateTime())
-        .isEqualTo(expectedReceipt.getResponseDateTime());
-  }
-
-  @Test
   public void testLogRefusalEventWithTransactionId() {
     // Given
     RefusalDTO expectedRefusal = easyRandom.nextObject(RefusalDTO.class);
@@ -231,29 +204,5 @@ public class EventLoggerTest {
     assertThat(actualFulfilment.getCaseId()).isEqualTo(fulfilmentRequestPayload.getCaseId());
     assertThat(actualFulfilment.getFulfilmentCode())
         .isEqualTo(fulfilmentRequestPayload.getFulfilmentCode());
-  }
-
-  @Test
-  public void testLogQuestionnaireLinkedEvent() {
-    // Given
-    ResponseManagementEvent managementEvent = easyRandom.nextObject(ResponseManagementEvent.class);
-    UacDTO expectedUac = managementEvent.getPayload().getUac();
-    expectedUac.setCaseId(UUID.randomUUID().toString());
-
-    // When
-    underTest.logQuestionnaireLinkedEvent(
-        new UacQidLink(),
-        "Questionnaire Linked",
-        EventType.QUESTIONNAIRE_LINKED,
-        expectedUac,
-        new EventDTO());
-
-    // Then
-    ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
-    verify(eventRepository).save(eventArgumentCaptor.capture());
-    UacDTO actualUac = convertJsonToUacDTO(eventArgumentCaptor.getValue().getEventPayload());
-
-    assertThat(actualUac.getCaseId()).isEqualTo(expectedUac.getCaseId());
-    assertThat(actualUac.getQuestionnaireId()).isEqualTo(expectedUac.getQuestionnaireId());
   }
 }

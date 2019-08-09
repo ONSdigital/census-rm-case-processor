@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
-import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
@@ -58,11 +57,11 @@ public class EventProcessor {
     caseProcessor.emitCaseCreatedEvent(caze);
 
     eventLogger.logEvent(
-            uacQidLink,
-            CREATE_CASE_SAMPLE_RECEIVED,
-            EventType.SAMPLE_UNIT_VALIDATED,
-            convertObjectToJson(createCaseSample),
-            createCaseEventDto);
+        uacQidLink,
+        CREATE_CASE_SAMPLE_RECEIVED,
+        EventType.SAMPLE_UNIT_VALIDATED,
+        convertObjectToJson(createCaseSample),
+        createCaseEventDto);
 
     if (QuestionnaireTypeHelper.isQuestionnaireWelsh(caze.getTreatmentCode())) {
       uacQidLink = uacProcessor.saveUacQidLink(caze, 3);

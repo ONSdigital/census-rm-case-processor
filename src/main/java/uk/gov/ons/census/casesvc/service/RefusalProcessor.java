@@ -47,7 +47,6 @@ public class RefusalProcessor {
     }
 
     Case caze = optCase.get();
-
     caze.setRefusalReceived(true);
     caseRepository.saveAndFlush(caze);
 

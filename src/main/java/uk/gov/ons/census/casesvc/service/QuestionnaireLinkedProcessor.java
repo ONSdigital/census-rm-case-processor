@@ -14,6 +14,8 @@ import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+
 @Component
 public class QuestionnaireLinkedProcessor {
 
@@ -62,11 +64,11 @@ public class QuestionnaireLinkedProcessor {
 
     uacProcessor.emitUacUpdatedEvent(uacQidLink, caze);
 
-    eventLogger.logQuestionnaireLinkedEvent(
+    eventLogger.logEvent(
         uacQidLink,
         QUESTIONNAIRE_LINKED,
         EventType.QUESTIONNAIRE_LINKED,
-        uac,
+        convertObjectToJson(uac),
         questionnaireLinkedEvent.getEvent());
   }
 }

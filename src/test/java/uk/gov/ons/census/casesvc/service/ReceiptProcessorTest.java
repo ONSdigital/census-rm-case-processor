@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.service.ReceiptProcessor.QID_RECEIPTED;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementEvent;
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -61,11 +62,11 @@ public class ReceiptProcessorTest {
     // then
     verify(uacProcessor, times(1)).emitUacUpdatedEvent(expectedUacQidLink, expectedCase, false);
     verify(eventLogger, times(1))
-        .logReceiptEvent(
+        .logEvent(
             expectedUacQidLink,
             QID_RECEIPTED,
-            EventType.UAC_UPDATED,
-            expectedReceipt,
+            EventType.RESPONSE_RECEIVED,
+            convertObjectToJson(expectedReceipt),
             managementEvent.getEvent());
   }
 

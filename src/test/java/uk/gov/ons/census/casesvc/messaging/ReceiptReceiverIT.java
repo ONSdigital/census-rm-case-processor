@@ -6,10 +6,14 @@ import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManage
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.io.IOException;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import org.jeasy.random.EasyRandom;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -76,7 +80,7 @@ public class ReceiptReceiverIT {
   }
 
   @Test
-  public void testGoodReceiptEmitsMessageAndLogsEvent() throws InterruptedException, IOException {
+  public void testGoodReceiptEmitsMessageAndLogsEvent() throws InterruptedException, IOException, JSONException {
     // GIVEN
     BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhUacQueue);
 
@@ -124,5 +128,18 @@ public class ReceiptReceiverIT {
     assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID);
     assertThat(actualUacQidLink.getUac()).isEqualTo(TEST_UAC);
     assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
+
+    // Test date saved format here
+    String utcDateAsString = new JSONObject(event.getEventPayload()).getString("dateTime");
+    assertThat(isStringFormattedAsUTCDate(utcDateAsString)).isTrue();
+  }
+
+  private boolean isStringFormattedAsUTCDate(String dateAsString) {
+    try {
+      OffsetDateTime.parse(dateAsString);
+      return true;
+    } catch (DateTimeParseException dtpe) {
+      return false;
+    }
   }
 }
