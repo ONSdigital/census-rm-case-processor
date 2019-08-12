@@ -72,8 +72,7 @@ public class EventProcessorTest {
             uacQidLink,
             CREATE_CASE_SAMPLE_RECEIVED,
             EventType.SAMPLE_UNIT_VALIDATED,
-            convertObjectToJson(createCaseSample),
-            createCaseEventDto());
+            convertObjectToJson(createCaseSample));
   }
 
   @Test
@@ -105,8 +104,7 @@ public class EventProcessorTest {
             uacQidLink,
             CREATE_CASE_SAMPLE_RECEIVED,
             EventType.SAMPLE_UNIT_VALIDATED,
-            convertObjectToJson(createCaseSample),
-            createCaseEventDto());
+            convertObjectToJson(createCaseSample));
   }
 
   @Test

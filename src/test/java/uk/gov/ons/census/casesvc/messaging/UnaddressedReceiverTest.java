@@ -46,6 +46,6 @@ public class UnaddressedReceiverTest {
             eq(uacQidLink),
             eq("Unaddressed UAC/QID pair created"),
             any(EventType.class),
-            any(PayloadDTO.class));
+            eq("{}"));
   }
 }

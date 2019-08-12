@@ -1,7 +1,10 @@
 package uk.gov.ons.census.casesvc.model.dto;
 
 import java.time.OffsetDateTime;
+
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 
 @Data

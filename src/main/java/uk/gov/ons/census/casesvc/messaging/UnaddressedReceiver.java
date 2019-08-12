@@ -10,6 +10,8 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.service.UacProcessor;
 
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+
 @MessageEndpoint
 public class UnaddressedReceiver {
   private final UacProcessor uacProcessor;
@@ -28,6 +30,6 @@ public class UnaddressedReceiver {
             null, Integer.parseInt(createUacQid.getQuestionnaireType()), createUacQid.getBatchId());
     PayloadDTO uacPayloadDTO = uacProcessor.emitUacUpdatedEvent(uacQidLink, null);
     eventLogger.logEvent(
-        uacQidLink, "Unaddressed UAC/QID pair created", EventType.UAC_UPDATED, uacPayloadDTO);
+        uacQidLink, "Unaddressed UAC/QID pair created", EventType.UAC_UPDATED, convertObjectToJson(uacPayloadDTO));
   }
 }

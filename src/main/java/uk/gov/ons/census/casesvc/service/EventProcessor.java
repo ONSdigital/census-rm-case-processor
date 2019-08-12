@@ -31,7 +31,6 @@ public class EventProcessor {
   private final UacProcessor uacProcessor;
   private final EventRepository eventRepository;
   private final EventLogger eventLogger;
-  private final EventDTO createCaseEventDto;
 
   public EventProcessor(
       CaseProcessor caseProcessor,
@@ -42,10 +41,6 @@ public class EventProcessor {
     this.uacProcessor = uacProcessor;
     this.eventRepository = eventRepository;
     this.eventLogger = eventLogger;
-
-    this.createCaseEventDto = new EventDTO();
-    this.createCaseEventDto.setSource(CREATE_CASE_SOURCE);
-    this.createCaseEventDto.setChannel(CREATE_CASE_CHANNEL);
   }
 
   public void processSampleReceivedMessage(CreateCaseSample createCaseSample) {
@@ -60,8 +55,8 @@ public class EventProcessor {
         uacQidLink,
         CREATE_CASE_SAMPLE_RECEIVED,
         EventType.SAMPLE_UNIT_VALIDATED,
-        convertObjectToJson(createCaseSample),
-        createCaseEventDto);
+        convertObjectToJson(createCaseSample)
+    );
 
     if (QuestionnaireTypeHelper.isQuestionnaireWelsh(caze.getTreatmentCode())) {
       uacQidLink = uacProcessor.saveUacQidLink(caze, 3);

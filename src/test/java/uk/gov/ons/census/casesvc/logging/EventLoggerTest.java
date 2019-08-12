@@ -34,6 +34,7 @@ import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 public class EventLoggerTest {
 
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
+  public static final String TEST_JSON = "{test: json}";
 
   @Mock EventRepository eventRepository;
 
@@ -51,7 +52,7 @@ public class EventLoggerTest {
     uacQidLink.setCaze(caze);
 
     // When
-    underTest.logEvent(uacQidLink, "TEST_LOGGED_EVENT", EventType.UAC_UPDATED, new PayloadDTO());
+    underTest.logEvent(uacQidLink, "TEST_LOGGED_EVENT", EventType.UAC_UPDATED, TEST_JSON);
 
     // Then
     ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
