@@ -37,6 +37,7 @@ queueconfig:
   action-scheduler-routing-key-uac: event.uac.*
   action-scheduler-routing-key-case: event.case.*
   refusal-routing-key: event.respondent.refusal
+  receipt-routing-key: event.response.receipt
   fulfilment-routing-key: event.fulfilment.request
   questionnaire-linked-routing-key: event.respondent.questionnaire.linked
   unaddressed-inbound-queue: unaddressedRequestQueue
