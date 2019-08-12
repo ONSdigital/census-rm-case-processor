@@ -2,10 +2,7 @@ package uk.gov.ons.census.casesvc.config;
 
 import static org.springframework.amqp.core.Binding.DestinationType.QUEUE;
 
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.Exchange;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.core.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,6 +29,12 @@ public class QueueSetterUpper {
 
   @Value("${queueconfig.action-scheduler-queue}")
   private String actionSchedulerQueue;
+
+  @Value("${queueconfig.uac-qid-created-queue}")
+  private String uacQidCreatedQueue;
+
+  @Value("${queueconfig.uac-qid-created-exchange}")
+  private String uacQidCreatedExchange;
 
   @Value("${queueconfig.action-scheduler-routing-key-uac}")
   private String actionSchedulerRoutingKeyUac;
@@ -92,6 +95,21 @@ public class QueueSetterUpper {
   @Bean
   public Queue actionSchedulerQueue() {
     return new Queue(actionSchedulerQueue, true);
+  }
+
+  @Bean
+  public Queue uacQidCreatedQueue() {
+    return new Queue(uacQidCreatedQueue, true);
+  }
+
+  @Bean
+  public Exchange uacQidCreatedExchange() {
+    return new DirectExchange(uacQidCreatedExchange, true, false);
+  }
+
+  @Bean
+  public Binding uacQidCreatedBinding() {
+    return new Binding(uacQidCreatedQueue, QUEUE, uacQidCreatedExchange, "", null);
   }
 
   @Bean
