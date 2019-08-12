@@ -95,13 +95,19 @@ public class QueueSetterUpper {
   }
 
   @Bean
-  public Queue uacQidCreatedQueue() { return new Queue(uacQidCreatedQueue, true); }
+  public Queue uacQidCreatedQueue() {
+    return new Queue(uacQidCreatedQueue, true);
+  }
 
   @Bean
-  public Exchange uacQidCreatedExchange() { return new DirectExchange(uacQidCreatedExchange, true, false); }
+  public Exchange uacQidCreatedExchange() {
+    return new DirectExchange(uacQidCreatedExchange, true, false);
+  }
 
   @Bean
-  public Binding uacQidCreatedBinding() { return new Binding(uacQidCreatedQueue, QUEUE, uacQidCreatedExchange, "", null); }
+  public Binding uacQidCreatedBinding() {
+    return new Binding(uacQidCreatedQueue, QUEUE, uacQidCreatedExchange, "", null);
+  }
 
   @Bean
   public Exchange myTopicExchange() {
