@@ -67,7 +67,7 @@ public class EventProcessorTest {
         .logEvent(
             uacQidLink,
             CREATE_CASE_SAMPLE_RECEIVED,
-            EventType.SAMPLE_UNIT_VALIDATED,
+            EventType.SAMPLE_LOADED,
             convertObjectToJson(createCaseSample));
   }
 
@@ -99,7 +99,7 @@ public class EventProcessorTest {
         .logEvent(
             uacQidLink,
             CREATE_CASE_SAMPLE_RECEIVED,
-            EventType.SAMPLE_UNIT_VALIDATED,
+            EventType.SAMPLE_LOADED,
             convertObjectToJson(createCaseSample));
   }
 
