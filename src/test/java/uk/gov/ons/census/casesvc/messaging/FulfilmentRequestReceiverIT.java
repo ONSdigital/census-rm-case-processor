@@ -1,15 +1,13 @@
 package uk.gov.ons.census.casesvc.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToRefusalDTO;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementRefusalEvent;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToFulfilmentRequestDTO;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementFulfilmentRequestedEvent;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.BlockingQueue;
+import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,12 +22,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.ons.census.casesvc.model.dto.EventDTO;
-import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
+import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
-import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
@@ -40,17 +36,13 @@ import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @RunWith(SpringJUnit4ClassRunner.class)
-public class RefusalReceiverIT {
+public class FulfilmentRequestReceiverIT {
+
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
+  private static final String TEST_FULFILMENT_CODE = "P_IC_ICL1";
 
-  @Value("${queueconfig.refusal-response-inbound-queue}")
+  @Value("${queueconfig.fulfilment-request-inbound-queue}")
   private String inboundQueue;
-
-  @Value("${queueconfig.action-scheduler-queue}")
-  private String actionQueue;
-
-  @Value("${queueconfig.rh-case-queue}")
-  private String rhCaseQueue;
 
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
   @Autowired private CaseRepository caseRepository;
@@ -61,56 +53,43 @@ public class RefusalReceiverIT {
   @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(inboundQueue);
-    rabbitQueueHelper.purgeQueue(actionQueue);
-    rabbitQueueHelper.purgeQueue(rhCaseQueue);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
   }
 
   @Test
-  public void testGoodRefusalEmitsMessageAndLogsEvent() throws InterruptedException, IOException {
+  public void testFulfilmentRequestLogged() throws InterruptedException {
     // GIVEN
-    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
-
-    Case caze = getRandomCase();
+    EasyRandom easyRandom = new EasyRandom();
+    Case caze = easyRandom.nextObject(Case.class);
     caze.setCaseId(TEST_CASE_ID);
-    caze.setRefusalReceived(false);
     caze.setUacQidLinks(null);
     caze.setEvents(null);
     caseRepository.saveAndFlush(caze);
 
-    ResponseManagementEvent managementEvent = getTestResponseManagementRefusalEvent();
+    ResponseManagementEvent managementEvent = getTestResponseManagementFulfilmentRequestedEvent();
+    managementEvent.getPayload().getFulfilmentRequest().setCaseId(TEST_CASE_ID.toString());
+    managementEvent.getPayload().getFulfilmentRequest().setFulfilmentCode(TEST_FULFILMENT_CODE);
     managementEvent.getEvent().setTransactionId(UUID.randomUUID().toString());
-    RefusalDTO expectedRefusal = managementEvent.getPayload().getRefusal();
-    expectedRefusal.getCollectionCase().setId(TEST_CASE_ID.toString());
 
+    // WHEN
     String json = convertObjectToJson(managementEvent);
     Message message =
         MessageBuilder.withBody(json.getBytes())
             .setContentType(MessageProperties.CONTENT_TYPE_JSON)
             .build();
-
-    // WHEN
     rabbitQueueHelper.sendMessage(inboundQueue, message);
 
+    Thread.sleep(1000);
+
     // THEN
-    ResponseManagementEvent responseManagementEvent =
-        rabbitQueueHelper.checkExpectedMessageReceived(outboundQueue);
-
-    EventDTO eventDTO = responseManagementEvent.getEvent();
-    assertThat(eventDTO.getType()).isEqualTo(EventType.CASE_UPDATED);
-    assertThat(eventDTO.getSource()).isEqualTo("CASE_SERVICE");
-    assertThat(eventDTO.getChannel()).isEqualTo("RM");
-
     List<Event> events = eventRepository.findAll();
     assertThat(events.size()).isEqualTo(1);
-
-    RefusalDTO actualRefusal = convertJsonToRefusalDTO(events.get(0).getEventPayload());
-    assertThat(actualRefusal.getType()).isEqualTo(expectedRefusal.getType());
-    assertThat(actualRefusal.getReport()).isEqualTo(expectedRefusal.getReport());
-    assertThat(actualRefusal.getAgentId()).isEqualTo(expectedRefusal.getAgentId());
-    assertThat(actualRefusal.getCollectionCase().getId())
-        .isEqualTo(expectedRefusal.getCollectionCase().getId());
+    Event event = events.get(0);
+    FulfilmentRequestDTO actualFulfilmentRequest =
+        convertJsonToFulfilmentRequestDTO(event.getEventPayload());
+    assertThat(actualFulfilmentRequest.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
+    assertThat(actualFulfilmentRequest.getFulfilmentCode()).isEqualTo(TEST_FULFILMENT_CODE);
   }
 }
