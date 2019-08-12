@@ -69,6 +69,9 @@ public class QueueSetterUpper {
   @Value("${queueconfig.action-case-queue}")
   private String actionCaseQueue;
 
+  @Value("${queueconfig.receipt-routing-key}")
+  private String receiptRoutingKey;
+
   @Bean
   public Queue inboundQueue() {
     return new Queue(inboundQueue, true);
@@ -160,6 +163,11 @@ public class QueueSetterUpper {
         caseEventExchange,
         caseProcessorQuestionnaireLinkedRoutingKey,
         null);
+  }
+
+  @Bean
+  public Binding bindingReceiptQueue() {
+    return new Binding(receiptInboundQueue, QUEUE, caseEventExchange, receiptRoutingKey, null);
   }
 
   @Bean
