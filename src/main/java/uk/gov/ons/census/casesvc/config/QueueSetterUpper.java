@@ -33,7 +33,7 @@ public class QueueSetterUpper {
   @Value("${queueconfig.uac-qid-created-queue}")
   private String uacQidCreatedQueue;
 
-  @Value("${queueconfig.uac-qid-created-exchange")
+  @Value("${queueconfig.uac-qid-created-exchange}")
   private String uacQidCreatedExchange;
 
   @Value("${queueconfig.action-scheduler-routing-key-uac}")
