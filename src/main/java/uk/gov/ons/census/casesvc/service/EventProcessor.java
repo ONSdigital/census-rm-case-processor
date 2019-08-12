@@ -11,7 +11,6 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
-import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
@@ -55,8 +54,7 @@ public class EventProcessor {
         uacQidLink,
         CREATE_CASE_SAMPLE_RECEIVED,
         EventType.SAMPLE_UNIT_VALIDATED,
-        convertObjectToJson(createCaseSample)
-    );
+        convertObjectToJson(createCaseSample));
 
     if (QuestionnaireTypeHelper.isQuestionnaireWelsh(caze.getTreatmentCode())) {
       uacQidLink = uacProcessor.saveUacQidLink(caze, 3);

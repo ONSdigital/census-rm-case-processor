@@ -1,22 +1,16 @@
 package uk.gov.ons.census.casesvc.messaging;
 
-import static net.minidev.json.JSONValue.isValidJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -118,7 +112,7 @@ public class SampleReceiverIT {
     String p = actualEvent.getEventPayload();
 
     CreateCaseSample actualcreateCaseSample =
-            objectMapper.readValue(actualEvent.getEventPayload(), CreateCaseSample.class);
+        objectMapper.readValue(actualEvent.getEventPayload(), CreateCaseSample.class);
 
     assertThat(actualcreateCaseSample).isEqualTo(createCaseSample);
   }

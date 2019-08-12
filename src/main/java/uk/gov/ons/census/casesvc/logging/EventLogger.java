@@ -9,10 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
-import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
-import uk.gov.ons.census.casesvc.model.dto.ReceiptDTO;
 import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
-import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
@@ -23,7 +20,7 @@ import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 public class EventLogger {
   private final EventRepository eventRepository;
 
-  public EventLogger(EventRepository eventRepository)  {
+  public EventLogger(EventRepository eventRepository) {
     this.eventRepository = eventRepository;
   }
 

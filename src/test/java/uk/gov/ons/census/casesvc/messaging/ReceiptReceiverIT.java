@@ -80,7 +80,8 @@ public class ReceiptReceiverIT {
   }
 
   @Test
-  public void testGoodReceiptEmitsMessageAndLogsEvent() throws InterruptedException, IOException, JSONException {
+  public void testGoodReceiptEmitsMessageAndLogsEvent()
+      throws InterruptedException, IOException, JSONException {
     // GIVEN
     BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhUacQueue);
 
