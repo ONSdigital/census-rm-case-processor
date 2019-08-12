@@ -30,8 +30,8 @@ public class QueueSetterUpper {
   @Value("${queueconfig.action-scheduler-queue}")
   private String actionSchedulerQueue;
 
-  @Value("${queueconfig.case-uac-qid-created-queue}")
-  private String caseUacQidCreatedQueue;
+  @Value("${queueconfig.uac-qid-created-queue}")
+  private String uacQidCreatedQueue;
 
   @Value("${queueconfig.uac-qid-created-exchange")
   private String uacQidCreatedExchange;
@@ -95,13 +95,13 @@ public class QueueSetterUpper {
   }
 
   @Bean
-  public Queue uacQidCreatedQueue() { return new Queue(caseUacQidCreatedQueue, true); }
+  public Queue uacQidCreatedQueue() { return new Queue(uacQidCreatedQueue, true); }
 
   @Bean
   public Exchange uacQidCreatedExchange() { return new DirectExchange(uacQidCreatedExchange, true, false); }
 
   @Bean
-  public Binding uacQidCreatedBinding() { return new Binding(caseUacQidCreatedQueue, QUEUE, uacQidCreatedExchange, "", null); }
+  public Binding uacQidCreatedBinding() { return new Binding(uacQidCreatedQueue, QUEUE, uacQidCreatedExchange, "", null); }
 
   @Bean
   public Exchange myTopicExchange() {
