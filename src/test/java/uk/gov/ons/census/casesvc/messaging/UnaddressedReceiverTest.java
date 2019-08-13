@@ -32,7 +32,7 @@ public class UnaddressedReceiverTest {
     createUacQid.setQuestionnaireType("21");
     createUacQid.setBatchId(UUID.randomUUID());
     UacQidLink uacQidLink = new UacQidLink();
-    when(uacProcessor.saveUacQidLink(null, 21, createUacQid.getBatchId())).thenReturn(uacQidLink);
+    when(uacProcessor.generateAndSaveUacQidLink(null, 21, createUacQid.getBatchId())).thenReturn(uacQidLink);
     when(uacProcessor.emitUacUpdatedEvent(any(UacQidLink.class), any()))
         .thenReturn(new PayloadDTO());
 

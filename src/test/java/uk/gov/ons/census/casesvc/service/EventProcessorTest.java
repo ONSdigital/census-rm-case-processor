@@ -51,7 +51,7 @@ public class EventProcessorTest {
     caze.setTreatmentCode("HH_LF2R3BE");
     when(caseProcessor.saveCase(createCaseSample)).thenReturn(caze);
     UacQidLink uacQidLink = new UacQidLink();
-    when(uacProcessor.saveUacQidLink(caze, 1)).thenReturn(uacQidLink);
+    when(uacProcessor.generateAndSaveUacQidLink(caze, 1)).thenReturn(uacQidLink);
     when(uacProcessor.emitUacUpdatedEvent(any(UacQidLink.class), any(Case.class)))
         .thenReturn(new PayloadDTO());
     when(caseProcessor.emitCaseCreatedEvent(any(Case.class))).thenReturn(new PayloadDTO());
@@ -61,7 +61,7 @@ public class EventProcessorTest {
 
     // Then
     verify(caseProcessor).saveCase(createCaseSample);
-    verify(uacProcessor).saveUacQidLink(eq(caze), eq(1));
+    verify(uacProcessor).generateAndSaveUacQidLink(eq(caze), eq(1));
     verify(uacProcessor).emitUacUpdatedEvent(uacQidLink, caze);
     verify(caseProcessor).emitCaseCreatedEvent(caze);
     verify(eventLogger, times(2))
@@ -77,8 +77,8 @@ public class EventProcessorTest {
     when(caseProcessor.saveCase(createCaseSample)).thenReturn(caze);
     UacQidLink uacQidLink = new UacQidLink();
     UacQidLink secondUacQidLink = new UacQidLink();
-    when(uacProcessor.saveUacQidLink(caze, 2)).thenReturn(uacQidLink);
-    when(uacProcessor.saveUacQidLink(caze, 3)).thenReturn(secondUacQidLink);
+    when(uacProcessor.generateAndSaveUacQidLink(caze, 2)).thenReturn(uacQidLink);
+    when(uacProcessor.generateAndSaveUacQidLink(caze, 3)).thenReturn(secondUacQidLink);
     when(uacProcessor.emitUacUpdatedEvent(any(UacQidLink.class), any(Case.class)))
         .thenReturn(new PayloadDTO());
     when(caseProcessor.emitCaseCreatedEvent(any(Case.class))).thenReturn(new PayloadDTO());
@@ -88,7 +88,7 @@ public class EventProcessorTest {
 
     // Then
     verify(caseProcessor).saveCase(createCaseSample);
-    verify(uacProcessor, times(1)).saveUacQidLink(eq(caze), eq(2));
+    verify(uacProcessor, times(1)).generateAndSaveUacQidLink(eq(caze), eq(2));
     verify(uacProcessor, times(2)).emitUacUpdatedEvent(uacQidLink, caze);
     verify(caseProcessor).emitCaseCreatedEvent(caze);
     verify(eventLogger, times(3))

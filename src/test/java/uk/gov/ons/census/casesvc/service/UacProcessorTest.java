@@ -45,7 +45,7 @@ public class UacProcessorTest {
 
     // When
     UacQidLink result;
-    result = underTest.saveUacQidLink(caze, 1);
+    result = underTest.generateAndSaveUacQidLink(caze, 1);
 
     // Then
     assertEquals("01", result.getQid().substring(0, 2));
