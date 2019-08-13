@@ -58,12 +58,16 @@ public class ReceiptProcessor {
     }
 
     UacQidLink uacQidLink = uacQidLinkOpt.get();
-    Case caze = uacQidLink.getCaze();
+    uacQidLink.setActive(false);
+    uacQidLinkRepository.saveAndFlush(uacQidLink);
 
-    uacProcessor.emitUacUpdatedEvent(uacQidLink, caze, false);
+    Case caze = uacQidLink.getCaze();
     caze.setReceiptReceived(true);
     caseRepository.saveAndFlush(caze);
+
+    uacProcessor.emitUacUpdatedEvent(uacQidLink, caze, uacQidLink.isActive());
     caseProcessor.emitCaseUpdatedEvent(caze);
+
     eventLogger.logReceiptEvent(
         uacQidLink, QID_RECEIPTED, EventType.UAC_UPDATED, receiptPayload, receiptEvent.getEvent());
   }
