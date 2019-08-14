@@ -156,7 +156,8 @@ public class AppConfig {
     return adapter;
   }
 
-  @Bean AmqpInboundChannelAdapter uacCreatedInbound(
+  @Bean
+  AmqpInboundChannelAdapter uacCreatedInbound(
       @Qualifier("uacCreatedContainer") SimpleMessageListenerContainer listenerContainer,
       @Qualifier("uacCreatedInputChannel") MessageChannel channel) {
     AmqpInboundChannelAdapter adapter = new AmqpInboundChannelAdapter(listenerContainer);
@@ -247,7 +248,8 @@ public class AppConfig {
 
   @Bean
   public SimpleMessageListenerContainer uacCreatedContainer(ConnectionFactory connectionFactory) {
-    SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(connectionFactory);
+    SimpleMessageListenerContainer container =
+        new SimpleMessageListenerContainer(connectionFactory);
     container.setQueueNames(uacQidCreatedQueue);
     container.setConcurrentConsumers(consumers);
     return container;

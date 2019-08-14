@@ -152,4 +152,9 @@ public class EventLogger {
 
     eventRepository.save(loggedEvent);
   }
+
+  public void logEvent(
+      UacQidLink uacQidLink, String eventDescription, PayloadDTO payload, EventDTO event) {
+    logEvent(uacQidLink, eventDescription, event.getType(), convertObjectToJson(payload), event);
+  }
 }

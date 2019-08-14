@@ -1,14 +1,14 @@
 package uk.gov.ons.census.casesvc.service;
 
-import java.util.Optional;
-import java.util.UUID;
-
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import java.util.Optional;
+import java.util.UUID;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.client.UacQidServiceClient;
+import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
@@ -31,6 +31,7 @@ public class UacProcessor {
   private final RabbitTemplate rabbitTemplate;
   private final UacQidServiceClient uacQidServiceClient;
   private final CaseRepository caseRepository;
+  private final EventLogger eventLogger;
 
   @Value("${queueconfig.case-event-exchange}")
   private String outboundExchange;
@@ -39,11 +40,13 @@ public class UacProcessor {
       UacQidLinkRepository uacQidLinkRepository,
       RabbitTemplate rabbitTemplate,
       UacQidServiceClient uacQidServiceClient,
-      CaseRepository caseRepository) {
+      CaseRepository caseRepository,
+      EventLogger eventLogger) {
     this.rabbitTemplate = rabbitTemplate;
     this.uacQidServiceClient = uacQidServiceClient;
     this.uacQidLinkRepository = uacQidLinkRepository;
     this.caseRepository = caseRepository;
+    this.eventLogger = eventLogger;
   }
 
   public UacQidLink generateAndSaveUacQidLink(Case caze, int questionnaireType) {
@@ -118,5 +121,10 @@ public class UacProcessor {
             uacCreatedEvent.getPayload().getUacQidCreated().getQid());
 
     emitUacUpdatedEvent(uacQidLink, linkedCase.get());
+    eventLogger.logEvent(
+        uacQidLink,
+        "RM UAC QID pair created",
+        uacCreatedEvent.getPayload(),
+        uacCreatedEvent.getEvent());
   }
 }
