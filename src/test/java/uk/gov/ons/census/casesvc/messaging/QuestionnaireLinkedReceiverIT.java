@@ -68,6 +68,7 @@ public class QuestionnaireLinkedReceiverIT {
     rabbitQueueHelper.purgeQueue(inboundQueue);
     rabbitQueueHelper.purgeQueue(actionQueue);
     rabbitQueueHelper.purgeQueue(rhUacQueue);
+    rabbitQueueHelper.purgeQueue(rhCaseQueue);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
@@ -77,7 +78,7 @@ public class QuestionnaireLinkedReceiverIT {
   public void testGoodQuestionnaireLinkedEmitsMessageAndLogsEventForUnreceiptedCase()
       throws InterruptedException, IOException {
     // GIVEN
-    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhUacQueue);
+    BlockingQueue<String> outboundUacQueue = rabbitQueueHelper.listen(rhUacQueue);
 
     Case testCase = easyRandom.nextObject(Case.class);
     testCase.setCaseId(TEST_CASE_ID);
@@ -113,7 +114,7 @@ public class QuestionnaireLinkedReceiverIT {
 
     // Check Uac updated message sent
     ResponseManagementEvent responseManagementEvent =
-        rabbitQueueHelper.checkExpectedMessageReceived(outboundQueue);
+        rabbitQueueHelper.checkExpectedMessageReceived(outboundUacQueue);
 
     // Check message contains expected data
     assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventType.UAC_UPDATED);
@@ -121,12 +122,12 @@ public class QuestionnaireLinkedReceiverIT {
     assertThat(actualUac.getQuestionnaireId()).isEqualTo(TEST_QID);
     assertThat(actualUac.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
 
-    // Check database that Case is still unreceipted and response received not set
+    // Check database Case is still unreceipted and response received not set
     Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
     assertThat(actualCase.isReceiptReceived()).isFalse();
     assertThat(actualCase.isResponseReceived()).isFalse();
 
-    // Check database that Case is now linked to questionnaire and still unreceipted
+    // Check database Case is now linked to questionnaire and still unreceipted
     List<UacQidLink> uacQidLinks = uacQidLinkRepository.findAll();
     assertThat(uacQidLinks.size()).isEqualTo(1);
     testUacQidLink = uacQidLinks.get(0);
@@ -189,6 +190,7 @@ public class QuestionnaireLinkedReceiverIT {
     UacDTO actualUac = responseManagementEvent.getPayload().getUac();
     assertThat(actualUac.getQuestionnaireId()).isEqualTo(TEST_QID);
     assertThat(actualUac.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
+    assertThat(actualUac.isActive()).isTrue();
 
     // Check Case updated message sent
     responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(outboundCaseQueue);
