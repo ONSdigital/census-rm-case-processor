@@ -40,7 +40,7 @@ import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @RunWith(SpringJUnit4ClassRunner.class)
-public class QuestionnaireLinkedProcessorIT {
+public class QuestionnaireLinkedReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final EasyRandom easyRandom = new EasyRandom();
   private static final String TEST_QID = easyRandom.nextObject(String.class);
