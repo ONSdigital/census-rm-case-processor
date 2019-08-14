@@ -121,6 +121,7 @@ public class CaseProcessor {
     collectionCase.setSurvey(SURVEY);
     collectionCase.setReceiptReceived(caze.isReceiptReceived());
     collectionCase.setRefusalReceived(caze.isRefusalReceived());
+    collectionCase.setResponseReceived(caze.isResponseReceived());
 
     // Below this line is extra data potentially needed by Action Scheduler - can be ignored by RM
     collectionCase.setActionPlanId(caze.getActionPlanId());
