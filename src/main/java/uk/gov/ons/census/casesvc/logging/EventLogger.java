@@ -69,7 +69,7 @@ public class EventLogger {
     if (StringUtils.isEmpty(event.getTransactionId())) {
       loggedEvent.setEventTransactionId(UUID.randomUUID());
     } else {
-      loggedEvent.setEventTransactionId(UUID.fromString(event.getTransactionId()));
+      loggedEvent.setEventTransactionId(event.getTransactionId());
     }
 
     loggedEvent.setEventPayload(convertObjectToJson(payload));
@@ -100,7 +100,7 @@ public class EventLogger {
     if (StringUtils.isEmpty(event.getTransactionId())) {
       loggedEvent.setEventTransactionId(UUID.randomUUID());
     } else {
-      loggedEvent.setEventTransactionId(UUID.fromString(event.getTransactionId()));
+      loggedEvent.setEventTransactionId(event.getTransactionId());
     }
 
     loggedEvent.setRmEventProcessed(OffsetDateTime.now());
@@ -145,7 +145,7 @@ public class EventLogger {
     if (StringUtils.isEmpty(event.getTransactionId())) {
       loggedEvent.setEventTransactionId(UUID.randomUUID());
     } else {
-      loggedEvent.setEventTransactionId(UUID.fromString(event.getTransactionId()));
+      loggedEvent.setEventTransactionId(event.getTransactionId());
     }
 
     loggedEvent.setEventPayload(jsonPayload);

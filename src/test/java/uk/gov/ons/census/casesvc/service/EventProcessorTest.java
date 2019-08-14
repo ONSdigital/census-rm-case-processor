@@ -109,7 +109,7 @@ public class EventProcessorTest {
     event.setChannel("Test channel");
     event.setDateTime(OffsetDateTime.now());
     event.setSource("Test source");
-    event.setTransactionId(UUID.randomUUID().toString());
+    event.setTransactionId(UUID.randomUUID());
     responseManagementEvent.setEvent(event);
 
     PrintCaseSelected printCaseSelected = new PrintCaseSelected();
@@ -132,7 +132,7 @@ public class EventProcessorTest {
     assertThat(caze).isEqualTo(actualEvent.getCaze());
     assertThat("Test channel").isEqualTo(actualEvent.getEventChannel());
     assertThat("Test source").isEqualTo(actualEvent.getEventSource());
-    assertThat(event.getTransactionId()).isEqualTo(actualEvent.getEventTransactionId().toString());
+    assertThat(event.getTransactionId()).isEqualTo(actualEvent.getEventTransactionId());
     assertThat(event.getType().toString()).isEqualTo(actualEvent.getEventType().toString());
     assertThat(event.getDateTime()).isEqualTo(actualEvent.getEventDate());
     assertThat(

@@ -125,7 +125,7 @@ public class EventLoggerTest {
     RefusalDTO expectedRefusal = easyRandom.nextObject(RefusalDTO.class);
     expectedRefusal.getCollectionCase().setId(TEST_CASE_ID.toString());
     EventDTO event = new EventDTO();
-    event.setTransactionId(UUID.randomUUID().toString());
+    event.setTransactionId(UUID.randomUUID());
 
     // When
     underTest.logRefusalEvent(
@@ -179,7 +179,7 @@ public class EventLoggerTest {
     FulfilmentRequestDTO fulfilmentRequestPayload =
         managementEvent.getPayload().getFulfilmentRequest();
     fulfilmentRequestPayload.setCaseId(UUID.randomUUID().toString());
-    fulfilmentRequestEvent.setTransactionId(UUID.randomUUID().toString());
+    fulfilmentRequestEvent.setTransactionId(UUID.randomUUID());
 
     // When
     underTest.logFulfilmentRequestedEvent(

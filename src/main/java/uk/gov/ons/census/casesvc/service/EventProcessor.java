@@ -78,8 +78,7 @@ public class EventProcessor {
     event.setEventChannel(responseManagementEvent.getEvent().getChannel());
     event.setEventDate(responseManagementEvent.getEvent().getDateTime());
     event.setEventSource(responseManagementEvent.getEvent().getSource());
-    event.setEventTransactionId(
-        UUID.fromString(responseManagementEvent.getEvent().getTransactionId()));
+    event.setEventTransactionId(responseManagementEvent.getEvent().getTransactionId());
     event.setEventType(PRINT_CASE_SELECTED);
     event.setRmEventProcessed(OffsetDateTime.now());
     event.setEventDescription(

@@ -1,13 +1,5 @@
 package uk.gov.ons.census.casesvc.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Optional;
-import java.util.UUID;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,15 +11,23 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.ons.census.casesvc.client.UacQidServiceClient;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
-import uk.gov.ons.census.casesvc.model.dto.EventDTO;
-import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
-import uk.gov.ons.census.casesvc.model.dto.UacCreatedDTO;
 import uk.gov.ons.census.casesvc.model.dto.UacQidDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
+
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.generateUacCreatedEvent;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UacProcessorTest {
@@ -93,7 +93,7 @@ public class UacProcessorTest {
   @Test
   public void testIngestUacCreatedEventSavesUacQidLink() {
     // Given
-    Case linkedCase = generateRandomCase();
+    Case linkedCase = getRandomCase();
     ResponseManagementEvent uacCreatedEvent = generateUacCreatedEvent(linkedCase);
     when(caseRepository.findByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId()))
         .thenReturn(Optional.of(linkedCase));
@@ -118,7 +118,7 @@ public class UacProcessorTest {
   @Test
   public void testIngestUacCreatedEventEmitsUacUpdatedEvent() {
     // Given
-    Case linkedCase = generateRandomCase();
+    Case linkedCase = getRandomCase();
     ResponseManagementEvent uacCreatedEvent = generateUacCreatedEvent(linkedCase);
     when(caseRepository.findByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId()))
         .thenReturn(Optional.of(linkedCase));
@@ -153,7 +153,7 @@ public class UacProcessorTest {
   @Test
   public void testIngestUacCreatedEventLogsRmUacCreatedEvent() {
     // Given
-    Case linkedCase = generateRandomCase();
+    Case linkedCase = getRandomCase();
     ResponseManagementEvent uacCreatedEvent = generateUacCreatedEvent(linkedCase);
     when(caseRepository.findByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId()))
         .thenReturn(Optional.of(linkedCase));
@@ -178,25 +178,5 @@ public class UacProcessorTest {
     assertEquals(
         uacCreatedEvent.getPayload().getUacQidCreated().getCaseId(),
         uacQidLinkArgumentCaptor.getValue().getCaze().getCaseId());
-  }
-
-  private ResponseManagementEvent generateUacCreatedEvent(Case linkedCase) {
-    UacCreatedDTO uacCreatedPayload = easyRandom.nextObject(UacCreatedDTO.class);
-    linkedCase.setCaseId(uacCreatedPayload.getCaseId());
-    EventDTO eventDTO = easyRandom.nextObject(EventDTO.class);
-    PayloadDTO payloadDTO = new PayloadDTO();
-    ResponseManagementEvent uacCreatedEvent = new ResponseManagementEvent();
-    payloadDTO.setUacQidCreated(uacCreatedPayload);
-    uacCreatedEvent.setEvent(eventDTO);
-    uacCreatedEvent.setPayload(payloadDTO);
-    return uacCreatedEvent;
-  }
-
-  private Case generateRandomCase() {
-    // uacQidLinks and Events have to be set to null to avoid a stack overflow in easy random
-    Case linkedCase = easyRandom.nextObject(Case.class);
-    linkedCase.setUacQidLinks(null);
-    linkedCase.setEvents(null);
-    return linkedCase;
   }
 }

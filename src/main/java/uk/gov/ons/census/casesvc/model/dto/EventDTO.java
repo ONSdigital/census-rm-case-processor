@@ -1,6 +1,8 @@
 package uk.gov.ons.census.casesvc.model.dto;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
+
 import lombok.Data;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 
@@ -10,5 +12,5 @@ public class EventDTO {
   private String source;
   private String channel;
   private OffsetDateTime dateTime;
-  private String transactionId;
+  private UUID transactionId;
 }
