@@ -99,6 +99,7 @@ public class QuestionnaireLinkedProcessorTest {
 
     Case testCase = getRandomCase();
     testCase.setCaseId(TEST_CASE_ID);
+    testCase.setReceiptReceived(false);
 
     UacQidLink testUacQidLink = testCase.getUacQidLinks().get(0);
     testUacQidLink.setActive(false);
@@ -118,7 +119,7 @@ public class QuestionnaireLinkedProcessorTest {
     verify(caseRepository).saveAndFlush(caseCaptor.capture());
     Case actualCase = caseCaptor.getValue();
     assertThat(actualCase.getCaseId()).isEqualTo(TEST_CASE_ID);
-    assertThat(actualCase.isResponseReceived()).isTrue();
+    assertThat(actualCase.isReceiptReceived()).isTrue();
 
     verify(caseProcessor).emitCaseUpdatedEvent(testCase);
 

@@ -63,7 +63,7 @@ public class QuestionnaireLinkedProcessor {
 
     // If already receipted
     if (!uacQidLink.isActive()) {
-      caze.setResponseReceived(true);
+      caze.setReceiptReceived(true);
       caseRepository.saveAndFlush(caze);
 
       caseProcessor.emitCaseUpdatedEvent(caze);
