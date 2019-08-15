@@ -2,7 +2,6 @@ package uk.gov.ons.census.casesvc.model.dto;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
-
 import lombok.Data;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 

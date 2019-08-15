@@ -1,8 +1,15 @@
 package uk.gov.ons.census.casesvc.messaging;
 
-import org.jeasy.random.EasyRandom;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.generateUacCreatedEvent;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+
+import java.io.IOException;
+import java.util.Optional;
+import java.util.concurrent.BlockingQueue;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.amqp.core.Message;
@@ -18,20 +25,11 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
+import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
-
-import java.io.IOException;
-import java.util.UUID;
-import java.util.concurrent.BlockingQueue;
-
-import static org.junit.Assert.assertEquals;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.generateUacCreatedEvent;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementFulfilmentRequestedEvent;
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -62,7 +60,7 @@ public class UacCreatedEventReceiverIT {
   }
 
   @Test
-  public void testUacUpdatedEventIsEmitted() throws IOException, InterruptedException {
+  public void testReceiveRmUacCreatedEvent() throws IOException, InterruptedException {
     // Given
     Case linkedCase = getRandomCase();
     caseRepository.saveAndFlush(linkedCase);
@@ -79,10 +77,19 @@ public class UacCreatedEventReceiverIT {
     rabbitQueueHelper.sendMessage(uacQidCreatedQueue, message);
 
     // Then
+    // Check the UAC Updated event is emitted
     ResponseManagementEvent uacUpdatedEvent =
         rabbitQueueHelper.checkExpectedMessageReceived(uacEventQueue);
     assertEquals(
         uacCreatedEvent.getPayload().getUacQidCreated().getCaseId().toString(),
         uacUpdatedEvent.getPayload().getUac().getCaseId());
+
+    // Check the Uac Qid Link is created
+    Optional<UacQidLink> actualUacQidLink =
+        uacQidLinkRepository.findByQid(uacCreatedEvent.getPayload().getUacQidCreated().getQid());
+    assertTrue(actualUacQidLink.isPresent());
+    assertEquals(
+        uacCreatedEvent.getPayload().getUacQidCreated().getUac(), actualUacQidLink.get().getUac());
+    assertEquals(linkedCase.getCaseId(), actualUacQidLink.get().getCaze().getCaseId());
   }
 }

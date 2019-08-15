@@ -49,7 +49,8 @@ public class QuestionnaireLinkedProcessorTest {
     String caseId = uac.getCaseId();
 
     when(uacQidLinkRepository.findByQid(questionnaireId)).thenReturn(Optional.of(uacQidLink));
-    when(caseRepository.findByCaseId(UUID.fromString(caseId))).thenReturn(Optional.of(expectedCase));
+    when(caseRepository.findByCaseId(UUID.fromString(caseId)))
+        .thenReturn(Optional.of(expectedCase));
 
     // when
     underTest.processQuestionnaireLinked(managementEvent);

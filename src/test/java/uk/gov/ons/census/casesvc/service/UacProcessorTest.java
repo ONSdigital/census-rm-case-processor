@@ -1,5 +1,15 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.generateUacCreatedEvent;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
+
+import java.util.Optional;
+import java.util.UUID;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,17 +27,6 @@ import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
-
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.generateUacCreatedEvent;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UacProcessorTest {

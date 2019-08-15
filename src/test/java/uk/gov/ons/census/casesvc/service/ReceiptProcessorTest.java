@@ -6,8 +6,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.service.ReceiptProcessor.QID_RECEIPTED;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.generateRandomUacQidLink;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementEvent;
 
 import java.time.OffsetDateTime;
