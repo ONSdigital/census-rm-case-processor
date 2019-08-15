@@ -43,8 +43,6 @@ public class UacProcessorTest {
 
   @InjectMocks UacProcessor underTest;
 
-  public static final EasyRandom easyRandom = new EasyRandom();
-
   @Test
   public void testSaveUacQidLinkEnglandHousehold() {
     // Given
@@ -177,5 +175,25 @@ public class UacProcessorTest {
     assertEquals(
         uacCreatedEvent.getPayload().getUacQidCreated().getCaseId(),
         uacQidLinkArgumentCaptor.getValue().getCaze().getCaseId());
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testIngestUacCreatedEventThrowsRuntimeErrorIfCaseNotFound() {
+    // Given
+    Case unknownCase = getRandomCase();
+    ResponseManagementEvent uacCreatedEvent = generateUacCreatedEvent(unknownCase);
+    when(caseRepository.findByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId()))
+        .thenReturn(Optional.empty());
+
+    try {
+
+      // When
+      underTest.ingestUacCreatedEvent(uacCreatedEvent);
+    } catch (RuntimeException re) {
+
+      // Then
+      assertEquals("No case found matching UAC created event", re.getMessage());
+      throw re;
+    }
   }
 }

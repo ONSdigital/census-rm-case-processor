@@ -107,12 +107,14 @@ public class UacProcessor {
   public void ingestUacCreatedEvent(ResponseManagementEvent uacCreatedEvent) {
     Optional<Case> linkedCase =
         caseRepository.findByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId());
+
     if (linkedCase.isEmpty()) {
       log.with("caseId", uacCreatedEvent.getPayload().getUacQidCreated().getCaseId())
           .with("transactionId", uacCreatedEvent.getEvent().getTransactionId())
           .error("Cannot find case for UAC created event");
       throw new RuntimeException("No case found matching UAC created event");
     }
+
     UacQidLink uacQidLink =
         createAndSaveUacQidLink(
             linkedCase.get(),
@@ -121,6 +123,7 @@ public class UacProcessor {
             uacCreatedEvent.getPayload().getUacQidCreated().getQid());
 
     emitUacUpdatedEvent(uacQidLink, linkedCase.get());
+
     eventLogger.logEvent(
         uacQidLink,
         "RM UAC QID pair created",
