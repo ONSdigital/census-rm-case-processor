@@ -1,12 +1,5 @@
 package uk.gov.ons.census.casesvc.logging;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.verify;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToFulfilmentRequestDTO;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToRefusalDTO;
-
-import java.util.UUID;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,11 +17,19 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.verify;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToFulfilmentRequestDTO;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToRefusalDTO;
+
 @RunWith(MockitoJUnitRunner.class)
 public class EventLoggerTest {
 
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
-  public static final String TEST_JSON = "{test: json}";
+  private static final String TEST_JSON = "{test: json}";
 
   @Mock EventRepository eventRepository;
 

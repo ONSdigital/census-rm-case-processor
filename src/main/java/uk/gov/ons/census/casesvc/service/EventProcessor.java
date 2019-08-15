@@ -1,13 +1,7 @@
 package uk.gov.ons.census.casesvc.service;
 
-import static uk.gov.ons.census.casesvc.model.entity.EventType.PRINT_CASE_SELECTED;
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.OffsetDateTime;
-import java.util.Optional;
-import java.util.UUID;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
@@ -18,6 +12,13 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper;
+
+import java.time.OffsetDateTime;
+import java.util.Optional;
+import java.util.UUID;
+
+import static uk.gov.ons.census.casesvc.model.entity.EventType.PRINT_CASE_SELECTED;
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 @Component
 public class EventProcessor {

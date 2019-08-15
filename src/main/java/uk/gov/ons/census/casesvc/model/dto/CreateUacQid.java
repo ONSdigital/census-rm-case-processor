@@ -1,7 +1,8 @@
 package uk.gov.ons.census.casesvc.model.dto;
 
-import java.util.UUID;
 import lombok.Data;
+
+import java.util.UUID;
 
 @Data
 public class CreateUacQid {

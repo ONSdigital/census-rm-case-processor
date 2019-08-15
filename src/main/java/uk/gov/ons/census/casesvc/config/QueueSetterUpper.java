@@ -1,11 +1,15 @@
 package uk.gov.ons.census.casesvc.config;
 
-import static org.springframework.amqp.core.Binding.DestinationType.QUEUE;
-
-import org.springframework.amqp.core.*;
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.DirectExchange;
+import org.springframework.amqp.core.Exchange;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import static org.springframework.amqp.core.Binding.DestinationType.QUEUE;
 
 @Configuration
 public class QueueSetterUpper {

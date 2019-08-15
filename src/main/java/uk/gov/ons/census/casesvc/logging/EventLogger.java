@@ -1,10 +1,5 @@
 package uk.gov.ons.census.casesvc.logging;
 
-import static uk.gov.ons.census.casesvc.utility.EventHelper.createEventDTO;
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
-
-import java.time.OffsetDateTime;
-import java.util.UUID;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
@@ -15,6 +10,12 @@ import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
+
+import java.time.OffsetDateTime;
+import java.util.UUID;
+
+import static uk.gov.ons.census.casesvc.utility.EventHelper.createEventDTO;
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 @Component
 public class EventLogger {

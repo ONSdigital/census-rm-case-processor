@@ -1,11 +1,7 @@
 package uk.gov.ons.census.casesvc.service;
 
-import static uk.gov.ons.census.casesvc.model.entity.EventType.FULFILMENT_REQUESTED;
-
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
-import java.util.Optional;
-import java.util.UUID;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
@@ -13,6 +9,11 @@ import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
+
+import java.util.Optional;
+import java.util.UUID;
+
+import static uk.gov.ons.census.casesvc.model.entity.EventType.FULFILMENT_REQUESTED;
 
 @Service
 public class FulfilmentRequestProcessor {
