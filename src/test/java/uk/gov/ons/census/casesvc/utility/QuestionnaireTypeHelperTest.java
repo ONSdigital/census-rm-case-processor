@@ -1,8 +1,8 @@
 package uk.gov.ons.census.casesvc.utility;
 
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
 
 public class QuestionnaireTypeHelperTest {
   @Test

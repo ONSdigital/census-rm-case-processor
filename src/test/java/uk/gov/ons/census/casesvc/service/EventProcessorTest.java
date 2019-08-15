@@ -1,5 +1,14 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.*;
+import static uk.gov.ons.census.casesvc.service.EventProcessor.*;
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+
+import java.time.OffsetDateTime;
+import java.util.Optional;
+import java.util.UUID;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,16 +27,6 @@ import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
-
-import java.time.OffsetDateTime;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.*;
-import static uk.gov.ons.census.casesvc.service.EventProcessor.*;
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EventProcessorTest {
