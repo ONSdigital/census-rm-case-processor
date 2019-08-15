@@ -10,7 +10,6 @@ import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 
 import java.util.Optional;
 import java.util.UUID;
-import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
