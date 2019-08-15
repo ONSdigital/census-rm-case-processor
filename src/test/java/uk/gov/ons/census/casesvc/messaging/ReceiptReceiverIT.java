@@ -130,6 +130,7 @@ public class ReceiptReceiverIT {
     assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID);
     assertThat(actualUacQidLink.getUac()).isEqualTo(TEST_UAC);
     assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
+    assertThat(actualUacQidLink.isActive()).isFalse();
 
     // Test date saved format here
     String utcDateAsString = new JSONObject(event.getEventPayload()).getString("dateTime");

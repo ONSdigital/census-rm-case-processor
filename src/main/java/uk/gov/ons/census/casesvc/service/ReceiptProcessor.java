@@ -2,6 +2,7 @@ package uk.gov.ons.census.casesvc.service;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.ReceiptDTO;
@@ -11,8 +12,6 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
-
-import java.util.Optional;
 
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
@@ -61,11 +60,14 @@ public class ReceiptProcessor {
     }
 
     UacQidLink uacQidLink = uacQidLinkOpt.get();
-    Case caze = uacQidLink.getCaze();
+    uacQidLink.setActive(false);
+    uacQidLinkRepository.saveAndFlush(uacQidLink);
 
-    uacProcessor.emitUacUpdatedEvent(uacQidLink, caze, false);
+    Case caze = uacQidLink.getCaze();
     caze.setReceiptReceived(true);
     caseRepository.saveAndFlush(caze);
+
+    uacProcessor.emitUacUpdatedEvent(uacQidLink, caze, uacQidLink.isActive());
     caseProcessor.emitCaseUpdatedEvent(caze);
 
     eventLogger.logEvent(
