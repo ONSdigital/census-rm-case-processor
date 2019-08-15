@@ -120,9 +120,11 @@ public class ReceiptReceiverIT {
     assertThat(events.size()).isEqualTo(1);
     Event event = events.get(0);
     assertThat(event.getEventDescription()).isEqualTo(QID_RECEIPTED);
+
     UacQidLink actualUacQidLink = event.getUacQidLink();
     assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID);
     assertThat(actualUacQidLink.getUac()).isEqualTo(TEST_UAC);
     assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
+    assertThat(actualUacQidLink.isActive()).isFalse();
   }
 }

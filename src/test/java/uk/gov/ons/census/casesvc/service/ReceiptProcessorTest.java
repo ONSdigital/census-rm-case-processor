@@ -59,7 +59,10 @@ public class ReceiptProcessorTest {
     underTest.processReceipt(managementEvent);
 
     // then
+    verify(uacQidLinkRepository, times(1)).saveAndFlush(expectedUacQidLink);
+    verify(caseRepository, times(1)).saveAndFlush(expectedCase);
     verify(uacProcessor, times(1)).emitUacUpdatedEvent(expectedUacQidLink, expectedCase, false);
+    verify(caseProcessor, times(1)).emitCaseUpdatedEvent(expectedCase);
     verify(eventLogger, times(1))
         .logReceiptEvent(
             expectedUacQidLink,
