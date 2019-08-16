@@ -1,5 +1,7 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import java.util.Optional;
@@ -68,7 +70,11 @@ public class ReceiptProcessor {
     uacProcessor.emitUacUpdatedEvent(uacQidLink, caze, uacQidLink.isActive());
     caseProcessor.emitCaseUpdatedEvent(caze);
 
-    eventLogger.logReceiptEvent(
-        uacQidLink, QID_RECEIPTED, EventType.UAC_UPDATED, receiptPayload, receiptEvent.getEvent());
+    eventLogger.logEvent(
+        uacQidLink,
+        QID_RECEIPTED,
+        EventType.RESPONSE_RECEIVED,
+        convertObjectToJson(receiptPayload),
+        receiptEvent.getEvent());
   }
 }

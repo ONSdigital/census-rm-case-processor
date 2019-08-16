@@ -1,5 +1,6 @@
 package uk.gov.ons.census.casesvc.logging;
 
+import static uk.gov.ons.census.casesvc.utility.EventHelper.createEventDTO;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.time.OffsetDateTime;
@@ -9,9 +10,7 @@ import org.springframework.util.StringUtils;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
-import uk.gov.ons.census.casesvc.model.dto.ReceiptDTO;
 import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
-import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
@@ -20,10 +19,6 @@ import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 
 @Component
 public class EventLogger {
-
-  private static final String EVENT_SOURCE = "CASE_SERVICE";
-  private static final String EVENT_CHANNEL = "RM";
-
   private final EventRepository eventRepository;
 
   public EventLogger(EventRepository eventRepository) {
@@ -31,24 +26,8 @@ public class EventLogger {
   }
 
   public void logEvent(
-      UacQidLink uacQidLink, String eventDescription, EventType eventType, PayloadDTO payload) {
-
-    // Keep hardcoded for non-receipting calls for now
-    EventDTO event = new EventDTO();
-    event.setSource(EVENT_SOURCE);
-    event.setChannel(EVENT_CHANNEL);
-
-    logEvent(uacQidLink, eventDescription, eventType, convertObjectToJson(payload), event);
-  }
-
-  public void logReceiptEvent(
-      UacQidLink uacQidLink,
-      String eventDescription,
-      EventType eventType,
-      ReceiptDTO payload,
-      EventDTO event) {
-
-    logEvent(uacQidLink, eventDescription, eventType, convertObjectToJson(payload), event);
+      UacQidLink uacQidLink, String eventDescription, EventType eventType, String payloadJson) {
+    logEvent(uacQidLink, eventDescription, eventType, payloadJson, createEventDTO(eventType));
   }
 
   public void logRefusalEvent(
@@ -106,16 +85,6 @@ public class EventLogger {
     loggedEvent.setRmEventProcessed(OffsetDateTime.now());
 
     eventRepository.save(loggedEvent);
-  }
-
-  public void logQuestionnaireLinkedEvent(
-      UacQidLink uacQidLink,
-      String eventDescription,
-      EventType eventType,
-      UacDTO payload,
-      EventDTO event) {
-
-    logEvent(uacQidLink, eventDescription, eventType, convertObjectToJson(payload), event);
   }
 
   public void logEvent(

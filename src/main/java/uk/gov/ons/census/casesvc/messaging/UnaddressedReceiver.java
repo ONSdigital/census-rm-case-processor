@@ -1,5 +1,7 @@
 package uk.gov.ons.census.casesvc.messaging;
 
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +30,9 @@ public class UnaddressedReceiver {
             null, Integer.parseInt(createUacQid.getQuestionnaireType()), createUacQid.getBatchId());
     PayloadDTO uacPayloadDTO = uacProcessor.emitUacUpdatedEvent(uacQidLink, null);
     eventLogger.logEvent(
-        uacQidLink, "Unaddressed UAC/QID pair created", EventType.UAC_UPDATED, uacPayloadDTO);
+        uacQidLink,
+        "Unaddressed UAC/QID pair created",
+        EventType.UAC_UPDATED,
+        convertObjectToJson(uacPayloadDTO));
   }
 }

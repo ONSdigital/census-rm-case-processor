@@ -44,9 +44,6 @@ public class UnaddressedReceiverTest {
     verify(uacProcessor).emitUacUpdatedEvent(eq(uacQidLink), eq(null));
     verify(eventLogger)
         .logEvent(
-            eq(uacQidLink),
-            eq("Unaddressed UAC/QID pair created"),
-            any(EventType.class),
-            any(PayloadDTO.class));
+            eq(uacQidLink), eq("Unaddressed UAC/QID pair created"), any(EventType.class), eq("{}"));
   }
 }

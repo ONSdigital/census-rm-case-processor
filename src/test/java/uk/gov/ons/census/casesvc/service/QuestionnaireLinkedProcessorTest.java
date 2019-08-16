@@ -1,12 +1,14 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.generateRandomUacQidLink;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementQuestionnaireLinkedEvent;
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -58,11 +60,11 @@ public class QuestionnaireLinkedProcessorTest {
     // then
     verify(uacProcessor, times(1)).emitUacUpdatedEvent(uacQidLink, expectedCase);
     verify(eventLogger, times(1))
-        .logQuestionnaireLinkedEvent(
+        .logEvent(
             uacQidLink,
             "Questionnaire Linked",
             EventType.QUESTIONNAIRE_LINKED,
-            uac,
+            convertObjectToJson(uac),
             managementEvent.getEvent());
   }
 

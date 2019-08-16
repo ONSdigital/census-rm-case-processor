@@ -1,5 +1,7 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import java.util.Optional;
@@ -62,11 +64,11 @@ public class QuestionnaireLinkedProcessor {
 
     uacProcessor.emitUacUpdatedEvent(uacQidLink, caze);
 
-    eventLogger.logQuestionnaireLinkedEvent(
+    eventLogger.logEvent(
         uacQidLink,
         QUESTIONNAIRE_LINKED,
         EventType.QUESTIONNAIRE_LINKED,
-        uac,
+        convertObjectToJson(uac),
         questionnaireLinkedEvent.getEvent());
   }
 }
