@@ -1,8 +1,5 @@
 package uk.gov.ons.census.casesvc.service;
 
-import java.time.OffsetDateTime;
-import java.util.Optional;
-import java.util.UUID;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +16,10 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.utility.EventHelper;
 import uk.gov.ons.census.casesvc.utility.RandomCaseRefGenerator;
+
+import java.time.OffsetDateTime;
+import java.util.Optional;
+import java.util.UUID;
 
 @Component
 public class CaseProcessor {

@@ -1,11 +1,11 @@
 package uk.gov.ons.census.casesvc.messaging;
 
-import static org.mockito.Mockito.*;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementEvent;
-
 import org.junit.Test;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.service.ReceiptProcessor;
+
+import static org.mockito.Mockito.*;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementEvent;
 
 public class ReceiptReceiverTest {
 

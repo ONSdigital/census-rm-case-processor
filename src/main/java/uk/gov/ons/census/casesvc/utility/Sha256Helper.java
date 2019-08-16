@@ -1,9 +1,9 @@
 package uk.gov.ons.census.casesvc.utility;
 
+import javax.xml.bind.DatatypeConverter;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import javax.xml.bind.DatatypeConverter;
 
 public class Sha256Helper {
   private static final MessageDigest digest;

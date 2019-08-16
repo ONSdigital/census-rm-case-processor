@@ -1,8 +1,7 @@
 package uk.gov.ons.census.casesvc.model.entity;
 
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.UUID;
+import lombok.Data;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -10,7 +9,9 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import lombok.Data;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.UUID;
 
 @Data
 @Entity
