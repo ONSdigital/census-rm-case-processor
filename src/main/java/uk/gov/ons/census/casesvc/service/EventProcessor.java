@@ -46,7 +46,7 @@ public class EventProcessor {
     Case caze = caseProcessor.saveCase(createCaseSample);
     int questionnaireType =
         QuestionnaireTypeHelper.calculateQuestionnaireType(caze.getTreatmentCode());
-    UacQidLink uacQidLink = uacProcessor.saveUacQidLink(caze, questionnaireType);
+    UacQidLink uacQidLink = uacProcessor.generateAndSaveUacQidLink(caze, questionnaireType);
     uacProcessor.emitUacUpdatedEvent(uacQidLink, caze);
     caseProcessor.emitCaseCreatedEvent(caze);
 
@@ -57,7 +57,7 @@ public class EventProcessor {
         convertObjectToJson(createCaseSample));
 
     if (QuestionnaireTypeHelper.isQuestionnaireWelsh(caze.getTreatmentCode())) {
-      uacQidLink = uacProcessor.saveUacQidLink(caze, 3);
+      uacQidLink = uacProcessor.generateAndSaveUacQidLink(caze, 3);
       uacProcessor.emitUacUpdatedEvent(uacQidLink, caze);
     }
   }
