@@ -3,6 +3,8 @@ package uk.gov.ons.census.casesvc.testutil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.io.IOException;
+import java.util.UUID;
 import org.jeasy.random.EasyRandom;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
@@ -14,9 +16,6 @@ import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.type.RefusalType;
-
-import java.io.IOException;
-import java.util.UUID;
 
 public class DataUtils {
 

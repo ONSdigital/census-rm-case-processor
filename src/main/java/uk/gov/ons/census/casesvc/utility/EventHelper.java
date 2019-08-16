@@ -1,10 +1,9 @@
 package uk.gov.ons.census.casesvc.utility;
 
-import uk.gov.ons.census.casesvc.model.dto.EventDTO;
-import uk.gov.ons.census.casesvc.model.entity.EventType;
-
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import uk.gov.ons.census.casesvc.model.dto.EventDTO;
+import uk.gov.ons.census.casesvc.model.entity.EventType;
 
 public class EventHelper {
 

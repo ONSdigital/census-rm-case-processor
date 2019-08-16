@@ -1,5 +1,16 @@
 package uk.gov.ons.census.casesvc.messaging;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.ons.census.casesvc.service.ReceiptProcessor.QID_RECEIPTED;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementReceiptEvent;
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+
+import java.io.IOException;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeParseException;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.BlockingQueue;
 import org.jeasy.random.EasyRandom;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,18 +38,6 @@ import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
-
-import java.io.IOException;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeParseException;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.BlockingQueue;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.ons.census.casesvc.service.ReceiptProcessor.QID_RECEIPTED;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementReceiptEvent;
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 @ContextConfiguration
 @ActiveProfiles("test")

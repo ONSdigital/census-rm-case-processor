@@ -1,5 +1,7 @@
 package uk.gov.ons.census.casesvc.messaging;
 
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,8 +11,6 @@ import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.service.UacProcessor;
-
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 @MessageEndpoint
 public class UnaddressedReceiver {

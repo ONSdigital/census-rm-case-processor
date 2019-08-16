@@ -1,16 +1,15 @@
 package uk.gov.ons.census.casesvc.messaging;
 
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
-import uk.gov.ons.census.casesvc.service.QuestionnaireLinkedProcessor;
-
-import java.time.OffsetDateTime;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementEvent;
+
+import java.time.OffsetDateTime;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
+import uk.gov.ons.census.casesvc.service.QuestionnaireLinkedProcessor;
 
 public class QuestionnaireLinkedReceiverTest {
 
