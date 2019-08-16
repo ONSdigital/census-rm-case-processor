@@ -6,6 +6,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.service.ReceiptProcessor.QID_RECEIPTED;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.generateRandomUacQidLink;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementEvent;
 
@@ -47,8 +48,7 @@ public class ReceiptProcessorTest {
 
     // Given
     Case expectedCase = getRandomCase();
-    UacQidLink expectedUacQidLink = expectedCase.getUacQidLinks().get(0);
-    expectedUacQidLink.setCaze(expectedCase);
+    UacQidLink expectedUacQidLink = generateRandomUacQidLink(expectedCase);
 
     managementEvent.getPayload().getReceipt().setResponseDateTime(OffsetDateTime.now());
 

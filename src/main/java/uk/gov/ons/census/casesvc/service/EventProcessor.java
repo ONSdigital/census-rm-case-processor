@@ -45,7 +45,7 @@ public class EventProcessor {
     Case caze = caseProcessor.saveCase(createCaseSample);
     int questionnaireType =
         QuestionnaireTypeHelper.calculateQuestionnaireType(caze.getTreatmentCode());
-    UacQidLink uacQidLink = uacProcessor.saveUacQidLink(caze, questionnaireType);
+    UacQidLink uacQidLink = uacProcessor.generateAndSaveUacQidLink(caze, questionnaireType);
     PayloadDTO uacPayloadDTO = uacProcessor.emitUacUpdatedEvent(uacQidLink, caze);
     PayloadDTO casePayloadDTO = caseProcessor.emitCaseCreatedEvent(caze);
     eventLogger.logEvent(
@@ -54,7 +54,7 @@ public class EventProcessor {
         uacQidLink, UAC_QID_LINKED_EVENT_DESCRIPTION, EventType.UAC_UPDATED, uacPayloadDTO);
 
     if (QuestionnaireTypeHelper.isQuestionnaireWelsh(caze.getTreatmentCode())) {
-      uacQidLink = uacProcessor.saveUacQidLink(caze, 3);
+      uacQidLink = uacProcessor.generateAndSaveUacQidLink(caze, 3);
       uacPayloadDTO = uacProcessor.emitUacUpdatedEvent(uacQidLink, caze);
       eventLogger.logEvent(
           uacQidLink, UAC_QID_LINKED_EVENT_DESCRIPTION, EventType.UAC_UPDATED, uacPayloadDTO);
@@ -78,8 +78,7 @@ public class EventProcessor {
     event.setEventChannel(responseManagementEvent.getEvent().getChannel());
     event.setEventDate(responseManagementEvent.getEvent().getDateTime());
     event.setEventSource(responseManagementEvent.getEvent().getSource());
-    event.setEventTransactionId(
-        UUID.fromString(responseManagementEvent.getEvent().getTransactionId()));
+    event.setEventTransactionId(responseManagementEvent.getEvent().getTransactionId());
     event.setEventType(PRINT_CASE_SELECTED);
     event.setRmEventProcessed(OffsetDateTime.now());
     event.setEventDescription(
