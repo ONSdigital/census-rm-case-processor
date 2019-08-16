@@ -47,7 +47,7 @@ public class EventLogger {
     if (StringUtils.isEmpty(event.getTransactionId())) {
       loggedEvent.setEventTransactionId(UUID.randomUUID());
     } else {
-      loggedEvent.setEventTransactionId(UUID.fromString(event.getTransactionId()));
+      loggedEvent.setEventTransactionId(event.getTransactionId());
     }
 
     loggedEvent.setEventPayload(convertObjectToJson(payload));
@@ -78,7 +78,7 @@ public class EventLogger {
     if (StringUtils.isEmpty(event.getTransactionId())) {
       loggedEvent.setEventTransactionId(UUID.randomUUID());
     } else {
-      loggedEvent.setEventTransactionId(UUID.fromString(event.getTransactionId()));
+      loggedEvent.setEventTransactionId(event.getTransactionId());
     }
 
     loggedEvent.setRmEventProcessed(OffsetDateTime.now());
@@ -113,11 +113,16 @@ public class EventLogger {
     if (StringUtils.isEmpty(event.getTransactionId())) {
       loggedEvent.setEventTransactionId(UUID.randomUUID());
     } else {
-      loggedEvent.setEventTransactionId(UUID.fromString(event.getTransactionId()));
+      loggedEvent.setEventTransactionId(event.getTransactionId());
     }
 
     loggedEvent.setEventPayload(jsonPayload);
 
     eventRepository.save(loggedEvent);
+  }
+
+  public void logEvent(
+      UacQidLink uacQidLink, String eventDescription, PayloadDTO payload, EventDTO event) {
+    logEvent(uacQidLink, eventDescription, event.getType(), convertObjectToJson(payload), event);
   }
 }

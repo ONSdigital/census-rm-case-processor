@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static uk.gov.ons.census.casesvc.service.ReceiptProcessor.QID_RECEIPTED;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.generateRandomUacQidLink;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementEvent;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
@@ -46,8 +47,7 @@ public class ReceiptProcessorTest {
 
     // Given
     Case expectedCase = getRandomCase();
-    UacQidLink expectedUacQidLink = expectedCase.getUacQidLinks().get(0);
-    expectedUacQidLink.setCaze(expectedCase);
+    UacQidLink expectedUacQidLink = generateRandomUacQidLink(expectedCase);
 
     managementEvent.getPayload().getReceipt().setResponseDateTime(OffsetDateTime.now());
 

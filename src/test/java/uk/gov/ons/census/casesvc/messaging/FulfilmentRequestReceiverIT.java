@@ -71,7 +71,7 @@ public class FulfilmentRequestReceiverIT {
     ResponseManagementEvent managementEvent = getTestResponseManagementFulfilmentRequestedEvent();
     managementEvent.getPayload().getFulfilmentRequest().setCaseId(TEST_CASE_ID.toString());
     managementEvent.getPayload().getFulfilmentRequest().setFulfilmentCode(TEST_FULFILMENT_CODE);
-    managementEvent.getEvent().setTransactionId(UUID.randomUUID().toString());
+    managementEvent.getEvent().setTransactionId(UUID.randomUUID());
 
     // WHEN
     String json = convertObjectToJson(managementEvent);

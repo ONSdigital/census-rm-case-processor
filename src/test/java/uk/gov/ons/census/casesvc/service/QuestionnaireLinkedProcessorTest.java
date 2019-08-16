@@ -2,6 +2,10 @@ package uk.gov.ons.census.casesvc.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.generateRandomUacQidLink;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementQuestionnaireLinkedEvent;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
@@ -39,22 +43,22 @@ public class QuestionnaireLinkedProcessorTest {
   public void testGoodQuestionnaireLinked() {
     ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
     managementEvent.getPayload().getUac().setCaseId(UUID.randomUUID().toString());
-    Case caze = getRandomCase();
-    UacQidLink uacQidLink = caze.getUacQidLinks().get(0);
-    uacQidLink.setCaze(caze);
+    Case expectedCase = getRandomCase();
+    UacQidLink uacQidLink = generateRandomUacQidLink(expectedCase);
 
     UacDTO uac = managementEvent.getPayload().getUac();
     String questionnaireId = uac.getQuestionnaireId();
     String caseId = uac.getCaseId();
 
     when(uacQidLinkRepository.findByQid(questionnaireId)).thenReturn(Optional.of(uacQidLink));
-    when(caseRepository.findByCaseId(UUID.fromString(caseId))).thenReturn(Optional.of(caze));
+    when(caseRepository.findByCaseId(UUID.fromString(caseId)))
+        .thenReturn(Optional.of(expectedCase));
 
     // when
     underTest.processQuestionnaireLinked(managementEvent);
 
     // then
-    verify(uacProcessor, times(1)).emitUacUpdatedEvent(uacQidLink, caze);
+    verify(uacProcessor, times(1)).emitUacUpdatedEvent(uacQidLink, expectedCase);
     verify(eventLogger, times(1))
         .logEvent(
             uacQidLink,

@@ -16,7 +16,7 @@ public class EventHelper {
     eventDTO.setChannel(EVENT_CHANNEL);
     eventDTO.setSource(EVENT_SOURCE);
     eventDTO.setDateTime(OffsetDateTime.now());
-    eventDTO.setTransactionId(UUID.randomUUID().toString());
+    eventDTO.setTransactionId(UUID.randomUUID());
     eventDTO.setType(EventType);
 
     return eventDTO;

@@ -79,7 +79,7 @@ public class RefusalReceiverIT {
     caseRepository.saveAndFlush(caze);
 
     ResponseManagementEvent managementEvent = getTestResponseManagementRefusalEvent();
-    managementEvent.getEvent().setTransactionId(UUID.randomUUID().toString());
+    managementEvent.getEvent().setTransactionId(UUID.randomUUID());
     RefusalDTO expectedRefusal = managementEvent.getPayload().getRefusal();
     expectedRefusal.getCollectionCase().setId(TEST_CASE_ID.toString());
 

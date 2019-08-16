@@ -78,7 +78,7 @@ public class TransactionsIT {
     // WHEN
     ResponseManagementEvent managementEvent = getTestResponseManagementReceiptEvent();
     managementEvent.getPayload().getReceipt().setQuestionnaireId(TEST_QID);
-    managementEvent.getEvent().setTransactionId(UUID.randomUUID().toString());
+    managementEvent.getEvent().setTransactionId(UUID.randomUUID());
 
     String json = convertObjectToJson(managementEvent);
     Message message =
@@ -123,7 +123,7 @@ public class TransactionsIT {
 
     // WHEN
     ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
-    managementEvent.getEvent().setTransactionId(UUID.randomUUID().toString());
+    managementEvent.getEvent().setTransactionId(UUID.randomUUID());
     UacDTO uac = managementEvent.getPayload().getUac();
     uac.setCaseId(TEST_CASE_ID.toString());
     uac.setQuestionnaireId(TEST_QID);
