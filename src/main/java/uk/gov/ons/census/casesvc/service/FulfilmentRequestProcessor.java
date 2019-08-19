@@ -5,6 +5,7 @@ import static uk.gov.ons.census.casesvc.model.entity.EventType.FULFILMENT_REQUES
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
@@ -16,7 +17,9 @@ import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
+import uk.gov.ons.census.casesvc.model.entity.CaseState;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
+import uk.gov.ons.census.casesvc.utility.RandomCaseRefGenerator;
 
 @Service
 public class FulfilmentRequestProcessor {
@@ -29,6 +32,7 @@ public class FulfilmentRequestProcessor {
 
   public static final Set<String> individualResponseRequestCodes =
       new HashSet<>(Arrays.asList("UACIT1", "UACIT2", "UACIT2W", "UACIT4"));
+  public static final String HOUSEHOLD_INDIVIDUAL_RESPONSE = "HI";
 
   private final CaseRepository caseRepository;
   private final EventLogger eventLogger;
@@ -69,8 +73,33 @@ public class FulfilmentRequestProcessor {
         fulfilmentRequestPayload,
         fulfilmentRequestEvent);
 
-    if( individualResponseRequestCodes.contains(fulfilmentRequestPayload.getFulfilmentCode())) {
-       //copy case
+    if (individualResponseRequestCodes.contains(fulfilmentRequestPayload.getFulfilmentCode())) {
+      int caseRef = RandomCaseRefGenerator.getCaseRef();
+      // Check for collisions
+      if (caseRepository.existsById(caseRef)) {
+        throw new RuntimeException();
+      }
+
+      Case individualResponseCase = caze.toBuilder()
+          .caseId(UUID.randomUUID())
+          .caseRef(caseRef)
+          .uacQidLinks(null)
+          .events(null)
+          .createdDateTime(OffsetDateTime.now())
+          .state(CaseState.ACTIONABLE)
+          .receiptReceived(false)
+          .refusalReceived(false)
+          .addressType(HOUSEHOLD_INDIVIDUAL_RESPONSE)
+          .addressLevel(null)
+          .htcWillingness(null)
+          .htcDigital(null)
+          .fieldCoordinatorId(null)
+          .fieldOfficerId(null)
+          .treatmentCode(null)
+          .ceExpectedCapacity(null)
+          .build();
+
+      caseRepository.save(individualResponseCase);
 
       // emit case created event
 
