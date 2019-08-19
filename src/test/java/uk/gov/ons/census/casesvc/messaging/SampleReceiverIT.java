@@ -108,9 +108,6 @@ public class SampleReceiverIT {
     Event actualEvent = eventList.get(0);
 
     ObjectMapper objectMapper = new ObjectMapper();
-
-    String p = actualEvent.getEventPayload();
-
     CreateCaseSample actualcreateCaseSample =
         objectMapper.readValue(actualEvent.getEventPayload(), CreateCaseSample.class);
 

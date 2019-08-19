@@ -3,6 +3,7 @@ package uk.gov.ons.census.casesvc.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -100,5 +101,14 @@ public class CaseProcessorTest {
     assertThat(collectionCase.getFieldCoordinatorId()).isEqualTo(FIELD_CORD_ID);
     assertThat(collectionCase.getFieldOfficerId()).isEqualTo(FIELD_OFFICER_ID);
     assertThat(collectionCase.getCeExpectedCapacity()).isEqualTo(CE_CAPACITY);
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testUIniqueCaseRefCreationThrowsRuntimeException() {
+    // Given
+    when(caseRepository.existsById(anyInt())).thenReturn(true);
+
+    // When
+    underTest.getUniqueCaseRef();
   }
 }

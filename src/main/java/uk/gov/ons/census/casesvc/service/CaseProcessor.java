@@ -41,12 +41,7 @@ public class CaseProcessor {
   }
 
   public Case saveCase(CreateCaseSample createCaseSample) {
-    int caseRef = RandomCaseRefGenerator.getCaseRef();
-
-    // Check for collisions
-    if (caseRepository.existsById(caseRef)) {
-      throw new RuntimeException();
-    }
+    int caseRef = getUniqueCaseRef();
 
     Case caze = mapperFacade.map(createCaseSample, Case.class);
     caze.setCaseRef(caseRef);
@@ -56,6 +51,16 @@ public class CaseProcessor {
     caze.setReceiptReceived(false);
     caze = caseRepository.saveAndFlush(caze);
     return caze;
+  }
+
+  public int getUniqueCaseRef() {
+    int caseRef = RandomCaseRefGenerator.getCaseRef();
+
+    // Check for collisions
+    if (caseRepository.existsById(caseRef)) {
+      throw new RuntimeException();
+    }
+    return caseRef;
   }
 
   public Optional<Case> findCase(int caseRef) {

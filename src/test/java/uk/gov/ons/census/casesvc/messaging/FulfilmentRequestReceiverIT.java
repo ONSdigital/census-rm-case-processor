@@ -6,6 +6,7 @@ import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManage
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
@@ -39,7 +40,9 @@ import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 public class FulfilmentRequestReceiverIT {
 
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
-  private static final String TEST_FULFILMENT_CODE = "P_IC_ICL1";
+  private static final String TEST_REPLACEMENT_FULFILMENT_CODE = "UACHHT1";
+  private static final String TEST_INDIVIDUAL_RESPONSE_FULFILMENT_CODE = "UACIT1";
+
 
   @Value("${queueconfig.fulfilment-request-inbound-queue}")
   private String inboundQueue;
@@ -59,7 +62,7 @@ public class FulfilmentRequestReceiverIT {
   }
 
   @Test
-  public void testFulfilmentRequestLogged() throws InterruptedException {
+  public void testReplacementFulfilmentRequestLogged() throws InterruptedException {
     // GIVEN
     EasyRandom easyRandom = new EasyRandom();
     Case caze = easyRandom.nextObject(Case.class);
@@ -70,7 +73,8 @@ public class FulfilmentRequestReceiverIT {
 
     ResponseManagementEvent managementEvent = getTestResponseManagementFulfilmentRequestedEvent();
     managementEvent.getPayload().getFulfilmentRequest().setCaseId(TEST_CASE_ID.toString());
-    managementEvent.getPayload().getFulfilmentRequest().setFulfilmentCode(TEST_FULFILMENT_CODE);
+    managementEvent.getPayload().getFulfilmentRequest().setFulfilmentCode(
+        TEST_REPLACEMENT_FULFILMENT_CODE);
     managementEvent.getEvent().setTransactionId(UUID.randomUUID());
 
     // WHEN
@@ -90,6 +94,53 @@ public class FulfilmentRequestReceiverIT {
     FulfilmentRequestDTO actualFulfilmentRequest =
         convertJsonToFulfilmentRequestDTO(event.getEventPayload());
     assertThat(actualFulfilmentRequest.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
-    assertThat(actualFulfilmentRequest.getFulfilmentCode()).isEqualTo(TEST_FULFILMENT_CODE);
+    assertThat(actualFulfilmentRequest.getFulfilmentCode()).isEqualTo(
+        TEST_REPLACEMENT_FULFILMENT_CODE);
+  }
+
+  @Test
+  public void testIndividualResponseFulfilmentRequestLogged() throws InterruptedException {
+    // GIVEN
+    EasyRandom easyRandom = new EasyRandom();
+    Case caze = easyRandom.nextObject(Case.class);
+    caze.setCaseId(TEST_CASE_ID);
+    caze.setUacQidLinks(null);
+    caze.setEvents(null);
+    Case parentCase = caseRepository.saveAndFlush(caze);
+
+    ResponseManagementEvent managementEvent = getTestResponseManagementFulfilmentRequestedEvent();
+    managementEvent.getPayload().getFulfilmentRequest().setCaseId(TEST_CASE_ID.toString());
+    managementEvent.getPayload().getFulfilmentRequest().setFulfilmentCode(
+        TEST_INDIVIDUAL_RESPONSE_FULFILMENT_CODE);
+    managementEvent.getEvent().setTransactionId(UUID.randomUUID());
+
+    // WHEN
+    String json = convertObjectToJson(managementEvent);
+    Message message =
+        MessageBuilder.withBody(json.getBytes())
+            .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+            .build();
+    rabbitQueueHelper.sendMessage(inboundQueue, message);
+
+    Thread.sleep(1000);
+
+    // THEN
+    List<Event> events = eventRepository.findAll();
+    assertThat(events.size()).isEqualTo(1);
+    Event event = events.get(0);
+    FulfilmentRequestDTO actualFulfilmentRequest =
+        convertJsonToFulfilmentRequestDTO(event.getEventPayload());
+    assertThat(actualFulfilmentRequest.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
+    assertThat(actualFulfilmentRequest.getFulfilmentCode()).isEqualTo(
+        TEST_INDIVIDUAL_RESPONSE_FULFILMENT_CODE);
+
+    List<Case> cases = caseRepository.findAll();
+    assertThat(cases.size()).isEqualTo(2);
+
+    Case actualParentCase = caseRepository.findByCaseId(parentCase.getCaseId()).get();
+    Case actualChildCase = cases.stream()
+        .filter(c -> c.getCaseId() != parentCase.getCaseId()).findFirst().get();
+    
+
   }
 }
