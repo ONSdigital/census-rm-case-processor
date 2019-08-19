@@ -6,7 +6,6 @@ import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManage
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
@@ -43,7 +42,6 @@ public class FulfilmentRequestReceiverIT {
   private static final String TEST_REPLACEMENT_FULFILMENT_CODE = "UACHHT1";
   private static final String TEST_INDIVIDUAL_RESPONSE_FULFILMENT_CODE = "UACIT1";
 
-
   @Value("${queueconfig.fulfilment-request-inbound-queue}")
   private String inboundQueue;
 
@@ -73,8 +71,10 @@ public class FulfilmentRequestReceiverIT {
 
     ResponseManagementEvent managementEvent = getTestResponseManagementFulfilmentRequestedEvent();
     managementEvent.getPayload().getFulfilmentRequest().setCaseId(TEST_CASE_ID.toString());
-    managementEvent.getPayload().getFulfilmentRequest().setFulfilmentCode(
-        TEST_REPLACEMENT_FULFILMENT_CODE);
+    managementEvent
+        .getPayload()
+        .getFulfilmentRequest()
+        .setFulfilmentCode(TEST_REPLACEMENT_FULFILMENT_CODE);
     managementEvent.getEvent().setTransactionId(UUID.randomUUID());
 
     // WHEN
@@ -94,8 +94,8 @@ public class FulfilmentRequestReceiverIT {
     FulfilmentRequestDTO actualFulfilmentRequest =
         convertJsonToFulfilmentRequestDTO(event.getEventPayload());
     assertThat(actualFulfilmentRequest.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
-    assertThat(actualFulfilmentRequest.getFulfilmentCode()).isEqualTo(
-        TEST_REPLACEMENT_FULFILMENT_CODE);
+    assertThat(actualFulfilmentRequest.getFulfilmentCode())
+        .isEqualTo(TEST_REPLACEMENT_FULFILMENT_CODE);
   }
 
   @Test
@@ -110,8 +110,10 @@ public class FulfilmentRequestReceiverIT {
 
     ResponseManagementEvent managementEvent = getTestResponseManagementFulfilmentRequestedEvent();
     managementEvent.getPayload().getFulfilmentRequest().setCaseId(TEST_CASE_ID.toString());
-    managementEvent.getPayload().getFulfilmentRequest().setFulfilmentCode(
-        TEST_INDIVIDUAL_RESPONSE_FULFILMENT_CODE);
+    managementEvent
+        .getPayload()
+        .getFulfilmentRequest()
+        .setFulfilmentCode(TEST_INDIVIDUAL_RESPONSE_FULFILMENT_CODE);
     managementEvent.getEvent().setTransactionId(UUID.randomUUID());
 
     // WHEN
@@ -131,16 +133,14 @@ public class FulfilmentRequestReceiverIT {
     FulfilmentRequestDTO actualFulfilmentRequest =
         convertJsonToFulfilmentRequestDTO(event.getEventPayload());
     assertThat(actualFulfilmentRequest.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
-    assertThat(actualFulfilmentRequest.getFulfilmentCode()).isEqualTo(
-        TEST_INDIVIDUAL_RESPONSE_FULFILMENT_CODE);
+    assertThat(actualFulfilmentRequest.getFulfilmentCode())
+        .isEqualTo(TEST_INDIVIDUAL_RESPONSE_FULFILMENT_CODE);
 
     List<Case> cases = caseRepository.findAll();
     assertThat(cases.size()).isEqualTo(2);
 
     Case actualParentCase = caseRepository.findByCaseId(parentCase.getCaseId()).get();
-    Case actualChildCase = cases.stream()
-        .filter(c -> c.getCaseId() != parentCase.getCaseId()).findFirst().get();
-    
-
+    Case actualChildCase =
+        cases.stream().filter(c -> c.getCaseId() != parentCase.getCaseId()).findFirst().get();
   }
 }
