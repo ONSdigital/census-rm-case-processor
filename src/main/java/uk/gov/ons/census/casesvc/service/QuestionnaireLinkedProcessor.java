@@ -63,8 +63,8 @@ public class QuestionnaireLinkedProcessor {
     UacQidLink uacQidLink = uacQidLinkOpt.get();
     Case caze = caseOpt.get();
 
-    // If already receipted
-    if (!uacQidLink.isActive()) {
+    // If UAC/QID has been receipted before case, update case
+    if (!uacQidLink.isActive() && !caze.isReceiptReceived()) {
       caze.setReceiptReceived(true);
       caseRepository.saveAndFlush(caze);
 

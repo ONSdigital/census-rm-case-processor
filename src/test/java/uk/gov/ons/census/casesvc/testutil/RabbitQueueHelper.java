@@ -2,6 +2,7 @@ package uk.gov.ons.census.casesvc.testutil;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -77,5 +78,11 @@ public class RabbitQueueHelper {
     assertNotNull(responseManagementEvent);
     assertEquals("RM", responseManagementEvent.getEvent().getChannel());
     return responseManagementEvent;
+  }
+
+  public void checkMessageIsNotReceived(BlockingQueue<String> queue, int timeOut)
+      throws InterruptedException {
+    String actualMessage = queue.poll(timeOut, TimeUnit.SECONDS);
+    assertNull("Message received when not expected", actualMessage);
   }
 }

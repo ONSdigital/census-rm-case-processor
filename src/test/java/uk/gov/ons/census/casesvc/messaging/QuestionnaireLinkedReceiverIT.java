@@ -144,25 +144,84 @@ public class QuestionnaireLinkedReceiverIT {
   @Test
   public void testGoodQuestionnaireLinkedAfterReceiptedCase()
       throws InterruptedException, IOException {
-    testGoodQuestionnaireLinkedForReceiptedCase(true);
-  }
-
-  @Test
-  public void testGoodQuestionnaireLinkedBeforeReceiptedCase()
-      throws InterruptedException, IOException {
-    testGoodQuestionnaireLinkedForReceiptedCase(false);
-  }
-
-  private void testGoodQuestionnaireLinkedForReceiptedCase(boolean caseReceiptedValue)
-      throws IOException, InterruptedException {
-
     // GIVEN
     BlockingQueue<String> outboundUacQueue = rabbitQueueHelper.listen(rhUacQueue);
     BlockingQueue<String> outboundCaseQueue = rabbitQueueHelper.listen(rhCaseQueue);
 
     Case testCase = easyRandom.nextObject(Case.class);
     testCase.setCaseId(TEST_CASE_ID);
-    testCase.setReceiptReceived(caseReceiptedValue);
+    testCase.setReceiptReceived(true);
+    testCase.setUacQidLinks(null);
+    testCase.setEvents(null);
+    caseRepository.saveAndFlush(testCase);
+
+    UacQidLink testUacQidLink = easyRandom.nextObject(UacQidLink.class);
+    testUacQidLink.setQid(TEST_QID);
+    testUacQidLink.setActive(false);
+    testUacQidLink.setCaze(null);
+    testUacQidLink.setEvents(null);
+    uacQidLinkRepository.saveAndFlush(testUacQidLink);
+
+    ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
+    managementEvent.getEvent().setTransactionId(UUID.randomUUID());
+    UacDTO uac = managementEvent.getPayload().getUac();
+    uac.setCaseId(TEST_CASE_ID.toString());
+    uac.setQuestionnaireId(TEST_QID);
+
+    String json = convertObjectToJson(managementEvent);
+    Message message =
+        MessageBuilder.withBody(json.getBytes())
+            .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+            .build();
+
+    // WHEN
+    rabbitQueueHelper.sendMessage(inboundQueue, message);
+
+    // THEN
+
+    // Check Uac updated message sent
+    ResponseManagementEvent responseManagementEvent =
+        rabbitQueueHelper.checkExpectedMessageReceived(outboundUacQueue);
+
+    // Check message contains expected data
+    assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventType.UAC_UPDATED);
+    UacDTO actualUac = responseManagementEvent.getPayload().getUac();
+    assertThat(actualUac.getQuestionnaireId()).isEqualTo(TEST_QID);
+    assertThat(actualUac.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
+    assertThat(actualUac.isActive()).isTrue();
+
+    // Check Case updated message not sent
+    rabbitQueueHelper.checkMessageIsNotReceived(outboundCaseQueue, 5);
+
+    // Check database that Case is still receipted and has response received set
+    Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
+    assertThat(actualCase.isReceiptReceived()).isTrue();
+
+    // Check database that Case is now linked to questionnaire and still receipted
+    List<UacQidLink> uacQidLinks = uacQidLinkRepository.findAll();
+    assertThat(uacQidLinks.size()).isEqualTo(1);
+    testUacQidLink = uacQidLinks.get(0);
+    assertThat(testUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
+    assertThat(testUacQidLink.isActive()).isFalse();
+
+    // Check database for expected log event
+    List<Event> events = eventRepository.findAll();
+    assertThat(events.size()).isEqualTo(1);
+    Event event = events.get(0);
+    assertThat(event.getEventType()).isEqualTo(EventType.QUESTIONNAIRE_LINKED);
+    assertThat(event.getEventDescription()).isEqualTo("Questionnaire Linked");
+  }
+
+  @Test
+  public void testGoodQuestionnaireLinkedBeforeReceiptedCase()
+      throws InterruptedException, IOException {
+    // GIVEN
+    BlockingQueue<String> outboundUacQueue = rabbitQueueHelper.listen(rhUacQueue);
+    BlockingQueue<String> outboundCaseQueue = rabbitQueueHelper.listen(rhCaseQueue);
+
+    Case testCase = easyRandom.nextObject(Case.class);
+    testCase.setCaseId(TEST_CASE_ID);
+    testCase.setReceiptReceived(false);
     testCase.setUacQidLinks(null);
     testCase.setEvents(null);
     caseRepository.saveAndFlush(testCase);
