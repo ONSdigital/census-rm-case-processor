@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 import org.jeasy.random.EasyRandom;
@@ -41,6 +42,21 @@ public class DataUtils {
     randomCase.setUacQidLinks(null);
     randomCase.setEvents(null);
     randomCase.setCaseId(TEST_CASE_ID);
+    return randomCase;
+  }
+
+  public static Case getRandomCaseWithUacQidLinks(int numLinks) {
+    Case randomCase = getRandomCase();
+    List<UacQidLink> uacQidLinks = new LinkedList<>();
+
+    for (int i = 0; i < numLinks; i++) {
+      UacQidLink uacQidLink = easyRandom.nextObject(UacQidLink.class);
+      uacQidLink.setCaze(randomCase);
+      uacQidLinks.add(uacQidLink);
+    }
+
+    randomCase.setUacQidLinks(uacQidLinks);
+
     return randomCase;
   }
 

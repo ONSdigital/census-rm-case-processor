@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCaseWithUacQidLinks;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementQuestionnaireLinkedEvent;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
@@ -53,7 +53,7 @@ public class QuestionnaireLinkedProcessorTest {
     uac.setCaseId(TEST_CASE_ID.toString());
     uac.setQuestionnaireId(TEST_QID);
 
-    Case testCase = getRandomCase();
+    Case testCase = getRandomCaseWithUacQidLinks(1);
     testCase.setCaseId(TEST_CASE_ID);
 
     UacQidLink testUacQidLink = testCase.getUacQidLinks().get(0);
@@ -98,7 +98,7 @@ public class QuestionnaireLinkedProcessorTest {
     uac.setCaseId(TEST_CASE_ID.toString());
     uac.setQuestionnaireId(TEST_QID);
 
-    Case testCase = getRandomCase();
+    Case testCase = getRandomCaseWithUacQidLinks(1);
     testCase.setCaseId(TEST_CASE_ID);
     testCase.setReceiptReceived(false);
 
