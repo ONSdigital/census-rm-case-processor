@@ -10,10 +10,16 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Entity
+@Builder(toBuilder=true)
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "cases")
 public class Case {
 
