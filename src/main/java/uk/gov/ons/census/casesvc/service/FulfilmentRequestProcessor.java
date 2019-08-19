@@ -4,7 +4,11 @@ import static uk.gov.ons.census.casesvc.model.entity.EventType.FULFILMENT_REQUES
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
@@ -22,6 +26,9 @@ public class FulfilmentRequestProcessor {
   private static final String CASE_NOT_FOUND_ERROR = "Case not found error";
   private static final String DATETIME_NOT_PRESENT = "Date time not in event error";
   private static final String FULFILMENT_REQUEST_RECEIVED = "Fulfilment Request Received";
+
+  public static final Set<String> individualResponseRequestCodes =
+      new HashSet<>(Arrays.asList("UACIT1", "UACIT2", "UACIT2W", "UACIT4"));
 
   private final CaseRepository caseRepository;
   private final EventLogger eventLogger;
@@ -61,5 +68,12 @@ public class FulfilmentRequestProcessor {
         FULFILMENT_REQUESTED,
         fulfilmentRequestPayload,
         fulfilmentRequestEvent);
+
+    if( individualResponseRequestCodes.contains(fulfilmentRequestPayload.getFulfilmentCode())) {
+       //copy case
+
+      // emit case created event
+
+    }
   }
 }

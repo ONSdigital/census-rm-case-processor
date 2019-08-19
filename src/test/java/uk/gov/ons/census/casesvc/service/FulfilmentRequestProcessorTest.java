@@ -57,13 +57,21 @@ public class FulfilmentRequestProcessorTest {
             managementEvent.getEvent());
   }
 
+  // test indidvidual responses log event, save new case and emitted event.  Maybe loop through set of fufilmnent codes
+  // to test they're all good etc.
+
+  //new test to check no case copied or case emitted where not in idny respons ecpdes
+
+  //test empty/null getFulfilmentCode throws runTimeException
+
+
   @Test(expected = RuntimeException.class)
   public void testCaseIdNotFound() {
     // GIVEN
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
     managementEvent.getPayload().getFulfilmentRequest().setCaseId(UUID.randomUUID().toString());
     UUID expectedCaseIdNotFound =
-        UUID.fromString(managementEvent.getPayload().getFulfilmentRequest().getCaseId());
+            UUID.fromString(managementEvent.getPayload().getFulfilmentRequest().getCaseId());
     String expectedErrorMessage = String.format("Case ID '%s' not found!", expectedCaseIdNotFound);
 
     try {
