@@ -1,20 +1,16 @@
 package uk.gov.ons.census.casesvc.messaging;
 
-import static net.minidev.json.JSONValue.isValidJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -108,74 +104,16 @@ public class SampleReceiverIT {
     assertEquals("ABC123", caseList.get(0).getPostcode());
 
     List<Event> eventList = eventRepository.findAll();
-    assertThat(eventList.size(), is(2));
-    assertThat(isValidJson(eventList.get(0).getEventPayload()), is(true));
-    assertThat(isValidJson(eventList.get(1).getEventPayload()), is(true));
+    assertThat(eventList.size()).isEqualTo(1);
+    Event actualEvent = eventList.get(0);
 
-    String utcDateAsString =
-        new JSONObject(eventList.get(0).getEventPayload())
-            .getJSONObject("collectionCase")
-            .getString("actionableFrom");
-    assertThat(isStringFormattedAsUTCDate(utcDateAsString)).isTrue();
-  }
+    ObjectMapper objectMapper = new ObjectMapper();
 
-  @Test
-  public void testInvalidSerialisedUTCDateFailure()
-      throws InterruptedException, IOException, JSONException {
-    // GIVEN
-    BlockingQueue<String> rhCaseMessages = rabbitQueueHelper.listen(rhCaseQueue);
-    BlockingQueue<String> rhUacMessages = rabbitQueueHelper.listen(rhUacQueue);
-    BlockingQueue<String> actionMessages = rabbitQueueHelper.listen(actionSchedulerQueue);
+    String p = actualEvent.getEventPayload();
 
-    CreateCaseSample createCaseSample = new CreateCaseSample();
-    createCaseSample.setPostcode("ABC123");
-    createCaseSample.setRegion("E12000009");
-    createCaseSample.setTreatmentCode("HH_LF3R2E");
+    CreateCaseSample actualcreateCaseSample =
+        objectMapper.readValue(actualEvent.getEventPayload(), CreateCaseSample.class);
 
-    // WHEN
-    rabbitQueueHelper.sendMessage(inboundQueue, createCaseSample);
-
-    // THEN
-    ResponseManagementEvent responseManagementEvent =
-        rabbitQueueHelper.checkExpectedMessageReceived(rhCaseMessages);
-    assertEquals(EventType.CASE_CREATED, responseManagementEvent.getEvent().getType());
-    responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(rhUacMessages);
-    assertEquals(EventType.UAC_UPDATED, responseManagementEvent.getEvent().getType());
-
-    List<EventType> eventTypesSeenDTO = new LinkedList<>();
-    responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(actionMessages);
-    eventTypesSeenDTO.add(responseManagementEvent.getEvent().getType());
-    responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(actionMessages);
-    eventTypesSeenDTO.add(responseManagementEvent.getEvent().getType());
-
-    assertThat(
-        eventTypesSeenDTO, containsInAnyOrder(EventType.CASE_CREATED, EventType.UAC_UPDATED));
-
-    List<Case> caseList = caseRepository.findAll();
-    assertEquals(1, caseList.size());
-    assertEquals("ABC123", caseList.get(0).getPostcode());
-
-    List<Event> eventList = eventRepository.findAll();
-    assertThat(eventList.size(), is(2));
-    assertThat(isValidJson(eventList.get(0).getEventPayload()), is(true));
-    assertThat(isValidJson(eventList.get(1).getEventPayload()), is(true));
-
-    String utcDateAsString =
-        new JSONObject(eventList.get(0).getEventPayload())
-            .getJSONObject("collectionCase")
-            .getString("actionableFrom");
-
-    utcDateAsString = utcDateAsString.substring(0, utcDateAsString.length() - 1);
-
-    assertThat(isStringFormattedAsUTCDate(utcDateAsString)).isFalse();
-  }
-
-  private boolean isStringFormattedAsUTCDate(String dateAsString) {
-    try {
-      OffsetDateTime.parse(dateAsString);
-      return true;
-    } catch (DateTimeParseException dtpe) {
-      return false;
-    }
+    assertThat(actualcreateCaseSample).isEqualTo(createCaseSample);
   }
 }

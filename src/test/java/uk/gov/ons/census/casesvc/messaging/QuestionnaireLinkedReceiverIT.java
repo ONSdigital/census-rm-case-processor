@@ -95,7 +95,7 @@ public class QuestionnaireLinkedReceiverIT {
     uacQidLinkRepository.saveAndFlush(testUacQidLink);
 
     ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
-    managementEvent.getEvent().setTransactionId(UUID.randomUUID().toString());
+    managementEvent.getEvent().setTransactionId(UUID.randomUUID());
     UacDTO uac = managementEvent.getPayload().getUac();
     uac.setCaseId(TEST_CASE_ID.toString());
     uac.setQuestionnaireId(TEST_QID);
@@ -175,7 +175,7 @@ public class QuestionnaireLinkedReceiverIT {
     uacQidLinkRepository.saveAndFlush(testUacQidLink);
 
     ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
-    managementEvent.getEvent().setTransactionId(UUID.randomUUID().toString());
+    managementEvent.getEvent().setTransactionId(UUID.randomUUID());
     UacDTO uac = managementEvent.getPayload().getUac();
     uac.setCaseId(TEST_CASE_ID.toString());
     uac.setQuestionnaireId(TEST_QID);

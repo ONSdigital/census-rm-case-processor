@@ -1,9 +1,7 @@
 package uk.gov.ons.census.casesvc.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToRefusalDTO;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementRefusalEvent;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.*;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.io.IOException;
@@ -81,7 +79,7 @@ public class RefusalReceiverIT {
     caseRepository.saveAndFlush(caze);
 
     ResponseManagementEvent managementEvent = getTestResponseManagementRefusalEvent();
-    managementEvent.getEvent().setTransactionId(UUID.randomUUID().toString());
+    managementEvent.getEvent().setTransactionId(UUID.randomUUID());
     RefusalDTO expectedRefusal = managementEvent.getPayload().getRefusal();
     expectedRefusal.getCollectionCase().setId(TEST_CASE_ID.toString());
 

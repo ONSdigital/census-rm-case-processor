@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementQuestionnaireLinkedEvent;
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -77,11 +78,11 @@ public class QuestionnaireLinkedProcessorTest {
 
     verify(uacProcessor).emitUacUpdatedEvent(testUacQidLink, testCase);
     verify(eventLogger)
-        .logQuestionnaireLinkedEvent(
+        .logEvent(
             testUacQidLink,
             "Questionnaire Linked",
             EventType.QUESTIONNAIRE_LINKED,
-            uac,
+            convertObjectToJson(uac),
             managementEvent.getEvent());
 
     verifyNoMoreInteractions(uacQidLinkRepository);
@@ -131,11 +132,11 @@ public class QuestionnaireLinkedProcessorTest {
 
     verify(uacProcessor).emitUacUpdatedEvent(testUacQidLink, testCase);
     verify(eventLogger)
-        .logQuestionnaireLinkedEvent(
+        .logEvent(
             testUacQidLink,
             "Questionnaire Linked",
             EventType.QUESTIONNAIRE_LINKED,
-            uac,
+            convertObjectToJson(uac),
             managementEvent.getEvent());
 
     verifyNoMoreInteractions(uacQidLinkRepository);

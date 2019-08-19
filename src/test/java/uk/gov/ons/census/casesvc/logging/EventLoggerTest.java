@@ -4,10 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToFulfilmentRequestDTO;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToReceiptDTO;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToRefusalDTO;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToUacDTO;
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.util.UUID;
 import org.jeasy.random.EasyRandom;
@@ -19,11 +16,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
-import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
-import uk.gov.ons.census.casesvc.model.dto.ReceiptDTO;
 import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
-import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
@@ -34,6 +28,7 @@ import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 public class EventLoggerTest {
 
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
+  private static final String TEST_JSON = "{test: json}";
 
   @Mock EventRepository eventRepository;
 
@@ -51,7 +46,7 @@ public class EventLoggerTest {
     uacQidLink.setCaze(caze);
 
     // When
-    underTest.logEvent(uacQidLink, "TEST_LOGGED_EVENT", EventType.UAC_UPDATED, new PayloadDTO());
+    underTest.logEvent(uacQidLink, "TEST_LOGGED_EVENT", EventType.UAC_UPDATED, TEST_JSON);
 
     // Then
     ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
@@ -93,39 +88,12 @@ public class EventLoggerTest {
   }
 
   @Test
-  public void testLogReceiptEvent() {
-    // Given
-    ReceiptDTO expectedReceipt =
-        convertJsonToReceiptDTO(convertObjectToJson(easyRandom.nextObject(ReceiptDTO.class)));
-
-    // When
-    underTest.logReceiptEvent(
-        new UacQidLink(),
-        "TEST_LOGGED_EVENT",
-        EventType.UAC_UPDATED,
-        expectedReceipt,
-        new EventDTO());
-
-    // Then
-    ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
-    verify(eventRepository).save(eventArgumentCaptor.capture());
-    ReceiptDTO actualReceipt =
-        convertJsonToReceiptDTO(eventArgumentCaptor.getValue().getEventPayload());
-
-    assertThat(actualReceipt.getCaseId()).isEqualTo(expectedReceipt.getCaseId());
-    assertThat(actualReceipt.getQuestionnaireId()).isEqualTo(expectedReceipt.getQuestionnaireId());
-    assertThat(actualReceipt.isUnreceipt()).isEqualTo(expectedReceipt.isUnreceipt());
-    assertThat(actualReceipt.getResponseDateTime())
-        .isEqualTo(expectedReceipt.getResponseDateTime());
-  }
-
-  @Test
   public void testLogRefusalEventWithTransactionId() {
     // Given
     RefusalDTO expectedRefusal = easyRandom.nextObject(RefusalDTO.class);
     expectedRefusal.getCollectionCase().setId(TEST_CASE_ID.toString());
     EventDTO event = new EventDTO();
-    event.setTransactionId(UUID.randomUUID().toString());
+    event.setTransactionId(UUID.randomUUID());
 
     // When
     underTest.logRefusalEvent(
@@ -179,7 +147,7 @@ public class EventLoggerTest {
     FulfilmentRequestDTO fulfilmentRequestPayload =
         managementEvent.getPayload().getFulfilmentRequest();
     fulfilmentRequestPayload.setCaseId(UUID.randomUUID().toString());
-    fulfilmentRequestEvent.setTransactionId(UUID.randomUUID().toString());
+    fulfilmentRequestEvent.setTransactionId(UUID.randomUUID());
 
     // When
     underTest.logFulfilmentRequestedEvent(
@@ -231,29 +199,5 @@ public class EventLoggerTest {
     assertThat(actualFulfilment.getCaseId()).isEqualTo(fulfilmentRequestPayload.getCaseId());
     assertThat(actualFulfilment.getFulfilmentCode())
         .isEqualTo(fulfilmentRequestPayload.getFulfilmentCode());
-  }
-
-  @Test
-  public void testLogQuestionnaireLinkedEvent() {
-    // Given
-    ResponseManagementEvent managementEvent = easyRandom.nextObject(ResponseManagementEvent.class);
-    UacDTO expectedUac = managementEvent.getPayload().getUac();
-    expectedUac.setCaseId(UUID.randomUUID().toString());
-
-    // When
-    underTest.logQuestionnaireLinkedEvent(
-        new UacQidLink(),
-        "Questionnaire Linked",
-        EventType.QUESTIONNAIRE_LINKED,
-        expectedUac,
-        new EventDTO());
-
-    // Then
-    ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
-    verify(eventRepository).save(eventArgumentCaptor.capture());
-    UacDTO actualUac = convertJsonToUacDTO(eventArgumentCaptor.getValue().getEventPayload());
-
-    assertThat(actualUac.getCaseId()).isEqualTo(expectedUac.getCaseId());
-    assertThat(actualUac.getQuestionnaireId()).isEqualTo(expectedUac.getQuestionnaireId());
   }
 }

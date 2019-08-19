@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 import org.jeasy.random.EasyRandom;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
@@ -12,9 +13,11 @@ import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ReceiptDTO;
 import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
+import uk.gov.ons.census.casesvc.model.dto.UacCreatedDTO;
 import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
+import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.type.RefusalType;
 
 public class DataUtils {
@@ -33,10 +36,20 @@ public class DataUtils {
   }
 
   public static Case getRandomCase() {
-    Case caze = easyRandom.nextObject(Case.class);
-    caze.setCaseId(TEST_CASE_ID);
+    // uacQidLinks and Events have to be set to avoid a stack overflow in easy random
+    Case randomCase = easyRandom.nextObject(Case.class);
+    randomCase.setUacQidLinks(null);
+    randomCase.setEvents(null);
+    randomCase.setCaseId(TEST_CASE_ID);
+    return randomCase;
+  }
 
-    return caze;
+  public static UacQidLink generateRandomUacQidLink(Case linkedCase) {
+    UacQidLink uacQidLink = easyRandom.nextObject(UacQidLink.class);
+    uacQidLink.setCaze(linkedCase);
+    uacQidLink.setEvents(null);
+    linkedCase.setUacQidLinks(List.of(uacQidLink));
+    return uacQidLink;
   }
 
   public static ResponseManagementEvent getTestResponseManagementEvent() {
@@ -154,5 +167,18 @@ public class DataUtils {
     } catch (IOException e) {
       throw new RuntimeException("Failed converting Json To FulfilmentRequestDTO", e);
     }
+  }
+
+  public static ResponseManagementEvent generateUacCreatedEvent(Case linkedCase) {
+    UacCreatedDTO uacCreatedPayload = easyRandom.nextObject(UacCreatedDTO.class);
+    uacCreatedPayload.setCaseId(linkedCase.getCaseId());
+    EventDTO eventDTO = easyRandom.nextObject(EventDTO.class);
+    eventDTO.setType(EventType.RM_UAC_CREATED);
+    PayloadDTO payloadDTO = new PayloadDTO();
+    ResponseManagementEvent uacCreatedEvent = new ResponseManagementEvent();
+    payloadDTO.setUacQidCreated(uacCreatedPayload);
+    uacCreatedEvent.setEvent(eventDTO);
+    uacCreatedEvent.setPayload(payloadDTO);
+    return uacCreatedEvent;
   }
 }

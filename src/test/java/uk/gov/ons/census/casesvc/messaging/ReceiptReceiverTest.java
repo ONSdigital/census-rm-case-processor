@@ -1,8 +1,6 @@
 package uk.gov.ons.census.casesvc.messaging;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementEvent;
 
 import org.junit.Test;

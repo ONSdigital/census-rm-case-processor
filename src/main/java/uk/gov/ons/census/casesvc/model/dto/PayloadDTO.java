@@ -26,4 +26,7 @@ public class PayloadDTO {
 
   @JsonInclude(Include.NON_NULL)
   private FulfilmentRequestDTO fulfilmentRequest;
+
+  @JsonInclude(Include.NON_NULL)
+  private UacCreatedDTO uacQidCreated;
 }

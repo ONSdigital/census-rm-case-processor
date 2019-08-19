@@ -50,6 +50,9 @@ public class AppConfig {
   @Value("${queueconfig.action-case-queue}")
   private String actionCaseQueue;
 
+  @Value("${queueconfig.uac-qid-created-queue}")
+  private String uacQidCreatedQueue;
+
   @Bean
   public MessageChannel caseSampleInputChannel() {
     return new DirectChannel();
@@ -82,6 +85,11 @@ public class AppConfig {
 
   @Bean
   public MessageChannel actionCaseInputChannel() {
+    return new DirectChannel();
+  }
+
+  @Bean
+  public MessageChannel uacCreatedInputChannel() {
     return new DirectChannel();
   }
 
@@ -143,6 +151,15 @@ public class AppConfig {
   public AmqpInboundChannelAdapter actionCaseInbound(
       @Qualifier("actionCaseContainer") SimpleMessageListenerContainer listenerContainer,
       @Qualifier("actionCaseInputChannel") MessageChannel channel) {
+    AmqpInboundChannelAdapter adapter = new AmqpInboundChannelAdapter(listenerContainer);
+    adapter.setOutputChannel(channel);
+    return adapter;
+  }
+
+  @Bean
+  AmqpInboundChannelAdapter uacCreatedInbound(
+      @Qualifier("uacCreatedContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("uacCreatedInputChannel") MessageChannel channel) {
     AmqpInboundChannelAdapter adapter = new AmqpInboundChannelAdapter(listenerContainer);
     adapter.setOutputChannel(channel);
     return adapter;
@@ -225,6 +242,15 @@ public class AppConfig {
     SimpleMessageListenerContainer container =
         new SimpleMessageListenerContainer(connectionFactory);
     container.setQueueNames(actionCaseQueue);
+    container.setConcurrentConsumers(consumers);
+    return container;
+  }
+
+  @Bean
+  public SimpleMessageListenerContainer uacCreatedContainer(ConnectionFactory connectionFactory) {
+    SimpleMessageListenerContainer container =
+        new SimpleMessageListenerContainer(connectionFactory);
+    container.setQueueNames(uacQidCreatedQueue);
     container.setConcurrentConsumers(consumers);
     return container;
   }
