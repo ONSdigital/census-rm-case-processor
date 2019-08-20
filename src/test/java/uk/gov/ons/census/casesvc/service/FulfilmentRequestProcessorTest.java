@@ -8,8 +8,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.ons.census.casesvc.model.entity.EventType.FULFILMENT_REQUESTED;
-import static uk.gov.ons.census.casesvc.service.FulfilmentRequestProcessor.HOUSEHOLD_INDIVIDUAL_RESPONSE;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementEvent;
 
@@ -29,10 +27,18 @@ import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.CaseState;
+import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FulfilmentRequestProcessorTest {
+
+  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_ADDRESS_TYPE = "HI";
+
+  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND = "UACIT1";
+  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH = "UACIT2";
+  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH = "UACIT2W";
+  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NORTHERN_IRELAND = "UACIT4";
 
   @Mock private CaseRepository caseRepository;
 
@@ -65,7 +71,7 @@ public class FulfilmentRequestProcessorTest {
             expectedCase.getCaseId(),
             managementEvent.getEvent().getDateTime(),
             "Fulfilment Request Received",
-            FULFILMENT_REQUESTED,
+            EventType.FULFILMENT_REQUESTED,
             expectedFulfilmentRequest,
             managementEvent.getEvent());
 
@@ -76,22 +82,22 @@ public class FulfilmentRequestProcessorTest {
 
   @Test
   public void testGoodIndividualResponseFulfilmentRequestForUACIT1() {
-    testIndividualResponseCode("UACIT1");
+    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND);
   }
 
   @Test
   public void testGoodIndividualResponseFulfilmentRequestForUACIT2() {
-    testIndividualResponseCode("UACIT2");
+    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH);
   }
 
   @Test
   public void testGoodIndividualResponseFulfilmentRequestForUACIT2W() {
-    testIndividualResponseCode("UACIT2W");
+    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH);
   }
 
   @Test
   public void testGoodIndividualResponseFulfilmentRequestForUACIT4() {
-    testIndividualResponseCode("UACIT4");
+    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NORTHERN_IRELAND);
   }
 
   @Test(expected = RuntimeException.class)
@@ -200,7 +206,7 @@ public class FulfilmentRequestProcessorTest {
             parentCase.getCaseId(),
             managementEvent.getEvent().getDateTime(),
             "Fulfilment Request Received",
-            FULFILMENT_REQUESTED,
+            EventType.FULFILMENT_REQUESTED,
             expectedFulfilmentRequest,
             managementEvent.getEvent());
 
@@ -208,12 +214,12 @@ public class FulfilmentRequestProcessorTest {
     verify(caseRepository).save(caseArgumentCaptor.capture());
     Case actualChildCase = caseArgumentCaptor.getValue();
 
-    testIndivdualFulfilmentRequestCase(parentCase, actualChildCase);
+    checkIndivdualFulfilmentRequestCase(parentCase, actualChildCase);
     verify(caseProcessor).emitCaseCreatedEvent(actualChildCase);
     verify(caseProcessor, times(1)).getUniqueCaseRef();
   }
 
-  private void testIndivdualFulfilmentRequestCase(Case parentCase, Case actualChildCase) {
+  private void checkIndivdualFulfilmentRequestCase(Case parentCase, Case actualChildCase) {
     assertThat(actualChildCase.getCaseRef()).isNotEqualTo(parentCase.getCaseRef());
     assertThat(UUID.fromString(actualChildCase.getCaseId().toString()))
         .isNotEqualTo(parentCase.getCaseId());
@@ -230,7 +236,8 @@ public class FulfilmentRequestProcessorTest {
     assertThat(actualChildCase.getArid()).isEqualTo(parentCase.getArid());
     assertThat(actualChildCase.getEstabArid()).isEqualTo(parentCase.getEstabArid());
     assertThat(actualChildCase.getUprn()).isEqualTo(parentCase.getUprn());
-    assertThat(actualChildCase.getAddressType()).isEqualTo(HOUSEHOLD_INDIVIDUAL_RESPONSE);
+    assertThat(actualChildCase.getAddressType())
+        .isEqualTo(HOUSEHOLD_INDIVIDUAL_RESPONSE_ADDRESS_TYPE);
     assertThat(actualChildCase.getEstabType()).isEqualTo(parentCase.getEstabType());
     assertThat(actualChildCase.getAddressLevel()).isNull();
     assertThat(actualChildCase.getAbpCode()).isEqualTo(parentCase.getAbpCode());

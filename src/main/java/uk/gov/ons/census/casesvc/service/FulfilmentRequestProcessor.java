@@ -30,9 +30,19 @@ public class FulfilmentRequestProcessor {
   private static final String FULFILMENT_REQUEST_RECEIVED = "Fulfilment Request Received";
   private static final String FULFILMENT_CODE_NOT_FOUND = "Fulfilment Code not found";
 
+  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_ADDRESS_TYPE = "HI";
+
+  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND = "UACIT1";
+  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH = "UACIT2";
+  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH = "UACIT2W";
+  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NORTHERN_IRELAND = "UACIT4";
   private static final Set<String> individualResponseRequestCodes =
-      new HashSet<>(Arrays.asList("UACIT1", "UACIT2", "UACIT2W", "UACIT4"));
-  static final String HOUSEHOLD_INDIVIDUAL_RESPONSE = "HI";
+      new HashSet<>(
+          Arrays.asList(
+              HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND,
+              HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH,
+              HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH,
+              HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NORTHERN_IRELAND));
 
   private final CaseRepository caseRepository;
   private final EventLogger eventLogger;
@@ -81,7 +91,7 @@ public class FulfilmentRequestProcessor {
             .state(CaseState.ACTIONABLE)
             .receiptReceived(false)
             .refusalReceived(false)
-            .addressType(HOUSEHOLD_INDIVIDUAL_RESPONSE)
+            .addressType(HOUSEHOLD_INDIVIDUAL_RESPONSE_ADDRESS_TYPE)
             .addressLevel(null)
             .htcWillingness(null)
             .htcDigital(null)

@@ -28,6 +28,7 @@ import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
+import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
@@ -108,6 +109,8 @@ public class FulfilmentRequestReceiverIT {
   public void testIndividualResponseFulfilmentRequestLogged()
       throws InterruptedException, IOException {
     // GIVEN
+    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
+
     EasyRandom easyRandom = new EasyRandom();
     Case caze = easyRandom.nextObject(Case.class);
     caze.setCaseId(TEST_CASE_ID);
@@ -131,11 +134,13 @@ public class FulfilmentRequestReceiverIT {
             .build();
     rabbitQueueHelper.sendMessage(inboundQueue, message);
 
-    // wait for the the emitted event
-    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
-    rabbitQueueHelper.checkExpectedMessageReceived(outboundQueue);
-
     // THEN
+    ResponseManagementEvent responseManagementEvent =
+        rabbitQueueHelper.checkExpectedMessageReceived(outboundQueue);
+    assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventType.CASE_CREATED);
+    assertThat(responseManagementEvent.getPayload().getCollectionCase().getAddress().getEstabArid())
+        .isEqualTo(parentCase.getEstabArid());
+
     List<Event> events = eventRepository.findAll();
     assertThat(events.size()).isEqualTo(1);
     Event event = events.get(0);
@@ -154,6 +159,10 @@ public class FulfilmentRequestReceiverIT {
             .filter(c -> !c.getCaseId().equals(actualParentCase.getCaseId()))
             .findFirst()
             .get();
+
+    // Ensure emitted RM message matches new case
+    assertThat(UUID.fromString(responseManagementEvent.getPayload().getCollectionCase().getId()))
+        .isEqualTo(actualChildCase.getCaseId());
 
     assertThat(actualParentCase.getEstabArid()).isEqualTo(actualChildCase.getEstabArid());
     assertThat(actualParentCase.getAddressLine1()).isEqualTo(actualChildCase.getAddressLine1());
