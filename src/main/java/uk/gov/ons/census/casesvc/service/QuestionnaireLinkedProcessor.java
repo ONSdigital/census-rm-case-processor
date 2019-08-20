@@ -27,16 +27,19 @@ public class QuestionnaireLinkedProcessor {
   private final UacQidLinkRepository uacQidLinkRepository;
   private final CaseRepository caseRepository;
   private final UacProcessor uacProcessor;
+  private final CaseProcessor caseProcessor;
   private final EventLogger eventLogger;
 
   public QuestionnaireLinkedProcessor(
       UacQidLinkRepository uacQidLinkRepository,
       CaseRepository caseRepository,
       UacProcessor uacProcessor,
+      CaseProcessor caseProcessor,
       EventLogger eventLogger) {
     this.uacQidLinkRepository = uacQidLinkRepository;
     this.caseRepository = caseRepository;
     this.uacProcessor = uacProcessor;
+    this.caseProcessor = caseProcessor;
     this.eventLogger = eventLogger;
   }
 
@@ -60,7 +63,16 @@ public class QuestionnaireLinkedProcessor {
     UacQidLink uacQidLink = uacQidLinkOpt.get();
     Case caze = caseOpt.get();
 
+    // If UAC/QID has been receipted before case, update case
+    if (!uacQidLink.isActive() && !caze.isReceiptReceived()) {
+      caze.setReceiptReceived(true);
+      caseRepository.saveAndFlush(caze);
+
+      caseProcessor.emitCaseUpdatedEvent(caze);
+    }
+
     uacQidLink.setCaze(caze);
+    uacQidLinkRepository.saveAndFlush(uacQidLink);
 
     uacProcessor.emitUacUpdatedEvent(uacQidLink, caze);
 

@@ -1,19 +1,19 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.generateRandomUacQidLink;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCaseWithUacQidLinks;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementQuestionnaireLinkedEvent;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.util.Optional;
 import java.util.UUID;
+import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -29,43 +29,118 @@ import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 @RunWith(MockitoJUnitRunner.class)
 public class QuestionnaireLinkedProcessorTest {
 
+  private final UUID TEST_CASE_ID = UUID.randomUUID();
+  private final String TEST_QID = new EasyRandom().nextObject(String.class);
+
   @Mock UacQidLinkRepository uacQidLinkRepository;
 
   @Mock CaseRepository caseRepository;
 
   @Mock UacProcessor uacProcessor;
 
+  @Mock CaseProcessor caseProcessor;
+
   @Mock EventLogger eventLogger;
 
   @InjectMocks QuestionnaireLinkedProcessor underTest;
 
   @Test
-  public void testGoodQuestionnaireLinked() {
+  public void testGoodQuestionnaireLinkedForUnreceiptedCase() {
+    // GIVEN
     ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
-    managementEvent.getPayload().getUac().setCaseId(UUID.randomUUID().toString());
-    Case expectedCase = getRandomCase();
-    UacQidLink uacQidLink = generateRandomUacQidLink(expectedCase);
 
     UacDTO uac = managementEvent.getPayload().getUac();
-    String questionnaireId = uac.getQuestionnaireId();
-    String caseId = uac.getCaseId();
+    uac.setCaseId(TEST_CASE_ID.toString());
+    uac.setQuestionnaireId(TEST_QID);
 
-    when(uacQidLinkRepository.findByQid(questionnaireId)).thenReturn(Optional.of(uacQidLink));
-    when(caseRepository.findByCaseId(UUID.fromString(caseId)))
-        .thenReturn(Optional.of(expectedCase));
+    Case testCase = getRandomCaseWithUacQidLinks(1);
+    testCase.setCaseId(TEST_CASE_ID);
 
-    // when
+    UacQidLink testUacQidLink = testCase.getUacQidLinks().get(0);
+    testUacQidLink.setActive(true);
+    testUacQidLink.setCaze(null);
+
+    when(uacQidLinkRepository.findByQid(TEST_QID)).thenReturn(Optional.of(testUacQidLink));
+    when(caseRepository.findByCaseId(TEST_CASE_ID)).thenReturn(Optional.of(testCase));
+
+    // WHEN
     underTest.processQuestionnaireLinked(managementEvent);
 
-    // then
-    verify(uacProcessor, times(1)).emitUacUpdatedEvent(uacQidLink, expectedCase);
-    verify(eventLogger, times(1))
+    // THEN
+    verify(uacQidLinkRepository).findByQid(TEST_QID);
+    verify(caseRepository).findByCaseId(TEST_CASE_ID);
+
+    ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
+    verify(uacQidLinkRepository).saveAndFlush(uacQidLinkCaptor.capture());
+    UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
+    assertThat(actualUacQidLink.getCaze()).isEqualTo(testCase);
+    assertThat(actualUacQidLink.isActive()).isTrue();
+
+    verify(uacProcessor).emitUacUpdatedEvent(testUacQidLink, testCase);
+    verify(eventLogger)
         .logEvent(
-            uacQidLink,
+            testUacQidLink,
             "Questionnaire Linked",
             EventType.QUESTIONNAIRE_LINKED,
             convertObjectToJson(uac),
             managementEvent.getEvent());
+
+    verifyNoMoreInteractions(uacQidLinkRepository);
+    verifyNoMoreInteractions(caseRepository);
+  }
+
+  @Test
+  public void testGoodQuestionnaireLinkedForReceiptedCase() {
+    // GIVEN
+    ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
+
+    UacDTO uac = managementEvent.getPayload().getUac();
+    uac.setCaseId(TEST_CASE_ID.toString());
+    uac.setQuestionnaireId(TEST_QID);
+
+    Case testCase = getRandomCaseWithUacQidLinks(1);
+    testCase.setCaseId(TEST_CASE_ID);
+    testCase.setReceiptReceived(false);
+
+    UacQidLink testUacQidLink = testCase.getUacQidLinks().get(0);
+    testUacQidLink.setActive(false);
+    testUacQidLink.setCaze(null);
+
+    when(uacQidLinkRepository.findByQid(TEST_QID)).thenReturn(Optional.of(testUacQidLink));
+    when(caseRepository.findByCaseId(TEST_CASE_ID)).thenReturn(Optional.of(testCase));
+
+    // WHEN
+    underTest.processQuestionnaireLinked(managementEvent);
+
+    // THEN
+    verify(uacQidLinkRepository).findByQid(TEST_QID);
+    verify(caseRepository).findByCaseId(TEST_CASE_ID);
+
+    ArgumentCaptor<Case> caseCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseRepository).saveAndFlush(caseCaptor.capture());
+    Case actualCase = caseCaptor.getValue();
+    assertThat(actualCase.getCaseId()).isEqualTo(TEST_CASE_ID);
+    assertThat(actualCase.isReceiptReceived()).isTrue();
+
+    verify(caseProcessor).emitCaseUpdatedEvent(testCase);
+
+    ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
+    verify(uacQidLinkRepository).saveAndFlush(uacQidLinkCaptor.capture());
+    UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
+    assertThat(actualUacQidLink.getCaze()).isEqualTo(testCase);
+    assertThat(actualUacQidLink.isActive()).isFalse();
+
+    verify(uacProcessor).emitUacUpdatedEvent(testUacQidLink, testCase);
+    verify(eventLogger)
+        .logEvent(
+            testUacQidLink,
+            "Questionnaire Linked",
+            EventType.QUESTIONNAIRE_LINKED,
+            convertObjectToJson(uac),
+            managementEvent.getEvent());
+
+    verifyNoMoreInteractions(uacQidLinkRepository);
+    verifyNoMoreInteractions(caseRepository);
   }
 
   @Test(expected = RuntimeException.class)
