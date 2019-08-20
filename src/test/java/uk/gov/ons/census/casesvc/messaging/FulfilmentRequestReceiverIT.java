@@ -5,8 +5,10 @@ import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToFulfilme
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementFulfilmentRequestedEvent;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.BlockingQueue;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,6 +47,9 @@ public class FulfilmentRequestReceiverIT {
   @Value("${queueconfig.fulfilment-request-inbound-queue}")
   private String inboundQueue;
 
+  @Value("${queueconfig.rh-case-queue}")
+  private String rhCaseQueue;
+
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
   @Autowired private CaseRepository caseRepository;
   @Autowired private EventRepository eventRepository;
@@ -54,6 +59,7 @@ public class FulfilmentRequestReceiverIT {
   @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(inboundQueue);
+    rabbitQueueHelper.purgeQueue(rhCaseQueue);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
@@ -99,7 +105,8 @@ public class FulfilmentRequestReceiverIT {
   }
 
   @Test
-  public void testIndividualResponseFulfilmentRequestLogged() throws InterruptedException {
+  public void testIndividualResponseFulfilmentRequestLogged()
+      throws InterruptedException, IOException {
     // GIVEN
     EasyRandom easyRandom = new EasyRandom();
     Case caze = easyRandom.nextObject(Case.class);
@@ -124,7 +131,9 @@ public class FulfilmentRequestReceiverIT {
             .build();
     rabbitQueueHelper.sendMessage(inboundQueue, message);
 
-    Thread.sleep(1000);
+    // wait for the the emitted event
+    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
+    rabbitQueueHelper.checkExpectedMessageReceived(outboundQueue);
 
     // THEN
     List<Event> events = eventRepository.findAll();
@@ -142,5 +151,15 @@ public class FulfilmentRequestReceiverIT {
     Case actualParentCase = caseRepository.findByCaseId(parentCase.getCaseId()).get();
     Case actualChildCase =
         cases.stream().filter(c -> c.getCaseId() != parentCase.getCaseId()).findFirst().get();
+
+    assertThat(actualParentCase.getArid()).isEqualTo(actualChildCase.getArid());
+    assertThat(actualParentCase.getAddressLine1()).isEqualTo(actualChildCase.getAddressLine1());
+
+    assertThat(actualChildCase.getAddressType()).isEqualTo("HI");
+    assertThat(actualChildCase.isReceiptReceived()).isEqualTo(false);
+    assertThat(actualChildCase.isRefusalReceived()).isEqualTo(false);
+
+    assertThat(actualChildCase.getHtcWillingness()).isNull();
+    assertThat(actualChildCase.getTreatmentCode()).isNull();
   }
 }
