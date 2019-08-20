@@ -150,10 +150,11 @@ public class FulfilmentRequestReceiverIT {
 
     Case actualParentCase = caseRepository.findByCaseId(parentCase.getCaseId()).get();
     Case actualChildCase =
-        cases.stream().filter(c -> c.getCaseId() != parentCase.getCaseId()).findFirst().get();
+        cases.stream().filter(c -> !c.getCaseId().equals(actualParentCase.getCaseId())).findFirst().get();
 
-    assertThat(actualParentCase.getArid()).isEqualTo(actualChildCase.getArid());
+    assertThat(actualParentCase.getEstabArid()).isEqualTo(actualChildCase.getEstabArid());
     assertThat(actualParentCase.getAddressLine1()).isEqualTo(actualChildCase.getAddressLine1());
+    assertThat(actualParentCase.getCaseRef()).isNotEqualTo(actualChildCase.getCaseRef());
 
     assertThat(actualChildCase.getAddressType()).isEqualTo("HI");
     assertThat(actualChildCase.isReceiptReceived()).isEqualTo(false);
