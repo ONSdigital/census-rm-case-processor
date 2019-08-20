@@ -6,6 +6,7 @@ import static uk.gov.ons.census.casesvc.model.entity.EventType.FULFILMENT_REQUES
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementEvent;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.Test;
@@ -47,14 +48,14 @@ public class FulfilmentRequestProcessorTest {
 
     // then
     verify(eventLogger, times(1))
-        .logFulfilmentRequestedEvent(
-            expectedCase,
-            expectedCase.getCaseId(),
-            managementEvent.getEvent().getDateTime(),
-            "Fulfilment Request Received",
-            FULFILMENT_REQUESTED,
-            expectedFulfilmentRequest,
-            managementEvent.getEvent());
+        .logCaseEvent(
+            eq(expectedCase),
+            eq(managementEvent.getEvent().getDateTime()),
+            any(OffsetDateTime.class),
+            eq("Fulfilment Request Received"),
+            eq(FULFILMENT_REQUESTED),
+            eq(managementEvent.getEvent()),
+            anyString());
   }
 
   @Test(expected = RuntimeException.class)

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.*;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.Test;
@@ -62,12 +63,14 @@ public class RefusalProcessorTest {
 
     verify(caseProcessor, times(1)).emitCaseUpdatedEvent(testCase);
     verify(eventLogger, times(1))
-        .logRefusalEvent(
-            testCase,
-            REFUSAL_RECEIVED,
-            EventType.REFUSAL_RECEIVED,
-            expectedRefusal,
-            managementEvent.getEvent());
+        .logCaseEvent(
+            eq(testCase),
+            any(OffsetDateTime.class),
+            any(OffsetDateTime.class),
+            eq(REFUSAL_RECEIVED),
+            eq(EventType.REFUSAL_RECEIVED),
+            eq(managementEvent.getEvent()),
+            anyString());
   }
 
   @Test(expected = RuntimeException.class)

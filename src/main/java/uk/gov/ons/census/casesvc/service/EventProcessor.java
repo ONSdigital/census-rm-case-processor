@@ -1,6 +1,7 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.model.entity.EventType.PRINT_CASE_SELECTED;
+import static uk.gov.ons.census.casesvc.utility.EventHelper.createEventDTO;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -11,6 +12,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
+import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
@@ -50,10 +52,13 @@ public class EventProcessor {
     uacProcessor.emitUacUpdatedEvent(uacQidLink, caze);
     caseProcessor.emitCaseCreatedEvent(caze);
 
-    eventLogger.logEvent(
+    eventLogger.logUacQidEvent(
         uacQidLink,
+        OffsetDateTime.now(),
+        OffsetDateTime.now(),
         CREATE_CASE_SAMPLE_RECEIVED,
         EventType.SAMPLE_LOADED,
+        createEventDTO(EventTypeDTO.SAMPLE_LOADED),
         convertObjectToJson(createCaseSample));
 
     if (QuestionnaireTypeHelper.isQuestionnaireWelsh(caze.getTreatmentCode())) {
@@ -74,7 +79,6 @@ public class EventProcessor {
     Case caze = cazeResult.get();
     Event event = new Event();
     event.setId(UUID.randomUUID());
-    event.setCaseId(caze.getCaseId());
     event.setCaze(caze);
     event.setEventChannel(responseManagementEvent.getEvent().getChannel());
     event.setEventDate(responseManagementEvent.getEvent().getDateTime());

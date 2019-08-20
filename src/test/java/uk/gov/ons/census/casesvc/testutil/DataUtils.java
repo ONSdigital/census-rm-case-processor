@@ -9,15 +9,14 @@ import java.util.List;
 import java.util.UUID;
 import org.jeasy.random.EasyRandom;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
+import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ReceiptDTO;
 import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.UacCreatedDTO;
-import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
-import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.type.RefusalType;
 
@@ -80,7 +79,7 @@ public class DataUtils {
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
 
     EventDTO event = managementEvent.getEvent();
-    event.setType(EventType.RESPONSE_RECEIVED);
+    event.setType(EventTypeDTO.RESPONSE_RECEIVED);
     event.setSource("RECEIPT_SERVICE");
     event.setChannel("EQ");
 
@@ -97,7 +96,7 @@ public class DataUtils {
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
 
     EventDTO event = managementEvent.getEvent();
-    event.setType(EventType.REFUSAL_RECEIVED);
+    event.setType(EventTypeDTO.REFUSAL_RECEIVED);
     event.setSource("CONTACT CENTRE API");
     event.setChannel("CC");
 
@@ -117,7 +116,7 @@ public class DataUtils {
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
 
     EventDTO event = managementEvent.getEvent();
-    event.setType(EventType.FULFILMENT_REQUESTED);
+    event.setType(EventTypeDTO.FULFILMENT_REQUESTED);
     event.setSource("CONTACT CENTRE API");
     event.setChannel("CC");
 
@@ -139,7 +138,7 @@ public class DataUtils {
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
 
     EventDTO event = managementEvent.getEvent();
-    event.setType(EventType.QUESTIONNAIRE_LINKED);
+    event.setType(EventTypeDTO.QUESTIONNAIRE_LINKED);
     event.setSource("FIELDWORK_GATEWAY");
     event.setChannel("FIELD");
 
@@ -177,19 +176,11 @@ public class DataUtils {
     }
   }
 
-  public static UacDTO convertJsonToUacDTO(String json) {
-    try {
-      return objectMapper.readValue(json, UacDTO.class);
-    } catch (IOException e) {
-      throw new RuntimeException("Failed converting Json To FulfilmentRequestDTO", e);
-    }
-  }
-
   public static ResponseManagementEvent generateUacCreatedEvent(Case linkedCase) {
     UacCreatedDTO uacCreatedPayload = easyRandom.nextObject(UacCreatedDTO.class);
     uacCreatedPayload.setCaseId(linkedCase.getCaseId());
     EventDTO eventDTO = easyRandom.nextObject(EventDTO.class);
-    eventDTO.setType(EventType.RM_UAC_CREATED);
+    eventDTO.setType(EventTypeDTO.RM_UAC_CREATED);
     PayloadDTO payloadDTO = new PayloadDTO();
     ResponseManagementEvent uacCreatedEvent = new ResponseManagementEvent();
     payloadDTO.setUacQidCreated(uacCreatedPayload);

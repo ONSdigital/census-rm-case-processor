@@ -36,7 +36,6 @@ public class Event {
   @Enumerated(EnumType.STRING)
   private EventType eventType;
 
-  @Column private UUID caseId;
   @Column private String eventChannel;
   @Column private String eventSource;
   @Column private UUID eventTransactionId;

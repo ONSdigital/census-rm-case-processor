@@ -1,9 +1,11 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.model.entity.EventType.FULFILMENT_REQUESTED;
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -53,13 +55,13 @@ public class FulfilmentRequestProcessor {
 
     Case caze = cazeResult.get();
 
-    eventLogger.logFulfilmentRequestedEvent(
+    eventLogger.logCaseEvent(
         caze,
-        UUID.fromString(caseId),
         fulfilmentRequestEvent.getDateTime(),
+        OffsetDateTime.now(),
         FULFILMENT_REQUEST_RECEIVED,
         FULFILMENT_REQUESTED,
-        fulfilmentRequestPayload,
-        fulfilmentRequestEvent);
+        fulfilmentRequestEvent,
+        convertObjectToJson(fulfilmentRequestPayload));
   }
 }

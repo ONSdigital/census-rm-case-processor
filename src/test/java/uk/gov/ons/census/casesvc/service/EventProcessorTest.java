@@ -19,6 +19,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
+import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.PrintCaseSelected;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
@@ -64,11 +65,14 @@ public class EventProcessorTest {
     verify(caseProcessor).emitCaseCreatedEvent(caze);
 
     verify(eventLogger, times(1))
-        .logEvent(
-            uacQidLink,
-            CREATE_CASE_SAMPLE_RECEIVED,
-            EventType.SAMPLE_LOADED,
-            convertObjectToJson(createCaseSample));
+        .logUacQidEvent(
+            eq(uacQidLink),
+            any(OffsetDateTime.class),
+            any(OffsetDateTime.class),
+            eq(CREATE_CASE_SAMPLE_RECEIVED),
+            eq(EventType.SAMPLE_LOADED),
+            any(EventDTO.class),
+            eq(convertObjectToJson(createCaseSample)));
   }
 
   @Test
@@ -96,11 +100,14 @@ public class EventProcessorTest {
     verify(caseProcessor).emitCaseCreatedEvent(caze);
 
     verify(eventLogger, times(1))
-        .logEvent(
-            uacQidLink,
-            CREATE_CASE_SAMPLE_RECEIVED,
-            EventType.SAMPLE_LOADED,
-            convertObjectToJson(createCaseSample));
+        .logUacQidEvent(
+            eq(uacQidLink),
+            any(OffsetDateTime.class),
+            any(OffsetDateTime.class),
+            eq(CREATE_CASE_SAMPLE_RECEIVED),
+            eq(EventType.SAMPLE_LOADED),
+            any(EventDTO.class),
+            eq(convertObjectToJson(createCaseSample)));
   }
 
   @Test
@@ -113,7 +120,7 @@ public class EventProcessorTest {
     // When
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
     EventDTO event = new EventDTO();
-    event.setType(EventType.PRINT_CASE_SELECTED);
+    event.setType(EventTypeDTO.PRINT_CASE_SELECTED);
     event.setChannel("Test channel");
     event.setDateTime(OffsetDateTime.now());
     event.setSource("Test source");

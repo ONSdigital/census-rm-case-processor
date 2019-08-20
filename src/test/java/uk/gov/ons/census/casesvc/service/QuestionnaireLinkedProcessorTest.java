@@ -1,13 +1,16 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCaseWithUacQidLinks;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementQuestionnaireLinkedEvent;
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import org.jeasy.random.EasyRandom;
@@ -78,12 +81,14 @@ public class QuestionnaireLinkedProcessorTest {
 
     verify(uacProcessor).emitUacUpdatedEvent(testUacQidLink, testCase);
     verify(eventLogger)
-        .logEvent(
-            testUacQidLink,
-            "Questionnaire Linked",
-            EventType.QUESTIONNAIRE_LINKED,
-            convertObjectToJson(uac),
-            managementEvent.getEvent());
+        .logUacQidEvent(
+            eq(testUacQidLink),
+            any(OffsetDateTime.class),
+            any(OffsetDateTime.class),
+            eq("Questionnaire Linked"),
+            eq(EventType.QUESTIONNAIRE_LINKED),
+            eq(managementEvent.getEvent()),
+            anyString());
 
     verifyNoMoreInteractions(uacQidLinkRepository);
     verifyNoMoreInteractions(caseRepository);
@@ -132,12 +137,14 @@ public class QuestionnaireLinkedProcessorTest {
 
     verify(uacProcessor).emitUacUpdatedEvent(testUacQidLink, testCase);
     verify(eventLogger)
-        .logEvent(
-            testUacQidLink,
-            "Questionnaire Linked",
-            EventType.QUESTIONNAIRE_LINKED,
-            convertObjectToJson(uac),
-            managementEvent.getEvent());
+        .logUacQidEvent(
+            eq(testUacQidLink),
+            any(OffsetDateTime.class),
+            any(OffsetDateTime.class),
+            eq("Questionnaire Linked"),
+            eq(EventType.QUESTIONNAIRE_LINKED),
+            eq(managementEvent.getEvent()),
+            anyString());
 
     verifyNoMoreInteractions(uacQidLinkRepository);
     verifyNoMoreInteractions(caseRepository);

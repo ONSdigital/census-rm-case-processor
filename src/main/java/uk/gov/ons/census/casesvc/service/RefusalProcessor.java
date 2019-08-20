@@ -1,7 +1,10 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -52,7 +55,13 @@ public class RefusalProcessor {
 
     caseProcessor.emitCaseUpdatedEvent(caze);
 
-    eventLogger.logRefusalEvent(
-        caze, REFUSAL_RECEIVED, EventType.REFUSAL_RECEIVED, refusal, refusalEvent.getEvent());
+    eventLogger.logCaseEvent(
+        caze,
+        refusalEvent.getEvent().getDateTime(),
+        OffsetDateTime.now(),
+        REFUSAL_RECEIVED,
+        EventType.REFUSAL_RECEIVED,
+        refusalEvent.getEvent(),
+        convertObjectToJson(refusalEvent.getPayload().getRefusal()));
   }
 }

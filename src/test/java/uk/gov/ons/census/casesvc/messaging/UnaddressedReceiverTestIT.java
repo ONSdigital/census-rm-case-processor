@@ -18,8 +18,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.model.dto.CreateUacQid;
+import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
-import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
@@ -63,7 +63,7 @@ public class UnaddressedReceiverTestIT {
     // THEN
     ResponseManagementEvent responseManagementEvent =
         rabbitQueueHelper.checkExpectedMessageReceived(queue);
-    assertEquals(EventType.UAC_UPDATED, responseManagementEvent.getEvent().getType());
+    assertEquals(EventTypeDTO.UAC_UPDATED, responseManagementEvent.getEvent().getType());
     assertThat(responseManagementEvent.getPayload().getUac().getQuestionnaireId()).startsWith("21");
   }
 }
