@@ -48,6 +48,7 @@ public class CaseService {
 
     Case caze = mapperFacade.map(createCaseSample, Case.class);
     caze.setCaseRef(caseRef);
+    caze.setCaseType("HH");
     caze.setCaseId(UUID.randomUUID());
     caze.setState(CaseState.ACTIONABLE);
     caze.setCreatedDateTime(OffsetDateTime.now());
