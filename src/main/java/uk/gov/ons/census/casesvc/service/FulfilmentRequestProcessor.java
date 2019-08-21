@@ -68,31 +68,40 @@ public class FulfilmentRequestProcessor {
         fulfilmentRequestEvent);
 
     if (individualResponseRequestCodes.contains(fulfilmentRequestPayload.getFulfilmentCode())) {
-      Case individualResponseCase = saveIndividualResponseCase(caze);
+      Case individualResponseCase = saveIndividualResponseCaseFromParentCase(caze);
       caseProcessor.emitCaseCreatedEvent(individualResponseCase);
     }
   }
 
-  private Case saveIndividualResponseCase(Case caze) {
-    Case individualResponseCase =
-        caze.toBuilder()
-            .caseId(UUID.randomUUID())
-            .caseRef(caseProcessor.getUniqueCaseRef())
-            .uacQidLinks(null)
-            .events(null)
-            .createdDateTime(OffsetDateTime.now())
-            .state(CaseState.ACTIONABLE)
-            .receiptReceived(false)
-            .refusalReceived(false)
-            .addressType(HOUSEHOLD_INDIVIDUAL_RESPONSE_ADDRESS_TYPE)
-            .addressLevel(null)
-            .htcWillingness(null)
-            .htcDigital(null)
-            .fieldCoordinatorId(null)
-            .fieldOfficerId(null)
-            .treatmentCode(null)
-            .ceExpectedCapacity(null)
-            .build();
+  private Case saveIndividualResponseCaseFromParentCase(Case parentCase) {
+    Case individualResponseCase = new Case();
+
+    individualResponseCase.setCaseId(UUID.randomUUID());
+    individualResponseCase.setCaseRef(caseProcessor.getUniqueCaseRef());
+    individualResponseCase.setState(CaseState.ACTIONABLE);
+    individualResponseCase.setCreatedDateTime(OffsetDateTime.now());
+    individualResponseCase.setAddressType(HOUSEHOLD_INDIVIDUAL_RESPONSE_ADDRESS_TYPE);
+
+    individualResponseCase.setCollectionExerciseId(parentCase.getCollectionExerciseId());
+    individualResponseCase.setActionPlanId(parentCase.getActionPlanId());
+    individualResponseCase.setArid(parentCase.getArid());
+    individualResponseCase.setEstabArid(parentCase.getEstabArid());
+    individualResponseCase.setUprn(parentCase.getUprn());
+    individualResponseCase.setEstabType(parentCase.getEstabType());
+    individualResponseCase.setAbpCode(parentCase.getAbpCode());
+    individualResponseCase.setOrganisationName(parentCase.getOrganisationName());
+    individualResponseCase.setAddressLine1(parentCase.getAddressLine1());
+    individualResponseCase.setAddressLine2(parentCase.getAddressLine2());
+    individualResponseCase.setAddressLine3(parentCase.getAddressLine3());
+    individualResponseCase.setTownName(parentCase.getTownName());
+    individualResponseCase.setPostcode(parentCase.getPostcode());
+    individualResponseCase.setLatitude(parentCase.getLatitude());
+    individualResponseCase.setLongitude(parentCase.getLongitude());
+    individualResponseCase.setOa(parentCase.getOa());
+    individualResponseCase.setLsoa(parentCase.getLsoa());
+    individualResponseCase.setMsoa(parentCase.getMsoa());
+    individualResponseCase.setLad(parentCase.getLad());
+    individualResponseCase.setRegion(parentCase.getRegion());
 
     caseRepository.save(individualResponseCase);
 
