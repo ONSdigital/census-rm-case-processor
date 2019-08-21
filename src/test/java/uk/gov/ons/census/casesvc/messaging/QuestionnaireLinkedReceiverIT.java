@@ -24,6 +24,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
+import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -116,7 +117,7 @@ public class QuestionnaireLinkedReceiverIT {
         rabbitQueueHelper.checkExpectedMessageReceived(outboundUacQueue);
 
     // Check message contains expected data
-    assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventType.UAC_UPDATED);
+    assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
     UacDTO actualUac = responseManagementEvent.getPayload().getUac();
     assertThat(actualUac.getQuestionnaireId()).isEqualTo(TEST_QID);
     assertThat(actualUac.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
@@ -184,7 +185,7 @@ public class QuestionnaireLinkedReceiverIT {
         rabbitQueueHelper.checkExpectedMessageReceived(outboundUacQueue);
 
     // Check message contains expected data
-    assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventType.UAC_UPDATED);
+    assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
     UacDTO actualUac = responseManagementEvent.getPayload().getUac();
     assertThat(actualUac.getQuestionnaireId()).isEqualTo(TEST_QID);
     assertThat(actualUac.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
@@ -255,7 +256,7 @@ public class QuestionnaireLinkedReceiverIT {
         rabbitQueueHelper.checkExpectedMessageReceived(outboundUacQueue);
 
     // Check message contains expected data
-    assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventType.UAC_UPDATED);
+    assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
     UacDTO actualUac = responseManagementEvent.getPayload().getUac();
     assertThat(actualUac.getQuestionnaireId()).isEqualTo(TEST_QID);
     assertThat(actualUac.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
@@ -265,7 +266,7 @@ public class QuestionnaireLinkedReceiverIT {
     responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(outboundCaseQueue);
 
     // Check message contains expected data
-    assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventType.CASE_UPDATED);
+    assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_UPDATED);
     CollectionCase actualCollectionCase = responseManagementEvent.getPayload().getCollectionCase();
     assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID.toString());
 

@@ -1,10 +1,12 @@
 package uk.gov.ons.census.casesvc.messaging;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.CreateUacQid;
+import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
@@ -20,6 +23,7 @@ import uk.gov.ons.census.casesvc.service.UacProcessor;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UnaddressedReceiverTest {
+
   @Mock UacProcessor uacProcessor;
   @Mock EventLogger eventLogger;
 
@@ -43,7 +47,13 @@ public class UnaddressedReceiverTest {
     // Then
     verify(uacProcessor).emitUacUpdatedEvent(eq(uacQidLink), eq(null));
     verify(eventLogger)
-        .logEvent(
-            eq(uacQidLink), eq("Unaddressed UAC/QID pair created"), any(EventType.class), eq("{}"));
+        .logUacQidEvent(
+            eq(uacQidLink),
+            any(OffsetDateTime.class),
+            any(OffsetDateTime.class),
+            eq("Unaddressed UAC/QID pair created"),
+            any(EventType.class),
+            any(EventDTO.class),
+            anyString());
   }
 }

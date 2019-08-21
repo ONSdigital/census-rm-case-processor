@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.*;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.Test;
@@ -20,15 +21,12 @@ import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
-import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RefusalProcessorTest {
 
   private static final String REFUSAL_RECEIVED = "Refusal Received";
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
-
-  @Mock private UacQidLinkRepository uacQidLinkRepository;
 
   @Mock private CaseRepository caseRepository;
 
@@ -46,7 +44,6 @@ public class RefusalProcessorTest {
     collectionCase.setId(TEST_CASE_ID.toString());
     collectionCase.setRefusalReceived(false);
     Case testCase = getRandomCase();
-    RefusalDTO expectedRefusal = managementEvent.getPayload().getRefusal();
 
     when(caseRepository.findByCaseId(TEST_CASE_ID)).thenReturn(Optional.of(testCase));
 
@@ -62,12 +59,14 @@ public class RefusalProcessorTest {
 
     verify(caseProcessor, times(1)).emitCaseUpdatedEvent(testCase);
     verify(eventLogger, times(1))
-        .logRefusalEvent(
-            testCase,
-            REFUSAL_RECEIVED,
-            EventType.REFUSAL_RECEIVED,
-            expectedRefusal,
-            managementEvent.getEvent());
+        .logCaseEvent(
+            eq(testCase),
+            any(OffsetDateTime.class),
+            any(OffsetDateTime.class),
+            eq(REFUSAL_RECEIVED),
+            eq(EventType.REFUSAL_RECEIVED),
+            eq(managementEvent.getEvent()),
+            anyString());
   }
 
   @Test(expected = RuntimeException.class)

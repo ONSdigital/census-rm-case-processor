@@ -23,11 +23,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
+import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
-import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
@@ -97,7 +97,7 @@ public class RefusalReceiverIT {
         rabbitQueueHelper.checkExpectedMessageReceived(outboundQueue);
 
     EventDTO eventDTO = responseManagementEvent.getEvent();
-    assertThat(eventDTO.getType()).isEqualTo(EventType.CASE_UPDATED);
+    assertThat(eventDTO.getType()).isEqualTo(EventTypeDTO.CASE_UPDATED);
     assertThat(eventDTO.getSource()).isEqualTo("CASE_SERVICE");
     assertThat(eventDTO.getChannel()).isEqualTo("RM");
 
