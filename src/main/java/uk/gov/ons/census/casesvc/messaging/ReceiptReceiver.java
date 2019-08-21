@@ -4,19 +4,19 @@ import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
-import uk.gov.ons.census.casesvc.service.ReceiptProcessor;
+import uk.gov.ons.census.casesvc.service.ReceiptService;
 
 @MessageEndpoint
 public class ReceiptReceiver {
-  private final ReceiptProcessor receiptProcessor;
+  private final ReceiptService receiptService;
 
-  public ReceiptReceiver(ReceiptProcessor receiptProcessor) {
-    this.receiptProcessor = receiptProcessor;
+  public ReceiptReceiver(ReceiptService receiptService) {
+    this.receiptService = receiptService;
   }
 
   @Transactional
   @ServiceActivator(inputChannel = "receiptInputChannel")
   public void receiveMessage(ResponseManagementEvent receiptEvent) {
-    receiptProcessor.processReceipt(receiptEvent);
+    receiptService.processReceipt(receiptEvent);
   }
 }

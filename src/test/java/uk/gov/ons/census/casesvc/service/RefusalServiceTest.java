@@ -21,17 +21,17 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RefusalProcessorTest {
+public class RefusalServiceTest {
   private static final String REFUSAL_RECEIVED = "Refusal Received";
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
 
   @Mock private CaseRepository caseRepository;
 
-  @Mock private CaseProcessor caseProcessor;
+  @Mock private CaseService caseService;
 
   @Mock private EventLogger eventLogger;
 
-  @InjectMocks RefusalProcessor underTest;
+  @InjectMocks RefusalService underTest;
 
   @Test
   public void shouldProcessARefusalReceivedMessageSuccessfully() {
@@ -42,7 +42,7 @@ public class RefusalProcessorTest {
     collectionCase.setRefusalReceived(false);
     Case testCase = getRandomCase();
 
-    when(caseProcessor.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);
+    when(caseService.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);
 
     // WHEN
     underTest.processRefusal(managementEvent);
@@ -54,7 +54,7 @@ public class RefusalProcessorTest {
 
     assertThat(actualCase.isRefusalReceived()).isTrue();
 
-    verify(caseProcessor, times(1)).emitCaseUpdatedEvent(testCase);
+    verify(caseService, times(1)).emitCaseUpdatedEvent(testCase);
     verify(eventLogger, times(1))
         .logCaseEvent(
             eq(testCase),

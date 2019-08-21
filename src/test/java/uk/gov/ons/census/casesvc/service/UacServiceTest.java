@@ -27,11 +27,11 @@ import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
 @RunWith(MockitoJUnitRunner.class)
-public class UacProcessorTest {
+public class UacServiceTest {
 
   @Mock UacQidLinkRepository uacQidLinkRepository;
 
-  @Mock CaseProcessor caseProcessor;
+  @Mock CaseService caseService;
 
   @Mock RabbitTemplate rabbitTemplate;
 
@@ -39,7 +39,7 @@ public class UacProcessorTest {
 
   @Mock EventLogger eventLogger;
 
-  @InjectMocks UacProcessor underTest;
+  @InjectMocks UacService underTest;
 
   @Test
   public void testSaveUacQidLinkEnglandHousehold() {
@@ -90,7 +90,7 @@ public class UacProcessorTest {
     // Given
     Case linkedCase = getRandomCase();
     ResponseManagementEvent uacCreatedEvent = generateUacCreatedEvent(linkedCase);
-    when(caseProcessor.getCaseByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId()))
+    when(caseService.getCaseByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId()))
         .thenReturn(linkedCase);
     ArgumentCaptor<UacQidLink> uacQidLinkArgumentCaptor = ArgumentCaptor.forClass(UacQidLink.class);
 
@@ -115,7 +115,7 @@ public class UacProcessorTest {
     // Given
     Case linkedCase = getRandomCase();
     ResponseManagementEvent uacCreatedEvent = generateUacCreatedEvent(linkedCase);
-    when(caseProcessor.getCaseByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId()))
+    when(caseService.getCaseByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId()))
         .thenReturn(linkedCase);
 
     ArgumentCaptor<ResponseManagementEvent> responseManagementEventArgumentCaptor =
@@ -151,7 +151,7 @@ public class UacProcessorTest {
     // Given
     Case linkedCase = getRandomCase();
     ResponseManagementEvent uacCreatedEvent = generateUacCreatedEvent(linkedCase);
-    when(caseProcessor.getCaseByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId()))
+    when(caseService.getCaseByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId()))
         .thenReturn(linkedCase);
 
     // When

@@ -18,7 +18,7 @@ import uk.gov.ons.census.casesvc.model.entity.CaseState;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 
 @Service
-public class FulfilmentRequestProcessor {
+public class FulfilmentRequestService {
   private static final String FULFILMENT_REQUEST_RECEIVED = "Fulfilment Request Received";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_ADDRESS_TYPE = "HI";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND = "UACIT1";
@@ -35,13 +35,13 @@ public class FulfilmentRequestProcessor {
 
   private final CaseRepository caseRepository;
   private final EventLogger eventLogger;
-  private final CaseProcessor caseProcessor;
+  private final CaseService caseService;
 
-  public FulfilmentRequestProcessor(
-      CaseRepository caseRepository, EventLogger eventLogger, CaseProcessor caseProcessor) {
+  public FulfilmentRequestService(
+      CaseRepository caseRepository, EventLogger eventLogger, CaseService caseService) {
     this.caseRepository = caseRepository;
     this.eventLogger = eventLogger;
-    this.caseProcessor = caseProcessor;
+    this.caseService = caseService;
   }
 
   public void processFulfilmentRequest(ResponseManagementEvent fulfilmentRequest) {
@@ -49,8 +49,7 @@ public class FulfilmentRequestProcessor {
     FulfilmentRequestDTO fulfilmentRequestPayload =
         fulfilmentRequest.getPayload().getFulfilmentRequest();
 
-    Case caze =
-        caseProcessor.getCaseByCaseId(UUID.fromString(fulfilmentRequestPayload.getCaseId()));
+    Case caze = caseService.getCaseByCaseId(UUID.fromString(fulfilmentRequestPayload.getCaseId()));
 
     eventLogger.logCaseEvent(
         caze,
@@ -63,7 +62,7 @@ public class FulfilmentRequestProcessor {
 
     if (individualResponseRequestCodes.contains(fulfilmentRequestPayload.getFulfilmentCode())) {
       Case individualResponseCase = saveIndividualResponseCaseFromParentCase(caze);
-      caseProcessor.emitCaseCreatedEvent(individualResponseCase);
+      caseService.emitCaseCreatedEvent(individualResponseCase);
     }
   }
 
@@ -71,7 +70,7 @@ public class FulfilmentRequestProcessor {
     Case individualResponseCase = new Case();
 
     individualResponseCase.setCaseId(UUID.randomUUID());
-    individualResponseCase.setCaseRef(caseProcessor.getUniqueCaseRef());
+    individualResponseCase.setCaseRef(caseService.getUniqueCaseRef());
     individualResponseCase.setState(CaseState.ACTIONABLE);
     individualResponseCase.setCreatedDateTime(OffsetDateTime.now());
     individualResponseCase.setAddressType(HOUSEHOLD_INDIVIDUAL_RESPONSE_ADDRESS_TYPE);

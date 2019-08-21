@@ -24,7 +24,7 @@ import uk.gov.ons.census.casesvc.model.entity.CaseState;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 
 @RunWith(MockitoJUnitRunner.class)
-public class FulfilmentRequestProcessorTest {
+public class FulfilmentRequestServiceTest {
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_ADDRESS_TYPE = "HI";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND = "UACIT1";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH = "UACIT2";
@@ -35,9 +35,9 @@ public class FulfilmentRequestProcessorTest {
 
   @Mock private EventLogger eventLogger;
 
-  @Mock private CaseProcessor caseProcessor;
+  @Mock private CaseService caseService;
 
-  @InjectMocks FulfilmentRequestProcessor underTest;
+  @InjectMocks FulfilmentRequestService underTest;
 
   @Test
   public void testGoodFulfilmentRequest() {
@@ -49,7 +49,7 @@ public class FulfilmentRequestProcessorTest {
     Case expectedCase = getRandomCase();
     expectedFulfilmentRequest.setCaseId(expectedCase.getCaseId().toString());
 
-    when(caseProcessor.getCaseByCaseId(UUID.fromString(expectedFulfilmentRequest.getCaseId())))
+    when(caseService.getCaseByCaseId(UUID.fromString(expectedFulfilmentRequest.getCaseId())))
         .thenReturn(expectedCase);
 
     // when
@@ -104,7 +104,7 @@ public class FulfilmentRequestProcessorTest {
     expectedFulfilmentRequest.setCaseId(parentCase.getCaseId().toString());
     expectedFulfilmentRequest.setFulfilmentCode(individualResponseCode);
 
-    when(caseProcessor.getCaseByCaseId(UUID.fromString(expectedFulfilmentRequest.getCaseId())))
+    when(caseService.getCaseByCaseId(UUID.fromString(expectedFulfilmentRequest.getCaseId())))
         .thenReturn(parentCase);
 
     // when
@@ -126,8 +126,8 @@ public class FulfilmentRequestProcessorTest {
     Case actualChildCase = caseArgumentCaptor.getValue();
 
     checkIndivdualFulfilmentRequestCase(parentCase, actualChildCase);
-    verify(caseProcessor).emitCaseCreatedEvent(actualChildCase);
-    verify(caseProcessor, times(1)).getUniqueCaseRef();
+    verify(caseService).emitCaseCreatedEvent(actualChildCase);
+    verify(caseService, times(1)).getUniqueCaseRef();
   }
 
   private void checkIndivdualFulfilmentRequestCase(Case parentCase, Case actualChildCase) {
