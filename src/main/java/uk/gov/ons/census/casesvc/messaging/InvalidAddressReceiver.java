@@ -10,8 +10,7 @@ import uk.gov.ons.census.casesvc.service.InvalidAddressService;
 public class InvalidAddressReceiver {
   private final InvalidAddressService invalidAddressService;
 
-  public InvalidAddressReceiver(
-      InvalidAddressService invalidAddressService) {
+  public InvalidAddressReceiver(InvalidAddressService invalidAddressService) {
     this.invalidAddressService = invalidAddressService;
   }
 
@@ -20,5 +19,4 @@ public class InvalidAddressReceiver {
   public void receiveMessage(ResponseManagementEvent invalidAddressEvent) {
     invalidAddressService.processMessage(invalidAddressEvent);
   }
-
 }
