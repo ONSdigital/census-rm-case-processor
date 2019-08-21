@@ -7,11 +7,9 @@ import com.godaddy.logging.LoggerFactory;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
@@ -22,10 +20,7 @@ import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 
 @Service
 public class FulfilmentRequestProcessor {
-
   private static final Logger log = LoggerFactory.getLogger(FulfilmentRequestProcessor.class);
-
-  private static final String CASE_NOT_FOUND_ERROR = "Case not found error";
   private static final String DATETIME_NOT_PRESENT = "Date time not in event error";
   private static final String FULFILMENT_REQUEST_RECEIVED = "Fulfilment Request Received";
   private static final String FULFILMENT_CODE_NOT_FOUND = "Fulfilment Code not found";
@@ -60,10 +55,8 @@ public class FulfilmentRequestProcessor {
     FulfilmentRequestDTO fulfilmentRequestPayload =
         fulfilmentRequest.getPayload().getFulfilmentRequest();
 
-    Case caze = getCaseByCaseId(fulfilmentRequestPayload);
-
-    validateFulfilmentRequiredFields(
-        fulfilmentRequestEvent, fulfilmentRequestPayload, caze.getCaseId().toString());
+    Case caze =
+        caseProcessor.getCaseByCaseId(UUID.fromString(fulfilmentRequestPayload.getCaseId()));
 
     eventLogger.logFulfilmentRequestedEvent(
         caze,
@@ -104,34 +97,5 @@ public class FulfilmentRequestProcessor {
     caseRepository.save(individualResponseCase);
 
     return individualResponseCase;
-  }
-
-  private void validateFulfilmentRequiredFields(
-      EventDTO eventDTO, FulfilmentRequestDTO fulfilmentRequestDTO, String caseId) {
-    if (eventDTO.getDateTime() == null) {
-      log.error(DATETIME_NOT_PRESENT);
-      throw new RuntimeException(
-          String.format("Date time not found in fulfilment request event for Case ID '%s", caseId));
-    }
-
-    if (StringUtils.isEmpty(fulfilmentRequestDTO.getFulfilmentCode())) {
-      log.error(FULFILMENT_CODE_NOT_FOUND);
-      throw new RuntimeException(
-          String.format(
-              "Fulfilment code '%s' not found from event for Case ID '%s",
-              caseId, fulfilmentRequestDTO.getFulfilmentCode()));
-    }
-  }
-
-  private Case getCaseByCaseId(FulfilmentRequestDTO fulfilmentRequest) {
-    Optional<Case> cazeResult =
-        caseRepository.findByCaseId(UUID.fromString(fulfilmentRequest.getCaseId()));
-
-    if (cazeResult.isEmpty()) {
-      log.error(CASE_NOT_FOUND_ERROR);
-      throw new RuntimeException(
-          String.format("Case ID '%s' not found!", fulfilmentRequest.getCaseId()));
-    }
-    return cazeResult.get();
   }
 }

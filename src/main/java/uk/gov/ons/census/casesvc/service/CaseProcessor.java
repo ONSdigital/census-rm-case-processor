@@ -1,5 +1,7 @@
 package uk.gov.ons.census.casesvc.service;
 
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -22,9 +24,10 @@ import uk.gov.ons.census.casesvc.utility.RandomCaseRefGenerator;
 
 @Component
 public class CaseProcessor {
-
+  private static final Logger log = LoggerFactory.getLogger(CaseProcessor.class);
+  private static final String CASE_NOT_FOUND_ERROR = "Case not found error";
   private static final String SURVEY = "CENSUS";
-  public static final String CASE_UPDATE_ROUTING_KEY = "event.case.update";
+  static final String CASE_UPDATE_ROUTING_KEY = "event.case.update";
 
   private final CaseRepository caseRepository;
   private final MapperFacade mapperFacade;
@@ -141,5 +144,15 @@ public class CaseProcessor {
     collectionCase.setCeExpectedCapacity(caze.getCeExpectedCapacity());
 
     return collectionCase;
+  }
+
+  public Case getCaseByCaseId(UUID caseId) {
+    Optional<Case> cazeResult = caseRepository.findByCaseId(caseId);
+
+    if (cazeResult.isEmpty()) {
+      log.error(CASE_NOT_FOUND_ERROR);
+      throw new RuntimeException(String.format("Case ID '%s' not present", caseId));
+    }
+    return cazeResult.get();
   }
 }

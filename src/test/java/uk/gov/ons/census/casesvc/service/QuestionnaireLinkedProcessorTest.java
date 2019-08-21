@@ -61,15 +61,12 @@ public class QuestionnaireLinkedProcessorTest {
     testUacQidLink.setCaze(null);
 
     when(uacQidLinkRepository.findByQid(TEST_QID)).thenReturn(Optional.of(testUacQidLink));
-    when(caseRepository.findByCaseId(TEST_CASE_ID)).thenReturn(Optional.of(testCase));
+    when(caseProcessor.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);
 
     // WHEN
     underTest.processQuestionnaireLinked(managementEvent);
 
     // THEN
-    verify(uacQidLinkRepository).findByQid(TEST_QID);
-    verify(caseRepository).findByCaseId(TEST_CASE_ID);
-
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
     verify(uacQidLinkRepository).saveAndFlush(uacQidLinkCaptor.capture());
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
@@ -84,9 +81,6 @@ public class QuestionnaireLinkedProcessorTest {
             EventType.QUESTIONNAIRE_LINKED,
             convertObjectToJson(uac),
             managementEvent.getEvent());
-
-    verifyNoMoreInteractions(uacQidLinkRepository);
-    verifyNoMoreInteractions(caseRepository);
   }
 
   @Test
@@ -107,15 +101,12 @@ public class QuestionnaireLinkedProcessorTest {
     testUacQidLink.setCaze(null);
 
     when(uacQidLinkRepository.findByQid(TEST_QID)).thenReturn(Optional.of(testUacQidLink));
-    when(caseRepository.findByCaseId(TEST_CASE_ID)).thenReturn(Optional.of(testCase));
+    when(caseProcessor.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);
 
     // WHEN
     underTest.processQuestionnaireLinked(managementEvent);
 
     // THEN
-    verify(uacQidLinkRepository).findByQid(TEST_QID);
-    verify(caseRepository).findByCaseId(TEST_CASE_ID);
-
     ArgumentCaptor<Case> caseCaptor = ArgumentCaptor.forClass(Case.class);
     verify(caseRepository).saveAndFlush(caseCaptor.capture());
     Case actualCase = caseCaptor.getValue();
@@ -139,7 +130,6 @@ public class QuestionnaireLinkedProcessorTest {
             convertObjectToJson(uac),
             managementEvent.getEvent());
 
-    verifyNoMoreInteractions(uacQidLinkRepository);
     verifyNoMoreInteractions(caseRepository);
   }
 
@@ -152,29 +142,6 @@ public class QuestionnaireLinkedProcessorTest {
         String.format("Questionnaire Id '%s' not found!", questionnaireId);
 
     when(uacQidLinkRepository.findByQid(questionnaireId)).thenReturn(Optional.empty());
-
-    try {
-      // WHEN
-      underTest.processQuestionnaireLinked(managementEvent);
-    } catch (RuntimeException re) {
-      // THEN
-      assertThat(re.getMessage()).isEqualTo(expectedErrorMessage);
-      throw re;
-    }
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testQuestionnaireLinkedCaseNotFound() {
-    // GIVEN
-    ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
-    managementEvent.getPayload().getUac().setCaseId(UUID.randomUUID().toString());
-    UacDTO uac = managementEvent.getPayload().getUac();
-    String questionnaireId = uac.getQuestionnaireId();
-    String caseId = uac.getCaseId();
-    String expectedErrorMessage = String.format("Case Id '%s' not found!", caseId);
-
-    when(uacQidLinkRepository.findByQid(questionnaireId)).thenReturn(Optional.of(new UacQidLink()));
-    when(caseRepository.findByCaseId(UUID.fromString(caseId))).thenReturn(Optional.empty());
 
     try {
       // WHEN

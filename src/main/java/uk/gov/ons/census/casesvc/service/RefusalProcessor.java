@@ -2,7 +2,6 @@ package uk.gov.ons.census.casesvc.service;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
-import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
@@ -31,25 +30,9 @@ public class RefusalProcessor {
 
   public void processRefusal(ResponseManagementEvent refusalEvent) {
     RefusalDTO refusal = refusalEvent.getPayload().getRefusal();
-    UUID caseId = UUID.fromString(refusal.getCollectionCase().getId());
-    Optional<Case> optCase = caseRepository.findByCaseId(caseId);
-
-    if (optCase.isEmpty()) {
-      log.error(CASE_NOT_FOUND_ERROR);
-      throw new RuntimeException(String.format("Case Id '%s' not found!", caseId.toString()));
-    }
-
-    if (refusalEvent.getEvent().getDateTime() == null) {
-      log.error(DATETIME_NOT_PRESENT);
-      throw new RuntimeException(
-          String.format(
-              "Date time not found in refusal request event for Case Id '%s", caseId.toString()));
-    }
-
-    Case caze = optCase.get();
+    Case caze = caseProcessor.getCaseByCaseId(UUID.fromString(refusal.getCollectionCase().getId()));
     caze.setRefusalReceived(true);
     caseRepository.saveAndFlush(caze);
-
     caseProcessor.emitCaseUpdatedEvent(caze);
 
     eventLogger.logRefusalEvent(

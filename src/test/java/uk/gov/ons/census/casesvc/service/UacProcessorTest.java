@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.generateUacCreatedEvent;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +23,6 @@ import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.UacQidDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
-import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -32,7 +30,7 @@ public class UacProcessorTest {
 
   @Mock UacQidLinkRepository uacQidLinkRepository;
 
-  @Mock CaseRepository caseRepository;
+  @Mock CaseProcessor caseProcessor;
 
   @Mock RabbitTemplate rabbitTemplate;
 
@@ -91,8 +89,8 @@ public class UacProcessorTest {
     // Given
     Case linkedCase = getRandomCase();
     ResponseManagementEvent uacCreatedEvent = generateUacCreatedEvent(linkedCase);
-    when(caseRepository.findByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId()))
-        .thenReturn(Optional.of(linkedCase));
+    when(caseProcessor.getCaseByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId()))
+        .thenReturn(linkedCase);
     ArgumentCaptor<UacQidLink> uacQidLinkArgumentCaptor = ArgumentCaptor.forClass(UacQidLink.class);
 
     // When
@@ -116,8 +114,9 @@ public class UacProcessorTest {
     // Given
     Case linkedCase = getRandomCase();
     ResponseManagementEvent uacCreatedEvent = generateUacCreatedEvent(linkedCase);
-    when(caseRepository.findByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId()))
-        .thenReturn(Optional.of(linkedCase));
+    when(caseProcessor.getCaseByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId()))
+        .thenReturn(linkedCase);
+
     ArgumentCaptor<ResponseManagementEvent> responseManagementEventArgumentCaptor =
         ArgumentCaptor.forClass(ResponseManagementEvent.class);
     ReflectionTestUtils.setField(underTest, "outboundExchange", "TEST_EXCHANGE");
@@ -151,8 +150,8 @@ public class UacProcessorTest {
     // Given
     Case linkedCase = getRandomCase();
     ResponseManagementEvent uacCreatedEvent = generateUacCreatedEvent(linkedCase);
-    when(caseRepository.findByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId()))
-        .thenReturn(Optional.of(linkedCase));
+    when(caseProcessor.getCaseByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId()))
+        .thenReturn(linkedCase);
     ArgumentCaptor<UacQidLink> uacQidLinkArgumentCaptor = ArgumentCaptor.forClass(UacQidLink.class);
 
     // When
@@ -174,25 +173,5 @@ public class UacProcessorTest {
     assertEquals(
         uacCreatedEvent.getPayload().getUacQidCreated().getCaseId(),
         uacQidLinkArgumentCaptor.getValue().getCaze().getCaseId());
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testIngestUacCreatedEventThrowsRuntimeErrorIfCaseNotFound() {
-    // Given
-    Case unknownCase = getRandomCase();
-    ResponseManagementEvent uacCreatedEvent = generateUacCreatedEvent(unknownCase);
-    when(caseRepository.findByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId()))
-        .thenReturn(Optional.empty());
-
-    try {
-
-      // When
-      underTest.ingestUacCreatedEvent(uacCreatedEvent);
-    } catch (RuntimeException re) {
-
-      // Then
-      assertEquals("No case found matching UAC created event", re.getMessage());
-      throw re;
-    }
   }
 }

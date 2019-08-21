@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.*;
 
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,7 +17,6 @@ import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
-import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
@@ -48,7 +46,7 @@ public class RefusalProcessorTest {
     Case testCase = getRandomCase();
     RefusalDTO expectedRefusal = managementEvent.getPayload().getRefusal();
 
-    when(caseRepository.findByCaseId(TEST_CASE_ID)).thenReturn(Optional.of(testCase));
+    when(caseProcessor.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);
 
     // WHEN
     underTest.processRefusal(managementEvent);
@@ -68,54 +66,5 @@ public class RefusalProcessorTest {
             EventType.REFUSAL_RECEIVED,
             expectedRefusal,
             managementEvent.getEvent());
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void shouldThrowRuntimeExceptionWhenCaseNotFound() {
-    // GIVEN
-    ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
-    managementEvent.getPayload().getRefusal().getCollectionCase().setId(TEST_CASE_ID.toString());
-    String expectedErrorMessage = String.format("Case Id '%s' not found!", TEST_CASE_ID.toString());
-
-    when(caseRepository.findByCaseId(TEST_CASE_ID)).thenReturn(Optional.empty());
-
-    try {
-      // WHEN
-      underTest.processRefusal(managementEvent);
-    } catch (RuntimeException re) {
-      // THEN
-      assertThat(re.getMessage()).isEqualTo(expectedErrorMessage);
-      throw re;
-    }
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testNullDateTime() {
-    ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
-    managementEvent.getPayload().getRefusal().getCollectionCase().setId(TEST_CASE_ID.toString());
-    RefusalDTO expectedRefusal = managementEvent.getPayload().getRefusal();
-
-    // Given
-    Case expectedCase = getRandomCase();
-    UacQidLink expectedUacQidLink = expectedCase.getUacQidLinks().get(0);
-    expectedUacQidLink.setCaze(expectedCase);
-
-    managementEvent.getEvent().setDateTime(null);
-
-    when(caseRepository.findByCaseId(TEST_CASE_ID)).thenReturn(Optional.of(expectedCase));
-
-    String expectedErrorMessage =
-        String.format(
-            "Date time not found in refusal request event for Case Id '%s",
-            expectedRefusal.getCollectionCase().getId());
-
-    try {
-      // WHEN
-      underTest.processRefusal(managementEvent);
-    } catch (RuntimeException re) {
-      // THEN
-      assertThat(re.getMessage()).isEqualTo(expectedErrorMessage);
-      throw re;
-    }
   }
 }

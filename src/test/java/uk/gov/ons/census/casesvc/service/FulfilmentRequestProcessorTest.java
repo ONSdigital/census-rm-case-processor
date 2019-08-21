@@ -6,14 +6,12 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementEvent;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,7 +20,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
-import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -32,9 +29,7 @@ import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FulfilmentRequestProcessorTest {
-
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_ADDRESS_TYPE = "HI";
-
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND = "UACIT1";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH = "UACIT2";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH = "UACIT2W";
@@ -58,8 +53,8 @@ public class FulfilmentRequestProcessorTest {
     Case expectedCase = getRandomCase();
     expectedFulfilmentRequest.setCaseId(expectedCase.getCaseId().toString());
 
-    when(caseRepository.findByCaseId(UUID.fromString(expectedFulfilmentRequest.getCaseId())))
-        .thenReturn(Optional.of(expectedCase));
+    when(caseProcessor.getCaseByCaseId(UUID.fromString(expectedFulfilmentRequest.getCaseId())))
+        .thenReturn(expectedCase);
 
     // when
     underTest.processFulfilmentRequest(managementEvent);
@@ -77,7 +72,6 @@ public class FulfilmentRequestProcessorTest {
 
     verify(caseRepository, never()).save(any(Case.class));
     verifyNoMoreInteractions(eventLogger);
-    verifyZeroInteractions(caseProcessor);
   }
 
   @Test
@@ -100,82 +94,6 @@ public class FulfilmentRequestProcessorTest {
     testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NORTHERN_IRELAND);
   }
 
-  @Test(expected = RuntimeException.class)
-  public void testEmptyFulfilmentCodeThrowsException() {
-    // Given
-    Case parentCase = getRandomCase();
-
-    ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
-    FulfilmentRequestDTO expectedFulfilmentRequest =
-        managementEvent.getPayload().getFulfilmentRequest();
-    expectedFulfilmentRequest.setCaseId(parentCase.getCaseId().toString());
-    expectedFulfilmentRequest.setFulfilmentCode(null);
-
-    when(caseRepository.findByCaseId(UUID.fromString(expectedFulfilmentRequest.getCaseId())))
-        .thenReturn(Optional.of(parentCase));
-
-    String expectedErrorMessage =
-        String.format(
-            "Fulfilment code '%s' not found from event for Case ID '%s",
-            parentCase.getCaseId(), expectedFulfilmentRequest.getFulfilmentCode());
-
-    try {
-      // WHEN
-      underTest.processFulfilmentRequest(managementEvent);
-    } catch (RuntimeException re) {
-      // THEN
-      assertThat(re.getMessage()).isEqualTo(expectedErrorMessage);
-      throw re;
-    }
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testCaseIdNotFound() {
-    // GIVEN
-    ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
-    managementEvent.getPayload().getFulfilmentRequest().setCaseId(UUID.randomUUID().toString());
-    UUID expectedCaseIdNotFound =
-        UUID.fromString(managementEvent.getPayload().getFulfilmentRequest().getCaseId());
-    String expectedErrorMessage = String.format("Case ID '%s' not found!", expectedCaseIdNotFound);
-
-    try {
-      // WHEN
-      underTest.processFulfilmentRequest(managementEvent);
-    } catch (RuntimeException re) {
-      // THEN
-      assertThat(re.getMessage()).isEqualTo(expectedErrorMessage);
-      throw re;
-    }
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testNullDateTime() {
-    ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
-    FulfilmentRequestDTO expectedFulfilmentRequest =
-        managementEvent.getPayload().getFulfilmentRequest();
-    EventDTO event = managementEvent.getEvent();
-    event.setDateTime(null);
-
-    // Given
-    Case expectedCase = getRandomCase();
-    expectedFulfilmentRequest.setCaseId(expectedCase.getCaseId().toString());
-    UUID caseId = expectedCase.getCaseId();
-
-    when(caseRepository.findByCaseId(caseId)).thenReturn(Optional.of(expectedCase));
-
-    String expectedErrorMessage =
-        String.format("Date time not found in fulfilment request event for Case ID '%s", caseId);
-
-    try {
-      // WHEN
-      underTest.processFulfilmentRequest(managementEvent);
-    } catch (RuntimeException re) {
-      // THEN
-      assertThat(re.getMessage()).isEqualTo(expectedErrorMessage);
-      throw re;
-    }
-  }
-
   private void testIndividualResponseCode(String individualResponseCode) {
     // Given
     Case parentCase = getRandomCase();
@@ -193,8 +111,8 @@ public class FulfilmentRequestProcessorTest {
     expectedFulfilmentRequest.setCaseId(parentCase.getCaseId().toString());
     expectedFulfilmentRequest.setFulfilmentCode(individualResponseCode);
 
-    when(caseRepository.findByCaseId(UUID.fromString(expectedFulfilmentRequest.getCaseId())))
-        .thenReturn(Optional.of(parentCase));
+    when(caseProcessor.getCaseByCaseId(UUID.fromString(expectedFulfilmentRequest.getCaseId())))
+        .thenReturn(parentCase);
 
     // when
     underTest.processFulfilmentRequest(managementEvent);

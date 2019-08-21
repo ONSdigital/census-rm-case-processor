@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.service.CaseProcessor.CASE_UPDATE_ROUTING_KEY;
 
+import java.util.Optional;
 import java.util.UUID;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
@@ -30,13 +31,13 @@ import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CaseProcessorTest {
-
   private static final String FIELD_CORD_ID = "FIELD_CORD_ID";
   private static final String FIELD_OFFICER_ID = "FIELD_OFFICER_ID";
   private static final String CE_CAPACITY = "CE_CAPACITY";
   private static final String TEST_TREATMENT_CODE = "TEST_TREATMENT_CODE";
   private static final String TEST_POSTCODE = "TEST_POSTCODE";
   private static final String TEST_EXCHANGE = "TEST_EXCHANGE";
+  private static final UUID TEST_UUID = UUID.randomUUID();
 
   @Mock CaseRepository caseRepository;
 
@@ -110,5 +111,21 @@ public class CaseProcessorTest {
 
     // When
     underTest.getUniqueCaseRef();
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testCaseIdNotFound() {
+    when(caseRepository.findByCaseId(TEST_UUID)).thenReturn(Optional.empty());
+
+    String expectedErrorMessage = String.format("Case ID '%s' not present", TEST_UUID);
+
+    try {
+      // WHEN
+      underTest.getCaseByCaseId(TEST_UUID);
+    } catch (RuntimeException re) {
+      // THEN
+      assertThat(re.getMessage()).isEqualTo(expectedErrorMessage);
+      throw re;
+    }
   }
 }
