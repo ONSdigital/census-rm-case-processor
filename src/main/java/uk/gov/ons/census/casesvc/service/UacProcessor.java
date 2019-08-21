@@ -2,10 +2,7 @@ package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
 import java.time.OffsetDateTime;
-import java.util.Optional;
 import java.util.UUID;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,21 +18,19 @@ import uk.gov.ons.census.casesvc.model.dto.UacQidDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
-import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 import uk.gov.ons.census.casesvc.utility.EventHelper;
 import uk.gov.ons.census.casesvc.utility.Sha256Helper;
 
 @Component
 public class UacProcessor {
-  private static final Logger log = LoggerFactory.getLogger(UacProcessor.class);
   private static final String UAC_UPDATE_ROUTING_KEY = "event.uac.update";
 
   private final UacQidLinkRepository uacQidLinkRepository;
   private final RabbitTemplate rabbitTemplate;
   private final UacQidServiceClient uacQidServiceClient;
-  private final CaseRepository caseRepository;
   private final EventLogger eventLogger;
+  private final CaseProcessor caseProcessor;
 
   @Value("${queueconfig.case-event-exchange}")
   private String outboundExchange;
@@ -44,13 +39,13 @@ public class UacProcessor {
       UacQidLinkRepository uacQidLinkRepository,
       RabbitTemplate rabbitTemplate,
       UacQidServiceClient uacQidServiceClient,
-      CaseRepository caseRepository,
-      EventLogger eventLogger) {
+      EventLogger eventLogger,
+      CaseProcessor caseProcessor) {
     this.rabbitTemplate = rabbitTemplate;
     this.uacQidServiceClient = uacQidServiceClient;
     this.uacQidLinkRepository = uacQidLinkRepository;
-    this.caseRepository = caseRepository;
     this.eventLogger = eventLogger;
+    this.caseProcessor = caseProcessor;
   }
 
   public UacQidLink generateAndSaveUacQidLink(Case caze, int questionnaireType) {
@@ -109,24 +104,17 @@ public class UacProcessor {
   }
 
   public void ingestUacCreatedEvent(ResponseManagementEvent uacCreatedEvent) {
-    Optional<Case> linkedCase =
-        caseRepository.findByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId());
-
-    if (linkedCase.isEmpty()) {
-      log.with("caseId", uacCreatedEvent.getPayload().getUacQidCreated().getCaseId())
-          .with("transactionId", uacCreatedEvent.getEvent().getTransactionId())
-          .error("Cannot find case for UAC created event");
-      throw new RuntimeException("No case found matching UAC created event");
-    }
+    Case linkedCase =
+        caseProcessor.getCaseByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId());
 
     UacQidLink uacQidLink =
         createAndSaveUacQidLink(
-            linkedCase.get(),
+            linkedCase,
             null,
             uacCreatedEvent.getPayload().getUacQidCreated().getUac(),
             uacCreatedEvent.getPayload().getUacQidCreated().getQid());
 
-    emitUacUpdatedEvent(uacQidLink, linkedCase.get());
+    emitUacUpdatedEvent(uacQidLink, linkedCase);
 
     eventLogger.logUacQidEvent(
         uacQidLink,

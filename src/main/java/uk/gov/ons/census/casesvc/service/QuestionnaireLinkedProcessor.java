@@ -19,10 +19,8 @@ import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
 @Component
 public class QuestionnaireLinkedProcessor {
-
   private static final Logger log = LoggerFactory.getLogger(QuestionnaireLinkedProcessor.class);
   private static final String QID_NOT_FOUND_ERROR = "Qid not found error";
-  private static final String CASE_NOT_FOUND_ERROR = "Case not found error";
   private static final String QUESTIONNAIRE_LINKED = "Questionnaire Linked";
 
   private final UacQidLinkRepository uacQidLinkRepository;
@@ -54,21 +52,14 @@ public class QuestionnaireLinkedProcessor {
           String.format("Questionnaire Id '%s' not found!", uac.getQuestionnaireId()));
     }
 
-    Optional<Case> caseOpt = caseRepository.findByCaseId(UUID.fromString(uac.getCaseId()));
-
-    if (caseOpt.isEmpty()) {
-      log.error(CASE_NOT_FOUND_ERROR);
-      throw new RuntimeException(String.format("Case Id '%s' not found!", uac.getCaseId()));
-    }
-
     UacQidLink uacQidLink = uacQidLinkOpt.get();
-    Case caze = caseOpt.get();
+
+    Case caze = caseProcessor.getCaseByCaseId(UUID.fromString(uac.getCaseId()));
 
     // If UAC/QID has been receipted before case, update case
     if (!uacQidLink.isActive() && !caze.isReceiptReceived()) {
       caze.setReceiptReceived(true);
       caseRepository.saveAndFlush(caze);
-
       caseProcessor.emitCaseUpdatedEvent(caze);
     }
 
