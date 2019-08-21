@@ -1,7 +1,5 @@
 package uk.gov.ons.census.casesvc.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 import static uk.gov.ons.census.casesvc.service.EventProcessor.*;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
@@ -12,7 +10,6 @@ import java.util.UUID;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -24,10 +21,8 @@ import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.PrintCaseSelected;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
-import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
-import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EventProcessorTest {
@@ -35,8 +30,6 @@ public class EventProcessorTest {
   @Mock CaseProcessor caseProcessor;
 
   @Mock UacProcessor uacProcessor;
-
-  @Mock EventRepository eventRepository;
 
   @Mock EventLogger eventLogger;
 
@@ -140,28 +133,15 @@ public class EventProcessorTest {
     underTest.processPrintCaseSelected(responseManagementEvent);
 
     // Then
-    ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
-    verify(eventRepository).save(eventArgumentCaptor.capture());
-    Event actualEvent = eventArgumentCaptor.getValue();
-
-    assertThat(caze).isEqualTo(actualEvent.getCaze());
-    assertThat("Test channel").isEqualTo(actualEvent.getEventChannel());
-    assertThat("Test source").isEqualTo(actualEvent.getEventSource());
-    assertThat(event.getTransactionId()).isEqualTo(actualEvent.getEventTransactionId());
-    assertThat(event.getType().toString()).isEqualTo(actualEvent.getEventType().toString());
-    assertThat(event.getDateTime()).isEqualTo(actualEvent.getEventDate());
-    assertThat(
-            "{\"printCaseSelected\":{\"caseRef\":123,\"packCode\":\"Test packCode\",\"actionRuleId\":\"Test actionRuleId\",\"batchId\":\"Test batchId\"}}")
-        .isEqualTo(actualEvent.getEventPayload());
-    assertThat(actualEvent.getRmEventProcessed()).isNotNull();
-    assertThat("Case selected by Action Rule for print Pack Code Test packCode")
-        .isEqualTo(actualEvent.getEventDescription());
-  }
-
-  private EventDTO createCaseEventDto() {
-    EventDTO eventDTO = new EventDTO();
-    eventDTO.setSource(CREATE_CASE_SOURCE);
-    eventDTO.setChannel(CREATE_CASE_CHANNEL);
-    return eventDTO;
+    verify(eventLogger, times(1))
+        .logCaseEvent(
+            eq(caze),
+            any(OffsetDateTime.class),
+            any(OffsetDateTime.class),
+            eq("Case selected by Action Rule for print Pack Code Test packCode"),
+            eq(EventType.PRINT_CASE_SELECTED),
+            eq(event),
+            eq(
+                "{\"printCaseSelected\":{\"caseRef\":123,\"packCode\":\"Test packCode\",\"actionRuleId\":\"Test actionRuleId\",\"batchId\":\"Test batchId\"}}"));
   }
 }

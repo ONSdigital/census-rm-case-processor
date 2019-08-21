@@ -12,7 +12,6 @@ import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
-import uk.gov.ons.census.casesvc.model.dto.ReceiptDTO;
 import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.UacCreatedDTO;
@@ -150,14 +149,6 @@ public class DataUtils {
     payload.setFulfilmentRequest(null);
 
     return managementEvent;
-  }
-
-  public static ReceiptDTO convertJsonToReceiptDTO(String json) {
-    try {
-      return objectMapper.readValue(json, ReceiptDTO.class);
-    } catch (IOException e) {
-      throw new RuntimeException("Failed converting Json To ReceiptDTO", e);
-    }
   }
 
   public static RefusalDTO convertJsonToRefusalDTO(String json) {

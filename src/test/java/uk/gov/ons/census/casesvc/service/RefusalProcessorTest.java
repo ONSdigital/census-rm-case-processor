@@ -21,15 +21,12 @@ import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
-import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RefusalProcessorTest {
 
   private static final String REFUSAL_RECEIVED = "Refusal Received";
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
-
-  @Mock private UacQidLinkRepository uacQidLinkRepository;
 
   @Mock private CaseRepository caseRepository;
 
@@ -47,7 +44,6 @@ public class RefusalProcessorTest {
     collectionCase.setId(TEST_CASE_ID.toString());
     collectionCase.setRefusalReceived(false);
     Case testCase = getRandomCase();
-    RefusalDTO expectedRefusal = managementEvent.getPayload().getRefusal();
 
     when(caseRepository.findByCaseId(TEST_CASE_ID)).thenReturn(Optional.of(testCase));
 
