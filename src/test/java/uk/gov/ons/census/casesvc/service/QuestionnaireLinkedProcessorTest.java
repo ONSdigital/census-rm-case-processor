@@ -1,12 +1,7 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCaseWithUacQidLinks;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementQuestionnaireLinkedEvent;
 
@@ -64,15 +59,12 @@ public class QuestionnaireLinkedProcessorTest {
     testUacQidLink.setCaze(null);
 
     when(uacQidLinkRepository.findByQid(TEST_QID)).thenReturn(Optional.of(testUacQidLink));
-    when(caseRepository.findByCaseId(TEST_CASE_ID)).thenReturn(Optional.of(testCase));
+    when(caseProcessor.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);
 
     // WHEN
     underTest.processQuestionnaireLinked(managementEvent);
 
     // THEN
-    verify(uacQidLinkRepository).findByQid(TEST_QID);
-    verify(caseRepository).findByCaseId(TEST_CASE_ID);
-
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
     verify(uacQidLinkRepository).saveAndFlush(uacQidLinkCaptor.capture());
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
@@ -90,8 +82,7 @@ public class QuestionnaireLinkedProcessorTest {
             eq(managementEvent.getEvent()),
             anyString());
 
-    verifyNoMoreInteractions(uacQidLinkRepository);
-    verifyNoMoreInteractions(caseRepository);
+    verifyZeroInteractions(caseRepository);
   }
 
   @Test
@@ -112,15 +103,12 @@ public class QuestionnaireLinkedProcessorTest {
     testUacQidLink.setCaze(null);
 
     when(uacQidLinkRepository.findByQid(TEST_QID)).thenReturn(Optional.of(testUacQidLink));
-    when(caseRepository.findByCaseId(TEST_CASE_ID)).thenReturn(Optional.of(testCase));
+    when(caseProcessor.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);
 
     // WHEN
     underTest.processQuestionnaireLinked(managementEvent);
 
     // THEN
-    verify(uacQidLinkRepository).findByQid(TEST_QID);
-    verify(caseRepository).findByCaseId(TEST_CASE_ID);
-
     ArgumentCaptor<Case> caseCaptor = ArgumentCaptor.forClass(Case.class);
     verify(caseRepository).saveAndFlush(caseCaptor.capture());
     Case actualCase = caseCaptor.getValue();
@@ -146,7 +134,6 @@ public class QuestionnaireLinkedProcessorTest {
             eq(managementEvent.getEvent()),
             anyString());
 
-    verifyNoMoreInteractions(uacQidLinkRepository);
     verifyNoMoreInteractions(caseRepository);
   }
 
@@ -159,29 +146,6 @@ public class QuestionnaireLinkedProcessorTest {
         String.format("Questionnaire Id '%s' not found!", questionnaireId);
 
     when(uacQidLinkRepository.findByQid(questionnaireId)).thenReturn(Optional.empty());
-
-    try {
-      // WHEN
-      underTest.processQuestionnaireLinked(managementEvent);
-    } catch (RuntimeException re) {
-      // THEN
-      assertThat(re.getMessage()).isEqualTo(expectedErrorMessage);
-      throw re;
-    }
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testQuestionnaireLinkedCaseNotFound() {
-    // GIVEN
-    ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
-    managementEvent.getPayload().getUac().setCaseId(UUID.randomUUID().toString());
-    UacDTO uac = managementEvent.getPayload().getUac();
-    String questionnaireId = uac.getQuestionnaireId();
-    String caseId = uac.getCaseId();
-    String expectedErrorMessage = String.format("Case Id '%s' not found!", caseId);
-
-    when(uacQidLinkRepository.findByQid(questionnaireId)).thenReturn(Optional.of(new UacQidLink()));
-    when(caseRepository.findByCaseId(UUID.fromString(caseId))).thenReturn(Optional.empty());
 
     try {
       // WHEN
