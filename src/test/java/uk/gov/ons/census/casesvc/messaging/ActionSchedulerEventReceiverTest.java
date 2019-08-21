@@ -8,15 +8,15 @@ import org.junit.Test;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
-import uk.gov.ons.census.casesvc.service.EventProcessor;
+import uk.gov.ons.census.casesvc.service.EventService;
 
 public class ActionSchedulerEventReceiverTest {
 
   @Test
   public void testReceiveMessage() {
     // Given
-    EventProcessor eventProcessor = mock(EventProcessor.class);
-    ActionSchedulerEventReceiver underTest = new ActionSchedulerEventReceiver(eventProcessor);
+    EventService eventService = mock(EventService.class);
+    ActionSchedulerEventReceiver underTest = new ActionSchedulerEventReceiver(eventService);
 
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
     EventDTO event = new EventDTO();
@@ -27,14 +27,14 @@ public class ActionSchedulerEventReceiverTest {
     underTest.receiveMessage(responseManagementEvent);
 
     // Then
-    verify(eventProcessor).processPrintCaseSelected(eq(responseManagementEvent));
+    verify(eventService).processPrintCaseSelected(eq(responseManagementEvent));
   }
 
   @Test(expected = RuntimeException.class)
   public void testReceiveUnexpectedMessage() {
     // Given
-    EventProcessor eventProcessor = mock(EventProcessor.class);
-    ActionSchedulerEventReceiver underTest = new ActionSchedulerEventReceiver(eventProcessor);
+    EventService eventService = mock(EventService.class);
+    ActionSchedulerEventReceiver underTest = new ActionSchedulerEventReceiver(eventService);
 
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
     EventDTO event = new EventDTO();

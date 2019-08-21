@@ -12,11 +12,11 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
-import uk.gov.ons.census.casesvc.service.UacProcessor;
+import uk.gov.ons.census.casesvc.service.UacService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UacCreatedEventReceiverTest {
-  @Mock UacProcessor uacProcessor;
+  @Mock UacService uacService;
 
   @InjectMocks UacCreatedEventReceiver underTest;
 
@@ -30,6 +30,6 @@ public class UacCreatedEventReceiverTest {
     underTest.receiveMessage(uacCreatedEvent);
 
     // Then
-    verify(uacProcessor).ingestUacCreatedEvent(eq(uacCreatedEvent));
+    verify(uacService).ingestUacCreatedEvent(eq(uacCreatedEvent));
   }
 }
