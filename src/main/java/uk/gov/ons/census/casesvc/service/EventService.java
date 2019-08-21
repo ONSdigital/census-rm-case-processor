@@ -5,7 +5,7 @@ import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
@@ -15,28 +15,27 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper;
 
-@Component
-public class EventProcessor {
+@Service
+public class EventService {
   public static final String CREATE_CASE_SAMPLE_RECEIVED = "Create case sample received";
 
-  private final CaseProcessor caseProcessor;
-  private final UacProcessor uacProcessor;
+  private final CaseService caseService;
+  private final UacService uacService;
   private final EventLogger eventLogger;
 
-  public EventProcessor(
-      CaseProcessor caseProcessor, UacProcessor uacProcessor, EventLogger eventLogger) {
-    this.caseProcessor = caseProcessor;
-    this.uacProcessor = uacProcessor;
+  public EventService(CaseService caseService, UacService uacService, EventLogger eventLogger) {
+    this.caseService = caseService;
+    this.uacService = uacService;
     this.eventLogger = eventLogger;
   }
 
   public void processSampleReceivedMessage(CreateCaseSample createCaseSample) {
-    Case caze = caseProcessor.saveCase(createCaseSample);
+    Case caze = caseService.saveCase(createCaseSample);
     int questionnaireType =
         QuestionnaireTypeHelper.calculateQuestionnaireType(caze.getTreatmentCode());
-    UacQidLink uacQidLink = uacProcessor.generateAndSaveUacQidLink(caze, questionnaireType);
-    uacProcessor.emitUacUpdatedEvent(uacQidLink, caze);
-    caseProcessor.emitCaseCreatedEvent(caze);
+    UacQidLink uacQidLink = uacService.generateAndSaveUacQidLink(caze, questionnaireType);
+    uacService.emitUacUpdatedEvent(uacQidLink, caze);
+    caseService.emitCaseCreatedEvent(caze);
 
     eventLogger.logCaseEvent(
         caze,
@@ -48,14 +47,14 @@ public class EventProcessor {
         convertObjectToJson(createCaseSample));
 
     if (QuestionnaireTypeHelper.isQuestionnaireWelsh(caze.getTreatmentCode())) {
-      uacQidLink = uacProcessor.generateAndSaveUacQidLink(caze, 3);
-      uacProcessor.emitUacUpdatedEvent(uacQidLink, caze);
+      uacQidLink = uacService.generateAndSaveUacQidLink(caze, 3);
+      uacService.emitUacUpdatedEvent(uacQidLink, caze);
     }
   }
 
   public void processPrintCaseSelected(ResponseManagementEvent responseManagementEvent) {
     Optional<Case> cazeResult =
-        caseProcessor.findCase(
+        caseService.findCase(
             responseManagementEvent.getPayload().getPrintCaseSelected().getCaseRef());
 
     if (cazeResult.isEmpty()) {

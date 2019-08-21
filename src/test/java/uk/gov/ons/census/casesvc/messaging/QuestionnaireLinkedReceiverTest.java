@@ -9,24 +9,23 @@ import java.time.OffsetDateTime;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
-import uk.gov.ons.census.casesvc.service.QuestionnaireLinkedProcessor;
+import uk.gov.ons.census.casesvc.service.QuestionnaireLinkedService;
 
 public class QuestionnaireLinkedReceiverTest {
 
   @Test
   public void testQuestionnaireLinking() {
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
-    QuestionnaireLinkedProcessor questionnaireLinkedProcessor =
-        mock(QuestionnaireLinkedProcessor.class);
+    QuestionnaireLinkedService questionnaireLinkedService = mock(QuestionnaireLinkedService.class);
     OffsetDateTime expectedEventDateTime = managementEvent.getEvent().getDateTime();
 
     QuestionnaireLinkedReceiver questionnaireLinkedReceiver =
-        new QuestionnaireLinkedReceiver(questionnaireLinkedProcessor);
+        new QuestionnaireLinkedReceiver(questionnaireLinkedService);
     questionnaireLinkedReceiver.receiveMessage(managementEvent);
 
     ArgumentCaptor<ResponseManagementEvent> eventArgumentCaptor =
         ArgumentCaptor.forClass(ResponseManagementEvent.class);
-    verify(questionnaireLinkedProcessor).processQuestionnaireLinked(eventArgumentCaptor.capture());
+    verify(questionnaireLinkedService).processQuestionnaireLinked(eventArgumentCaptor.capture());
 
     OffsetDateTime actualEventDateTime = eventArgumentCaptor.getValue().getEvent().getDateTime();
     assertThat(actualEventDateTime).isEqualTo(expectedEventDateTime);

@@ -8,7 +8,7 @@ import java.util.UUID;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.model.dto.Address;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
@@ -22,9 +22,9 @@ import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.utility.EventHelper;
 import uk.gov.ons.census.casesvc.utility.RandomCaseRefGenerator;
 
-@Component
-public class CaseProcessor {
-  private static final Logger log = LoggerFactory.getLogger(CaseProcessor.class);
+@Service
+public class CaseService {
+  private static final Logger log = LoggerFactory.getLogger(CaseService.class);
   private static final String CASE_NOT_FOUND_ERROR = "Case not found error";
   private static final String SURVEY = "CENSUS";
   static final String CASE_UPDATE_ROUTING_KEY = "event.case.update";
@@ -36,7 +36,7 @@ public class CaseProcessor {
   @Value("${queueconfig.case-event-exchange}")
   private String outboundExchange;
 
-  public CaseProcessor(
+  public CaseService(
       CaseRepository caseRepository, RabbitTemplate rabbitTemplate, MapperFacade mapperFacade) {
     this.caseRepository = caseRepository;
     this.rabbitTemplate = rabbitTemplate;
