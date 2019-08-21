@@ -4,11 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementQuestionnaireLinkedEvent;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import org.jeasy.random.EasyRandom;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,6 +46,8 @@ public class QuestionnaireLinkedReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final EasyRandom easyRandom = new EasyRandom();
   private static final String TEST_QID = easyRandom.nextObject(String.class);
+  private static final String QUESTIONNAIRE_LINKED_CHANNEL = "FIELD";
+  private static final String QUESTIONNAIRE_LINKED_SOURCE = "FIELDWORK_GATEWAY";
 
   @Value("${queueconfig.questionnaire-linked-inbound-queue}")
   private String inboundQueue;
@@ -76,8 +79,7 @@ public class QuestionnaireLinkedReceiverIT {
   }
 
   @Test
-  public void testGoodQuestionnaireLinkedForUnreceiptedCase()
-      throws InterruptedException, IOException {
+  public void testGoodQuestionnaireLinkedForUnreceiptedCase() throws Exception {
     // GIVEN
     BlockingQueue<String> outboundUacQueue = rabbitQueueHelper.listen(rhUacQueue);
 
@@ -97,9 +99,10 @@ public class QuestionnaireLinkedReceiverIT {
 
     ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
     managementEvent.getEvent().setTransactionId(UUID.randomUUID());
-    UacDTO uac = managementEvent.getPayload().getUac();
+    UacDTO uac = new UacDTO();
     uac.setCaseId(TEST_CASE_ID.toString());
     uac.setQuestionnaireId(TEST_QID);
+    managementEvent.getPayload().setUac(uac);
 
     String json = convertObjectToJson(managementEvent);
     Message message =
@@ -121,7 +124,7 @@ public class QuestionnaireLinkedReceiverIT {
     UacDTO actualUac = responseManagementEvent.getPayload().getUac();
     assertThat(actualUac.getQuestionnaireId()).isEqualTo(TEST_QID);
     assertThat(actualUac.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
-    assertThat(actualUac.isActive()).isTrue();
+    assertThat(actualUac.getActive()).isTrue();
 
     // Check database Case is still unreceipted and response received not set
     Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
@@ -134,17 +137,11 @@ public class QuestionnaireLinkedReceiverIT {
     assertThat(testUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
     assertThat(testUacQidLink.isActive()).isTrue();
 
-    // Check database for expected log event
-    List<Event> events = eventRepository.findAll();
-    assertThat(events.size()).isEqualTo(1);
-    Event event = events.get(0);
-    assertThat(event.getEventType()).isEqualTo(EventType.QUESTIONNAIRE_LINKED);
-    assertThat(event.getEventDescription()).isEqualTo("Questionnaire Linked");
+    validateEvents(eventRepository.findAll());
   }
 
   @Test
-  public void testGoodQuestionnaireLinkedAfterReceiptedCase()
-      throws InterruptedException, IOException {
+  public void testGoodQuestionnaireLinkedAfterReceiptedCase() throws Exception {
     // GIVEN
     BlockingQueue<String> outboundUacQueue = rabbitQueueHelper.listen(rhUacQueue);
     BlockingQueue<String> outboundCaseQueue = rabbitQueueHelper.listen(rhCaseQueue);
@@ -165,9 +162,10 @@ public class QuestionnaireLinkedReceiverIT {
 
     ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
     managementEvent.getEvent().setTransactionId(UUID.randomUUID());
-    UacDTO uac = managementEvent.getPayload().getUac();
+    UacDTO uac = new UacDTO();
     uac.setCaseId(TEST_CASE_ID.toString());
     uac.setQuestionnaireId(TEST_QID);
+    managementEvent.getPayload().setUac(uac);
 
     String json = convertObjectToJson(managementEvent);
     Message message =
@@ -189,7 +187,7 @@ public class QuestionnaireLinkedReceiverIT {
     UacDTO actualUac = responseManagementEvent.getPayload().getUac();
     assertThat(actualUac.getQuestionnaireId()).isEqualTo(TEST_QID);
     assertThat(actualUac.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
-    assertThat(actualUac.isActive()).isTrue();
+    assertThat(actualUac.getActive()).isTrue();
 
     // Check Case updated message not sent
     rabbitQueueHelper.checkMessageIsNotReceived(outboundCaseQueue, 5);
@@ -205,17 +203,11 @@ public class QuestionnaireLinkedReceiverIT {
     assertThat(testUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
     assertThat(testUacQidLink.isActive()).isFalse();
 
-    // Check database for expected log event
-    List<Event> events = eventRepository.findAll();
-    assertThat(events.size()).isEqualTo(1);
-    Event event = events.get(0);
-    assertThat(event.getEventType()).isEqualTo(EventType.QUESTIONNAIRE_LINKED);
-    assertThat(event.getEventDescription()).isEqualTo("Questionnaire Linked");
+    validateEvents(eventRepository.findAll());
   }
 
   @Test
-  public void testGoodQuestionnaireLinkedBeforeReceiptedCase()
-      throws InterruptedException, IOException {
+  public void testGoodQuestionnaireLinkedBeforeReceiptedCase() throws Exception {
     // GIVEN
     BlockingQueue<String> outboundUacQueue = rabbitQueueHelper.listen(rhUacQueue);
     BlockingQueue<String> outboundCaseQueue = rabbitQueueHelper.listen(rhCaseQueue);
@@ -236,9 +228,10 @@ public class QuestionnaireLinkedReceiverIT {
 
     ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
     managementEvent.getEvent().setTransactionId(UUID.randomUUID());
-    UacDTO uac = managementEvent.getPayload().getUac();
+    UacDTO uac = new UacDTO();
     uac.setCaseId(TEST_CASE_ID.toString());
     uac.setQuestionnaireId(TEST_QID);
+    managementEvent.getPayload().setUac(uac);
 
     String json = convertObjectToJson(managementEvent);
     Message message =
@@ -260,7 +253,7 @@ public class QuestionnaireLinkedReceiverIT {
     UacDTO actualUac = responseManagementEvent.getPayload().getUac();
     assertThat(actualUac.getQuestionnaireId()).isEqualTo(TEST_QID);
     assertThat(actualUac.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
-    assertThat(actualUac.isActive()).isTrue();
+    assertThat(actualUac.getActive()).isTrue();
 
     // Check Case updated message sent
     responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(outboundCaseQueue);
@@ -281,11 +274,21 @@ public class QuestionnaireLinkedReceiverIT {
     assertThat(testUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
     assertThat(testUacQidLink.isActive()).isFalse();
 
-    // Check database for expected log event
-    List<Event> events = eventRepository.findAll();
+    validateEvents(eventRepository.findAll());
+  }
+
+  private void validateEvents(List<Event> events) throws JSONException {
     assertThat(events.size()).isEqualTo(1);
+
     Event event = events.get(0);
+    assertThat(event.getEventChannel()).isEqualTo(QUESTIONNAIRE_LINKED_CHANNEL);
+    assertThat(event.getEventSource()).isEqualTo(QUESTIONNAIRE_LINKED_SOURCE);
     assertThat(event.getEventType()).isEqualTo(EventType.QUESTIONNAIRE_LINKED);
     assertThat(event.getEventDescription()).isEqualTo("Questionnaire Linked");
+
+    JSONObject payload = new JSONObject(event.getEventPayload());
+    assertThat(payload.length()).isEqualTo(2);
+    assertThat(payload.getString("caseId")).isEqualTo(TEST_CASE_ID.toString());
+    assertThat(payload.getString("questionnaireId")).isEqualTo(TEST_QID);
   }
 }
