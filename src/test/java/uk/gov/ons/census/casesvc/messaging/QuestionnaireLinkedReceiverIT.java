@@ -189,7 +189,7 @@ public class QuestionnaireLinkedReceiverIT {
     UacDTO actualUac = responseManagementEvent.getPayload().getUac();
     assertThat(actualUac.getQuestionnaireId()).isEqualTo(TEST_QID);
     assertThat(actualUac.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
-    assertThat(actualUac.isActive()).isTrue();
+    assertThat(actualUac.isActive()).isFalse();
 
     // Check Case updated message not sent
     rabbitQueueHelper.checkMessageIsNotReceived(outboundCaseQueue, 5);
@@ -260,7 +260,7 @@ public class QuestionnaireLinkedReceiverIT {
     UacDTO actualUac = responseManagementEvent.getPayload().getUac();
     assertThat(actualUac.getQuestionnaireId()).isEqualTo(TEST_QID);
     assertThat(actualUac.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
-    assertThat(actualUac.isActive()).isTrue();
+    assertThat(actualUac.isActive()).isFalse();
 
     // Check Case updated message sent
     responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(outboundCaseQueue);

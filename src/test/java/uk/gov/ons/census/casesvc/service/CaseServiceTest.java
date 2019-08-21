@@ -85,9 +85,11 @@ public class CaseServiceTest {
     ReflectionTestUtils.setField(underTest, "outboundExchange", TEST_EXCHANGE);
 
     // When
-    underTest.emitCaseCreatedEvent(caze);
+    underTest.saveAndEmitCaseCreatedEvent(caze);
 
     // Then
+    verify(caseRepository).saveAndFlush(eq(caze));
+
     ArgumentCaptor<ResponseManagementEvent> rmeArgumentCaptor =
         ArgumentCaptor.forClass(ResponseManagementEvent.class);
     verify(rabbitTemplate)

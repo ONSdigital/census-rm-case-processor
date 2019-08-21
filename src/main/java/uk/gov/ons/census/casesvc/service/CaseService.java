@@ -70,7 +70,9 @@ public class CaseService {
     return caseRepository.findById(caseRef);
   }
 
-  public PayloadDTO emitCaseCreatedEvent(Case caze) {
+  public PayloadDTO saveAndEmitCaseCreatedEvent(Case caze) {
+    caseRepository.saveAndFlush(caze);
+
     EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_CREATED);
     ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
     rabbitTemplate.convertAndSend(
@@ -78,7 +80,9 @@ public class CaseService {
     return responseManagementEvent.getPayload();
   }
 
-  public void emitCaseUpdatedEvent(Case caze) {
+  public void saveAndEmitCaseUpdatedEvent(Case caze) {
+    caseRepository.saveAndFlush(caze);
+
     EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_UPDATED);
     ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
     rabbitTemplate.convertAndSend(

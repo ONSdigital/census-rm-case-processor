@@ -15,7 +15,7 @@ public class InvalidAddressReceiver {
   }
 
   @Transactional
-  @ServiceActivator(inputChannel = "refusalInputChannel")
+  @ServiceActivator(inputChannel = "invalidAddressInputChannel")
   public void receiveMessage(ResponseManagementEvent invalidAddressEvent) {
     invalidAddressService.processMessage(invalidAddressEvent);
   }
