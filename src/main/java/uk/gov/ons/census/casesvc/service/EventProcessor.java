@@ -38,8 +38,8 @@ public class EventProcessor {
     uacProcessor.emitUacUpdatedEvent(uacQidLink, caze);
     caseProcessor.emitCaseCreatedEvent(caze);
 
-    eventLogger.logUacQidEvent(
-        uacQidLink,
+    eventLogger.logCaseEvent(
+        caze,
         OffsetDateTime.now(),
         OffsetDateTime.now(),
         CREATE_CASE_SAMPLE_RECEIVED,

@@ -58,8 +58,8 @@ public class EventProcessorTest {
     verify(caseProcessor).emitCaseCreatedEvent(caze);
 
     verify(eventLogger, times(1))
-        .logUacQidEvent(
-            eq(uacQidLink),
+        .logCaseEvent(
+            eq(caze),
             any(OffsetDateTime.class),
             any(OffsetDateTime.class),
             eq(CREATE_CASE_SAMPLE_RECEIVED),
@@ -93,8 +93,8 @@ public class EventProcessorTest {
     verify(caseProcessor).emitCaseCreatedEvent(caze);
 
     verify(eventLogger, times(1))
-        .logUacQidEvent(
-            eq(uacQidLink),
+        .logCaseEvent(
+            eq(caze),
             any(OffsetDateTime.class),
             any(OffsetDateTime.class),
             eq(CREATE_CASE_SAMPLE_RECEIVED),
@@ -142,6 +142,7 @@ public class EventProcessorTest {
             eq(EventType.PRINT_CASE_SELECTED),
             eq(event),
             eq(
-                "{\"printCaseSelected\":{\"caseRef\":123,\"packCode\":\"Test packCode\",\"actionRuleId\":\"Test actionRuleId\",\"batchId\":\"Test batchId\"}}"));
+                "{\"printCaseSelected\":{\"caseRef\":123,\"packCode\":\"Test packCode\","
+                    + "\"actionRuleId\":\"Test actionRuleId\",\"batchId\":\"Test batchId\"}}"));
   }
 }
