@@ -13,25 +13,25 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 
 @Service
-public class RefusalProcessor {
+public class RefusalService {
   private static final String REFUSAL_RECEIVED = "Refusal Received";
-  private final CaseProcessor caseProcessor;
+  private final CaseService caseService;
   private final CaseRepository caseRepository;
   private final EventLogger eventLogger;
 
-  public RefusalProcessor(
-      CaseProcessor caseProcessor, CaseRepository caseRepository, EventLogger eventLogger) {
-    this.caseProcessor = caseProcessor;
+  public RefusalService(
+      CaseService caseService, CaseRepository caseRepository, EventLogger eventLogger) {
+    this.caseService = caseService;
     this.caseRepository = caseRepository;
     this.eventLogger = eventLogger;
   }
 
   public void processRefusal(ResponseManagementEvent refusalEvent) {
     RefusalDTO refusal = refusalEvent.getPayload().getRefusal();
-    Case caze = caseProcessor.getCaseByCaseId(UUID.fromString(refusal.getCollectionCase().getId()));
+    Case caze = caseService.getCaseByCaseId(UUID.fromString(refusal.getCollectionCase().getId()));
     caze.setRefusalReceived(true);
     caseRepository.saveAndFlush(caze);
-    caseProcessor.emitCaseUpdatedEvent(caze);
+    caseService.emitCaseUpdatedEvent(caze);
 
     eventLogger.logCaseEvent(
         caze,

@@ -4,19 +4,19 @@ import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
-import uk.gov.ons.census.casesvc.service.QuestionnaireLinkedProcessor;
+import uk.gov.ons.census.casesvc.service.QuestionnaireLinkedService;
 
 @MessageEndpoint
 public class QuestionnaireLinkedReceiver {
-  private final QuestionnaireLinkedProcessor questionnaireLinkedProcessor;
+  private final QuestionnaireLinkedService questionnaireLinkedService;
 
-  public QuestionnaireLinkedReceiver(QuestionnaireLinkedProcessor questionnaireLinkedProcessor) {
-    this.questionnaireLinkedProcessor = questionnaireLinkedProcessor;
+  public QuestionnaireLinkedReceiver(QuestionnaireLinkedService questionnaireLinkedService) {
+    this.questionnaireLinkedService = questionnaireLinkedService;
   }
 
   @Transactional
   @ServiceActivator(inputChannel = "questionnaireLinkedInputChannel")
   public void receiveMessage(ResponseManagementEvent questionnaireLinkedEvent) {
-    questionnaireLinkedProcessor.processQuestionnaireLinked(questionnaireLinkedEvent);
+    questionnaireLinkedService.processQuestionnaireLinked(questionnaireLinkedEvent);
   }
 }

@@ -1,7 +1,7 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static org.mockito.Mockito.*;
-import static uk.gov.ons.census.casesvc.service.EventProcessor.CREATE_CASE_SAMPLE_RECEIVED;
+import static uk.gov.ons.census.casesvc.service.EventService.CREATE_CASE_SAMPLE_RECEIVED;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.time.OffsetDateTime;
@@ -25,15 +25,15 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
 @RunWith(MockitoJUnitRunner.class)
-public class EventProcessorTest {
+public class EventServiceTest {
 
-  @Mock CaseProcessor caseProcessor;
+  @Mock CaseService caseService;
 
-  @Mock UacProcessor uacProcessor;
+  @Mock UacService uacService;
 
   @Mock EventLogger eventLogger;
 
-  @InjectMocks EventProcessor underTest;
+  @InjectMocks EventService underTest;
 
   @Test
   public void testHappyPath() {
@@ -41,21 +41,21 @@ public class EventProcessorTest {
     CreateCaseSample createCaseSample = new CreateCaseSample();
     Case caze = new Case();
     caze.setTreatmentCode("HH_LF2R3BE");
-    when(caseProcessor.saveCase(createCaseSample)).thenReturn(caze);
+    when(caseService.saveCase(createCaseSample)).thenReturn(caze);
     UacQidLink uacQidLink = new UacQidLink();
-    when(uacProcessor.generateAndSaveUacQidLink(caze, 1)).thenReturn(uacQidLink);
-    when(uacProcessor.emitUacUpdatedEvent(any(UacQidLink.class), any(Case.class)))
+    when(uacService.generateAndSaveUacQidLink(caze, 1)).thenReturn(uacQidLink);
+    when(uacService.emitUacUpdatedEvent(any(UacQidLink.class), any(Case.class)))
         .thenReturn(new PayloadDTO());
-    when(caseProcessor.emitCaseCreatedEvent(any(Case.class))).thenReturn(new PayloadDTO());
+    when(caseService.emitCaseCreatedEvent(any(Case.class))).thenReturn(new PayloadDTO());
 
     // When
     underTest.processSampleReceivedMessage(createCaseSample);
 
     // Then
-    verify(caseProcessor).saveCase(createCaseSample);
-    verify(uacProcessor).generateAndSaveUacQidLink(eq(caze), eq(1));
-    verify(uacProcessor).emitUacUpdatedEvent(uacQidLink, caze);
-    verify(caseProcessor).emitCaseCreatedEvent(caze);
+    verify(caseService).saveCase(createCaseSample);
+    verify(uacService).generateAndSaveUacQidLink(eq(caze), eq(1));
+    verify(uacService).emitUacUpdatedEvent(uacQidLink, caze);
+    verify(caseService).emitCaseCreatedEvent(caze);
 
     verify(eventLogger, times(1))
         .logCaseEvent(
@@ -74,23 +74,23 @@ public class EventProcessorTest {
     CreateCaseSample createCaseSample = new CreateCaseSample();
     Case caze = new Case();
     caze.setTreatmentCode("HH_QF2R1W");
-    when(caseProcessor.saveCase(createCaseSample)).thenReturn(caze);
+    when(caseService.saveCase(createCaseSample)).thenReturn(caze);
     UacQidLink uacQidLink = new UacQidLink();
     UacQidLink secondUacQidLink = new UacQidLink();
-    when(uacProcessor.generateAndSaveUacQidLink(caze, 2)).thenReturn(uacQidLink);
-    when(uacProcessor.generateAndSaveUacQidLink(caze, 3)).thenReturn(secondUacQidLink);
-    when(uacProcessor.emitUacUpdatedEvent(any(UacQidLink.class), any(Case.class)))
+    when(uacService.generateAndSaveUacQidLink(caze, 2)).thenReturn(uacQidLink);
+    when(uacService.generateAndSaveUacQidLink(caze, 3)).thenReturn(secondUacQidLink);
+    when(uacService.emitUacUpdatedEvent(any(UacQidLink.class), any(Case.class)))
         .thenReturn(new PayloadDTO());
-    when(caseProcessor.emitCaseCreatedEvent(any(Case.class))).thenReturn(new PayloadDTO());
+    when(caseService.emitCaseCreatedEvent(any(Case.class))).thenReturn(new PayloadDTO());
 
     // When
     underTest.processSampleReceivedMessage(createCaseSample);
 
     // Then
-    verify(caseProcessor).saveCase(createCaseSample);
-    verify(uacProcessor, times(1)).generateAndSaveUacQidLink(eq(caze), eq(2));
-    verify(uacProcessor, times(2)).emitUacUpdatedEvent(uacQidLink, caze);
-    verify(caseProcessor).emitCaseCreatedEvent(caze);
+    verify(caseService).saveCase(createCaseSample);
+    verify(uacService, times(1)).generateAndSaveUacQidLink(eq(caze), eq(2));
+    verify(uacService, times(2)).emitUacUpdatedEvent(uacQidLink, caze);
+    verify(caseService).emitCaseCreatedEvent(caze);
 
     verify(eventLogger, times(1))
         .logCaseEvent(
@@ -108,7 +108,7 @@ public class EventProcessorTest {
     // Given
     EasyRandom easyRandom = new EasyRandom();
     Case caze = easyRandom.nextObject(Case.class);
-    when(caseProcessor.findCase(anyInt())).thenReturn(Optional.of(caze));
+    when(caseService.findCase(anyInt())).thenReturn(Optional.of(caze));
 
     // When
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();

@@ -25,7 +25,7 @@ import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
 @RunWith(MockitoJUnitRunner.class)
-public class QuestionnaireLinkedProcessorTest {
+public class QuestionnaireLinkedServiceTest {
 
   private final UUID TEST_CASE_ID = UUID.randomUUID();
   private final String TEST_QID = new EasyRandom().nextObject(String.class);
@@ -34,13 +34,13 @@ public class QuestionnaireLinkedProcessorTest {
 
   @Mock CaseRepository caseRepository;
 
-  @Mock UacProcessor uacProcessor;
+  @Mock UacService uacService;
 
-  @Mock CaseProcessor caseProcessor;
+  @Mock CaseService caseService;
 
   @Mock EventLogger eventLogger;
 
-  @InjectMocks QuestionnaireLinkedProcessor underTest;
+  @InjectMocks QuestionnaireLinkedService underTest;
 
   @Test
   public void testGoodQuestionnaireLinkedForUnreceiptedCase() {
@@ -59,7 +59,7 @@ public class QuestionnaireLinkedProcessorTest {
     testUacQidLink.setCaze(null);
 
     when(uacQidLinkRepository.findByQid(TEST_QID)).thenReturn(Optional.of(testUacQidLink));
-    when(caseProcessor.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);
+    when(caseService.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);
 
     // WHEN
     underTest.processQuestionnaireLinked(managementEvent);
@@ -71,7 +71,7 @@ public class QuestionnaireLinkedProcessorTest {
     assertThat(actualUacQidLink.getCaze()).isEqualTo(testCase);
     assertThat(actualUacQidLink.isActive()).isTrue();
 
-    verify(uacProcessor).emitUacUpdatedEvent(testUacQidLink, testCase);
+    verify(uacService).emitUacUpdatedEvent(testUacQidLink, testCase);
     verify(eventLogger)
         .logUacQidEvent(
             eq(testUacQidLink),
@@ -103,7 +103,7 @@ public class QuestionnaireLinkedProcessorTest {
     testUacQidLink.setCaze(null);
 
     when(uacQidLinkRepository.findByQid(TEST_QID)).thenReturn(Optional.of(testUacQidLink));
-    when(caseProcessor.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);
+    when(caseService.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);
 
     // WHEN
     underTest.processQuestionnaireLinked(managementEvent);
@@ -115,7 +115,7 @@ public class QuestionnaireLinkedProcessorTest {
     assertThat(actualCase.getCaseId()).isEqualTo(TEST_CASE_ID);
     assertThat(actualCase.isReceiptReceived()).isTrue();
 
-    verify(caseProcessor).emitCaseUpdatedEvent(testCase);
+    verify(caseService).emitCaseUpdatedEvent(testCase);
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
     verify(uacQidLinkRepository).saveAndFlush(uacQidLinkCaptor.capture());
@@ -123,7 +123,7 @@ public class QuestionnaireLinkedProcessorTest {
     assertThat(actualUacQidLink.getCaze()).isEqualTo(testCase);
     assertThat(actualUacQidLink.isActive()).isFalse();
 
-    verify(uacProcessor).emitUacUpdatedEvent(testUacQidLink, testCase);
+    verify(uacService).emitUacUpdatedEvent(testUacQidLink, testCase);
     verify(eventLogger)
         .logUacQidEvent(
             eq(testUacQidLink),

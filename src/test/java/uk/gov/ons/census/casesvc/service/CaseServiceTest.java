@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.ons.census.casesvc.service.CaseProcessor.CASE_UPDATE_ROUTING_KEY;
+import static uk.gov.ons.census.casesvc.service.CaseService.CASE_UPDATE_ROUTING_KEY;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -28,7 +28,7 @@ import uk.gov.ons.census.casesvc.model.entity.CaseState;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CaseProcessorTest {
+public class CaseServiceTest {
   private static final String FIELD_CORD_ID = "FIELD_CORD_ID";
   private static final String FIELD_OFFICER_ID = "FIELD_OFFICER_ID";
   private static final String CE_CAPACITY = "CE_CAPACITY";
@@ -44,7 +44,7 @@ public class CaseProcessorTest {
 
   @Mock RabbitTemplate rabbitTemplate;
 
-  @InjectMocks CaseProcessor underTest;
+  @InjectMocks CaseService underTest;
 
   @Test
   public void testSaveCase() {
