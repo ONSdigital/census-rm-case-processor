@@ -1,10 +1,8 @@
 package uk.gov.ons.census.casesvc.service;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.time.OffsetDateTime;
-import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
@@ -14,14 +12,9 @@ import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
-
 @Service
 public class RefusalProcessor {
-  private static final Logger log = LoggerFactory.getLogger(RefusalProcessor.class);
   private static final String REFUSAL_RECEIVED = "Refusal Received";
-  private static final String CASE_NOT_FOUND_ERROR = "Case Id not found error";
-  private static final String DATETIME_NOT_PRESENT = "Date time not in event error";
   private final CaseProcessor caseProcessor;
   private final CaseRepository caseRepository;
   private final EventLogger eventLogger;

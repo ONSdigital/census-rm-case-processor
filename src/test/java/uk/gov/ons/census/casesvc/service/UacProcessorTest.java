@@ -1,17 +1,13 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.generateUacCreatedEvent;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 
 import java.time.OffsetDateTime;
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -157,30 +153,19 @@ public class UacProcessorTest {
     ResponseManagementEvent uacCreatedEvent = generateUacCreatedEvent(linkedCase);
     when(caseProcessor.getCaseByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId()))
         .thenReturn(linkedCase);
-    ArgumentCaptor<UacQidLink> uacQidLinkArgumentCaptor = ArgumentCaptor.forClass(UacQidLink.class);
 
     // When
     underTest.ingestUacCreatedEvent(uacCreatedEvent);
 
     // Then
-      verify(eventLogger)
-              .logUacQidEvent(
-                      any(UacQidLink.class),
-                      any(OffsetDateTime.class),
-                      any(OffsetDateTime.class),
-                      eq("RM UAC QID pair created"),
-                      eq(EventType.RM_UAC_CREATED),
-                      eq(uacCreatedEvent.getEvent()),
-                      anyString());
-
-    assertEquals(
-        uacCreatedEvent.getPayload().getUacQidCreated().getQid(),
-        uacQidLinkArgumentCaptor.getValue().getQid());
-    assertEquals(
-        uacCreatedEvent.getPayload().getUacQidCreated().getUac(),
-        uacQidLinkArgumentCaptor.getValue().getUac());
-    assertEquals(
-        uacCreatedEvent.getPayload().getUacQidCreated().getCaseId(),
-        uacQidLinkArgumentCaptor.getValue().getCaze().getCaseId());
+    verify(eventLogger)
+        .logUacQidEvent(
+            any(UacQidLink.class),
+            any(OffsetDateTime.class),
+            any(OffsetDateTime.class),
+            eq("RM UAC QID pair created"),
+            eq(EventType.RM_UAC_CREATED),
+            eq(uacCreatedEvent.getEvent()),
+            anyString());
   }
 }

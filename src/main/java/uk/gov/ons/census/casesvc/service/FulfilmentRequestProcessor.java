@@ -3,8 +3,6 @@ package uk.gov.ons.census.casesvc.service;
 import static uk.gov.ons.census.casesvc.model.entity.EventType.FULFILMENT_REQUESTED;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -21,13 +19,8 @@ import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 
 @Service
 public class FulfilmentRequestProcessor {
-  private static final Logger log = LoggerFactory.getLogger(FulfilmentRequestProcessor.class);
-  private static final String DATETIME_NOT_PRESENT = "Date time not in event error";
   private static final String FULFILMENT_REQUEST_RECEIVED = "Fulfilment Request Received";
-  private static final String FULFILMENT_CODE_NOT_FOUND = "Fulfilment Code not found";
-
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_ADDRESS_TYPE = "HI";
-
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND = "UACIT1";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH = "UACIT2";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH = "UACIT2W";
@@ -59,14 +52,14 @@ public class FulfilmentRequestProcessor {
     Case caze =
         caseProcessor.getCaseByCaseId(UUID.fromString(fulfilmentRequestPayload.getCaseId()));
 
-      eventLogger.logCaseEvent(
-              caze,
-              fulfilmentRequestEvent.getDateTime(),
-              OffsetDateTime.now(),
-              FULFILMENT_REQUEST_RECEIVED,
-              FULFILMENT_REQUESTED,
-              fulfilmentRequestEvent,
-              convertObjectToJson(fulfilmentRequestPayload));
+    eventLogger.logCaseEvent(
+        caze,
+        fulfilmentRequestEvent.getDateTime(),
+        OffsetDateTime.now(),
+        FULFILMENT_REQUEST_RECEIVED,
+        FULFILMENT_REQUESTED,
+        fulfilmentRequestEvent,
+        convertObjectToJson(fulfilmentRequestPayload));
 
     if (individualResponseRequestCodes.contains(fulfilmentRequestPayload.getFulfilmentCode())) {
       Case individualResponseCase = saveIndividualResponseCaseFromParentCase(caze);

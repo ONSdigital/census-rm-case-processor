@@ -1,5 +1,13 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCaseWithUacQidLinks;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementQuestionnaireLinkedEvent;
+
+import java.time.OffsetDateTime;
+import java.util.Optional;
+import java.util.UUID;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,16 +23,6 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
-
-import java.time.OffsetDateTime;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCaseWithUacQidLinks;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementQuestionnaireLinkedEvent;
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 @RunWith(MockitoJUnitRunner.class)
 public class QuestionnaireLinkedProcessorTest {
@@ -84,8 +82,7 @@ public class QuestionnaireLinkedProcessorTest {
             eq(managementEvent.getEvent()),
             anyString());
 
-    verifyNoMoreInteractions(uacQidLinkRepository);
-    verifyNoMoreInteractions(caseRepository);
+    verifyZeroInteractions(caseRepository);
   }
 
   @Test

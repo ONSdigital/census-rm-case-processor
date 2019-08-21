@@ -21,7 +21,6 @@ import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 public class QuestionnaireLinkedProcessor {
   private static final Logger log = LoggerFactory.getLogger(QuestionnaireLinkedProcessor.class);
   private static final String QID_NOT_FOUND_ERROR = "Qid not found error";
-  private static final String CASE_NOT_FOUND_ERROR = "Case not found error";
   private static final String QUESTIONNAIRE_LINKED = "Questionnaire Linked";
 
   private final UacQidLinkRepository uacQidLinkRepository;

@@ -2,10 +2,7 @@ package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
 import java.time.OffsetDateTime;
-import java.util.Optional;
 import java.util.UUID;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +24,6 @@ import uk.gov.ons.census.casesvc.utility.Sha256Helper;
 
 @Component
 public class UacProcessor {
-  private static final Logger log = LoggerFactory.getLogger(UacProcessor.class);
   private static final String UAC_UPDATE_ROUTING_KEY = "event.uac.update";
 
   private final UacQidLinkRepository uacQidLinkRepository;

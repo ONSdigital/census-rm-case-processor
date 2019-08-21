@@ -1,5 +1,12 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementRefusalEvent;
+
+import java.time.OffsetDateTime;
+import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -12,23 +19,11 @@ import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
-import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
-
-import java.time.OffsetDateTime;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementRefusalEvent;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RefusalProcessorTest {
-
   private static final String REFUSAL_RECEIVED = "Refusal Received";
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
-
-  @Mock private UacQidLinkRepository uacQidLinkRepository;
 
   @Mock private CaseRepository caseRepository;
 
@@ -70,3 +65,4 @@ public class RefusalProcessorTest {
             eq(managementEvent.getEvent()),
             anyString());
   }
+}

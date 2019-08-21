@@ -2,11 +2,8 @@ package uk.gov.ons.census.casesvc.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static uk.gov.ons.census.casesvc.model.entity.EventType.FULFILMENT_REQUESTED;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementEvent;
 
@@ -24,7 +21,6 @@ import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.CaseState;
-import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -72,6 +68,11 @@ public class FulfilmentRequestProcessorTest {
   }
 
   @Test
+  public void testGoodIndividualResponseFulfilmentRequestForUACIT1() {
+    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND);
+  }
+
+  @Test
   public void testGoodIndividualResponseFulfilmentRequestForUACIT2() {
     testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH);
   }
@@ -111,14 +112,14 @@ public class FulfilmentRequestProcessorTest {
 
     // then
     verify(eventLogger, times(1))
-        .logFulfilmentRequestedEvent(
-            parentCase,
-            parentCase.getCaseId(),
-            managementEvent.getEvent().getDateTime(),
-            "Fulfilment Request Received",
-            EventType.FULFILMENT_REQUESTED,
-            expectedFulfilmentRequest,
-            managementEvent.getEvent());
+        .logCaseEvent(
+            eq(parentCase),
+            eq(managementEvent.getEvent().getDateTime()),
+            any(OffsetDateTime.class),
+            eq("Fulfilment Request Received"),
+            eq(FULFILMENT_REQUESTED),
+            eq(managementEvent.getEvent()),
+            anyString());
 
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
     verify(caseRepository).save(caseArgumentCaptor.capture());
