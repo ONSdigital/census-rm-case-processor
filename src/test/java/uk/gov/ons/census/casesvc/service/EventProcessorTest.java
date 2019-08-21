@@ -1,7 +1,7 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static org.mockito.Mockito.*;
-import static uk.gov.ons.census.casesvc.service.EventProcessor.*;
+import static uk.gov.ons.census.casesvc.service.EventProcessor.CREATE_CASE_SAMPLE_RECEIVED;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.time.OffsetDateTime;
