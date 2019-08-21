@@ -6,8 +6,8 @@ import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
+import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
-import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.service.EventProcessor;
 
 public class ActionSchedulerEventReceiverTest {
@@ -20,7 +20,7 @@ public class ActionSchedulerEventReceiverTest {
 
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
     EventDTO event = new EventDTO();
-    event.setType(EventType.PRINT_CASE_SELECTED);
+    event.setType(EventTypeDTO.PRINT_CASE_SELECTED);
     responseManagementEvent.setEvent(event);
 
     // When
@@ -38,7 +38,7 @@ public class ActionSchedulerEventReceiverTest {
 
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
     EventDTO event = new EventDTO();
-    event.setType(EventType.CASE_CREATED);
+    event.setType(EventTypeDTO.CASE_CREATED);
     responseManagementEvent.setEvent(event);
 
     // When

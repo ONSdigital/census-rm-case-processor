@@ -4,6 +4,7 @@ import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
@@ -70,11 +71,13 @@ public class ReceiptProcessor {
     uacProcessor.emitUacUpdatedEvent(uacQidLink, caze, uacQidLink.isActive());
     caseProcessor.emitCaseUpdatedEvent(caze);
 
-    eventLogger.logEvent(
+    eventLogger.logUacQidEvent(
         uacQidLink,
+        receiptEvent.getEvent().getDateTime(),
+        OffsetDateTime.now(),
         QID_RECEIPTED,
         EventType.RESPONSE_RECEIVED,
-        convertObjectToJson(receiptPayload),
-        receiptEvent.getEvent());
+        receiptEvent.getEvent(),
+        convertObjectToJson(receiptPayload));
   }
 }

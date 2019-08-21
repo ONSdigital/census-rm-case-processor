@@ -1,13 +1,17 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.generateUacCreatedEvent;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 
+import java.time.OffsetDateTime;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,6 +26,7 @@ import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.UacQidDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
+import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
@@ -158,12 +163,16 @@ public class UacProcessorTest {
     underTest.ingestUacCreatedEvent(uacCreatedEvent);
 
     // Then
-    verify(eventLogger)
-        .logEvent(
-            uacQidLinkArgumentCaptor.capture(),
-            eq("RM UAC QID pair created"),
-            eq(uacCreatedEvent.getPayload()),
-            eq(uacCreatedEvent.getEvent()));
+      verify(eventLogger)
+              .logUacQidEvent(
+                      any(UacQidLink.class),
+                      any(OffsetDateTime.class),
+                      any(OffsetDateTime.class),
+                      eq("RM UAC QID pair created"),
+                      eq(EventType.RM_UAC_CREATED),
+                      eq(uacCreatedEvent.getEvent()),
+                      anyString());
+
     assertEquals(
         uacCreatedEvent.getPayload().getUacQidCreated().getQid(),
         uacQidLinkArgumentCaptor.getValue().getQid());

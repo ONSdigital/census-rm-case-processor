@@ -1,7 +1,11 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import java.time.OffsetDateTime;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,6 +13,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.client.UacQidServiceClient;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
+import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.UacDTO;
@@ -75,7 +80,7 @@ public class UacProcessor {
   }
 
   public PayloadDTO emitUacUpdatedEvent(UacQidLink uacQidLink, Case caze, boolean active) {
-    EventDTO eventDTO = EventHelper.createEventDTO(EventType.UAC_UPDATED);
+    EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.UAC_UPDATED);
 
     UacDTO uac = new UacDTO();
     uac.setQuestionnaireId(uacQidLink.getQid());
@@ -115,10 +120,13 @@ public class UacProcessor {
 
     emitUacUpdatedEvent(uacQidLink, linkedCase);
 
-    eventLogger.logEvent(
+    eventLogger.logUacQidEvent(
         uacQidLink,
+        uacCreatedEvent.getEvent().getDateTime(),
+        OffsetDateTime.now(),
         "RM UAC QID pair created",
-        uacCreatedEvent.getPayload(),
-        uacCreatedEvent.getEvent());
+        EventType.RM_UAC_CREATED,
+        uacCreatedEvent.getEvent(),
+        convertObjectToJson(uacCreatedEvent.getPayload()));
   }
 }

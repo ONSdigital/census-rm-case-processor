@@ -1,10 +1,5 @@
 package uk.gov.ons.census.casesvc.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.*;
-
-import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -13,12 +8,19 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
-import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
+
+import java.time.OffsetDateTime;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementRefusalEvent;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RefusalProcessorTest {
@@ -44,7 +46,6 @@ public class RefusalProcessorTest {
     collectionCase.setId(TEST_CASE_ID.toString());
     collectionCase.setRefusalReceived(false);
     Case testCase = getRandomCase();
-    RefusalDTO expectedRefusal = managementEvent.getPayload().getRefusal();
 
     when(caseProcessor.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);
 
@@ -60,11 +61,12 @@ public class RefusalProcessorTest {
 
     verify(caseProcessor, times(1)).emitCaseUpdatedEvent(testCase);
     verify(eventLogger, times(1))
-        .logRefusalEvent(
-            testCase,
-            REFUSAL_RECEIVED,
-            EventType.REFUSAL_RECEIVED,
-            expectedRefusal,
-            managementEvent.getEvent());
+        .logCaseEvent(
+            eq(testCase),
+            any(OffsetDateTime.class),
+            any(OffsetDateTime.class),
+            eq(REFUSAL_RECEIVED),
+            eq(EventType.REFUSAL_RECEIVED),
+            eq(managementEvent.getEvent()),
+            anyString());
   }
-}

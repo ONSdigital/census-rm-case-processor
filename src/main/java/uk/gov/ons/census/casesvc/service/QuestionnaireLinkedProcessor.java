@@ -4,6 +4,7 @@ import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
@@ -68,11 +69,13 @@ public class QuestionnaireLinkedProcessor {
 
     uacProcessor.emitUacUpdatedEvent(uacQidLink, caze);
 
-    eventLogger.logEvent(
+    eventLogger.logUacQidEvent(
         uacQidLink,
+        questionnaireLinkedEvent.getEvent().getDateTime(),
+        OffsetDateTime.now(),
         QUESTIONNAIRE_LINKED,
         EventType.QUESTIONNAIRE_LINKED,
-        convertObjectToJson(uac),
-        questionnaireLinkedEvent.getEvent());
+        questionnaireLinkedEvent.getEvent(),
+        convertObjectToJson(uac));
   }
 }

@@ -1,13 +1,11 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static uk.gov.ons.census.casesvc.service.ReceiptProcessor.QID_RECEIPTED;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.generateRandomUacQidLink;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementEvent;
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -63,12 +61,14 @@ public class ReceiptProcessorTest {
     verify(uacProcessor, times(1)).emitUacUpdatedEvent(expectedUacQidLink, expectedCase, false);
     verify(caseProcessor, times(1)).emitCaseUpdatedEvent(expectedCase);
     verify(eventLogger, times(1))
-        .logEvent(
-            expectedUacQidLink,
-            QID_RECEIPTED,
-            EventType.RESPONSE_RECEIVED,
-            convertObjectToJson(expectedReceipt),
-            managementEvent.getEvent());
+        .logUacQidEvent(
+            eq(expectedUacQidLink),
+            any(OffsetDateTime.class),
+            any(OffsetDateTime.class),
+            eq(QID_RECEIPTED),
+            eq(EventType.RESPONSE_RECEIVED),
+            eq(managementEvent.getEvent()),
+            anyString());
   }
 
   @Test(expected = RuntimeException.class)

@@ -61,22 +61,14 @@ public class FulfilmentRequestProcessorTest {
 
     // then
     verify(eventLogger, times(1))
-        .logFulfilmentRequestedEvent(
-            expectedCase,
-            expectedCase.getCaseId(),
-            managementEvent.getEvent().getDateTime(),
-            "Fulfilment Request Received",
-            EventType.FULFILMENT_REQUESTED,
-            expectedFulfilmentRequest,
-            managementEvent.getEvent());
-
-    verify(caseRepository, never()).save(any(Case.class));
-    verifyNoMoreInteractions(eventLogger);
-  }
-
-  @Test
-  public void testGoodIndividualResponseFulfilmentRequestForUACIT1() {
-    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND);
+        .logCaseEvent(
+            eq(expectedCase),
+            eq(managementEvent.getEvent().getDateTime()),
+            any(OffsetDateTime.class),
+            eq("Fulfilment Request Received"),
+            eq(FULFILMENT_REQUESTED),
+            eq(managementEvent.getEvent()),
+            anyString());
   }
 
   @Test
