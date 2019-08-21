@@ -17,27 +17,26 @@ import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
 @Service
-public class ReceiptProcessor {
-  private static final Logger log = LoggerFactory.getLogger(ReceiptProcessor.class);
+public class ReceiptService {
+  private static final Logger log = LoggerFactory.getLogger(ReceiptService.class);
   public static final String QID_RECEIPTED = "QID Receipted";
   private static final String QID_NOT_FOUND_ERROR = "Qid not found error";
-  private static final String DATETIME_NOT_PRESENT = "Date time not in event error";
-  private final CaseProcessor caseProcessor;
+  private final CaseService caseService;
   private final UacQidLinkRepository uacQidLinkRepository;
   private final CaseRepository caseRepository;
-  private final UacProcessor uacProcessor;
+  private final UacService uacService;
   private final EventLogger eventLogger;
 
-  public ReceiptProcessor(
-      CaseProcessor caseProcessor,
+  public ReceiptService(
+      CaseService caseService,
       UacQidLinkRepository uacQidLinkRepository,
       CaseRepository caseRepository,
-      UacProcessor uacProcessor,
+      UacService uacService,
       EventLogger eventLogger) {
-    this.caseProcessor = caseProcessor;
+    this.caseService = caseService;
     this.uacQidLinkRepository = uacQidLinkRepository;
     this.caseRepository = caseRepository;
-    this.uacProcessor = uacProcessor;
+    this.uacService = uacService;
     this.eventLogger = eventLogger;
   }
 
@@ -52,14 +51,6 @@ public class ReceiptProcessor {
           String.format("Questionnaire Id '%s' not found!", receiptPayload.getQuestionnaireId()));
     }
 
-    if (receiptEvent.getEvent().getDateTime() == null) {
-      log.error(DATETIME_NOT_PRESENT);
-      throw new RuntimeException(
-          String.format(
-              "Date time not found in fulfilment receipt request event for QID '%s",
-              receiptPayload.getQuestionnaireId()));
-    }
-
     UacQidLink uacQidLink = uacQidLinkOpt.get();
     uacQidLink.setActive(false);
     uacQidLinkRepository.saveAndFlush(uacQidLink);
@@ -68,8 +59,8 @@ public class ReceiptProcessor {
     caze.setReceiptReceived(true);
     caseRepository.saveAndFlush(caze);
 
-    uacProcessor.emitUacUpdatedEvent(uacQidLink, caze, uacQidLink.isActive());
-    caseProcessor.emitCaseUpdatedEvent(caze);
+    uacService.emitUacUpdatedEvent(uacQidLink, caze, uacQidLink.isActive());
+    caseService.emitCaseUpdatedEvent(caze);
 
     eventLogger.logUacQidEvent(
         uacQidLink,

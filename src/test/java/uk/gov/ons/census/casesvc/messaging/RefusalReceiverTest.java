@@ -11,12 +11,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
-import uk.gov.ons.census.casesvc.service.RefusalProcessor;
+import uk.gov.ons.census.casesvc.service.RefusalService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RefusalReceiverTest {
 
-  @Mock private RefusalProcessor refusalProcessor;
+  @Mock private RefusalService refusalService;
 
   @InjectMocks RefusalReceiver underTest;
 
@@ -32,7 +32,7 @@ public class RefusalReceiverTest {
     // THEN
     ArgumentCaptor<ResponseManagementEvent> managementEventArgumentCaptor =
         ArgumentCaptor.forClass(ResponseManagementEvent.class);
-    verify(refusalProcessor).processRefusal(managementEventArgumentCaptor.capture());
+    verify(refusalService).processRefusal(managementEventArgumentCaptor.capture());
 
     String actualCaseId =
         managementEventArgumentCaptor.getValue().getPayload().getCollectionCase().getId();

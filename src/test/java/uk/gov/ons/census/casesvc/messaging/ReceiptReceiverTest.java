@@ -5,18 +5,18 @@ import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManage
 
 import org.junit.Test;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
-import uk.gov.ons.census.casesvc.service.ReceiptProcessor;
+import uk.gov.ons.census.casesvc.service.ReceiptService;
 
 public class ReceiptReceiverTest {
 
   @Test
   public void testReceipting() {
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
-    ReceiptProcessor receiptProcessor = mock(ReceiptProcessor.class);
+    ReceiptService receiptService = mock(ReceiptService.class);
 
-    ReceiptReceiver receiptReceiver = new ReceiptReceiver(receiptProcessor);
+    ReceiptReceiver receiptReceiver = new ReceiptReceiver(receiptService);
     receiptReceiver.receiveMessage(managementEvent);
 
-    verify(receiptProcessor, times(1)).processReceipt(managementEvent);
+    verify(receiptService, times(1)).processReceipt(managementEvent);
   }
 }

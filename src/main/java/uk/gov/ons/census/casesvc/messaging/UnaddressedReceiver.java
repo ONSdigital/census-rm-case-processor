@@ -13,16 +13,16 @@ import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
-import uk.gov.ons.census.casesvc.service.UacProcessor;
+import uk.gov.ons.census.casesvc.service.UacService;
 
 @MessageEndpoint
 public class UnaddressedReceiver {
 
-  private final UacProcessor uacProcessor;
+  private final UacService uacService;
   private final EventLogger eventLogger;
 
-  public UnaddressedReceiver(UacProcessor uacProcessor, EventLogger eventLogger) {
-    this.uacProcessor = uacProcessor;
+  public UnaddressedReceiver(UacService uacService, EventLogger eventLogger) {
+    this.uacService = uacService;
     this.eventLogger = eventLogger;
   }
 
@@ -30,9 +30,9 @@ public class UnaddressedReceiver {
   @ServiceActivator(inputChannel = "unaddressedInputChannel")
   public void receiveMessage(CreateUacQid createUacQid) {
     UacQidLink uacQidLink =
-        uacProcessor.generateAndSaveUacQidLink(
+        uacService.generateAndSaveUacQidLink(
             null, Integer.parseInt(createUacQid.getQuestionnaireType()), createUacQid.getBatchId());
-    PayloadDTO uacPayloadDTO = uacProcessor.emitUacUpdatedEvent(uacQidLink, null);
+    PayloadDTO uacPayloadDTO = uacService.emitUacUpdatedEvent(uacQidLink, null);
     eventLogger.logUacQidEvent(
         uacQidLink,
         OffsetDateTime.now(),

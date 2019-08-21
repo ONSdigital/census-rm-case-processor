@@ -1,12 +1,14 @@
 package uk.gov.ons.census.casesvc.service;
 
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.model.dto.Address;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
@@ -20,11 +22,12 @@ import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.utility.EventHelper;
 import uk.gov.ons.census.casesvc.utility.RandomCaseRefGenerator;
 
-@Component
-public class CaseProcessor {
-
+@Service
+public class CaseService {
+  private static final Logger log = LoggerFactory.getLogger(CaseService.class);
+  private static final String CASE_NOT_FOUND_ERROR = "Case not found error";
   private static final String SURVEY = "CENSUS";
-  public static final String CASE_UPDATE_ROUTING_KEY = "event.case.update";
+  static final String CASE_UPDATE_ROUTING_KEY = "event.case.update";
 
   private final CaseRepository caseRepository;
   private final MapperFacade mapperFacade;
@@ -33,7 +36,7 @@ public class CaseProcessor {
   @Value("${queueconfig.case-event-exchange}")
   private String outboundExchange;
 
-  public CaseProcessor(
+  public CaseService(
       CaseRepository caseRepository, RabbitTemplate rabbitTemplate, MapperFacade mapperFacade) {
     this.caseRepository = caseRepository;
     this.rabbitTemplate = rabbitTemplate;
@@ -41,12 +44,7 @@ public class CaseProcessor {
   }
 
   public Case saveCase(CreateCaseSample createCaseSample) {
-    int caseRef = RandomCaseRefGenerator.getCaseRef();
-
-    // Check for collisions
-    if (caseRepository.existsById(caseRef)) {
-      throw new RuntimeException();
-    }
+    int caseRef = getUniqueCaseRef();
 
     Case caze = mapperFacade.map(createCaseSample, Case.class);
     caze.setCaseRef(caseRef);
@@ -56,6 +54,16 @@ public class CaseProcessor {
     caze.setReceiptReceived(false);
     caze = caseRepository.saveAndFlush(caze);
     return caze;
+  }
+
+  public int getUniqueCaseRef() {
+    int caseRef = RandomCaseRefGenerator.getCaseRef();
+
+    // Check for collisions
+    if (caseRepository.existsById(caseRef)) {
+      throw new RuntimeException();
+    }
+    return caseRef;
   }
 
   public Optional<Case> findCase(int caseRef) {
@@ -136,5 +144,15 @@ public class CaseProcessor {
     collectionCase.setCeExpectedCapacity(caze.getCeExpectedCapacity());
 
     return collectionCase;
+  }
+
+  public Case getCaseByCaseId(UUID caseId) {
+    Optional<Case> cazeResult = caseRepository.findByCaseId(caseId);
+
+    if (cazeResult.isEmpty()) {
+      log.error(CASE_NOT_FOUND_ERROR);
+      throw new RuntimeException(String.format("Case ID '%s' not present", caseId));
+    }
+    return cazeResult.get();
   }
 }

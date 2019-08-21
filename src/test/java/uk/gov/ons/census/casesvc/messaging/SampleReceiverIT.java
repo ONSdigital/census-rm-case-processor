@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -69,7 +68,7 @@ public class SampleReceiverIT {
   }
 
   @Test
-  public void testHappyPath() throws InterruptedException, IOException, JSONException {
+  public void testHappyPath() throws InterruptedException, IOException {
     // GIVEN
     BlockingQueue<String> rhCaseMessages = rabbitQueueHelper.listen(rhCaseQueue);
     BlockingQueue<String> rhUacMessages = rabbitQueueHelper.listen(rhUacQueue);
@@ -107,10 +106,8 @@ public class SampleReceiverIT {
     assertThat(eventList.size()).isEqualTo(1);
     Event actualEvent = eventList.get(0);
 
-    ObjectMapper objectMapper = new ObjectMapper();
-
     CreateCaseSample actualcreateCaseSample =
-        objectMapper.readValue(actualEvent.getEventPayload(), CreateCaseSample.class);
+        new ObjectMapper().readValue(actualEvent.getEventPayload(), CreateCaseSample.class);
 
     assertThat(actualcreateCaseSample).isEqualTo(createCaseSample);
   }

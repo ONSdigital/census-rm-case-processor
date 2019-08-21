@@ -2,10 +2,8 @@ package uk.gov.ons.census.casesvc.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
-import static uk.gov.ons.census.casesvc.service.ReceiptProcessor.QID_RECEIPTED;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.generateRandomUacQidLink;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementEvent;
+import static uk.gov.ons.census.casesvc.service.ReceiptService.QID_RECEIPTED;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.*;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -24,19 +22,19 @@ import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ReceiptProcessorTest {
+public class ReceiptServiceTest {
 
-  @Mock private CaseProcessor caseProcessor;
+  @Mock private CaseService caseService;
 
   @Mock private UacQidLinkRepository uacQidLinkRepository;
 
   @Mock private CaseRepository caseRepository;
 
-  @Mock private UacProcessor uacProcessor;
+  @Mock private UacService uacService;
 
   @Mock private EventLogger eventLogger;
 
-  @InjectMocks ReceiptProcessor underTest;
+  @InjectMocks ReceiptService underTest;
 
   @Test
   public void testGoodReceipt() {
@@ -58,8 +56,8 @@ public class ReceiptProcessorTest {
     // then
     verify(uacQidLinkRepository, times(1)).saveAndFlush(expectedUacQidLink);
     verify(caseRepository, times(1)).saveAndFlush(expectedCase);
-    verify(uacProcessor, times(1)).emitUacUpdatedEvent(expectedUacQidLink, expectedCase, false);
-    verify(caseProcessor, times(1)).emitCaseUpdatedEvent(expectedCase);
+    verify(uacService, times(1)).emitUacUpdatedEvent(expectedUacQidLink, expectedCase, false);
+    verify(caseService, times(1)).emitCaseUpdatedEvent(expectedCase);
     verify(eventLogger, times(1))
         .logUacQidEvent(
             eq(expectedUacQidLink),
@@ -80,36 +78,6 @@ public class ReceiptProcessorTest {
         String.format("Questionnaire Id '%s' not found!", expectedQuestionnaireId);
 
     when(uacQidLinkRepository.findByQid(anyString())).thenReturn(Optional.empty());
-
-    try {
-      // WHEN
-      underTest.processReceipt(managementEvent);
-    } catch (RuntimeException re) {
-      // THEN
-      assertThat(re.getMessage()).isEqualTo(expectedErrorMessage);
-      throw re;
-    }
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testNullDateTime() {
-    ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
-    ReceiptDTO expectedReceipt = managementEvent.getPayload().getReceipt();
-
-    // Given
-    Case expectedCase = getRandomCase();
-    UacQidLink expectedUacQidLink = expectedCase.getUacQidLinks().get(0);
-    expectedUacQidLink.setCaze(expectedCase);
-
-    managementEvent.getEvent().setDateTime(null);
-
-    when(uacQidLinkRepository.findByQid(expectedReceipt.getQuestionnaireId()))
-        .thenReturn(Optional.of(expectedUacQidLink));
-
-    String expectedErrorMessage =
-        String.format(
-            "Date time not found in fulfilment receipt request event for QID '%s",
-            expectedReceipt.getQuestionnaireId());
 
     try {
       // WHEN
