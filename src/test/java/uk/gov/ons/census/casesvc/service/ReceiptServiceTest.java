@@ -56,17 +56,4 @@ public class ReceiptServiceTest {
             eq(managementEvent.getEvent()),
             anyString());
   }
-
-  @Test(expected = RuntimeException.class)
-  public void testReceiptedQidNotFound() {
-    // GIVEN
-    ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
-    when(uacService.findByQid(anyString())).thenThrow(new RuntimeException());
-
-    // WHEN
-    underTest.processReceipt(managementEvent);
-
-    // THEN
-    // RTE
-  }
 }

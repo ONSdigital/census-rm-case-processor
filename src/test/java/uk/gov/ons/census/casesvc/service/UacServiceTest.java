@@ -8,6 +8,7 @@ import static uk.gov.ons.census.casesvc.testutil.DataUtils.generateUacCreatedEve
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 
 import java.time.OffsetDateTime;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -166,5 +167,11 @@ public class UacServiceTest {
             eq(EventType.RM_UAC_CREATED),
             eq(uacCreatedEvent.getEvent()),
             anyString());
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testCantFindUacLink() {
+    when(uacQidLinkRepository.findByQid(anyString())).thenReturn(Optional.empty());
+    underTest.findByQid("Test qid");
   }
 }

@@ -117,19 +117,4 @@ public class QuestionnaireLinkedServiceTest {
             eq(managementEvent.getEvent()),
             anyString());
   }
-
-  @Test(expected = RuntimeException.class)
-  public void testQuestionnaireLinkedQidNotFound() {
-    // GIVEN
-    ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
-    String questionnaireId = managementEvent.getPayload().getUac().getQuestionnaireId();
-
-    when(uacService.findByQid(questionnaireId)).thenThrow(RuntimeException.class);
-
-    // WHEN
-    underTest.processQuestionnaireLinked(managementEvent);
-
-    // THEN
-    // RTE
-  }
 }
