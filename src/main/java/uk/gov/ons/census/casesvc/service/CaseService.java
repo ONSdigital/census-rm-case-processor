@@ -146,6 +146,7 @@ public class CaseService {
     collectionCase.setFieldCoordinatorId(caze.getFieldCoordinatorId());
     collectionCase.setFieldOfficerId(caze.getFieldOfficerId());
     collectionCase.setCeExpectedCapacity(caze.getCeExpectedCapacity());
+    collectionCase.setAddressInvalid(caze.isAddressInvalid());
 
     return collectionCase;
   }
