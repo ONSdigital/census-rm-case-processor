@@ -33,13 +33,12 @@ public class EventService {
     Case caze = caseService.saveCase(createCaseSample);
     int questionnaireType =
         QuestionnaireTypeHelper.calculateQuestionnaireType(caze.getTreatmentCode());
-    UacQidLink uacQidLink = uacService.generateAndSaveUacQidLink(caze, questionnaireType);
-    uacService.emitUacUpdatedEvent(uacQidLink, caze);
-    caseService.emitCaseCreatedEvent(caze);
+    UacQidLink uacQidLink = uacService.buildUacQidLink(caze, questionnaireType);
+    uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
+    caseService.saveAndEmitCaseCreatedEvent(caze);
 
     eventLogger.logCaseEvent(
         caze,
-        OffsetDateTime.now(),
         OffsetDateTime.now(),
         CREATE_CASE_SAMPLE_RECEIVED,
         EventType.SAMPLE_LOADED,
@@ -47,8 +46,8 @@ public class EventService {
         convertObjectToJson(createCaseSample));
 
     if (QuestionnaireTypeHelper.isQuestionnaireWelsh(caze.getTreatmentCode())) {
-      uacQidLink = uacService.generateAndSaveUacQidLink(caze, 3);
-      uacService.emitUacUpdatedEvent(uacQidLink, caze);
+      uacQidLink = uacService.buildUacQidLink(caze, 3);
+      uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
     }
   }
 
@@ -65,7 +64,6 @@ public class EventService {
     eventLogger.logCaseEvent(
         caze,
         responseManagementEvent.getEvent().getDateTime(),
-        OffsetDateTime.now(),
         String.format(
             "Case selected by Action Rule for print Pack Code %s",
             responseManagementEvent.getPayload().getPrintCaseSelected().getPackCode()),

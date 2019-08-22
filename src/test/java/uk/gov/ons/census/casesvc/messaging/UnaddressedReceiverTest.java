@@ -34,19 +34,17 @@ public class UnaddressedReceiverTest {
     createUacQid.setQuestionnaireType("21");
     createUacQid.setBatchId(UUID.randomUUID());
     UacQidLink uacQidLink = new UacQidLink();
-    when(uacService.generateAndSaveUacQidLink(null, 21, createUacQid.getBatchId()))
-        .thenReturn(uacQidLink);
-    when(uacService.emitUacUpdatedEvent(any(UacQidLink.class), any())).thenReturn(new PayloadDTO());
+    when(uacService.buildUacQidLink(null, 21, createUacQid.getBatchId())).thenReturn(uacQidLink);
+    when(uacService.saveAndEmitUacUpdatedEvent(any(UacQidLink.class))).thenReturn(new PayloadDTO());
 
     // When
     underTest.receiveMessage(createUacQid);
 
     // Then
-    verify(uacService).emitUacUpdatedEvent(eq(uacQidLink), eq(null));
+    verify(uacService).saveAndEmitUacUpdatedEvent(eq(uacQidLink));
     verify(eventLogger)
         .logUacQidEvent(
             eq(uacQidLink),
-            any(OffsetDateTime.class),
             any(OffsetDateTime.class),
             eq("Unaddressed UAC/QID pair created"),
             any(EventType.class),

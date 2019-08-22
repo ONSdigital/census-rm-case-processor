@@ -53,6 +53,9 @@ public class AppConfig {
   @Value("${queueconfig.uac-qid-created-queue}")
   private String uacQidCreatedQueue;
 
+  @Value("${queueconfig.invalid-address-inbound-queue}")
+  private String invalidAddressInboundQueue;
+
   @Bean
   public MessageChannel caseSampleInputChannel() {
     return new DirectChannel();
@@ -90,6 +93,11 @@ public class AppConfig {
 
   @Bean
   public MessageChannel uacCreatedInputChannel() {
+    return new DirectChannel();
+  }
+
+  @Bean
+  public MessageChannel invalidAddressInputChannel() {
     return new DirectChannel();
   }
 
@@ -160,6 +168,15 @@ public class AppConfig {
   AmqpInboundChannelAdapter uacCreatedInbound(
       @Qualifier("uacCreatedContainer") SimpleMessageListenerContainer listenerContainer,
       @Qualifier("uacCreatedInputChannel") MessageChannel channel) {
+    AmqpInboundChannelAdapter adapter = new AmqpInboundChannelAdapter(listenerContainer);
+    adapter.setOutputChannel(channel);
+    return adapter;
+  }
+
+  @Bean
+  AmqpInboundChannelAdapter invalidAddressInbound(
+      @Qualifier("invalidAddressContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("invalidAddressInputChannel") MessageChannel channel) {
     AmqpInboundChannelAdapter adapter = new AmqpInboundChannelAdapter(listenerContainer);
     adapter.setOutputChannel(channel);
     return adapter;
@@ -251,6 +268,16 @@ public class AppConfig {
     SimpleMessageListenerContainer container =
         new SimpleMessageListenerContainer(connectionFactory);
     container.setQueueNames(uacQidCreatedQueue);
+    container.setConcurrentConsumers(consumers);
+    return container;
+  }
+
+  @Bean
+  public SimpleMessageListenerContainer invalidAddressContainer(
+      ConnectionFactory connectionFactory) {
+    SimpleMessageListenerContainer container =
+        new SimpleMessageListenerContainer(connectionFactory);
+    container.setQueueNames(invalidAddressInboundQueue);
     container.setConcurrentConsumers(consumers);
     return container;
   }

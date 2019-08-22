@@ -29,4 +29,7 @@ public class PayloadDTO {
 
   @JsonInclude(Include.NON_NULL)
   private UacCreatedDTO uacQidCreated;
+
+  @JsonInclude(Include.NON_NULL)
+  private InvalidAddress invalidAddress;
 }
