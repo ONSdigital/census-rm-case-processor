@@ -105,7 +105,7 @@ public class CaseServiceTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void testUIniqueCaseRefCreationThrowsRuntimeException() {
+  public void testUniqueCaseRefCreationThrowsRuntimeException() {
     // Given
     when(caseRepository.existsById(anyInt())).thenReturn(true);
 
