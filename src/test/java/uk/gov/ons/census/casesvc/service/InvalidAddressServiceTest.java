@@ -7,7 +7,6 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementEvent;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -70,28 +69,5 @@ public class InvalidAddressServiceTest {
             eq(EventType.ADDRESS_NOT_VALID),
             eq(managementEvent.getEvent()),
             anyString());
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testCaseNotFound() {
-    // GIVEN
-    ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
-    managementEvent.setEvent(new EventDTO());
-    managementEvent.getEvent().setDateTime(OffsetDateTime.now());
-    managementEvent.setPayload(new PayloadDTO());
-    managementEvent.getPayload().setInvalidAddress(new InvalidAddress());
-    managementEvent.getPayload().getInvalidAddress().setCollectionCase(new CollectionCaseCaseId());
-    managementEvent
-        .getPayload()
-        .getInvalidAddress()
-        .getCollectionCase()
-        .setId(UUID.randomUUID().toString());
-    when(caseService.getCaseByCaseId(any(UUID.class))).thenThrow(new RuntimeException());
-
-    // WHEN
-    underTest.processMessage(managementEvent);
-
-    // THEN
-    // RTE
   }
 }
