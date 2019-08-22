@@ -80,6 +80,7 @@ public class InvalidAddressReceiverIT {
     managementEvent.getEvent().setDateTime(OffsetDateTime.now());
     managementEvent.getEvent().setChannel("Test channel");
     managementEvent.getEvent().setSource("Test source");
+    managementEvent.getEvent().setType(EventTypeDTO.ADDRESS_NOT_VALID);
     managementEvent.setPayload(new PayloadDTO());
     managementEvent.getPayload().setInvalidAddress(new InvalidAddress());
     managementEvent.getPayload().getInvalidAddress().setCollectionCase(new CollectionCaseCaseId());

@@ -19,6 +19,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCaseCaseId;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
+import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.InvalidAddress;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
@@ -39,6 +40,7 @@ public class InvalidAddressServiceTest {
     ResponseManagementEvent managementEvent = new ResponseManagementEvent();
     managementEvent.setEvent(new EventDTO());
     managementEvent.getEvent().setDateTime(OffsetDateTime.now());
+    managementEvent.getEvent().setType(EventTypeDTO.ADDRESS_NOT_VALID);
     managementEvent.setPayload(new PayloadDTO());
     managementEvent.getPayload().setInvalidAddress(new InvalidAddress());
     managementEvent.getPayload().getInvalidAddress().setCollectionCase(new CollectionCaseCaseId());
