@@ -28,6 +28,9 @@ public class QueueSetterUpper {
   @Value("${queueconfig.rh-uac-queue}")
   private String rhUacQueue;
 
+  @Value("${queueconfig.survey-launched-queue}")
+  private String surveyLaunchedQueue;
+
   @Value("${queueconfig.rh-uac-routing-key}")
   private String rhUacRoutingKey;
 
@@ -82,6 +85,9 @@ public class QueueSetterUpper {
   @Value("${queueconfig.invalid-address-inbound-queue}")
   private String invalidAddressInboundQueue;
 
+  @Value("${queueconfig.survey-launched-routing-key}")
+  private String surveyLaunchedRoutingKey;
+
   @Bean
   public Queue inboundQueue() {
     return new Queue(inboundQueue, true);
@@ -101,6 +107,8 @@ public class QueueSetterUpper {
   public Queue rhUacQueue() {
     return new Queue(rhUacQueue, true);
   }
+
+  @Bean Queue surveyLaunchedQueue() { return new Queue(surveyLaunchedQueue, true); }
 
   @Bean
   public Queue actionSchedulerQueue() {
@@ -126,6 +134,9 @@ public class QueueSetterUpper {
   public Exchange caseEventExchange() {
     return new TopicExchange(caseEventExchange, true, false);
   }
+
+  @Bean
+  public Binding surveyLaunchedBinding() { return new Binding(surveyLaunchedQueue, QUEUE, caseEventExchange, surveyLaunchedRoutingKey, null);}
 
   @Bean
   public Binding bindingRhCase() {

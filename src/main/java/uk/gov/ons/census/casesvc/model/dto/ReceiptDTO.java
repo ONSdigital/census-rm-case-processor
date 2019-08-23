@@ -18,6 +18,8 @@ public class ReceiptDTO {
 
   private boolean unreceipt;
 
+  private String agentId;
+
   @JsonInclude(Include.NON_NULL)
   @JsonProperty("dateTime")
   private OffsetDateTime responseDateTime;
