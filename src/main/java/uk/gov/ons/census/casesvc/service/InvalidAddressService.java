@@ -42,6 +42,6 @@ public class InvalidAddressService {
         "Invalid address",
         EventType.ADDRESS_NOT_VALID,
         invalidAddressEvent.getEvent(),
-        convertObjectToJson(invalidAddressEvent.getPayload()));
+        convertObjectToJson(invalidAddressEvent.getPayload().getInvalidAddress()));
   }
 }

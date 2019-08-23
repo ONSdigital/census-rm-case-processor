@@ -33,6 +33,7 @@ import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
+import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
@@ -111,6 +112,7 @@ public class InvalidAddressReceiverIT {
     assertThat(events.size()).isEqualTo(1);
     Event event = events.get(0);
     assertThat(event.getEventDescription()).isEqualTo("Invalid address");
+    assertThat(event.getEventType()).isEqualTo(EventType.ADDRESS_NOT_VALID);
 
     Optional<Case> actualCaseOpt = caseRepository.findByCaseId(caze.getCaseId());
     Case actualCase = actualCaseOpt.get();
