@@ -168,7 +168,7 @@ public class FulfilmentRequestReceiverIT {
     assertThat(actualParentCase.getAddressLine1()).isEqualTo(actualChildCase.getAddressLine1());
     assertThat(actualParentCase.getCaseRef()).isNotEqualTo(actualChildCase.getCaseRef());
 
-    assertThat(actualChildCase.getAddressType()).isEqualTo("HH");
+    assertThat(actualChildCase.getAddressType()).isEqualTo(actualParentCase.getAddressType());
     assertThat(actualChildCase.getCaseType()).isEqualTo("HI");
     assertThat(actualChildCase.isReceiptReceived()).isEqualTo(false);
     assertThat(actualChildCase.isRefusalReceived()).isEqualTo(false);

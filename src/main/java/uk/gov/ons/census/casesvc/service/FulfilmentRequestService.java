@@ -20,8 +20,7 @@ import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 @Service
 public class FulfilmentRequestService {
   private static final String FULFILMENT_REQUEST_RECEIVED = "Fulfilment Request Received";
-  private static final String HOUSEHOLD_RESPONSE_ADDRESS_TYPE = "HH";
-  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_ADDRESS_TYPE = "HI";
+  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_CASE_TYPE = "HI";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND = "UACIT1";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH = "UACIT2";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH = "UACIT2W";
@@ -74,8 +73,8 @@ public class FulfilmentRequestService {
     individualResponseCase.setCaseRef(caseService.getUniqueCaseRef());
     individualResponseCase.setState(CaseState.ACTIONABLE);
     individualResponseCase.setCreatedDateTime(OffsetDateTime.now());
-    individualResponseCase.setAddressType(HOUSEHOLD_RESPONSE_ADDRESS_TYPE);
-    individualResponseCase.setCaseType(HOUSEHOLD_INDIVIDUAL_RESPONSE_ADDRESS_TYPE);
+    individualResponseCase.setAddressType(parentCase.getAddressType());
+    individualResponseCase.setCaseType(HOUSEHOLD_INDIVIDUAL_RESPONSE_CASE_TYPE);
     individualResponseCase.setCollectionExerciseId(parentCase.getCollectionExerciseId());
     individualResponseCase.setActionPlanId(parentCase.getActionPlanId());
     individualResponseCase.setArid(parentCase.getArid());
