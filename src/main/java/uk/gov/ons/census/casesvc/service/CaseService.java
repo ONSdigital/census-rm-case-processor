@@ -124,6 +124,7 @@ public class CaseService {
     collectionCase.setActionableFrom(OffsetDateTime.now());
     collectionCase.setAddress(address);
     collectionCase.setCaseRef(Long.toString(caze.getCaseRef()));
+    collectionCase.setCaseType(caze.getCaseType());
     collectionCase.setCollectionExerciseId(caze.getCollectionExerciseId());
     collectionCase.setId(caze.getCaseId().toString());
     collectionCase.setState(caze.getState().toString());
