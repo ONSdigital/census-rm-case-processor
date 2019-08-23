@@ -25,6 +25,7 @@ import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FulfilmentRequestServiceTest {
+  private static final String HOUSEHOLD_RESPONSE_ADDRESS_TYPE = "HH";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_ADDRESS_TYPE = "HI";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND = "UACIT1";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH = "UACIT2";
@@ -147,8 +148,8 @@ public class FulfilmentRequestServiceTest {
     assertThat(actualChildCase.getArid()).isEqualTo(parentCase.getArid());
     assertThat(actualChildCase.getEstabArid()).isEqualTo(parentCase.getEstabArid());
     assertThat(actualChildCase.getUprn()).isEqualTo(parentCase.getUprn());
-    assertThat(actualChildCase.getAddressType())
-        .isEqualTo(HOUSEHOLD_INDIVIDUAL_RESPONSE_ADDRESS_TYPE);
+    assertThat(actualChildCase.getAddressType()).isEqualTo(HOUSEHOLD_RESPONSE_ADDRESS_TYPE);
+    assertThat(actualChildCase.getCaseType()).isEqualTo(HOUSEHOLD_INDIVIDUAL_RESPONSE_ADDRESS_TYPE);
     assertThat(actualChildCase.getEstabType()).isEqualTo(parentCase.getEstabType());
     assertThat(actualChildCase.getAddressLevel()).isNull();
     assertThat(actualChildCase.getAbpCode()).isEqualTo(parentCase.getAbpCode());
