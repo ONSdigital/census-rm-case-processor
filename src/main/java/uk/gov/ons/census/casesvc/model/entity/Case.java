@@ -20,7 +20,7 @@ public class Case {
   @Id private int caseRef;
 
   @Column private UUID caseId;
-  
+
   @Column private String arid;
 
   @Column private String estabArid;
