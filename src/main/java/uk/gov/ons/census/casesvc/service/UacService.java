@@ -2,7 +2,9 @@ package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
-import java.time.OffsetDateTime;
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,7 +26,9 @@ import uk.gov.ons.census.casesvc.utility.Sha256Helper;
 
 @Service
 public class UacService {
+  private static final Logger log = LoggerFactory.getLogger(UacService.class);
   private static final String UAC_UPDATE_ROUTING_KEY = "event.uac.update";
+  private static final String QID_NOT_FOUND_ERROR = "Qid not found error";
 
   private final UacQidLinkRepository uacQidLinkRepository;
   private final RabbitTemplate rabbitTemplate;
@@ -48,17 +52,16 @@ public class UacService {
     this.caseService = caseService;
   }
 
-  public UacQidLink generateAndSaveUacQidLink(Case caze, int questionnaireType) {
-    return generateAndSaveUacQidLink(caze, questionnaireType, null);
+  public UacQidLink buildUacQidLink(Case caze, int questionnaireType) {
+    return buildUacQidLink(caze, questionnaireType, null);
   }
 
-  public UacQidLink generateAndSaveUacQidLink(Case caze, int questionnaireType, UUID batchId) {
+  public UacQidLink buildUacQidLink(Case caze, int questionnaireType, UUID batchId) {
     UacQidDTO uacQid = uacQidServiceClient.generateUacQid(questionnaireType);
-    return createAndSaveUacQidLink(caze, batchId, uacQid.getUac(), uacQid.getQid());
+    return buildUacQidLink(caze, batchId, uacQid.getUac(), uacQid.getQid());
   }
 
-  private UacQidLink createAndSaveUacQidLink(
-      Case linkedCase, UUID batchId, String uac, String qid) {
+  private UacQidLink buildUacQidLink(Case linkedCase, UUID batchId, String uac, String qid) {
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setId(UUID.randomUUID());
     uacQidLink.setUac(uac);
@@ -67,23 +70,21 @@ public class UacService {
     uacQidLink.setActive(true);
     uacQidLink.setQid(qid);
 
-    uacQidLinkRepository.save(uacQidLink);
     return uacQidLink;
   }
 
-  public PayloadDTO emitUacUpdatedEvent(UacQidLink uacQidLink, Case caze) {
-    return emitUacUpdatedEvent(uacQidLink, caze, true);
-  }
+  public PayloadDTO saveAndEmitUacUpdatedEvent(UacQidLink uacQidLink) {
+    uacQidLinkRepository.save(uacQidLink);
 
-  public PayloadDTO emitUacUpdatedEvent(UacQidLink uacQidLink, Case caze, boolean active) {
     EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.UAC_UPDATED);
 
     UacDTO uac = new UacDTO();
     uac.setQuestionnaireId(uacQidLink.getQid());
     uac.setUacHash(Sha256Helper.hash(uacQidLink.getUac()));
     uac.setUac(uacQidLink.getUac());
-    uac.setActive(active);
+    uac.setActive(uacQidLink.isActive());
 
+    Case caze = uacQidLink.getCaze();
     if (caze != null) {
       uac.setCaseId(caze.getCaseId().toString());
       uac.setCaseType(caze.getAddressType());
@@ -108,21 +109,32 @@ public class UacService {
         caseService.getCaseByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId());
 
     UacQidLink uacQidLink =
-        createAndSaveUacQidLink(
+        buildUacQidLink(
             linkedCase,
             null,
             uacCreatedEvent.getPayload().getUacQidCreated().getUac(),
             uacCreatedEvent.getPayload().getUacQidCreated().getQid());
 
-    emitUacUpdatedEvent(uacQidLink, linkedCase);
+    saveAndEmitUacUpdatedEvent(uacQidLink);
 
     eventLogger.logUacQidEvent(
         uacQidLink,
         uacCreatedEvent.getEvent().getDateTime(),
-        OffsetDateTime.now(),
         "RM UAC QID pair created",
         EventType.RM_UAC_CREATED,
         uacCreatedEvent.getEvent(),
         convertObjectToJson(uacCreatedEvent.getPayload()));
+  }
+
+  public UacQidLink findByQid(String questionnaireId) {
+    Optional<UacQidLink> uacQidLinkOpt = uacQidLinkRepository.findByQid(questionnaireId);
+
+    if (uacQidLinkOpt.isEmpty()) {
+      log.error(QID_NOT_FOUND_ERROR);
+      throw new RuntimeException(
+          String.format("Questionnaire Id '%s' not found!", questionnaireId));
+    }
+
+    return uacQidLinkOpt.get();
   }
 }

@@ -70,7 +70,9 @@ public class CaseService {
     return caseRepository.findById(caseRef);
   }
 
-  public PayloadDTO emitCaseCreatedEvent(Case caze) {
+  public PayloadDTO saveAndEmitCaseCreatedEvent(Case caze) {
+    caseRepository.saveAndFlush(caze);
+
     EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_CREATED);
     ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
     rabbitTemplate.convertAndSend(
@@ -78,7 +80,9 @@ public class CaseService {
     return responseManagementEvent.getPayload();
   }
 
-  public void emitCaseUpdatedEvent(Case caze) {
+  public void saveAndEmitCaseUpdatedEvent(Case caze) {
+    caseRepository.saveAndFlush(caze);
+
     EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_UPDATED);
     ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
     rabbitTemplate.convertAndSend(
@@ -120,6 +124,8 @@ public class CaseService {
 
   private CollectionCase createCollectionCase(Case caze, Address address) {
     CollectionCase collectionCase = new CollectionCase();
+
+    // These are the mandatory fields required by RH, as documented in the event dictionary
     collectionCase.setActionableFrom(OffsetDateTime.now());
     collectionCase.setAddress(address);
     collectionCase.setCaseRef(Long.toString(caze.getCaseRef()));
@@ -127,10 +133,9 @@ public class CaseService {
     collectionCase.setId(caze.getCaseId().toString());
     collectionCase.setState(caze.getState().toString());
     collectionCase.setSurvey(SURVEY);
-    collectionCase.setReceiptReceived(caze.isReceiptReceived());
-    collectionCase.setRefusalReceived(caze.isRefusalReceived());
+    // Stop. No. Don't put anything else here unless it's in the event dictionary. Look down!
 
-    // Below this line is extra data potentially needed by Action Scheduler - can be ignored by RM
+    // Below this line is extra data potentially needed by Action Scheduler - will be ignored by RH
     collectionCase.setActionPlanId(caze.getActionPlanId());
     collectionCase.setTreatmentCode(caze.getTreatmentCode());
     collectionCase.setOa(caze.getOa());
@@ -142,6 +147,10 @@ public class CaseService {
     collectionCase.setFieldCoordinatorId(caze.getFieldCoordinatorId());
     collectionCase.setFieldOfficerId(caze.getFieldOfficerId());
     collectionCase.setCeExpectedCapacity(caze.getCeExpectedCapacity());
+    collectionCase.setReceiptReceived(caze.isReceiptReceived());
+    collectionCase.setRefusalReceived(caze.isRefusalReceived());
+    collectionCase.setAddressInvalid(caze.isAddressInvalid());
+    // Yes. You can add stuff to the bottom of this list if you like.
 
     return collectionCase;
   }

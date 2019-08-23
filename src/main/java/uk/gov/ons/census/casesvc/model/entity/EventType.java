@@ -1,8 +1,6 @@
 package uk.gov.ons.census.casesvc.model.entity;
 
 public enum EventType {
-  CASE_CREATED,
-  CASE_UPDATED,
   UAC_UPDATED,
   PRINT_CASE_SELECTED,
   RESPONSE_RECEIVED,
@@ -10,5 +8,6 @@ public enum EventType {
   FULFILMENT_REQUESTED,
   QUESTIONNAIRE_LINKED,
   SAMPLE_LOADED,
-  RM_UAC_CREATED
+  RM_UAC_CREATED,
+  ADDRESS_NOT_VALID
 }

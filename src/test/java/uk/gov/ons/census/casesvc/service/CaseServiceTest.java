@@ -85,9 +85,11 @@ public class CaseServiceTest {
     ReflectionTestUtils.setField(underTest, "outboundExchange", TEST_EXCHANGE);
 
     // When
-    underTest.emitCaseCreatedEvent(caze);
+    underTest.saveAndEmitCaseCreatedEvent(caze);
 
     // Then
+    verify(caseRepository).saveAndFlush(eq(caze));
+
     ArgumentCaptor<ResponseManagementEvent> rmeArgumentCaptor =
         ArgumentCaptor.forClass(ResponseManagementEvent.class);
     verify(rabbitTemplate)
@@ -103,7 +105,7 @@ public class CaseServiceTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void testUIniqueCaseRefCreationThrowsRuntimeException() {
+  public void testUniqueCaseRefCreationThrowsRuntimeException() {
     // Given
     when(caseRepository.existsById(anyInt())).thenReturn(true);
 
