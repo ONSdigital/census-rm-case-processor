@@ -27,6 +27,7 @@ public class CaseService {
   private static final Logger log = LoggerFactory.getLogger(CaseService.class);
   private static final String CASE_NOT_FOUND_ERROR = "Case not found error";
   private static final String SURVEY = "CENSUS";
+  private static final String HOUSE_RESPONSE_ADDRESS_TYPE = "HH";
   static final String CASE_UPDATE_ROUTING_KEY = "event.case.update";
 
   private final CaseRepository caseRepository;
@@ -48,7 +49,7 @@ public class CaseService {
 
     Case caze = mapperFacade.map(createCaseSample, Case.class);
     caze.setCaseRef(caseRef);
-    caze.setCaseType("HH");
+    caze.setCaseType(HOUSE_RESPONSE_ADDRESS_TYPE);
     caze.setCaseId(UUID.randomUUID());
     caze.setState(CaseState.ACTIONABLE);
     caze.setCreatedDateTime(OffsetDateTime.now());
