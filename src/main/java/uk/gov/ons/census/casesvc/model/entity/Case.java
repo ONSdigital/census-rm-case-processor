@@ -27,6 +27,8 @@ public class Case {
 
   @Column private String uprn;
 
+  @Column private String caseType;
+
   @Column private String addressType;
 
   @Column private String estabType;
