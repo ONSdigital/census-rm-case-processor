@@ -15,7 +15,6 @@ import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.CaseState;
-import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 
 @Service
 public class FulfilmentRequestService {
@@ -33,13 +32,10 @@ public class FulfilmentRequestService {
               HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH,
               HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NORTHERN_IRELAND));
 
-  private final CaseRepository caseRepository;
   private final EventLogger eventLogger;
   private final CaseService caseService;
 
-  public FulfilmentRequestService(
-      CaseRepository caseRepository, EventLogger eventLogger, CaseService caseService) {
-    this.caseRepository = caseRepository;
+  public FulfilmentRequestService(EventLogger eventLogger, CaseService caseService) {
     this.eventLogger = eventLogger;
     this.caseService = caseService;
   }
@@ -54,19 +50,18 @@ public class FulfilmentRequestService {
     eventLogger.logCaseEvent(
         caze,
         fulfilmentRequestEvent.getDateTime(),
-        OffsetDateTime.now(),
         FULFILMENT_REQUEST_RECEIVED,
         FULFILMENT_REQUESTED,
         fulfilmentRequestEvent,
         convertObjectToJson(fulfilmentRequestPayload));
 
     if (individualResponseRequestCodes.contains(fulfilmentRequestPayload.getFulfilmentCode())) {
-      Case individualResponseCase = saveIndividualResponseCaseFromParentCase(caze);
-      caseService.emitCaseCreatedEvent(individualResponseCase);
+      Case individualResponseCase = prepareIndividualResponseCaseFromParentCase(caze);
+      caseService.saveAndEmitCaseCreatedEvent(individualResponseCase);
     }
   }
 
-  private Case saveIndividualResponseCaseFromParentCase(Case parentCase) {
+  private Case prepareIndividualResponseCaseFromParentCase(Case parentCase) {
     Case individualResponseCase = new Case();
 
     individualResponseCase.setCaseId(UUID.randomUUID());
@@ -95,8 +90,6 @@ public class FulfilmentRequestService {
     individualResponseCase.setMsoa(parentCase.getMsoa());
     individualResponseCase.setLad(parentCase.getLad());
     individualResponseCase.setRegion(parentCase.getRegion());
-
-    caseRepository.save(individualResponseCase);
 
     return individualResponseCase;
   }

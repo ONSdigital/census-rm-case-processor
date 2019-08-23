@@ -22,13 +22,11 @@ public class EventLogger {
   public void logCaseEvent(
       Case caze,
       OffsetDateTime eventDate,
-      OffsetDateTime rmEventProcessed,
       String eventDescription,
       EventType eventType,
       EventDTO event,
       String eventPayload) {
-    Event loggedEvent =
-        buildEvent(eventDate, rmEventProcessed, eventDescription, eventType, event, eventPayload);
+    Event loggedEvent = buildEvent(eventDate, eventDescription, eventType, event, eventPayload);
     loggedEvent.setCaze(caze);
 
     eventRepository.save(loggedEvent);
@@ -37,13 +35,11 @@ public class EventLogger {
   public void logUacQidEvent(
       UacQidLink uacQidLink,
       OffsetDateTime eventDate,
-      OffsetDateTime rmEventProcessed,
       String eventDescription,
       EventType eventType,
       EventDTO event,
       String eventPayload) {
-    Event loggedEvent =
-        buildEvent(eventDate, rmEventProcessed, eventDescription, eventType, event, eventPayload);
+    Event loggedEvent = buildEvent(eventDate, eventDescription, eventType, event, eventPayload);
     loggedEvent.setUacQidLink(uacQidLink);
 
     eventRepository.save(loggedEvent);
@@ -51,7 +47,6 @@ public class EventLogger {
 
   private Event buildEvent(
       OffsetDateTime eventDate,
-      OffsetDateTime rmEventProcessed,
       String eventDescription,
       EventType eventType,
       EventDTO event,
@@ -60,7 +55,7 @@ public class EventLogger {
 
     loggedEvent.setId(UUID.randomUUID());
     loggedEvent.setEventDate(eventDate);
-    loggedEvent.setRmEventProcessed(rmEventProcessed);
+    loggedEvent.setRmEventProcessed(OffsetDateTime.now());
     loggedEvent.setEventDescription(eventDescription);
     loggedEvent.setEventType(eventType);
     loggedEvent.setEventChannel(event.getChannel());

@@ -18,14 +18,11 @@ import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
-import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RefusalServiceTest {
   private static final String REFUSAL_RECEIVED = "Refusal Received";
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
-
-  @Mock private CaseRepository caseRepository;
 
   @Mock private CaseService caseService;
 
@@ -49,16 +46,13 @@ public class RefusalServiceTest {
 
     // THEN
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(caseRepository).saveAndFlush(caseArgumentCaptor.capture());
+    verify(caseService, times(1)).saveAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture());
     Case actualCase = caseArgumentCaptor.getValue();
 
     assertThat(actualCase.isRefusalReceived()).isTrue();
-
-    verify(caseService, times(1)).emitCaseUpdatedEvent(testCase);
     verify(eventLogger, times(1))
         .logCaseEvent(
             eq(testCase),
-            any(OffsetDateTime.class),
             any(OffsetDateTime.class),
             eq(REFUSAL_RECEIVED),
             eq(EventType.REFUSAL_RECEIVED),

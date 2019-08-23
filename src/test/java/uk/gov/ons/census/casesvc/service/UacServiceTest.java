@@ -8,6 +8,7 @@ import static uk.gov.ons.census.casesvc.testutil.DataUtils.generateUacCreatedEve
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 
 import java.time.OffsetDateTime;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,7 +54,7 @@ public class UacServiceTest {
 
     // When
     UacQidLink result;
-    result = underTest.generateAndSaveUacQidLink(caze, 1);
+    result = underTest.buildUacQidLink(caze, 1);
 
     // Then
     assertEquals("01", result.getQid().substring(0, 2));
@@ -71,7 +72,7 @@ public class UacServiceTest {
     ReflectionTestUtils.setField(underTest, "outboundExchange", "TEST_EXCHANGE");
 
     // When
-    underTest.emitUacUpdatedEvent(uacQidLink, caze);
+    underTest.saveAndEmitUacUpdatedEvent(uacQidLink);
 
     // Then
     ArgumentCaptor<ResponseManagementEvent> responseManagementEventArgumentCaptor =
@@ -162,10 +163,15 @@ public class UacServiceTest {
         .logUacQidEvent(
             any(UacQidLink.class),
             any(OffsetDateTime.class),
-            any(OffsetDateTime.class),
             eq("RM UAC QID pair created"),
             eq(EventType.RM_UAC_CREATED),
             eq(uacCreatedEvent.getEvent()),
             anyString());
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testCantFindUacLink() {
+    when(uacQidLinkRepository.findByQid(anyString())).thenReturn(Optional.empty());
+    underTest.findByQid("Test qid");
   }
 }

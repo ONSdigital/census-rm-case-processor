@@ -43,24 +43,22 @@ public class EventServiceTest {
     caze.setTreatmentCode("HH_LF2R3BE");
     when(caseService.saveCase(createCaseSample)).thenReturn(caze);
     UacQidLink uacQidLink = new UacQidLink();
-    when(uacService.generateAndSaveUacQidLink(caze, 1)).thenReturn(uacQidLink);
-    when(uacService.emitUacUpdatedEvent(any(UacQidLink.class), any(Case.class)))
-        .thenReturn(new PayloadDTO());
-    when(caseService.emitCaseCreatedEvent(any(Case.class))).thenReturn(new PayloadDTO());
+    when(uacService.buildUacQidLink(caze, 1)).thenReturn(uacQidLink);
+    when(uacService.saveAndEmitUacUpdatedEvent(any(UacQidLink.class))).thenReturn(new PayloadDTO());
+    when(caseService.saveAndEmitCaseCreatedEvent(any(Case.class))).thenReturn(new PayloadDTO());
 
     // When
     underTest.processSampleReceivedMessage(createCaseSample);
 
     // Then
     verify(caseService).saveCase(createCaseSample);
-    verify(uacService).generateAndSaveUacQidLink(eq(caze), eq(1));
-    verify(uacService).emitUacUpdatedEvent(uacQidLink, caze);
-    verify(caseService).emitCaseCreatedEvent(caze);
+    verify(uacService).buildUacQidLink(eq(caze), eq(1));
+    verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLink);
+    verify(caseService).saveAndEmitCaseCreatedEvent(caze);
 
     verify(eventLogger, times(1))
         .logCaseEvent(
             eq(caze),
-            any(OffsetDateTime.class),
             any(OffsetDateTime.class),
             eq(CREATE_CASE_SAMPLE_RECEIVED),
             eq(EventType.SAMPLE_LOADED),
@@ -77,25 +75,23 @@ public class EventServiceTest {
     when(caseService.saveCase(createCaseSample)).thenReturn(caze);
     UacQidLink uacQidLink = new UacQidLink();
     UacQidLink secondUacQidLink = new UacQidLink();
-    when(uacService.generateAndSaveUacQidLink(caze, 2)).thenReturn(uacQidLink);
-    when(uacService.generateAndSaveUacQidLink(caze, 3)).thenReturn(secondUacQidLink);
-    when(uacService.emitUacUpdatedEvent(any(UacQidLink.class), any(Case.class)))
-        .thenReturn(new PayloadDTO());
-    when(caseService.emitCaseCreatedEvent(any(Case.class))).thenReturn(new PayloadDTO());
+    when(uacService.buildUacQidLink(caze, 2)).thenReturn(uacQidLink);
+    when(uacService.buildUacQidLink(caze, 3)).thenReturn(secondUacQidLink);
+    when(uacService.saveAndEmitUacUpdatedEvent(any(UacQidLink.class))).thenReturn(new PayloadDTO());
+    when(caseService.saveAndEmitCaseCreatedEvent(any(Case.class))).thenReturn(new PayloadDTO());
 
     // When
     underTest.processSampleReceivedMessage(createCaseSample);
 
     // Then
     verify(caseService).saveCase(createCaseSample);
-    verify(uacService, times(1)).generateAndSaveUacQidLink(eq(caze), eq(2));
-    verify(uacService, times(2)).emitUacUpdatedEvent(uacQidLink, caze);
-    verify(caseService).emitCaseCreatedEvent(caze);
+    verify(uacService, times(1)).buildUacQidLink(eq(caze), eq(2));
+    verify(uacService, times(2)).saveAndEmitUacUpdatedEvent(uacQidLink);
+    verify(caseService).saveAndEmitCaseCreatedEvent(caze);
 
     verify(eventLogger, times(1))
         .logCaseEvent(
             eq(caze),
-            any(OffsetDateTime.class),
             any(OffsetDateTime.class),
             eq(CREATE_CASE_SAMPLE_RECEIVED),
             eq(EventType.SAMPLE_LOADED),
@@ -136,7 +132,6 @@ public class EventServiceTest {
     verify(eventLogger, times(1))
         .logCaseEvent(
             eq(caze),
-            any(OffsetDateTime.class),
             any(OffsetDateTime.class),
             eq("Case selected by Action Rule for print Pack Code Test packCode"),
             eq(EventType.PRINT_CASE_SELECTED),

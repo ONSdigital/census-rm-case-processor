@@ -1,7 +1,6 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static uk.gov.ons.census.casesvc.model.entity.EventType.FULFILMENT_REQUESTED;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
@@ -21,7 +20,6 @@ import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.CaseState;
-import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FulfilmentRequestServiceTest {
@@ -31,8 +29,6 @@ public class FulfilmentRequestServiceTest {
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH = "UACIT2";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH = "UACIT2W";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NORTHERN_IRELAND = "UACIT4";
-
-  @Mock private CaseRepository caseRepository;
 
   @Mock private EventLogger eventLogger;
 
@@ -61,7 +57,6 @@ public class FulfilmentRequestServiceTest {
         .logCaseEvent(
             eq(expectedCase),
             eq(managementEvent.getEvent().getDateTime()),
-            any(OffsetDateTime.class),
             eq("Fulfilment Request Received"),
             eq(FULFILMENT_REQUESTED),
             eq(managementEvent.getEvent()),
@@ -116,18 +111,15 @@ public class FulfilmentRequestServiceTest {
         .logCaseEvent(
             eq(parentCase),
             eq(managementEvent.getEvent().getDateTime()),
-            any(OffsetDateTime.class),
             eq("Fulfilment Request Received"),
             eq(FULFILMENT_REQUESTED),
             eq(managementEvent.getEvent()),
             anyString());
 
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(caseRepository).save(caseArgumentCaptor.capture());
+    verify(caseService).saveAndEmitCaseCreatedEvent(caseArgumentCaptor.capture());
     Case actualChildCase = caseArgumentCaptor.getValue();
-
     checkIndivdualFulfilmentRequestCase(parentCase, actualChildCase);
-    verify(caseService).emitCaseCreatedEvent(actualChildCase);
     verify(caseService, times(1)).getUniqueCaseRef();
   }
 

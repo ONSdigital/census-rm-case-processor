@@ -28,16 +28,14 @@ public class EventLoggerTest {
   @Test
   public void testLogCaseEvent() {
     Case caze = new Case();
-    OffsetDateTime timeOne = OffsetDateTime.now();
-    OffsetDateTime timeTwo = OffsetDateTime.now();
+    OffsetDateTime eventTime = OffsetDateTime.now();
     EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_CREATED);
     eventDTO.setSource("Test source");
     eventDTO.setChannel("Test channel");
 
     underTest.logCaseEvent(
         caze,
-        timeOne,
-        timeTwo,
+        eventTime,
         "Test description",
         EventType.UAC_UPDATED,
         eventDTO,
@@ -48,8 +46,7 @@ public class EventLoggerTest {
     Event actualEvent = eventArgumentCaptor.getValue();
     assertThat(caze).isEqualTo(actualEvent.getCaze());
     assertThat(actualEvent.getUacQidLink()).isNull();
-    assertThat(timeOne).isEqualTo(actualEvent.getEventDate());
-    assertThat(timeTwo).isEqualTo(actualEvent.getRmEventProcessed());
+    assertThat(eventTime).isEqualTo(actualEvent.getEventDate());
     assertThat("Test source").isEqualTo(actualEvent.getEventSource());
     assertThat("Test channel").isEqualTo(actualEvent.getEventChannel());
     assertThat(EventType.UAC_UPDATED).isEqualTo(actualEvent.getEventType());
@@ -61,16 +58,14 @@ public class EventLoggerTest {
   @Test
   public void testLogUacQidEvent() {
     UacQidLink uacQidLink = new UacQidLink();
-    OffsetDateTime timeOne = OffsetDateTime.now();
-    OffsetDateTime timeTwo = OffsetDateTime.now();
+    OffsetDateTime eventTime = OffsetDateTime.now();
     EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_CREATED);
     eventDTO.setSource("Test source");
     eventDTO.setChannel("Test channel");
 
     underTest.logUacQidEvent(
         uacQidLink,
-        timeOne,
-        timeTwo,
+        eventTime,
         "Test description",
         EventType.UAC_UPDATED,
         eventDTO,
@@ -81,8 +76,7 @@ public class EventLoggerTest {
     Event actualEvent = eventArgumentCaptor.getValue();
     assertThat(uacQidLink).isEqualTo(actualEvent.getUacQidLink());
     assertThat(actualEvent.getCaze()).isNull();
-    assertThat(timeOne).isEqualTo(actualEvent.getEventDate());
-    assertThat(timeTwo).isEqualTo(actualEvent.getRmEventProcessed());
+    assertThat(eventTime).isEqualTo(actualEvent.getEventDate());
     assertThat("Test source").isEqualTo(actualEvent.getEventSource());
     assertThat("Test channel").isEqualTo(actualEvent.getEventChannel());
     assertThat(EventType.UAC_UPDATED).isEqualTo(actualEvent.getEventType());
