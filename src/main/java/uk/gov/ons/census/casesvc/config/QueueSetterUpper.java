@@ -108,7 +108,10 @@ public class QueueSetterUpper {
     return new Queue(rhUacQueue, true);
   }
 
-  @Bean Queue surveyLaunchedQueue() { return new Queue(surveyLaunchedQueue, true); }
+  @Bean
+  Queue surveyLaunchedQueue() {
+    return new Queue(surveyLaunchedQueue, true);
+  }
 
   @Bean
   public Queue actionSchedulerQueue() {
@@ -136,7 +139,10 @@ public class QueueSetterUpper {
   }
 
   @Bean
-  public Binding surveyLaunchedBinding() { return new Binding(surveyLaunchedQueue, QUEUE, caseEventExchange, surveyLaunchedRoutingKey, null);}
+  public Binding surveyLaunchedBinding() {
+    return new Binding(
+        surveyLaunchedQueue, QUEUE, caseEventExchange, surveyLaunchedRoutingKey, null);
+  }
 
   @Bean
   public Binding bindingRhCase() {

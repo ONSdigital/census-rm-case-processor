@@ -5,8 +5,6 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-import javax.persistence.criteria.CriteriaBuilder;
-
 @Data
 public class PayloadDTO {
 
@@ -34,5 +32,4 @@ public class PayloadDTO {
 
   @JsonInclude(Include.NON_NULL)
   private InvalidAddress invalidAddress;
-
 }

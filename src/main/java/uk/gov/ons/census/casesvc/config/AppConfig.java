@@ -105,7 +105,9 @@ public class AppConfig {
   }
 
   @Bean
-  public MessageChannel surveyLaunchedInputChannel() { return new DirectChannel(); }
+  public MessageChannel surveyLaunchedInputChannel() {
+    return new DirectChannel();
+  }
 
   @Bean
   public AmqpInboundChannelAdapter inboundSamples(
@@ -224,8 +226,10 @@ public class AppConfig {
   }
 
   @Bean
-  public SimpleMessageListenerContainer surveyLaunchedContainer(ConnectionFactory connectionFactory) {
-    SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(connectionFactory);
+  public SimpleMessageListenerContainer surveyLaunchedContainer(
+      ConnectionFactory connectionFactory) {
+    SimpleMessageListenerContainer container =
+        new SimpleMessageListenerContainer(connectionFactory);
     container.setQueueNames(surveyLaunchedQueue);
     container.setConcurrentConsumers(consumers);
     return container;
