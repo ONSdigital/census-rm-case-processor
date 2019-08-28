@@ -147,6 +147,8 @@ public class DataUtils {
     payload.setReceipt(null);
     payload.setPrintCaseSelected(null);
     payload.setFulfilmentRequest(null);
+    payload.setUacQidCreated(null);
+    payload.setInvalidAddress(null);
 
     return managementEvent;
   }
