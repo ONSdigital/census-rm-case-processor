@@ -109,7 +109,7 @@ public class QueueSetterUpper {
   }
 
   @Bean
-  Queue surveyLaunchedQueue() {
+  public Queue surveyLaunchedQueue() {
     return new Queue(surveyLaunchedQueue, true);
   }
 
