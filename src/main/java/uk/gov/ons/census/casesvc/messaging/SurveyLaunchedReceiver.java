@@ -37,7 +37,7 @@ public class SurveyLaunchedReceiver {
 
     eventLogger.logUacQidEvent(
         surveyLaunchedForQid,
-        OffsetDateTime.now(),
+        event.getEvent().getDateTime(),
         SURVEY_LAUNCHED,
         EventType.SURVEY_LAUNCHED,
         event.getEvent(),
