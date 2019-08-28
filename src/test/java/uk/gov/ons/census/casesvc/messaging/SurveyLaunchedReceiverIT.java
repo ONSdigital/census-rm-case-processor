@@ -71,7 +71,7 @@ public class SurveyLaunchedReceiverIT {
   }
 
   @Test
-  public void testSurveyLaunchLogsEvent() throws JSONException {
+  public void testSurveyLaunchLogsEvent() throws JSONException, InterruptedException {
     // GIVEN
     EasyRandom easyRandom = new EasyRandom();
     Case caze = easyRandom.nextObject(Case.class);
@@ -98,29 +98,17 @@ public class SurveyLaunchedReceiverIT {
 
     // WHEN
     rabbitQueueHelper.sendMessage(inboundQueue, message);
-
+    Thread.sleep(1000);
     // THEN
+
     List<Event> events = eventRepository.findAll();
     assertThat(events.size()).isEqualTo(1);
     Event event = events.get(0);
-    assertThat(event.getEventDescription()).isEqualTo("SURVEY LAUNCHED");
+    assertThat(event.getEventDescription()).isEqualTo("Survey launched");
     UacQidLink actualUacQidLink = event.getUacQidLink();
     assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID);
     assertThat(actualUacQidLink.getUac()).isEqualTo(TEST_UAC);
     assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
     assertThat(actualUacQidLink.isActive()).isFalse();
-
-    // Test date saved format here
-    String utcDateAsString = new JSONObject(event.getEventPayload()).getString("dateTime");
-    assertThat(isStringFormattedAsUTCDate(utcDateAsString)).isTrue();
-  }
-
-  private boolean isStringFormattedAsUTCDate(String dateAsString) {
-    try {
-      OffsetDateTime.parse(dateAsString);
-      return true;
-    } catch (DateTimeParseException dtpe) {
-      return false;
-    }
   }
 }
