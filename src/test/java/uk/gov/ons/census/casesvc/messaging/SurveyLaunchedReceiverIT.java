@@ -1,8 +1,13 @@
 package uk.gov.ons.census.casesvc.messaging;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementSurveyLaunchedEvent;
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+
+import java.util.List;
+import java.util.UUID;
 import org.jeasy.random.EasyRandom;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,30 +22,14 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
-import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
-import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
-
-import java.io.IOException;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeParseException;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.BlockingQueue;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.ons.census.casesvc.service.ReceiptService.QID_RECEIPTED;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementReceiptEvent;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementSurveyLaunchedEvent;
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -88,7 +77,7 @@ public class SurveyLaunchedReceiverIT {
     uacQidLinkRepository.saveAndFlush(uacQidLink);
 
     ResponseManagementEvent surveyLaunchedEvent = getTestResponseManagementSurveyLaunchedEvent();
-    surveyLaunchedEvent.getPayload().getReceipt().setQuestionnaireId(uacQidLink.getQid());
+    surveyLaunchedEvent.getPayload().getResponse().setQuestionnaireId(uacQidLink.getQid());
 
     String json = convertObjectToJson(surveyLaunchedEvent);
     Message message =

@@ -30,7 +30,7 @@ public class SurveyLaunchedReceiver {
   public void receiveMessage(ResponseManagementEvent event) {
     if (event.getEvent().getType() == EventTypeDTO.SURVEY_LAUNCHED) {
       UacQidLink surveyLaunchedForQid =
-          uacService.findByQid(event.getPayload().getReceipt().getQuestionnaireId());
+          uacService.findByQid(event.getPayload().getResponse().getQuestionnaireId());
       eventLogger.logUacQidEvent(
           surveyLaunchedForQid,
           OffsetDateTime.now(),

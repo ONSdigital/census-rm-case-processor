@@ -100,7 +100,7 @@ public class ReceiptReceiverIT {
     uacQidLinkRepository.saveAndFlush(uacQidLink);
 
     ResponseManagementEvent managementEvent = getTestResponseManagementReceiptEvent();
-    managementEvent.getPayload().getReceipt().setQuestionnaireId(uacQidLink.getQid());
+    managementEvent.getPayload().getResponse().setQuestionnaireId(uacQidLink.getQid());
     managementEvent.getEvent().setTransactionId(UUID.randomUUID());
 
     String json = convertObjectToJson(managementEvent);

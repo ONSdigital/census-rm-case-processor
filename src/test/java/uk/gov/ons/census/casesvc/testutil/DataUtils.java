@@ -119,7 +119,7 @@ public class DataUtils {
     PayloadDTO payload = managementEvent.getPayload();
     payload.setUac(null);
     payload.setCollectionCase(null);
-    payload.setReceipt(null);
+    payload.setResponse(null);
     payload.setPrintCaseSelected(null);
 
     RefusalDTO refusal = payload.getRefusal();
@@ -139,7 +139,7 @@ public class DataUtils {
     PayloadDTO payload = managementEvent.getPayload();
     payload.setUac(null);
     payload.setCollectionCase(null);
-    payload.setReceipt(null);
+    payload.setResponse(null);
     payload.setPrintCaseSelected(null);
     payload.setRefusal(null);
 
@@ -161,7 +161,7 @@ public class DataUtils {
     PayloadDTO payload = managementEvent.getPayload();
     payload.setRefusal(null);
     payload.setCollectionCase(null);
-    payload.setReceipt(null);
+    payload.setResponse(null);
     payload.setPrintCaseSelected(null);
     payload.setFulfilmentRequest(null);
 

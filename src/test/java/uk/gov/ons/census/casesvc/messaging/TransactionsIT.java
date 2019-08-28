@@ -77,7 +77,7 @@ public class TransactionsIT {
 
     // WHEN
     ResponseManagementEvent managementEvent = getTestResponseManagementReceiptEvent();
-    managementEvent.getPayload().getReceipt().setQuestionnaireId(TEST_QID);
+    managementEvent.getPayload().getResponse().setQuestionnaireId(TEST_QID);
     managementEvent.getEvent().setTransactionId(UUID.randomUUID());
 
     String json = convertObjectToJson(managementEvent);
