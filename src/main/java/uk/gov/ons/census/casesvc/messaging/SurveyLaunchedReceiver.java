@@ -14,13 +14,13 @@ import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.service.UacService;
 
 @MessageEndpoint
-public class SurveyLaunchedAuditReceiver {
+public class SurveyLaunchedReceiver {
 
   private final EventLogger eventLogger;
 
   private final UacService uacService;
 
-  public SurveyLaunchedAuditReceiver(EventLogger eventLogger, UacService uacService) {
+  public SurveyLaunchedReceiver(EventLogger eventLogger, UacService uacService) {
     this.eventLogger = eventLogger;
     this.uacService = uacService;
   }
