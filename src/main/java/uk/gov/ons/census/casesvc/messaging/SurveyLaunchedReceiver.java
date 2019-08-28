@@ -16,6 +16,8 @@ import uk.gov.ons.census.casesvc.service.UacService;
 @MessageEndpoint
 public class SurveyLaunchedReceiver {
 
+  public static final String SURVEY_LAUNCHED = "Survey launched";
+
   private final EventLogger eventLogger;
 
   private final UacService uacService;
@@ -28,18 +30,17 @@ public class SurveyLaunchedReceiver {
   @Transactional
   @ServiceActivator(inputChannel = "surveyLaunchedInputChannel")
   public void receiveMessage(ResponseManagementEvent event) {
-    if (event.getEvent().getType() == EventTypeDTO.SURVEY_LAUNCHED) {
-      UacQidLink surveyLaunchedForQid =
-          uacService.findByQid(event.getPayload().getResponse().getQuestionnaireId());
-      eventLogger.logUacQidEvent(
-          surveyLaunchedForQid,
-          OffsetDateTime.now(),
-          "Survey launched",
-          EventType.SURVEY_LAUNCHED,
-          event.getEvent(),
-          convertObjectToJson(event.getPayload()));
-    } else {
-      throw new RuntimeException(); // Unexpected event type received
-    }
+    if (event.getEvent().getType() != EventTypeDTO.SURVEY_LAUNCHED) throw new RuntimeException();
+
+    UacQidLink surveyLaunchedForQid =
+        uacService.findByQid(event.getPayload().getResponse().getQuestionnaireId());
+
+    eventLogger.logUacQidEvent(
+        surveyLaunchedForQid,
+        OffsetDateTime.now(),
+        SURVEY_LAUNCHED,
+        EventType.SURVEY_LAUNCHED,
+        event.getEvent(),
+        convertObjectToJson(event.getPayload()));
   }
 }
