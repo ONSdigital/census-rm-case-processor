@@ -54,4 +54,18 @@ public class QuestionnaireTypeHelper {
   public static boolean isQuestionnaireWelsh(String treatmentCode) {
     return (treatmentCode.startsWith("HH_Q") && treatmentCode.endsWith("W"));
   }
+
+  public static boolean isIndividualQuestionnaireType(String questionnaireId) {
+
+    switch (questionnaireId.substring(0, 2)) {
+      case "21":
+      case "22":
+      case "23":
+      case "24":
+        return true;
+
+      default:
+        return false;
+    }
+  }
 }

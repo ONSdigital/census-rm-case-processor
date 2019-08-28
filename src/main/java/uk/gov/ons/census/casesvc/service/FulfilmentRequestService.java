@@ -61,7 +61,7 @@ public class FulfilmentRequestService {
     }
   }
 
-  private Case prepareIndividualResponseCaseFromParentCase(Case parentCase) {
+  public Case prepareIndividualResponseCaseFromParentCase(Case parentCase) {
     Case individualResponseCase = new Case();
 
     individualResponseCase.setCaseId(UUID.randomUUID());
