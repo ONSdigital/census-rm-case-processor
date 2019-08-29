@@ -56,6 +56,9 @@ public class AppConfig {
   @Value("${queueconfig.invalid-address-inbound-queue}")
   private String invalidAddressInboundQueue;
 
+  @Value("${queueconfig.survey-launched-queue}")
+  private String surveyLaunchedQueue;
+
   @Bean
   public MessageChannel caseSampleInputChannel() {
     return new DirectChannel();
@@ -98,6 +101,11 @@ public class AppConfig {
 
   @Bean
   public MessageChannel invalidAddressInputChannel() {
+    return new DirectChannel();
+  }
+
+  @Bean
+  public MessageChannel surveyLaunchedInputChannel() {
     return new DirectChannel();
   }
 
@@ -183,6 +191,15 @@ public class AppConfig {
   }
 
   @Bean
+  AmqpInboundChannelAdapter surveyLaunchedInbound(
+      @Qualifier("surveyLaunchedContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("surveyLaunchedInputChannel") MessageChannel channel) {
+    AmqpInboundChannelAdapter adapter = new AmqpInboundChannelAdapter(listenerContainer);
+    adapter.setOutputChannel(channel);
+    return adapter;
+  }
+
+  @Bean
   public RabbitTemplate rabbitTemplate(
       ConnectionFactory connectionFactory, Jackson2JsonMessageConverter messageConverter) {
     RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
@@ -204,6 +221,16 @@ public class AppConfig {
     SimpleMessageListenerContainer container =
         new SimpleMessageListenerContainer(connectionFactory);
     container.setQueueNames(inboundQueue);
+    container.setConcurrentConsumers(consumers);
+    return container;
+  }
+
+  @Bean
+  public SimpleMessageListenerContainer surveyLaunchedContainer(
+      ConnectionFactory connectionFactory) {
+    SimpleMessageListenerContainer container =
+        new SimpleMessageListenerContainer(connectionFactory);
+    container.setQueueNames(surveyLaunchedQueue);
     container.setConcurrentConsumers(consumers);
     return container;
   }

@@ -11,7 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
-import uk.gov.ons.census.casesvc.model.dto.ReceiptDTO;
+import uk.gov.ons.census.casesvc.model.dto.ResponseDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
@@ -31,13 +31,13 @@ public class ReceiptServiceTest {
   @Test
   public void testGoodReceipt() {
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
-    ReceiptDTO expectedReceipt = managementEvent.getPayload().getReceipt();
+    ResponseDTO expectedReceipt = managementEvent.getPayload().getResponse();
 
     // Given
     Case expectedCase = getRandomCase();
     UacQidLink expectedUacQidLink = generateRandomUacQidLink(expectedCase);
 
-    managementEvent.getPayload().getReceipt().setResponseDateTime(OffsetDateTime.now());
+    managementEvent.getPayload().getResponse().setResponseDateTime(OffsetDateTime.now());
 
     when(uacService.findByQid(expectedReceipt.getQuestionnaireId())).thenReturn(expectedUacQidLink);
 
