@@ -91,6 +91,23 @@ public class DataUtils {
     return managementEvent;
   }
 
+  public static ResponseManagementEvent getTestResponseManagementSurveyLaunchedEvent() {
+    ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
+
+    EventDTO event = managementEvent.getEvent();
+    event.setType(EventTypeDTO.SURVEY_LAUNCHED);
+    event.setSource("CONTACT_CENTRE_API");
+    event.setChannel("CC");
+
+    PayloadDTO payload = managementEvent.getPayload();
+    payload.setUac(null);
+    payload.setCollectionCase(null);
+    payload.setRefusal(null);
+    payload.setPrintCaseSelected(null);
+
+    return managementEvent;
+  }
+
   public static ResponseManagementEvent getTestResponseManagementRefusalEvent() {
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
 
@@ -102,7 +119,7 @@ public class DataUtils {
     PayloadDTO payload = managementEvent.getPayload();
     payload.setUac(null);
     payload.setCollectionCase(null);
-    payload.setReceipt(null);
+    payload.setResponse(null);
     payload.setPrintCaseSelected(null);
 
     RefusalDTO refusal = payload.getRefusal();
@@ -122,7 +139,7 @@ public class DataUtils {
     PayloadDTO payload = managementEvent.getPayload();
     payload.setUac(null);
     payload.setCollectionCase(null);
-    payload.setReceipt(null);
+    payload.setResponse(null);
     payload.setPrintCaseSelected(null);
     payload.setRefusal(null);
 
@@ -144,7 +161,7 @@ public class DataUtils {
     PayloadDTO payload = managementEvent.getPayload();
     payload.setRefusal(null);
     payload.setCollectionCase(null);
-    payload.setReceipt(null);
+    payload.setResponse(null);
     payload.setPrintCaseSelected(null);
     payload.setFulfilmentRequest(null);
 
