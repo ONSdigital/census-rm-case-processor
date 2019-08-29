@@ -83,6 +83,8 @@ public class FulfilmentRequestServiceTest {
     testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NORTHERN_IRELAND);
   }
 
+  //  Add mapping tests here for P_OR_X...
+
   private void testIndividualResponseCode(String individualResponseCode) {
     // Given
     Case parentCase = getRandomCase();

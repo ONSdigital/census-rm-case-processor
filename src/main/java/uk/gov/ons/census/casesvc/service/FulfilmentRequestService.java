@@ -25,14 +25,18 @@ public class FulfilmentRequestService {
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH = "UACIT2W";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NORTHERN_IRELAND = "UACIT4";
 
-  //Expand for Individual Response Request Print
+  // Expand for Individual Response Request Print
   private static final Set<String> individualResponseRequestCodes =
       new HashSet<>(
           Arrays.asList(
               HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND,
               HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH,
               HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH,
-              HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NORTHERN_IRELAND));
+              HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NORTHERN_IRELAND,
+              "P_OR_I1",
+              "P_IR_I2",
+              "P_OR_I2W",
+              "P_IR_I4"));
 
   private final EventLogger eventLogger;
   private final CaseService caseService;
