@@ -40,7 +40,6 @@ public class QuestionnaireLinkedService {
 
     if (isIndividualQuestionnaireType(questionnaireId)) {
       Case householdCase = caseService.getCaseByCaseId(UUID.fromString(uac.getCaseId()));
-
       caze = fulfilmentRequestService.prepareIndividualResponseCaseFromParentCase(householdCase);
 
       caseService.saveAndEmitCaseCreatedEvent(caze);

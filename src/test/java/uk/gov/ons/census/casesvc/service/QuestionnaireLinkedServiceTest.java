@@ -33,15 +33,14 @@ public class QuestionnaireLinkedServiceTest {
 
   private final UUID TEST_CASE_ID_1 = UUID.randomUUID();
   private final UUID TEST_CASE_ID_2 = UUID.randomUUID();
-  private final String TEST_HOUSEHOLD_QID = "0112345678901234";
-  private final String TEST_INDIVIDUAL_QID = "2112345678901234";
+  private final String TEST_HH_QID = "0112345678901234";
+  private final String TEST_HI_QID = "2112345678901234";
 
   @Mock UacService uacService;
 
   @Mock CaseService caseService;
 
-  @Mock
-  FulfilmentRequestService fulfilmentRequestService;
+  @Mock FulfilmentRequestService fulfilmentRequestService;
 
   @Mock EventLogger eventLogger;
 
@@ -54,7 +53,7 @@ public class QuestionnaireLinkedServiceTest {
 
     UacDTO uac = managementEvent.getPayload().getUac();
     uac.setCaseId(TEST_CASE_ID_1.toString());
-    uac.setQuestionnaireId(TEST_HOUSEHOLD_QID);
+    uac.setQuestionnaireId(TEST_HH_QID);
 
     Case testCase = getRandomCaseWithUacQidLinks(1);
     testCase.setCaseId(TEST_CASE_ID_1);
@@ -63,7 +62,7 @@ public class QuestionnaireLinkedServiceTest {
     testUacQidLink.setActive(true);
     testUacQidLink.setCaze(null);
 
-    when(uacService.findByQid(TEST_HOUSEHOLD_QID)).thenReturn(testUacQidLink);
+    when(uacService.findByQid(TEST_HH_QID)).thenReturn(testUacQidLink);
     when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testCase);
 
     // WHEN
@@ -92,18 +91,18 @@ public class QuestionnaireLinkedServiceTest {
 
     UacDTO uac = managementEvent.getPayload().getUac();
     uac.setCaseId(TEST_CASE_ID_1.toString());
-    uac.setQuestionnaireId(TEST_HOUSEHOLD_QID);
+    uac.setQuestionnaireId(TEST_HH_QID);
 
     Case testCase = getRandomCaseWithUacQidLinks(1);
     testCase.setCaseId(TEST_CASE_ID_1);
     testCase.setReceiptReceived(true);
 
     UacQidLink testUacQidLink = testCase.getUacQidLinks().get(0);
-    testUacQidLink.setQid(TEST_INDIVIDUAL_QID);
+    testUacQidLink.setQid(TEST_HI_QID);
     testUacQidLink.setActive(true);
     testUacQidLink.setCaze(null);
 
-    when(uacService.findByQid(TEST_HOUSEHOLD_QID)).thenReturn(testUacQidLink);
+    when(uacService.findByQid(TEST_HH_QID)).thenReturn(testUacQidLink);
     when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testCase);
 
     // WHEN
@@ -111,7 +110,7 @@ public class QuestionnaireLinkedServiceTest {
 
     // THEN
     InOrder inOrder = inOrder(uacService, caseService, eventLogger);
-    inOrder.verify(uacService).findByQid(TEST_HOUSEHOLD_QID);
+    inOrder.verify(uacService).findByQid(TEST_HH_QID);
     inOrder.verify(caseService).getCaseByCaseId(TEST_CASE_ID_1);
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
@@ -142,18 +141,18 @@ public class QuestionnaireLinkedServiceTest {
 
     UacDTO uac = managementEvent.getPayload().getUac();
     uac.setCaseId(TEST_CASE_ID_1.toString());
-    uac.setQuestionnaireId(TEST_HOUSEHOLD_QID);
+    uac.setQuestionnaireId(TEST_HH_QID);
 
     Case testCase = getRandomCaseWithUacQidLinks(1);
     testCase.setCaseId(TEST_CASE_ID_1);
     testCase.setReceiptReceived(false);
 
     UacQidLink testUacQidLink = testCase.getUacQidLinks().get(0);
-    testUacQidLink.setQid(TEST_INDIVIDUAL_QID);
+    testUacQidLink.setQid(TEST_HI_QID);
     testUacQidLink.setActive(false);
     testUacQidLink.setCaze(null);
 
-    when(uacService.findByQid(TEST_HOUSEHOLD_QID)).thenReturn(testUacQidLink);
+    when(uacService.findByQid(TEST_HH_QID)).thenReturn(testUacQidLink);
     when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testCase);
 
     // WHEN
@@ -161,7 +160,7 @@ public class QuestionnaireLinkedServiceTest {
 
     // THEN
     InOrder inOrder = inOrder(uacService, caseService, eventLogger);
-    inOrder.verify(uacService).findByQid(TEST_HOUSEHOLD_QID);
+    inOrder.verify(uacService).findByQid(TEST_HH_QID);
     inOrder.verify(caseService).getCaseByCaseId(TEST_CASE_ID_1);
 
     ArgumentCaptor<Case> caseCaptor = ArgumentCaptor.forClass(Case.class);
@@ -199,7 +198,7 @@ public class QuestionnaireLinkedServiceTest {
 
     UacDTO uac = managementEvent.getPayload().getUac();
     uac.setCaseId(TEST_CASE_ID_1.toString());
-    uac.setQuestionnaireId(TEST_INDIVIDUAL_QID);
+    uac.setQuestionnaireId(TEST_HI_QID);
 
     Case testHHCase = getRandomCase();
     testHHCase.setCaseId(TEST_CASE_ID_1);
@@ -209,12 +208,12 @@ public class QuestionnaireLinkedServiceTest {
     testHICase.setCaseId(TEST_CASE_ID_2);
     testHHCase.setReceiptReceived(false);
 
-    UacQidLink testIndividualUacQidLink = testHICase.getUacQidLinks().get(0);
-    testIndividualUacQidLink.setQid(TEST_INDIVIDUAL_QID);
-    testIndividualUacQidLink.setActive(true);
-    testIndividualUacQidLink.setCaze(null);
+    UacQidLink testHIUacQidLink = testHICase.getUacQidLinks().get(0);
+    testHIUacQidLink.setQid(TEST_HI_QID);
+    testHIUacQidLink.setActive(true);
+    testHIUacQidLink.setCaze(null);
 
-    when(uacService.findByQid(TEST_INDIVIDUAL_QID)).thenReturn(testIndividualUacQidLink);
+    when(uacService.findByQid(TEST_HI_QID)).thenReturn(testHIUacQidLink);
     when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testHHCase);
     when(fulfilmentRequestService.prepareIndividualResponseCaseFromParentCase(testHHCase))
         .thenReturn(testHICase);
@@ -224,7 +223,7 @@ public class QuestionnaireLinkedServiceTest {
 
     // THEN
     InOrder inOrder = inOrder(uacService, caseService, fulfilmentRequestService, eventLogger);
-    inOrder.verify(uacService).findByQid(TEST_INDIVIDUAL_QID);
+    inOrder.verify(uacService).findByQid(TEST_HI_QID);
     inOrder.verify(caseService).getCaseByCaseId(TEST_CASE_ID_1);
     inOrder
         .verify(fulfilmentRequestService)
@@ -240,7 +239,7 @@ public class QuestionnaireLinkedServiceTest {
 
     verify(eventLogger)
         .logUacQidEvent(
-            eq(testIndividualUacQidLink),
+            eq(testHIUacQidLink),
             any(OffsetDateTime.class),
             eq("Questionnaire Linked"),
             eq(EventType.QUESTIONNAIRE_LINKED),
