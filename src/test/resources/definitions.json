@@ -109,6 +109,13 @@
       "durable": true,
       "auto_delete": false,
       "arguments": {}
+    },
+    {
+      "name": "survey.launched",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
     }
   ],
   "exchanges": [
@@ -210,6 +217,14 @@
       "destination": "case.uac-qid-created",
       "destination_type": "queue",
       "routing_key": "",
+      "arguments": {}
+    },
+    {
+      "source": "events",
+      "vhost": "/",
+      "destination": "survey.launched",
+      "destination_type": "queue",
+      "routing_key": "event.response.authentication",
       "arguments": {}
     }
   ]
