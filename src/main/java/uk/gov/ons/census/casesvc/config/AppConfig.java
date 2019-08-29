@@ -59,6 +59,9 @@ public class AppConfig {
   @Value("${queueconfig.survey-launched-queue}")
   private String surveyLaunchedQueue;
 
+  @Value("${queueconfig.undelivered-mail-queue}")
+  private String undeliveredMailQueue;
+
   @Bean
   public MessageChannel caseSampleInputChannel() {
     return new DirectChannel();
