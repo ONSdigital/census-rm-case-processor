@@ -29,6 +29,9 @@ public class SurveyLaunchedReceiver {
   @Transactional
   @ServiceActivator(inputChannel = "surveyLaunchedInputChannel")
   public void receiveMessage(ResponseManagementEvent event) {
+    if (event.getEvent().getType() == EventTypeDTO.RESPONDENT_AUTHENTICATED)
+      return; // Ignore these messages which arrive on the same topic as the Survey Launched events
+
     if (event.getEvent().getType() != EventTypeDTO.SURVEY_LAUNCHED) throw new RuntimeException();
 
     UacQidLink surveyLaunchedForQid =
