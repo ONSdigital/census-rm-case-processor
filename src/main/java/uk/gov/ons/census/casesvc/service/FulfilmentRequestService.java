@@ -24,6 +24,8 @@ public class FulfilmentRequestService {
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH = "UACIT2";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH = "UACIT2W";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NORTHERN_IRELAND = "UACIT4";
+
+  //Expand for Individual Response Request Print
   private static final Set<String> individualResponseRequestCodes =
       new HashSet<>(
           Arrays.asList(
@@ -56,15 +58,18 @@ public class FulfilmentRequestService {
         convertObjectToJson(fulfilmentRequestPayload));
 
     if (individualResponseRequestCodes.contains(fulfilmentRequestPayload.getFulfilmentCode())) {
-      Case individualResponseCase = prepareIndividualResponseCaseFromParentCase(caze);
+      Case individualResponseCase = prepareIndividualResponseCase(caze, fulfilmentRequest);
       caseService.saveAndEmitCaseCreatedEvent(individualResponseCase);
     }
   }
 
-  private Case prepareIndividualResponseCaseFromParentCase(Case parentCase) {
+  private Case prepareIndividualResponseCase(
+      Case parentCase, ResponseManagementEvent fulfilmentRequest) {
     Case individualResponseCase = new Case();
 
-    individualResponseCase.setCaseId(UUID.randomUUID());
+    individualResponseCase.setCaseId(
+        UUID.fromString(
+            fulfilmentRequest.getPayload().getFulfilmentRequest().getIndividualCaseId()));
     individualResponseCase.setCaseRef(caseService.getUniqueCaseRef());
     individualResponseCase.setState(CaseState.ACTIONABLE);
     individualResponseCase.setCreatedDateTime(OffsetDateTime.now());

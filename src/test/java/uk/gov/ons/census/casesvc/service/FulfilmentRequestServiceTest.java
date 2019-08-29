@@ -99,6 +99,7 @@ public class FulfilmentRequestServiceTest {
         managementEvent.getPayload().getFulfilmentRequest();
     expectedFulfilmentRequest.setCaseId(parentCase.getCaseId().toString());
     expectedFulfilmentRequest.setFulfilmentCode(individualResponseCode);
+    expectedFulfilmentRequest.setIndividualCaseId(UUID.randomUUID().toString());
 
     when(caseService.getCaseByCaseId(UUID.fromString(expectedFulfilmentRequest.getCaseId())))
         .thenReturn(parentCase);
@@ -119,14 +120,17 @@ public class FulfilmentRequestServiceTest {
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
     verify(caseService).saveAndEmitCaseCreatedEvent(caseArgumentCaptor.capture());
     Case actualChildCase = caseArgumentCaptor.getValue();
-    checkIndivdualFulfilmentRequestCase(parentCase, actualChildCase);
+    checkIndivdualFulfilmentRequestCase(parentCase, actualChildCase, managementEvent);
     verify(caseService, times(1)).getUniqueCaseRef();
   }
 
-  private void checkIndivdualFulfilmentRequestCase(Case parentCase, Case actualChildCase) {
+  private void checkIndivdualFulfilmentRequestCase(
+      Case parentCase, Case actualChildCase, ResponseManagementEvent managementEvent) {
     assertThat(actualChildCase.getCaseRef()).isNotEqualTo(parentCase.getCaseRef());
     assertThat(UUID.fromString(actualChildCase.getCaseId().toString()))
         .isNotEqualTo(parentCase.getCaseId());
+    assertThat(actualChildCase.getCaseId().toString())
+        .isEqualTo(managementEvent.getPayload().getFulfilmentRequest().getIndividualCaseId());
     assertThat(actualChildCase.getUacQidLinks()).isNull();
     assertThat(actualChildCase.getEvents()).isNull();
     assertThat(actualChildCase.getCreatedDateTime())
