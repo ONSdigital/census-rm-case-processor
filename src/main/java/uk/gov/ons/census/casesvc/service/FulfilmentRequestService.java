@@ -34,9 +34,9 @@ public class FulfilmentRequestService {
               HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH,
               HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NORTHERN_IRELAND,
               "P_OR_I1",
-              "P_IR_I2",
+              "P_OR_I2",
               "P_OR_I2W",
-              "P_IR_I4"));
+              "P_OR_I4"));
 
   private final EventLogger eventLogger;
   private final CaseService caseService;
