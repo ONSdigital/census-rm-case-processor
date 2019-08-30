@@ -34,10 +34,12 @@ queueconfig:
   rh-uac-queue: case.rh.uac
   rh-uac-routing-key: event.uac.*
   action-scheduler-queue: case.action
+  survey-launched-queue: survey.launched
   action-scheduler-routing-key-uac: event.uac.*
   action-scheduler-routing-key-case: event.case.*
   refusal-routing-key: event.respondent.refusal
   receipt-routing-key: event.response.receipt
+  survey-launched-routing-key: event.response.authentication
   fulfilment-routing-key: event.fulfilment.request
   questionnaire-linked-routing-key: event.respondent.questionnaire.linked
   unaddressed-inbound-queue: unaddressedRequestQueue

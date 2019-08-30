@@ -1,41 +1,44 @@
 version: '2.1'
 services:
- postgres:
-  container_name: postgres-case-it
-  image: sdcplatform/ras-rm-docker-postgres
-  command: ["-c", "shared_buffers=256MB", "-c", "max_connections=200"]
-  ports:
-   - "15432:5432"
+  postgres:
+    container_name: postgres-case-it
+    image: sdcplatform/ras-rm-docker-postgres
+    command: ["-c", "shared_buffers=256MB", "-c", "max_connections=200"]
+    ports:
+      - "15432:5432"
 
- rabbitmq:
-  container_name: rabbitmq-case-it
-  image: rabbitmq:3.6.10-management
-  ports:
-    - "34369:4369"
-    - "55672:25672"
-    - "35671:5671"
-    - "35672:5672"
-    - "46671:15671"
-    - "46672:15672"
+  rabbitmq:
+    container_name: rabbitmq-case-it
+    image: rabbitmq:3.6.10-management
+    ports:
+      - "34369:4369"
+      - "55672:25672"
+      - "35671:5671"
+      - "35672:5672"
+      - "46671:15671"
+      - "46672:15672"
+    volumes:
+      - ./rabbitmq.config:/etc/rabbitmq/rabbitmq.config:ro
+      - ./definitions.json:/opt/definitions.json:ro
 
- uac-qid:
-  container_name: uac-qid-case-it
-  image: eu.gcr.io/census-rm-ci/rm/census-rm-uac-qid-service:latest
-  ports:
-  - "18164:8164"
-  external_links:
-  - postgres-case-it
-  environment:
-  - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-case-it:5432/postgres?sslmode=disable
-  - SPRING_PROFILES_ACTIVE=dev
-  healthcheck:
-   test: ["CMD", "curl", "-f", "http://localhost:8164/actuator/info"]
-   interval: 30s
-   timeout: 10s
-   retries: 10
+  uac-qid:
+    container_name: uac-qid-case-it
+    image: eu.gcr.io/census-rm-ci/rm/census-rm-uac-qid-service:latest
+    ports:
+      - "18164:8164"
+    external_links:
+      - postgres-case-it
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-case-it:5432/postgres?sslmode=disable
+      - SPRING_PROFILES_ACTIVE=dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8164/actuator/info"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
 
- start_dependencies:
-  image: dadarek/wait-for-dependencies
-  depends_on:
-   uac-qid:
-    condition: service_healthy
+  start_dependencies:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      uac-qid:
+        condition: service_healthy

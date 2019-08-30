@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class ReceiptDTO {
+public class ResponseDTO {
 
   @JsonInclude(Include.NON_NULL)
   private String caseId;
@@ -17,6 +17,8 @@ public class ReceiptDTO {
   private String questionnaireId;
 
   private boolean unreceipt;
+
+  private String agentId;
 
   @JsonInclude(Include.NON_NULL)
   @JsonProperty("dateTime")
