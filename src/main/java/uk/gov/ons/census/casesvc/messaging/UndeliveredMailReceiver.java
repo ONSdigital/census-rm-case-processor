@@ -16,6 +16,7 @@ import uk.gov.ons.census.casesvc.service.UacService;
 
 @MessageEndpoint
 public class UndeliveredMailReceiver {
+  private static final String LOG_EVENT_DESCRIPTION = "Undelivered mail reported";
   private final UacService uacService;
   private final CaseService caseService;
   private final EventLogger eventLogger;
@@ -51,7 +52,7 @@ public class UndeliveredMailReceiver {
       eventLogger.logUacQidEvent(
           uacQidLink,
           event.getEvent().getDateTime(),
-          "Undelivered mail reported",
+          LOG_EVENT_DESCRIPTION,
           EventType.UNDELIVERED_MAIL_REPORTED,
           event.getEvent(),
           convertObjectToJson(event.getPayload().getFulfilmentInformation()));
@@ -59,7 +60,7 @@ public class UndeliveredMailReceiver {
       eventLogger.logCaseEvent(
           caze,
           event.getEvent().getDateTime(),
-          "Undelivered mail reported",
+          LOG_EVENT_DESCRIPTION,
           EventType.UNDELIVERED_MAIL_REPORTED,
           event.getEvent(),
           convertObjectToJson(event.getPayload().getFulfilmentInformation()));
