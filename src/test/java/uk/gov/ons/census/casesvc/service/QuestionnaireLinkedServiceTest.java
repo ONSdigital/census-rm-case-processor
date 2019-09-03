@@ -40,8 +40,6 @@ public class QuestionnaireLinkedServiceTest {
 
   @Mock CaseService caseService;
 
-  @Mock FulfilmentRequestService fulfilmentRequestService;
-
   @Mock EventLogger eventLogger;
 
   @InjectMocks QuestionnaireLinkedService underTest;
@@ -222,7 +220,7 @@ public class QuestionnaireLinkedServiceTest {
     underTest.processQuestionnaireLinked(managementEvent);
 
     // THEN
-    InOrder inOrder = inOrder(uacService, caseService, fulfilmentRequestService, eventLogger);
+    InOrder inOrder = inOrder(uacService, caseService, eventLogger);
     inOrder.verify(uacService).findByQid(TEST_HI_QID);
     inOrder.verify(caseService).getCaseByCaseId(TEST_CASE_ID_1);
     inOrder.verify(caseService).prepareIndividualResponseCaseFromParentCase(testHHCase);
@@ -246,7 +244,6 @@ public class QuestionnaireLinkedServiceTest {
 
     verifyNoMoreInteractions(caseService);
     verifyNoMoreInteractions(uacService);
-    verifyNoMoreInteractions(fulfilmentRequestService);
     verifyNoMoreInteractions(eventLogger);
   }
 }

@@ -18,17 +18,12 @@ public class QuestionnaireLinkedService {
 
   private final UacService uacService;
   private final CaseService caseService;
-  private final FulfilmentRequestService fulfilmentRequestService;
   private final EventLogger eventLogger;
 
   public QuestionnaireLinkedService(
-      UacService uacService,
-      CaseService caseService,
-      FulfilmentRequestService fulfilmentRequestService,
-      EventLogger eventLogger) {
+      UacService uacService, CaseService caseService, EventLogger eventLogger) {
     this.uacService = uacService;
     this.caseService = caseService;
-    this.fulfilmentRequestService = fulfilmentRequestService;
     this.eventLogger = eventLogger;
   }
 

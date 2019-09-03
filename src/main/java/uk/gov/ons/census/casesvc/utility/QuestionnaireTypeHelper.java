@@ -70,6 +70,8 @@ public class QuestionnaireTypeHelper {
   }
 
   public static boolean isIndividualQuestionnaireType(String questionnaireId) {
-    return individualQuestionnaireTypes.contains(questionnaireId);
+    String questionnaireType = questionnaireId.substring(0, 2);
+
+    return individualQuestionnaireTypes.contains(questionnaireType);
   }
 }
