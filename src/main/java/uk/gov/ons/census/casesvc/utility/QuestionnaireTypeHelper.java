@@ -2,12 +2,26 @@ package uk.gov.ons.census.casesvc.utility;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class QuestionnaireTypeHelper {
   private static final Logger log = LoggerFactory.getLogger(QuestionnaireTypeHelper.class);
 
   private static final String UNKNOWN_COUNTRY_ERROR = "Unknown Country";
   private static final String UNEXPECTED_CASE_TYPE_ERROR = "Unexpected Case Type";
+  private static final String HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_ENGLAND = "21";
+  private static final String HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_WALES_ENGLISH = "22";
+  private static final String HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_WALES_WELSH = "23";
+  private static final String HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_NORTHERN_IRELAND = "24";
+  private static final Set<String> individualQuestionnaireTypes =
+      new HashSet<>(
+          Arrays.asList(
+              HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_ENGLAND,
+              HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_WALES_ENGLISH,
+              HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_WALES_WELSH,
+              HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_NORTHERN_IRELAND));
 
   public static int calculateQuestionnaireType(String treatmentCode) {
     String country = treatmentCode.substring(treatmentCode.length() - 1);
@@ -56,16 +70,6 @@ public class QuestionnaireTypeHelper {
   }
 
   public static boolean isIndividualQuestionnaireType(String questionnaireId) {
-
-    switch (questionnaireId.substring(0, 2)) {
-      case "21":
-      case "22":
-      case "23":
-      case "24":
-        return true;
-
-      default:
-        return false;
-    }
+    return individualQuestionnaireTypes.contains(questionnaireId);
   }
 }
