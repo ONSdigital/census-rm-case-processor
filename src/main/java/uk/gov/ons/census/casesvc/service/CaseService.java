@@ -27,8 +27,9 @@ public class CaseService {
   private static final Logger log = LoggerFactory.getLogger(CaseService.class);
   private static final String CASE_NOT_FOUND_ERROR = "Case not found error";
   private static final String SURVEY = "CENSUS";
+  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_CASE_TYPE = "HI";
+  public static final String CASE_UPDATE_ROUTING_KEY = "event.case.update";
   private static final String HOUSEHOLD_RESPONSE_ADDRESS_TYPE = "HH";
-  static final String CASE_UPDATE_ROUTING_KEY = "event.case.update";
 
   private final CaseRepository caseRepository;
   private final MapperFacade mapperFacade;
@@ -156,6 +157,39 @@ public class CaseService {
     // Yes. You can add stuff to the bottom of this list if you like.
 
     return collectionCase;
+  }
+
+  public Case prepareIndividualResponseCaseFromParentCase(Case parentCase) {
+    Case individualResponseCase = new Case();
+
+    individualResponseCase.setCaseId(UUID.randomUUID());
+    individualResponseCase.setCaseRef(getUniqueCaseRef());
+    individualResponseCase.setState(CaseState.ACTIONABLE);
+    individualResponseCase.setCreatedDateTime(OffsetDateTime.now());
+    individualResponseCase.setAddressType(parentCase.getAddressType());
+    individualResponseCase.setCaseType(HOUSEHOLD_INDIVIDUAL_RESPONSE_CASE_TYPE);
+    individualResponseCase.setCollectionExerciseId(parentCase.getCollectionExerciseId());
+    individualResponseCase.setActionPlanId(parentCase.getActionPlanId());
+    individualResponseCase.setArid(parentCase.getArid());
+    individualResponseCase.setEstabArid(parentCase.getEstabArid());
+    individualResponseCase.setUprn(parentCase.getUprn());
+    individualResponseCase.setEstabType(parentCase.getEstabType());
+    individualResponseCase.setAbpCode(parentCase.getAbpCode());
+    individualResponseCase.setOrganisationName(parentCase.getOrganisationName());
+    individualResponseCase.setAddressLine1(parentCase.getAddressLine1());
+    individualResponseCase.setAddressLine2(parentCase.getAddressLine2());
+    individualResponseCase.setAddressLine3(parentCase.getAddressLine3());
+    individualResponseCase.setTownName(parentCase.getTownName());
+    individualResponseCase.setPostcode(parentCase.getPostcode());
+    individualResponseCase.setLatitude(parentCase.getLatitude());
+    individualResponseCase.setLongitude(parentCase.getLongitude());
+    individualResponseCase.setOa(parentCase.getOa());
+    individualResponseCase.setLsoa(parentCase.getLsoa());
+    individualResponseCase.setMsoa(parentCase.getMsoa());
+    individualResponseCase.setLad(parentCase.getLad());
+    individualResponseCase.setRegion(parentCase.getRegion());
+
+    return individualResponseCase;
   }
 
   public Case getCaseByCaseId(UUID caseId) {

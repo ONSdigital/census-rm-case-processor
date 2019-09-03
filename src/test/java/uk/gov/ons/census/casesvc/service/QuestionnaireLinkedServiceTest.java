@@ -215,7 +215,7 @@ public class QuestionnaireLinkedServiceTest {
 
     when(uacService.findByQid(TEST_HI_QID)).thenReturn(testHIUacQidLink);
     when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testHHCase);
-    when(fulfilmentRequestService.prepareIndividualResponseCaseFromParentCase(testHHCase))
+    when(caseService.prepareIndividualResponseCaseFromParentCase(testHHCase))
         .thenReturn(testHICase);
 
     // WHEN
@@ -225,9 +225,7 @@ public class QuestionnaireLinkedServiceTest {
     InOrder inOrder = inOrder(uacService, caseService, fulfilmentRequestService, eventLogger);
     inOrder.verify(uacService).findByQid(TEST_HI_QID);
     inOrder.verify(caseService).getCaseByCaseId(TEST_CASE_ID_1);
-    inOrder
-        .verify(fulfilmentRequestService)
-        .prepareIndividualResponseCaseFromParentCase(testHHCase);
+    inOrder.verify(caseService).prepareIndividualResponseCaseFromParentCase(testHHCase);
     inOrder.verify(caseService).saveAndEmitCaseCreatedEvent(testHICase);
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
