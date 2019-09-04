@@ -2,6 +2,7 @@ package uk.gov.ons.census.casesvc.testutil;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -18,6 +19,7 @@ import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.UacCreatedDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
+import uk.gov.ons.census.casesvc.utility.JsonHelper;
 
 public class DataUtils {
 
@@ -195,5 +197,29 @@ public class DataUtils {
     uacCreatedEvent.setEvent(eventDTO);
     uacCreatedEvent.setPayload(payloadDTO);
     return uacCreatedEvent;
+  }
+
+  public static String createTestAddressModifiedJson(UUID caseId) {
+    ObjectNode collectionCaseNode =
+        objectMapper.createObjectNode().put("id", caseId.toString()).put("ceExpectedResponses", 20);
+
+    ObjectNode addressNode =
+        objectMapper
+            .createObjectNode()
+            .put("orgName", "XXXXXXXXXXXXX")
+            .put("addressLine1", "1a main street")
+            .put("addressLine2", "upper upperingham")
+            .put("addressLine3", "")
+            .put("townName", "upton")
+            .put("postcode", "UP103UP")
+            .put("region", "E")
+            .put("uprn", "XXXXXXXXXXXXX")
+            .put("arid", "XXXXX");
+
+    ObjectNode parentNode = objectMapper.createObjectNode();
+    parentNode.set("collectionCase", collectionCaseNode);
+    parentNode.set("address", addressNode);
+
+    return JsonHelper.convertObjectToJson(parentNode);
   }
 }

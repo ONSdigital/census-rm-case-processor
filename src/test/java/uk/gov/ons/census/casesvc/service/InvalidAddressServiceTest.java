@@ -13,12 +13,15 @@ import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import org.json.JSONException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCaseCaseId;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
@@ -28,6 +31,7 @@ import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
+import uk.gov.ons.census.casesvc.testutil.DataUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InvalidAddressServiceTest {
@@ -79,7 +83,7 @@ public class InvalidAddressServiceTest {
   }
 
   @Test
-  public void testInvalidEventType() {
+  public void testAddressModifiedEventTypeLogged() throws JSONException {
     // Given
     ResponseManagementEvent managementEvent = new ResponseManagementEvent();
     managementEvent.setEvent(new EventDTO());
@@ -90,9 +94,8 @@ public class InvalidAddressServiceTest {
     collectionCaseCaseId.setId(TEST_CASE_ID.toString());
 
     PayloadDTO payload = new PayloadDTO();
-    payload.setInvalidAddress(new InvalidAddress());
-
-    payload.getInvalidAddress().setCollectionCase(collectionCaseCaseId);
+    String expectedAddressModifiedJson = DataUtils.createTestAddressModifiedJson(TEST_CASE_ID);
+    payload.setAddressModification(expectedAddressModifiedJson);
 
     managementEvent.setPayload(payload);
 
@@ -100,14 +103,19 @@ public class InvalidAddressServiceTest {
     underTest.processMessage(managementEvent);
 
     // then
+    ArgumentCaptor<String> addressModifiedCaptor = ArgumentCaptor.forClass(String.class);
     verify(eventLogger)
         .logCaseEvent(
             isNull(),
             any(OffsetDateTime.class),
-            eq(String.format("Unexpected event type '%s'", EventTypeDTO.ADDRESS_MODIFIED)),
+            eq(String.format("Consumed event type '%s'", EventTypeDTO.ADDRESS_MODIFIED)),
             eq(EventType.ADDRESS_MODIFIED),
             eq(managementEvent.getEvent()),
-            anyString());
+            addressModifiedCaptor.capture());
+
+    String actualAddressModifiedJson = addressModifiedCaptor.getValue();
+    JSONAssert.assertEquals(
+        actualAddressModifiedJson, expectedAddressModifiedJson, JSONCompareMode.STRICT);
 
     verifyNoMoreInteractions(eventLogger);
     verifyZeroInteractions(caseService);

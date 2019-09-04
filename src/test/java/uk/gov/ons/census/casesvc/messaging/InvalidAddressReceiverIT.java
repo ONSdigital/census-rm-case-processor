@@ -15,6 +15,8 @@ import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.core.MessageProperties;
@@ -40,6 +42,7 @@ import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
+import uk.gov.ons.census.casesvc.testutil.DataUtils;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 
 @ContextConfiguration
@@ -149,8 +152,8 @@ public class InvalidAddressReceiverIT {
     collectionCaseCaseId.setId(TEST_CASE_ID.toString());
 
     PayloadDTO payload = new PayloadDTO();
-    payload.setInvalidAddress(invalidAddress);
-    payload.getInvalidAddress().setCollectionCase(collectionCaseCaseId);
+    String expectedAddressModifiedJson = DataUtils.createTestAddressModifiedJson(TEST_CASE_ID);
+    payload.setAddressModification(expectedAddressModifiedJson);
 
     managementEvent.setPayload(payload);
 
@@ -176,7 +179,11 @@ public class InvalidAddressReceiverIT {
     assertThat(event.getEventChannel()).isEqualTo("Test channel");
     assertThat(event.getEventSource()).isEqualTo("Test source");
     assertThat(event.getEventDescription())
-        .isEqualTo(String.format("Unexpected event type '%s'", EventTypeDTO.ADDRESS_MODIFIED));
+        .isEqualTo(String.format("Consumed event type '%s'", EventTypeDTO.ADDRESS_MODIFIED));
     assertThat(event.getEventType()).isEqualTo(EventType.ADDRESS_MODIFIED);
+
+    String actualAddressModifiedJson = event.getEventPayload();
+    JSONAssert.assertEquals(
+        actualAddressModifiedJson, expectedAddressModifiedJson, JSONCompareMode.STRICT);
   }
 }

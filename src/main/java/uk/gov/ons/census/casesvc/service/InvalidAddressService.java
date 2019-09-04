@@ -28,10 +28,10 @@ public class InvalidAddressService {
       eventLogger.logCaseEvent(
           null,
           invalidAddressEvent.getEvent().getDateTime(),
-          String.format("Unexpected event type '%s'", eventType),
+          String.format("Consumed event type '%s'", eventType),
           EventType.ADDRESS_MODIFIED,
           invalidAddressEvent.getEvent(),
-          convertObjectToJson(invalidAddressEvent.getPayload()));
+          invalidAddressEvent.getPayload().getAddressModification());
       return;
     }
 
