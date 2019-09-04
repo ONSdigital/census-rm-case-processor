@@ -103,7 +103,7 @@ public class EventServiceTest {
     // Given
     EasyRandom easyRandom = new EasyRandom();
     Case caze = easyRandom.nextObject(Case.class);
-    when(caseService.getCaseByCaseRef(anyInt())).thenReturn(caze);
+    when(caseService.getCaseByCaseRef(eq(123))).thenReturn(caze);
 
     // When
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
