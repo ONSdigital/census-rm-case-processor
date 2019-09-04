@@ -34,7 +34,6 @@ import uk.gov.ons.census.casesvc.model.dto.CollectionCaseCaseId;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.InvalidAddress;
-import uk.gov.ons.census.casesvc.model.dto.InvalidAddressReason;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -145,12 +144,6 @@ public class InvalidAddressReceiverIT {
     managementEvent.getEvent().setSource("Test source");
     managementEvent.getEvent().setType(EventTypeDTO.ADDRESS_MODIFIED);
 
-    InvalidAddress invalidAddress = new InvalidAddress();
-    invalidAddress.setReason(InvalidAddressReason.DEMOLISHED);
-
-    CollectionCaseCaseId collectionCaseCaseId = new CollectionCaseCaseId();
-    collectionCaseCaseId.setId(TEST_CASE_ID.toString());
-
     PayloadDTO payload = new PayloadDTO();
     String expectedAddressModifiedJson = DataUtils.createTestAddressModifiedJson(TEST_CASE_ID);
     payload.setAddressModification(expectedAddressModifiedJson);
@@ -178,8 +171,7 @@ public class InvalidAddressReceiverIT {
     Event event = events.get(0);
     assertThat(event.getEventChannel()).isEqualTo("Test channel");
     assertThat(event.getEventSource()).isEqualTo("Test source");
-    assertThat(event.getEventDescription())
-        .isEqualTo(String.format("Consumed event type '%s'", EventTypeDTO.ADDRESS_MODIFIED));
+    assertThat(event.getEventDescription()).isEqualTo("Address modified");
     assertThat(event.getEventType()).isEqualTo(EventType.ADDRESS_MODIFIED);
 
     String actualAddressModifiedJson = event.getEventPayload();

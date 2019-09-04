@@ -108,7 +108,7 @@ public class InvalidAddressServiceTest {
         .logCaseEvent(
             isNull(),
             any(OffsetDateTime.class),
-            eq(String.format("Consumed event type '%s'", EventTypeDTO.ADDRESS_MODIFIED)),
+            eq("Address modified"),
             eq(EventType.ADDRESS_MODIFIED),
             eq(managementEvent.getEvent()),
             addressModifiedCaptor.capture());

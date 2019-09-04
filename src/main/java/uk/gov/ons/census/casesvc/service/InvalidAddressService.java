@@ -28,7 +28,7 @@ public class InvalidAddressService {
       eventLogger.logCaseEvent(
           null,
           invalidAddressEvent.getEvent().getDateTime(),
-          String.format("Consumed event type '%s'", eventType),
+          "Address modified",
           EventType.ADDRESS_MODIFIED,
           invalidAddressEvent.getEvent(),
           invalidAddressEvent.getPayload().getAddressModification());
