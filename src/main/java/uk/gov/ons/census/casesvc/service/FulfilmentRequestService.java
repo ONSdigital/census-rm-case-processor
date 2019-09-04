@@ -65,18 +65,20 @@ public class FulfilmentRequestService {
         convertObjectToJson(fulfilmentRequestPayload));
 
     if (individualResponseRequestCodes.contains(fulfilmentRequestPayload.getFulfilmentCode())) {
-      Case individualResponseCase = prepareIndividualResponseCase(caze, fulfilmentRequest);
+
+      Case individualResponseCase =
+          prepareIndividualResponseCase(
+              caze,
+              UUID.fromString(
+                  fulfilmentRequest.getPayload().getFulfilmentRequest().getIndividualCaseId()));
       caseService.saveAndEmitCaseCreatedEvent(individualResponseCase);
     }
   }
 
-  private Case prepareIndividualResponseCase(
-      Case parentCase, ResponseManagementEvent fulfilmentRequest) {
+  private Case prepareIndividualResponseCase(Case parentCase, UUID newCaseId) {
     Case individualResponseCase = new Case();
 
-    individualResponseCase.setCaseId(
-        UUID.fromString(
-            fulfilmentRequest.getPayload().getFulfilmentRequest().getIndividualCaseId()));
+    individualResponseCase.setCaseId(newCaseId);
     individualResponseCase.setCaseRef(caseService.getUniqueCaseRef());
     individualResponseCase.setState(CaseState.ACTIONABLE);
     individualResponseCase.setCreatedDateTime(OffsetDateTime.now());
