@@ -12,7 +12,6 @@ import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import org.jeasy.random.EasyRandom;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -123,8 +122,8 @@ public class InvalidAddressReceiverIT {
   }
 
   @Test
-  public void testInvalidEventTypeLoggedAndRejected()
-      throws InterruptedException, IOException, JSONException {
+  public void testAddressModifiedEventTypeLoggedAndRejected()
+      throws InterruptedException, JSONException {
     // GIVEN
     BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
 
@@ -141,7 +140,7 @@ public class InvalidAddressReceiverIT {
     managementEvent.getEvent().setDateTime(OffsetDateTime.now());
     managementEvent.getEvent().setChannel("Test channel");
     managementEvent.getEvent().setSource("Test source");
-    managementEvent.getEvent().setType(EventTypeDTO.CASE_CREATED);
+    managementEvent.getEvent().setType(EventTypeDTO.ADDRESS_MODIFIED);
 
     InvalidAddress invalidAddress = new InvalidAddress();
     invalidAddress.setReason(InvalidAddressReason.DEMOLISHED);
@@ -177,15 +176,7 @@ public class InvalidAddressReceiverIT {
     assertThat(event.getEventChannel()).isEqualTo("Test channel");
     assertThat(event.getEventSource()).isEqualTo("Test source");
     assertThat(event.getEventDescription())
-        .isEqualTo(String.format("Unexpected event type '%s'", EventTypeDTO.CASE_CREATED));
-    assertThat(event.getEventType()).isEqualTo(EventType.UNEXPECTED_EVENT_TYPE);
-
-    JSONObject actualPayload = new JSONObject(event.getEventPayload());
-    assertThat(actualPayload.length()).isEqualTo(2);
-    assertThat(actualPayload.getString("reason")).isEqualTo("DEMOLISHED");
-
-    JSONObject actualCollectionCase = (JSONObject) actualPayload.get("collectionCase");
-    assertThat(actualCollectionCase).isNotNull();
-    assertThat(actualCollectionCase.getString("id")).isEqualTo(TEST_CASE_ID.toString());
+        .isEqualTo(String.format("Unexpected event type '%s'", EventTypeDTO.ADDRESS_MODIFIED));
+    assertThat(event.getEventType()).isEqualTo(EventType.ADDRESS_MODIFIED);
   }
 }

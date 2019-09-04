@@ -1,11 +1,13 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 
@@ -82,7 +84,7 @@ public class InvalidAddressServiceTest {
     ResponseManagementEvent managementEvent = new ResponseManagementEvent();
     managementEvent.setEvent(new EventDTO());
     managementEvent.getEvent().setDateTime(OffsetDateTime.now());
-    managementEvent.getEvent().setType(EventTypeDTO.CASE_CREATED);
+    managementEvent.getEvent().setType(EventTypeDTO.ADDRESS_MODIFIED);
 
     CollectionCaseCaseId collectionCaseCaseId = new CollectionCaseCaseId();
     collectionCaseCaseId.setId(TEST_CASE_ID.toString());
@@ -94,27 +96,20 @@ public class InvalidAddressServiceTest {
 
     managementEvent.setPayload(payload);
 
-    Case expectedCase = getRandomCase();
-    expectedCase.setCaseId(TEST_CASE_ID);
-    expectedCase.setAddressInvalid(false);
-    when(caseService.getCaseByCaseId(TEST_CASE_ID)).thenReturn(expectedCase);
-
     // when
     underTest.processMessage(managementEvent);
 
     // then
-    verify(caseService).getCaseByCaseId(TEST_CASE_ID);
-
     verify(eventLogger)
         .logCaseEvent(
-            eq(expectedCase),
+            isNull(),
             any(OffsetDateTime.class),
-            eq(String.format("Unexpected event type '%s'", EventTypeDTO.CASE_CREATED)),
-            eq(EventType.UNEXPECTED_EVENT_TYPE),
+            eq(String.format("Unexpected event type '%s'", EventTypeDTO.ADDRESS_MODIFIED)),
+            eq(EventType.ADDRESS_MODIFIED),
             eq(managementEvent.getEvent()),
             anyString());
 
-    verifyNoMoreInteractions(caseService);
     verifyNoMoreInteractions(eventLogger);
+    verifyZeroInteractions(caseService);
   }
 }

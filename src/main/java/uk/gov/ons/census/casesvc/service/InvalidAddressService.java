@@ -22,23 +22,23 @@ public class InvalidAddressService {
   }
 
   public void processMessage(ResponseManagementEvent invalidAddressEvent) {
-    InvalidAddress invalidAddress = invalidAddressEvent.getPayload().getInvalidAddress();
     EventTypeDTO eventType = invalidAddressEvent.getEvent().getType();
+
+    if (eventType.equals(EventTypeDTO.ADDRESS_MODIFIED)) {
+      eventLogger.logCaseEvent(
+          null,
+          invalidAddressEvent.getEvent().getDateTime(),
+          String.format("Unexpected event type '%s'", eventType),
+          EventType.ADDRESS_MODIFIED,
+          invalidAddressEvent.getEvent(),
+          convertObjectToJson(invalidAddressEvent.getPayload()));
+      return;
+    }
+
+    InvalidAddress invalidAddress = invalidAddressEvent.getPayload().getInvalidAddress();
 
     Case caze =
         caseService.getCaseByCaseId(UUID.fromString(invalidAddress.getCollectionCase().getId()));
-
-    // Log unexpected event type and ack message
-    if (eventType != EventTypeDTO.ADDRESS_NOT_VALID) {
-      eventLogger.logCaseEvent(
-          caze,
-          invalidAddressEvent.getEvent().getDateTime(),
-          String.format("Unexpected event type '%s'", eventType),
-          EventType.UNEXPECTED_EVENT_TYPE,
-          invalidAddressEvent.getEvent(),
-          convertObjectToJson(invalidAddress));
-      return;
-    }
 
     caze.setAddressInvalid(true);
     caseService.saveAndEmitCaseUpdatedEvent(caze);
