@@ -5,6 +5,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 
@@ -28,6 +29,8 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InvalidAddressServiceTest {
+
+  private final UUID TEST_CASE_ID = UUID.randomUUID();
 
   @Mock private CaseService caseService;
 
@@ -71,5 +74,47 @@ public class InvalidAddressServiceTest {
             eq(EventType.ADDRESS_NOT_VALID),
             eq(managementEvent.getEvent()),
             anyString());
+  }
+
+  @Test
+  public void testInvalidEventType() {
+    // Given
+    ResponseManagementEvent managementEvent = new ResponseManagementEvent();
+    managementEvent.setEvent(new EventDTO());
+    managementEvent.getEvent().setDateTime(OffsetDateTime.now());
+    managementEvent.getEvent().setType(EventTypeDTO.CASE_CREATED);
+
+    CollectionCaseCaseId collectionCaseCaseId = new CollectionCaseCaseId();
+    collectionCaseCaseId.setId(TEST_CASE_ID.toString());
+
+    PayloadDTO payload = new PayloadDTO();
+    payload.setInvalidAddress(new InvalidAddress());
+
+    payload.getInvalidAddress().setCollectionCase(collectionCaseCaseId);
+
+    managementEvent.setPayload(payload);
+
+    Case expectedCase = getRandomCase();
+    expectedCase.setCaseId(TEST_CASE_ID);
+    expectedCase.setAddressInvalid(false);
+    when(caseService.getCaseByCaseId(TEST_CASE_ID)).thenReturn(expectedCase);
+
+    // when
+    underTest.processMessage(managementEvent);
+
+    // then
+    verify(caseService).getCaseByCaseId(TEST_CASE_ID);
+
+    verify(eventLogger)
+        .logCaseEvent(
+            eq(expectedCase),
+            any(OffsetDateTime.class),
+            eq(String.format("Unexpected event type '%s'", EventTypeDTO.CASE_CREATED)),
+            eq(EventType.UNEXPECTED_EVENT_TYPE),
+            eq(managementEvent.getEvent()),
+            anyString());
+
+    verifyNoMoreInteractions(caseService);
+    verifyNoMoreInteractions(eventLogger);
   }
 }

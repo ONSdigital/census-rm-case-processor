@@ -1,6 +1,7 @@
 package uk.gov.ons.census.casesvc.model.entity;
 
 public enum EventType {
+  UNEXPECTED_EVENT_TYPE,
   UAC_UPDATED,
   PRINT_CASE_SELECTED,
   RESPONSE_RECEIVED,

@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
+import uk.gov.ons.census.casesvc.model.dto.InvalidAddress;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
@@ -21,18 +22,24 @@ public class InvalidAddressService {
   }
 
   public void processMessage(ResponseManagementEvent invalidAddressEvent) {
-    // This check shouldn't be needed, but because several different shape messages are getting
-    // published to the same topic according to the event dictionary, let's keep this check in
-    // place so that we know we need to do something about it
-    if (invalidAddressEvent.getEvent().getType() != EventTypeDTO.ADDRESS_NOT_VALID) {
-      throw new RuntimeException(
-          String.format("Event Type '%s' is invalid!", invalidAddressEvent.getEvent().getType()));
-    }
+    InvalidAddress invalidAddress = invalidAddressEvent.getPayload().getInvalidAddress();
+    EventTypeDTO eventType = invalidAddressEvent.getEvent().getType();
 
     Case caze =
-        caseService.getCaseByCaseId(
-            UUID.fromString(
-                invalidAddressEvent.getPayload().getInvalidAddress().getCollectionCase().getId()));
+        caseService.getCaseByCaseId(UUID.fromString(invalidAddress.getCollectionCase().getId()));
+
+    // Log unexpected event type and ack message
+    if (eventType != EventTypeDTO.ADDRESS_NOT_VALID) {
+      eventLogger.logCaseEvent(
+          caze,
+          invalidAddressEvent.getEvent().getDateTime(),
+          String.format("Unexpected event type '%s'", eventType),
+          EventType.UNEXPECTED_EVENT_TYPE,
+          invalidAddressEvent.getEvent(),
+          convertObjectToJson(invalidAddress));
+      return;
+    }
+
     caze.setAddressInvalid(true);
     caseService.saveAndEmitCaseUpdatedEvent(caze);
 
@@ -42,6 +49,6 @@ public class InvalidAddressService {
         "Invalid address",
         EventType.ADDRESS_NOT_VALID,
         invalidAddressEvent.getEvent(),
-        convertObjectToJson(invalidAddressEvent.getPayload().getInvalidAddress()));
+        convertObjectToJson(invalidAddress));
   }
 }
