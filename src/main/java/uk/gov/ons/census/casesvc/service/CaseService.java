@@ -14,6 +14,7 @@ import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
+import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -70,10 +71,18 @@ public class CaseService {
   }
 
   public PayloadDTO saveAndEmitCaseCreatedEvent(Case caze) {
+    return saveAndEmitCaseCreatedEvent(caze, null);
+  }
+
+  public PayloadDTO saveAndEmitCaseCreatedEvent(Case caze, FulfilmentRequestDTO fulfilmentRequest) {
     caseRepository.saveAndFlush(caze);
 
     EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_CREATED);
     ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
+
+    // This has been added in to allow Action Scheduler to process fulfilments for individuals
+    responseManagementEvent.getPayload().setFulfilmentRequest(fulfilmentRequest);
+
     rabbitTemplate.convertAndSend(
         outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
     return responseManagementEvent.getPayload();
