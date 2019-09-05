@@ -32,5 +32,8 @@ public class PayloadDTO {
   private InvalidAddress invalidAddress;
 
   @JsonInclude(Include.NON_NULL)
+  private FieldCaseSelected fieldCaseSelected;
+
+  @JsonInclude(Include.NON_NULL)
   private FulfilmentInformation fulfilmentInformation;
 }

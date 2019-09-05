@@ -21,6 +21,8 @@ public class ActionSchedulerEventReceiver {
   public void receiveMessage(ResponseManagementEvent event) {
     if (event.getEvent().getType() == EventTypeDTO.PRINT_CASE_SELECTED) {
       eventService.processPrintCaseSelected(event);
+    } else if (event.getEvent().getType() == EventTypeDTO.FIELD_CASE_SELECTED) {
+      eventService.processFieldCaseSelected(event);
     } else {
       throw new RuntimeException(); // Unexpected event type received
     }
