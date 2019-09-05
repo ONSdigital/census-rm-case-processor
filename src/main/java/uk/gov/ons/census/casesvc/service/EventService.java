@@ -4,7 +4,6 @@ import static uk.gov.ons.census.casesvc.utility.EventHelper.createEventDTO;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.time.OffsetDateTime;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
@@ -74,13 +73,10 @@ public class EventService {
       ResponseManagementEvent responseManagementEvent,
       String eventDescription,
       EventType eventType) {
-    Optional<Case> cazeResult = caseService.findCase(caseRef);
+    Case caze =
+        caseService.getCaseByCaseRef(
+            responseManagementEvent.getPayload().getPrintCaseSelected().getCaseRef());
 
-    if (cazeResult.isEmpty()) {
-      throw new RuntimeException(); // This case should definitely exist
-    }
-
-    Case caze = cazeResult.get();
     eventLogger.logCaseEvent(
         caze,
         responseManagementEvent.getEvent().getDateTime(),

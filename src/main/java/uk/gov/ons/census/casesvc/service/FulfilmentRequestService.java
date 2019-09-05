@@ -20,17 +20,26 @@ import uk.gov.ons.census.casesvc.model.entity.CaseState;
 public class FulfilmentRequestService {
   private static final String FULFILMENT_REQUEST_RECEIVED = "Fulfilment Request Received";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_CASE_TYPE = "HI";
-  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND = "UACIT1";
-  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH = "UACIT2";
-  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH = "UACIT2W";
-  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NORTHERN_IRELAND = "UACIT4";
+  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_SMS = "UACIT1";
+  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH_SMS = "UACIT2";
+  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH_SMS = "UACIT2W";
+  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NI_SMS = "UACIT4";
+  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_PRINT = "P_OR_I1";
+  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH_PRINT = "P_OR_I2";
+  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH_PRINT = "P_OR_I2W";
+  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NI_PRINT = "P_OR_I4";
+
   private static final Set<String> individualResponseRequestCodes =
       new HashSet<>(
           Arrays.asList(
-              HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND,
-              HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH,
-              HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH,
-              HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NORTHERN_IRELAND));
+              HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_SMS,
+              HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH_SMS,
+              HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH_SMS,
+              HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NI_SMS,
+              HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_PRINT,
+              HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH_PRINT,
+              HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH_PRINT,
+              HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NI_PRINT));
 
   private final EventLogger eventLogger;
   private final CaseService caseService;
@@ -56,15 +65,20 @@ public class FulfilmentRequestService {
         convertObjectToJson(fulfilmentRequestPayload));
 
     if (individualResponseRequestCodes.contains(fulfilmentRequestPayload.getFulfilmentCode())) {
-      Case individualResponseCase = prepareIndividualResponseCaseFromParentCase(caze);
+
+      Case individualResponseCase =
+          prepareIndividualResponseCase(
+              caze,
+              UUID.fromString(
+                  fulfilmentRequest.getPayload().getFulfilmentRequest().getIndividualCaseId()));
       caseService.saveAndEmitCaseCreatedEvent(individualResponseCase);
     }
   }
 
-  private Case prepareIndividualResponseCaseFromParentCase(Case parentCase) {
+  private Case prepareIndividualResponseCase(Case parentCase, UUID newCaseId) {
     Case individualResponseCase = new Case();
 
-    individualResponseCase.setCaseId(UUID.randomUUID());
+    individualResponseCase.setCaseId(newCaseId);
     individualResponseCase.setCaseRef(caseService.getUniqueCaseRef());
     individualResponseCase.setState(CaseState.ACTIONABLE);
     individualResponseCase.setCreatedDateTime(OffsetDateTime.now());
