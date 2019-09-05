@@ -1,6 +1,7 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.getUUIDFromJson;
 
 import java.util.UUID;
 import org.springframework.stereotype.Component;
@@ -70,8 +71,10 @@ public class InvalidAddressService {
         throw new RuntimeException(String.format("Event type '%s' not found", event.getType()));
     }
 
+    Case caze = caseService.getCaseByCaseId(getUUIDFromJson("/collectionCase/id", logEventPayload));
+
     eventLogger.logCaseEvent(
-        null,
+        caze,
         addressEvent.getEvent().getDateTime(),
         logEventDescription,
         logEventType,

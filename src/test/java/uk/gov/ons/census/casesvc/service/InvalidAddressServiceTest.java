@@ -1,13 +1,12 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 
@@ -17,6 +16,7 @@ import org.json.JSONException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -96,14 +96,23 @@ public class InvalidAddressServiceTest {
 
     managementEvent.setPayload(payload);
 
+    Case expectedCase = getRandomCase();
+    expectedCase.setAddressInvalid(false);
+    when(caseService.getCaseByCaseId(TEST_CASE_ID)).thenReturn(expectedCase);
+
     // when
     underTest.processMessage(managementEvent);
 
     // then
+    InOrder inOrder = inOrder(caseService, eventLogger);
+
+    inOrder.verify(caseService).getCaseByCaseId(TEST_CASE_ID);
+
     ArgumentCaptor<String> addressModifiedCaptor = ArgumentCaptor.forClass(String.class);
-    verify(eventLogger)
+    inOrder
+        .verify(eventLogger)
         .logCaseEvent(
-            isNull(),
+            eq(expectedCase),
             any(OffsetDateTime.class),
             eq("Address modified"),
             eq(EventType.ADDRESS_MODIFIED),
@@ -114,8 +123,8 @@ public class InvalidAddressServiceTest {
     JSONAssert.assertEquals(
         actualAddressModifiedJson, expectedAddressModifiedJson, JSONCompareMode.STRICT);
 
+    verifyNoMoreInteractions(caseService);
     verifyNoMoreInteractions(eventLogger);
-    verifyZeroInteractions(caseService);
   }
 
   @Test
@@ -132,14 +141,23 @@ public class InvalidAddressServiceTest {
 
     managementEvent.setPayload(payload);
 
+    Case expectedCase = getRandomCase();
+    expectedCase.setAddressInvalid(false);
+    when(caseService.getCaseByCaseId(TEST_CASE_ID)).thenReturn(expectedCase);
+
     // when
     underTest.processMessage(managementEvent);
 
     // then
+    InOrder inOrder = inOrder(caseService, eventLogger);
+
+    inOrder.verify(caseService).getCaseByCaseId(TEST_CASE_ID);
+
     ArgumentCaptor<String> addressTypeChangeCaptor = ArgumentCaptor.forClass(String.class);
-    verify(eventLogger)
+    inOrder
+        .verify(eventLogger)
         .logCaseEvent(
-            isNull(),
+            eq(expectedCase),
             any(OffsetDateTime.class),
             eq("Address type changed"),
             eq(EventType.ADDRESS_TYPE_CHANGED),
@@ -150,8 +168,8 @@ public class InvalidAddressServiceTest {
     JSONAssert.assertEquals(
         actualAddressTypeChangeJson, expectedTypeChangeJson, JSONCompareMode.STRICT);
 
+    verifyNoMoreInteractions(caseService);
     verifyNoMoreInteractions(eventLogger);
-    verifyZeroInteractions(caseService);
   }
 
   @Test(expected = RuntimeException.class)
