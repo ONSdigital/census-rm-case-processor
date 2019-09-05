@@ -5,7 +5,6 @@ import static uk.gov.ons.census.casesvc.service.EventService.CREATE_CASE_SAMPLE_
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.time.OffsetDateTime;
-import java.util.Optional;
 import java.util.UUID;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
@@ -104,7 +103,7 @@ public class EventServiceTest {
     // Given
     EasyRandom easyRandom = new EasyRandom();
     Case caze = easyRandom.nextObject(Case.class);
-    when(caseService.findCase(anyInt())).thenReturn(Optional.of(caze));
+    when(caseService.getCaseByCaseRef(eq(123))).thenReturn(caze);
 
     // When
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();

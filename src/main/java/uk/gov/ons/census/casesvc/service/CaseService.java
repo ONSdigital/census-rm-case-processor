@@ -69,10 +69,6 @@ public class CaseService {
     return caseRef;
   }
 
-  public Optional<Case> findCase(int caseRef) {
-    return caseRepository.findById(caseRef);
-  }
-
   public PayloadDTO saveAndEmitCaseCreatedEvent(Case caze) {
     caseRepository.saveAndFlush(caze);
 
@@ -154,6 +150,7 @@ public class CaseService {
     collectionCase.setReceiptReceived(caze.isReceiptReceived());
     collectionCase.setRefusalReceived(caze.isRefusalReceived());
     collectionCase.setAddressInvalid(caze.isAddressInvalid());
+    collectionCase.setUndeliveredAsAddressed(caze.isUndeliveredAsAddressed());
     // Yes. You can add stuff to the bottom of this list if you like.
 
     return collectionCase;
@@ -200,5 +197,15 @@ public class CaseService {
       throw new RuntimeException(String.format("Case ID '%s' not present", caseId));
     }
     return cazeResult.get();
+  }
+
+  public Case getCaseByCaseRef(int caseRef) {
+    Optional<Case> caseOptional = caseRepository.findById(caseRef);
+
+    if (caseOptional.isEmpty()) {
+      throw new RuntimeException(); // This case should definitely exist
+    }
+
+    return caseOptional.get();
   }
 }

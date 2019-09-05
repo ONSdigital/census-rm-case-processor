@@ -41,6 +41,13 @@
       "arguments": {}
     },
     {
+      "name": "case.undeliveredMailQueue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
       "name": "case.action",
       "vhost": "/",
       "durable": true,
@@ -161,6 +168,14 @@
       "destination": "case.invalidAddressQueue",
       "destination_type": "queue",
       "routing_key": "event.case.address.update",
+      "arguments": {}
+    },
+    {
+      "source": "events",
+      "vhost": "/",
+      "destination": "case.undeliveredMailQueue",
+      "destination_type": "queue",
+      "routing_key": "event.fulfilment.undelivered",
       "arguments": {}
     },
     {
