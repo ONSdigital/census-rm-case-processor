@@ -1,5 +1,6 @@
 package uk.gov.ons.census.casesvc.utility;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
@@ -102,6 +103,61 @@ public class QuestionnaireTypeHelperTest {
 
     // Then
     assertEquals(34, actualQuestionnaireType);
+  }
+
+  @Test
+  public void testIsEnglandIndividualQuestionnaireType() {
+    // Given
+
+    // When
+    boolean actual = QuestionnaireTypeHelper.isIndividualQuestionnaireType("21");
+
+    // Then
+    assertThat(actual).isTrue();
+  }
+
+  @Test
+  public void testIsWalesEnglandIndividualQuestionnaireType() {
+    // Given
+
+    // When
+    boolean actual = QuestionnaireTypeHelper.isIndividualQuestionnaireType("22");
+
+    // Then
+    assertThat(actual).isTrue();
+  }
+
+  @Test
+  public void testIsWalesIndividualInWelshQuestionnaireType() {
+    // Given
+
+    // When
+    boolean actual = QuestionnaireTypeHelper.isIndividualQuestionnaireType("23");
+
+    // Then
+    assertThat(actual).isTrue();
+  }
+
+  @Test
+  public void testIsNorthernIrelandIndividualQuestionnaireType() {
+    // Given
+
+    // When
+    boolean actual = QuestionnaireTypeHelper.isIndividualQuestionnaireType("24");
+
+    // Then
+    assertThat(actual).isTrue();
+  }
+
+  @Test
+  public void testIsNotIndividualQuestionnaireType() {
+    // Given
+
+    // When
+    boolean actual = QuestionnaireTypeHelper.isIndividualQuestionnaireType("99");
+
+    // Then
+    assertThat(actual).isFalse();
   }
 
   @Test(expected = IllegalArgumentException.class)
