@@ -32,5 +32,4 @@ public class CollectionCase {
   private String fieldOfficerId;
   private String ceExpectedCapacity;
   private Boolean addressInvalid;
-  private Boolean undeliveredAsAddressed;
 }

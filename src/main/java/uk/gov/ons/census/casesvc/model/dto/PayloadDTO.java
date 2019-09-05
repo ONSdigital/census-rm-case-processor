@@ -33,7 +33,4 @@ public class PayloadDTO {
 
   @JsonInclude(Include.NON_NULL)
   private FieldCaseSelected fieldCaseSelected;
-
-  @JsonInclude(Include.NON_NULL)
-  private FulfilmentInformation fulfilmentInformation;
 }

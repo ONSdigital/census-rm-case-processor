@@ -59,9 +59,6 @@ public class AppConfig {
   @Value("${queueconfig.survey-launched-queue}")
   private String surveyLaunchedQueue;
 
-  @Value("${queueconfig.undelivered-mail-queue}")
-  private String undeliveredMailQueue;
-
   @Bean
   public MessageChannel caseSampleInputChannel() {
     return new DirectChannel();
@@ -109,11 +106,6 @@ public class AppConfig {
 
   @Bean
   public MessageChannel surveyLaunchedInputChannel() {
-    return new DirectChannel();
-  }
-
-  @Bean
-  public MessageChannel undeliveredMailInputChannel() {
     return new DirectChannel();
   }
 
@@ -202,15 +194,6 @@ public class AppConfig {
   AmqpInboundChannelAdapter surveyLaunchedInbound(
       @Qualifier("surveyLaunchedContainer") SimpleMessageListenerContainer listenerContainer,
       @Qualifier("surveyLaunchedInputChannel") MessageChannel channel) {
-    AmqpInboundChannelAdapter adapter = new AmqpInboundChannelAdapter(listenerContainer);
-    adapter.setOutputChannel(channel);
-    return adapter;
-  }
-
-  @Bean
-  AmqpInboundChannelAdapter undeliveredMailInbound(
-      @Qualifier("undeliveredMailContainer") SimpleMessageListenerContainer listenerContainer,
-      @Qualifier("undeliveredMailInputChannel") MessageChannel channel) {
     AmqpInboundChannelAdapter adapter = new AmqpInboundChannelAdapter(listenerContainer);
     adapter.setOutputChannel(channel);
     return adapter;
@@ -322,16 +305,6 @@ public class AppConfig {
     SimpleMessageListenerContainer container =
         new SimpleMessageListenerContainer(connectionFactory);
     container.setQueueNames(invalidAddressInboundQueue);
-    container.setConcurrentConsumers(consumers);
-    return container;
-  }
-
-  @Bean
-  public SimpleMessageListenerContainer undeliveredMailContainer(
-      ConnectionFactory connectionFactory) {
-    SimpleMessageListenerContainer container =
-        new SimpleMessageListenerContainer(connectionFactory);
-    container.setQueueNames(undeliveredMailQueue);
     container.setConcurrentConsumers(consumers);
     return container;
   }

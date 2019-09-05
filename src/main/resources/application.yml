@@ -30,9 +30,18 @@ queueconfig:
   inbound-queue: case.sample.inbound
   case-event-exchange: events
   rh-case-queue: case.rh.case
+  rh-case-routing-key: event.case.*
   rh-uac-queue: case.rh.uac
+  rh-uac-routing-key: event.uac.*
   action-scheduler-queue: case.action
   survey-launched-queue: survey.launched
+  action-scheduler-routing-key-uac: event.uac.*
+  action-scheduler-routing-key-case: event.case.*
+  refusal-routing-key: event.respondent.refusal
+  receipt-routing-key: event.response.receipt
+  survey-launched-routing-key: event.response.authentication
+  fulfilment-routing-key: event.fulfilment.request
+  questionnaire-linked-routing-key: event.respondent.questionnaire.linked
   unaddressed-inbound-queue: unaddressedRequestQueue
   receipt-response-inbound-queue: Case.Responses
   refusal-response-inbound-queue: case.refusals
@@ -41,8 +50,8 @@ queueconfig:
   action-case-queue: action.events
   uac-qid-created-queue: case.uac-qid-created
   uac-qid-created-exchange: uac-qid-created-exchange
+  invalid-address-routing-key: event.case.address.update
   invalid-address-inbound-queue: case.invalidAddressQueue
-  undelivered-mail-queue: case.undeliveredMailQueue
   consumers: 50
 
 healthcheck:

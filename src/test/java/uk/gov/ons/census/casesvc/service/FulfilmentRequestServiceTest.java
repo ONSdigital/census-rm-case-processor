@@ -25,14 +25,10 @@ import uk.gov.ons.census.casesvc.model.entity.CaseState;
 public class FulfilmentRequestServiceTest {
   private static final String HOUSEHOLD_RESPONSE_ADDRESS_TYPE = "HH";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_ADDRESS_TYPE = "HI";
-  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_SMS = "UACIT1";
-  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH_SMS = "UACIT2";
-  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH_SMS = "UACIT2W";
-  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NI_SMS = "UACIT4";
-  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_PRINT = "P_OR_I1";
-  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH_PRINT = "P_OR_I2";
-  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH_PRINT = "P_OR_I2W";
-  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NI_PRINT = "P_OR_I4";
+  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND = "UACIT1";
+  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH = "UACIT2";
+  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH = "UACIT2W";
+  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NORTHERN_IRELAND = "UACIT4";
 
   @Mock private EventLogger eventLogger;
 
@@ -69,42 +65,22 @@ public class FulfilmentRequestServiceTest {
 
   @Test
   public void testGoodIndividualResponseFulfilmentRequestForUACIT1() {
-    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_SMS);
+    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND);
   }
 
   @Test
   public void testGoodIndividualResponseFulfilmentRequestForUACIT2() {
-    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH_SMS);
+    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH);
   }
 
   @Test
   public void testGoodIndividualResponseFulfilmentRequestForUACIT2W() {
-    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH_SMS);
+    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH);
   }
 
   @Test
   public void testGoodIndividualResponseFulfilmentRequestForUACIT4() {
-    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NI_SMS);
-  }
-
-  @Test
-  public void testGoodIndividualResponseFulfilmentRequestForP_OR_I1() {
-    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_PRINT);
-  }
-
-  @Test
-  public void testGoodIndividualResponseFulfilmentRequestForP_OR_I2() {
-    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH_PRINT);
-  }
-
-  @Test
-  public void testGoodIndividualResponseFulfilmentRequestForP_OR_I2W() {
-    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH_PRINT);
-  }
-
-  @Test
-  public void testGoodIndividualResponseFulfilmentRequestForP_OR_I4() {
-    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NI_PRINT);
+    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NORTHERN_IRELAND);
   }
 
   private void testIndividualResponseCode(String individualResponseCode) {
@@ -123,7 +99,6 @@ public class FulfilmentRequestServiceTest {
         managementEvent.getPayload().getFulfilmentRequest();
     expectedFulfilmentRequest.setCaseId(parentCase.getCaseId().toString());
     expectedFulfilmentRequest.setFulfilmentCode(individualResponseCode);
-    expectedFulfilmentRequest.setIndividualCaseId(UUID.randomUUID().toString());
 
     when(caseService.getCaseByCaseId(UUID.fromString(expectedFulfilmentRequest.getCaseId())))
         .thenReturn(parentCase);
@@ -144,17 +119,14 @@ public class FulfilmentRequestServiceTest {
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
     verify(caseService).saveAndEmitCaseCreatedEvent(caseArgumentCaptor.capture());
     Case actualChildCase = caseArgumentCaptor.getValue();
-    checkIndivdualFulfilmentRequestCase(parentCase, actualChildCase, managementEvent);
+    checkIndivdualFulfilmentRequestCase(parentCase, actualChildCase);
     verify(caseService, times(1)).getUniqueCaseRef();
   }
 
-  private void checkIndivdualFulfilmentRequestCase(
-      Case parentCase, Case actualChildCase, ResponseManagementEvent managementEvent) {
+  private void checkIndivdualFulfilmentRequestCase(Case parentCase, Case actualChildCase) {
     assertThat(actualChildCase.getCaseRef()).isNotEqualTo(parentCase.getCaseRef());
     assertThat(UUID.fromString(actualChildCase.getCaseId().toString()))
         .isNotEqualTo(parentCase.getCaseId());
-    assertThat(actualChildCase.getCaseId().toString())
-        .isEqualTo(managementEvent.getPayload().getFulfilmentRequest().getIndividualCaseId());
     assertThat(actualChildCase.getUacQidLinks()).isNull();
     assertThat(actualChildCase.getEvents()).isNull();
     assertThat(actualChildCase.getCreatedDateTime())
