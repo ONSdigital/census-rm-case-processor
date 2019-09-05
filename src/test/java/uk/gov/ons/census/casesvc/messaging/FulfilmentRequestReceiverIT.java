@@ -40,10 +40,10 @@ import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @RunWith(SpringJUnit4ClassRunner.class)
 public class FulfilmentRequestReceiverIT {
-
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final String TEST_REPLACEMENT_FULFILMENT_CODE = "UACHHT1";
   private static final String TEST_INDIVIDUAL_RESPONSE_FULFILMENT_CODE = "UACIT1";
+  private static final UUID TEST_INDIVIDUAL_CASE_ID = UUID.randomUUID();
 
   @Value("${queueconfig.fulfilment-request-inbound-queue}")
   private String inboundQueue;
@@ -123,6 +123,10 @@ public class FulfilmentRequestReceiverIT {
     managementEvent
         .getPayload()
         .getFulfilmentRequest()
+        .setIndividualCaseId(TEST_INDIVIDUAL_CASE_ID.toString());
+    managementEvent
+        .getPayload()
+        .getFulfilmentRequest()
         .setFulfilmentCode(TEST_INDIVIDUAL_RESPONSE_FULFILMENT_CODE);
     managementEvent.getEvent().setTransactionId(UUID.randomUUID());
 
@@ -154,11 +158,7 @@ public class FulfilmentRequestReceiverIT {
     assertThat(cases.size()).isEqualTo(2);
 
     Case actualParentCase = caseRepository.findByCaseId(parentCase.getCaseId()).get();
-    Case actualChildCase =
-        cases.stream()
-            .filter(c -> !c.getCaseId().equals(actualParentCase.getCaseId()))
-            .findFirst()
-            .get();
+    Case actualChildCase = caseRepository.findByCaseId(TEST_INDIVIDUAL_CASE_ID).get();
 
     // Ensure emitted RM message matches new case
     assertThat(UUID.fromString(responseManagementEvent.getPayload().getCollectionCase().getId()))
