@@ -7,7 +7,6 @@ import lombok.Data;
 @Data
 @JsonInclude(Include.NON_NULL)
 public class PayloadDTO {
-  private InvalidAddress invalidAddress;
   private CollectionCase collectionCase;
   private UacDTO uac;
   private PrintCaseSelected printCaseSelected;
@@ -17,4 +16,6 @@ public class PayloadDTO {
   private UacCreatedDTO uacQidCreated;
   private String addressModification;
   private String addressTypeChange;
+  private InvalidAddress invalidAddress;
+  private FulfilmentInformation fulfilmentInformation;
 }
