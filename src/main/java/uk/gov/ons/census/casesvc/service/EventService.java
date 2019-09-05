@@ -16,6 +16,7 @@ import uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper;
 
 @Service
 public class EventService {
+
   public static final String CREATE_CASE_SAMPLE_RECEIVED = "Create case sample received";
 
   private final CaseService caseService;
@@ -73,9 +74,7 @@ public class EventService {
       ResponseManagementEvent responseManagementEvent,
       String eventDescription,
       EventType eventType) {
-    Case caze =
-        caseService.getCaseByCaseRef(
-            responseManagementEvent.getPayload().getPrintCaseSelected().getCaseRef());
+    Case caze = caseService.getCaseByCaseRef(caseRef);
 
     eventLogger.logCaseEvent(
         caze,

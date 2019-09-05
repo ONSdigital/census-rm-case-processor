@@ -146,7 +146,7 @@ public class EventServiceTest {
     // Given
     EasyRandom easyRandom = new EasyRandom();
     Case caze = easyRandom.nextObject(Case.class);
-    when(caseService.findCase(anyInt())).thenReturn(Optional.of(caze));
+    when(caseService.getCaseByCaseRef(anyInt())).thenReturn(caze);
 
     // When
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
