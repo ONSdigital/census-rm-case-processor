@@ -52,9 +52,29 @@ public class EventService {
   }
 
   public void processPrintCaseSelected(ResponseManagementEvent responseManagementEvent) {
-    Optional<Case> cazeResult =
-        caseService.findCase(
-            responseManagementEvent.getPayload().getPrintCaseSelected().getCaseRef());
+    processEvent(
+        responseManagementEvent.getPayload().getPrintCaseSelected().getCaseRef(),
+        responseManagementEvent,
+        String.format(
+            "Case selected by Action Rule for print Pack Code %s",
+            responseManagementEvent.getPayload().getPrintCaseSelected().getPackCode()),
+        EventType.PRINT_CASE_SELECTED);
+  }
+
+  public void processFieldCaseSelected(ResponseManagementEvent responseManagementEvent) {
+    processEvent(
+        responseManagementEvent.getPayload().getFieldCaseSelected().getCaseRef(),
+        responseManagementEvent,
+        "Case selected by Action Rule for fieldwork followup",
+        EventType.FIELD_CASE_SELECTED);
+  }
+
+  private void processEvent(
+      int caseRef,
+      ResponseManagementEvent responseManagementEvent,
+      String eventDescription,
+      EventType eventType) {
+    Optional<Case> cazeResult = caseService.findCase(caseRef);
 
     if (cazeResult.isEmpty()) {
       throw new RuntimeException(); // This case should definitely exist
@@ -64,10 +84,8 @@ public class EventService {
     eventLogger.logCaseEvent(
         caze,
         responseManagementEvent.getEvent().getDateTime(),
-        String.format(
-            "Case selected by Action Rule for print Pack Code %s",
-            responseManagementEvent.getPayload().getPrintCaseSelected().getPackCode()),
-        EventType.PRINT_CASE_SELECTED,
+        eventDescription,
+        eventType,
         responseManagementEvent.getEvent(),
         convertObjectToJson(responseManagementEvent.getPayload()));
   }
