@@ -228,7 +228,7 @@ public class FulfilmentRequestReceiverIT {
         convertJsonToFulfilmentRequestDTO(event.getEventPayload());
     assertThat(actualFulfilmentRequest.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
     assertThat(actualFulfilmentRequest.getFulfilmentCode())
-        .isEqualTo(TEST_INDIVIDUAL_RESPONSE_FULFILMENT_CODE);
+        .isEqualTo(TEST_INDIVIDUAL_RESPONSE_FULFILMENT_CODE_SMS);
 
     List<Case> cases = caseRepository.findAll();
     assertThat(cases.size()).isEqualTo(2);
