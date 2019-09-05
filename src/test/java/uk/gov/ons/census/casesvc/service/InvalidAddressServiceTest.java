@@ -83,15 +83,12 @@ public class InvalidAddressServiceTest {
   }
 
   @Test
-  public void testAddressModifiedEventTypeLogged() throws JSONException {
+  public void testAddressModifiedEventTypeLoggedAndRejected() throws JSONException {
     // Given
     ResponseManagementEvent managementEvent = new ResponseManagementEvent();
     managementEvent.setEvent(new EventDTO());
     managementEvent.getEvent().setDateTime(OffsetDateTime.now());
     managementEvent.getEvent().setType(EventTypeDTO.ADDRESS_MODIFIED);
-
-    CollectionCaseCaseId collectionCaseCaseId = new CollectionCaseCaseId();
-    collectionCaseCaseId.setId(TEST_CASE_ID.toString());
 
     PayloadDTO payload = new PayloadDTO();
     String expectedAddressModifiedJson = DataUtils.createTestAddressModifiedJson(TEST_CASE_ID);
@@ -119,5 +116,60 @@ public class InvalidAddressServiceTest {
 
     verifyNoMoreInteractions(eventLogger);
     verifyZeroInteractions(caseService);
+  }
+
+  @Test
+  public void testAddressTypeChangeEventTypeLoggedAndRejected() throws JSONException {
+    // Given
+    ResponseManagementEvent managementEvent = new ResponseManagementEvent();
+    managementEvent.setEvent(new EventDTO());
+    managementEvent.getEvent().setDateTime(OffsetDateTime.now());
+    managementEvent.getEvent().setType(EventTypeDTO.ADDRESS_TYPE_CHANGED);
+
+    PayloadDTO payload = new PayloadDTO();
+    String expectedTypeChangeJson = DataUtils.createTestAddressTypeChangeJson(TEST_CASE_ID);
+    payload.setAddressTypeChange(expectedTypeChangeJson);
+
+    managementEvent.setPayload(payload);
+
+    // when
+    underTest.processMessage(managementEvent);
+
+    // then
+    ArgumentCaptor<String> addressTypeChangeCaptor = ArgumentCaptor.forClass(String.class);
+    verify(eventLogger)
+        .logCaseEvent(
+            isNull(),
+            any(OffsetDateTime.class),
+            eq("Address type changed"),
+            eq(EventType.ADDRESS_TYPE_CHANGED),
+            eq(managementEvent.getEvent()),
+            addressTypeChangeCaptor.capture());
+
+    String actualAddressTypeChangeJson = addressTypeChangeCaptor.getValue();
+    JSONAssert.assertEquals(
+        actualAddressTypeChangeJson, expectedTypeChangeJson, JSONCompareMode.STRICT);
+
+    verifyNoMoreInteractions(eventLogger);
+    verifyZeroInteractions(caseService);
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testInvalidAddressEventTypeException() {
+    ResponseManagementEvent managementEvent = new ResponseManagementEvent();
+    managementEvent.setEvent(new EventDTO());
+    managementEvent.getEvent().setType(EventTypeDTO.CASE_CREATED);
+
+    String expectedErrorMessage =
+        String.format("Event type '%s' not found", EventTypeDTO.CASE_CREATED);
+
+    try {
+      // WHEN
+      underTest.processMessage(managementEvent);
+    } catch (RuntimeException re) {
+      // THEN
+      assertThat(re.getMessage()).isEqualTo(expectedErrorMessage);
+      throw re;
+    }
   }
 }

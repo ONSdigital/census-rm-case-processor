@@ -178,4 +178,60 @@ public class InvalidAddressReceiverIT {
     JSONAssert.assertEquals(
         actualAddressModifiedJson, expectedAddressModifiedJson, JSONCompareMode.STRICT);
   }
+
+  @Test
+  public void testAddressTypeChangeEventTypeLoggedAndRejected()
+      throws InterruptedException, JSONException {
+    // GIVEN
+    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
+
+    EasyRandom easyRandom = new EasyRandom();
+    Case caze = easyRandom.nextObject(Case.class);
+    caze.setCaseId(TEST_CASE_ID);
+    caze.setUacQidLinks(null);
+    caze.setEvents(null);
+    caze.setAddressInvalid(false);
+    caze = caseRepository.saveAndFlush(caze);
+
+    ResponseManagementEvent managementEvent = new ResponseManagementEvent();
+    managementEvent.setEvent(new EventDTO());
+    managementEvent.getEvent().setDateTime(OffsetDateTime.now());
+    managementEvent.getEvent().setChannel("Test channel");
+    managementEvent.getEvent().setSource("Test source");
+    managementEvent.getEvent().setType(EventTypeDTO.ADDRESS_TYPE_CHANGED);
+
+    PayloadDTO payload = new PayloadDTO();
+    String expectedAddressTypeChangeJson = DataUtils.createTestAddressTypeChangeJson(TEST_CASE_ID);
+    payload.setAddressTypeChange(expectedAddressTypeChangeJson);
+
+    managementEvent.setPayload(payload);
+
+    String json = convertObjectToJson(managementEvent);
+    Message message =
+        MessageBuilder.withBody(json.getBytes())
+            .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+            .build();
+    rabbitQueueHelper.sendMessage(invalidAddressInboundQueue, message);
+
+    // Check no message emitted
+    rabbitQueueHelper.checkMessageIsNotReceived(outboundQueue, 3);
+
+    // Check case not changed
+    Optional<Case> actualCaseOpt = caseRepository.findByCaseId(caze.getCaseId());
+    Case actualCase = actualCaseOpt.get();
+    assertThat(actualCase.isAddressInvalid()).isFalse();
+
+    // Event logged is as expected
+    List<Event> events = eventRepository.findAll(new Sort(ASC, "rmEventProcessed"));
+    assertThat(events.size()).isEqualTo(1);
+    Event event = events.get(0);
+    assertThat(event.getEventChannel()).isEqualTo("Test channel");
+    assertThat(event.getEventSource()).isEqualTo("Test source");
+    assertThat(event.getEventDescription()).isEqualTo("Address type changed");
+    assertThat(event.getEventType()).isEqualTo(EventType.ADDRESS_TYPE_CHANGED);
+
+    String actualAddressTypeChangeJson = event.getEventPayload();
+    JSONAssert.assertEquals(
+        actualAddressTypeChangeJson, expectedAddressTypeChangeJson, JSONCompareMode.STRICT);
+  }
 }

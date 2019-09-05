@@ -222,4 +222,24 @@ public class DataUtils {
 
     return JsonHelper.convertObjectToJson(parentNode);
   }
+
+  public static String createTestAddressTypeChangeJson(UUID caseId) {
+    ObjectNode collectionCaseNode =
+        objectMapper.createObjectNode().put("id", caseId.toString()).put("ceExpectedResponses", 20);
+
+    ObjectNode addressNode =
+        objectMapper
+            .createObjectNode()
+            .put("orgName", "XXXXXXXXXXXXX")
+            .put("uprn", "XXXXXXXXXXXXX")
+            .put("addressType", "CE")
+            .put("estabType", "XXX");
+
+    collectionCaseNode.set("address", addressNode);
+
+    ObjectNode parentNode = objectMapper.createObjectNode();
+    parentNode.set("collectionCase", collectionCaseNode);
+
+    return JsonHelper.convertObjectToJson(parentNode);
+  }
 }

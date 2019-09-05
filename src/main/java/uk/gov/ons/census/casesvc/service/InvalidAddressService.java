@@ -5,7 +5,7 @@ import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
-import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
+import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.InvalidAddress;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -22,16 +22,7 @@ public class InvalidAddressService {
   }
 
   public void processMessage(ResponseManagementEvent invalidAddressEvent) {
-    EventTypeDTO eventType = invalidAddressEvent.getEvent().getType();
-
-    if (eventType.equals(EventTypeDTO.ADDRESS_MODIFIED)) {
-      eventLogger.logCaseEvent(
-          null,
-          invalidAddressEvent.getEvent().getDateTime(),
-          "Address modified",
-          EventType.ADDRESS_MODIFIED,
-          invalidAddressEvent.getEvent(),
-          invalidAddressEvent.getPayload().getAddressModification());
+    if (!processEvent(invalidAddressEvent)) {
       return;
     }
 
@@ -50,5 +41,43 @@ public class InvalidAddressService {
         EventType.ADDRESS_NOT_VALID,
         invalidAddressEvent.getEvent(),
         convertObjectToJson(invalidAddress));
+  }
+
+  private boolean processEvent(ResponseManagementEvent addressEvent) {
+    String logEventDescription;
+    EventType logEventType;
+    String logEventPayload;
+    EventDTO event = addressEvent.getEvent();
+
+    switch (event.getType()) {
+      case ADDRESS_NOT_VALID:
+        return true;
+
+      case ADDRESS_MODIFIED:
+        logEventDescription = "Address modified";
+        logEventType = EventType.ADDRESS_MODIFIED;
+        logEventPayload = addressEvent.getPayload().getAddressModification();
+        break;
+
+      case ADDRESS_TYPE_CHANGED:
+        logEventDescription = "Address type changed";
+        logEventType = EventType.ADDRESS_TYPE_CHANGED;
+        logEventPayload = addressEvent.getPayload().getAddressTypeChange();
+        break;
+
+      default:
+        // Should never get here
+        throw new RuntimeException(String.format("Event type '%s' not found", event.getType()));
+    }
+
+    eventLogger.logCaseEvent(
+        null,
+        addressEvent.getEvent().getDateTime(),
+        logEventDescription,
+        logEventType,
+        event,
+        logEventPayload);
+
+    return false;
   }
 }
