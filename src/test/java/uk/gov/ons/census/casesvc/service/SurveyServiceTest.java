@@ -147,7 +147,7 @@ public class SurveyServiceTest {
     managementEvent.getEvent().setType(EventTypeDTO.CASE_CREATED);
 
     String expectedErrorMessage =
-        String.format("Event type '%s' not found", EventTypeDTO.CASE_CREATED);
+        String.format("Event Type '%s' is invalid on this topic", EventTypeDTO.CASE_CREATED);
 
     try {
       // WHEN

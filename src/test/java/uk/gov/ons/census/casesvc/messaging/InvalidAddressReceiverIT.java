@@ -149,14 +149,14 @@ public class InvalidAddressReceiverIT {
   public void testAddressTypeChangeEventTypeLoggedAndRejected()
       throws InterruptedException, JSONException {
     PayloadDTO payload = new PayloadDTO();
-    payload.setNewAddressReported(createNewAddressReportedJson(TEST_CASE_ID));
+    payload.setAddressTypeChange(createTestAddressTypeChangeJson(TEST_CASE_ID));
 
     testEventTypeLoggedAndRejected(
         payload,
-        payload.getNewAddressReported(),
-        NEW_ADDRESS_REPORTED,
-        EventType.NEW_ADDRESS_REPORTED,
-        "New Address reported");
+        payload.getAddressTypeChange(),
+        ADDRESS_TYPE_CHANGED,
+        EventType.ADDRESS_TYPE_CHANGED,
+        "Address type changed");
   }
 
   @Test

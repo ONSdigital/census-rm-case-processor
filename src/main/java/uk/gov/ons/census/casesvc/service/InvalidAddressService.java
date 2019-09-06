@@ -74,7 +74,8 @@ public class InvalidAddressService {
 
       default:
         // Should never get here
-        throw new RuntimeException(String.format("Event type '%s' not found", event.getType()));
+        throw new RuntimeException(
+            String.format("Event Type '%s' is invalid on this topic", event.getType()));
     }
 
     Case caze = caseService.getCaseByCaseId(getUUIDFromJson("/collectionCase/id", logEventPayload));

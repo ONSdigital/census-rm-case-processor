@@ -178,7 +178,8 @@ public class InvalidAddressServiceTest {
     managementEvent.setEvent(new EventDTO());
     managementEvent.getEvent().setType(CASE_CREATED);
 
-    String expectedErrorMessage = String.format("Event type '%s' not found", CASE_CREATED);
+    String expectedErrorMessage =
+        String.format("Event Type '%s' is invalid on this topic", CASE_CREATED);
 
     try {
       // WHEN
