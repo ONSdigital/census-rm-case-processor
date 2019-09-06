@@ -1,6 +1,7 @@
 package uk.gov.ons.census.casesvc.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementRespondentAuthenticatedEvent;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementSurveyLaunchedEvent;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
@@ -11,6 +12,8 @@ import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.core.MessageProperties;
@@ -25,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
+import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
@@ -60,7 +64,7 @@ public class SurveyLaunchedReceiverIT {
   }
 
   @Test
-  public void testSurveyLaunchLogsEvent() throws JSONException, InterruptedException {
+  public void testSurveyLaunchLogsEvent() throws InterruptedException {
     // GIVEN
     EasyRandom easyRandom = new EasyRandom();
     Case caze = easyRandom.nextObject(Case.class);
@@ -88,8 +92,8 @@ public class SurveyLaunchedReceiverIT {
     // WHEN
     rabbitQueueHelper.sendMessage(inboundQueue, message);
     Thread.sleep(1000);
-    // THEN
 
+    // THEN
     List<Event> events = eventRepository.findAll();
     assertThat(events.size()).isEqualTo(1);
     Event event = events.get(0);
@@ -99,5 +103,53 @@ public class SurveyLaunchedReceiverIT {
     assertThat(actualUacQidLink.getUac()).isEqualTo(TEST_UAC);
     assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
     assertThat(actualUacQidLink.isActive()).isFalse();
+  }
+
+  @Test
+  public void testRespondentAuthenticatedEventTypeLoggedAndRejected()
+      throws InterruptedException, JSONException {
+    // GIVEN
+    EasyRandom easyRandom = new EasyRandom();
+    Case caze = easyRandom.nextObject(Case.class);
+    caze.setCaseId(TEST_CASE_ID);
+    caze.setUacQidLinks(null);
+    caze.setEvents(null);
+    caze = caseRepository.saveAndFlush(caze);
+
+    UacQidLink uacQidLink = new UacQidLink();
+    uacQidLink.setId(UUID.randomUUID());
+    uacQidLink.setCaze(caze);
+    uacQidLink.setQid(TEST_QID);
+    uacQidLink.setUac(TEST_UAC);
+    uacQidLinkRepository.saveAndFlush(uacQidLink);
+
+    ResponseManagementEvent respondentAuthenticatedEvent =
+        getTestResponseManagementRespondentAuthenticatedEvent();
+    respondentAuthenticatedEvent.getPayload().getResponse().setQuestionnaireId(uacQidLink.getQid());
+
+    String json = convertObjectToJson(respondentAuthenticatedEvent);
+    Message message =
+        MessageBuilder.withBody(json.getBytes())
+            .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+            .build();
+
+    // WHEN
+    rabbitQueueHelper.sendMessage(inboundQueue, message);
+    Thread.sleep(1000);
+
+    // THEN
+    List<Event> events = eventRepository.findAll();
+    assertThat(events.size()).isEqualTo(1);
+    Event event = events.get(0);
+    assertThat(event.getEventChannel()).isEqualTo("Test channel");
+    assertThat(event.getEventSource()).isEqualTo("Test source");
+    assertThat(event.getEventDescription()).isEqualTo("Respondent authenticated");
+    assertThat(event.getEventType()).isEqualTo(EventType.RESPONDENT_AUTHENTICATED);
+
+    String expectedEventPayloadJson =
+        convertObjectToJson(respondentAuthenticatedEvent.getPayload().getResponse());
+    String actualEventPayloadJson = event.getEventPayload();
+    JSONAssert.assertEquals(
+        actualEventPayloadJson, expectedEventPayloadJson, JSONCompareMode.STRICT);
   }
 }
