@@ -132,12 +132,11 @@ public class InvalidAddressReceiverIT {
   }
 
   @Test
-  public void testAddressModifiedEventTypeLoggedAndRejected()
-      throws InterruptedException, JSONException {
+  public void testAddressModifiedEventTypeLoggedOnly() throws InterruptedException, JSONException {
     PayloadDTO payload = new PayloadDTO();
     payload.setAddressModification(createTestAddressModifiedJson(TEST_CASE_ID));
 
-    testEventTypeLoggedAndRejected(
+    testEventTypeLoggedOnly(
         payload,
         payload.getAddressModification(),
         ADDRESS_MODIFIED,
@@ -146,12 +145,12 @@ public class InvalidAddressReceiverIT {
   }
 
   @Test
-  public void testAddressTypeChangeEventTypeLoggedAndRejected()
+  public void testAddressTypeChangeEventTypeLoggedOnly()
       throws InterruptedException, JSONException {
     PayloadDTO payload = new PayloadDTO();
     payload.setAddressTypeChange(createTestAddressTypeChangeJson(TEST_CASE_ID));
 
-    testEventTypeLoggedAndRejected(
+    testEventTypeLoggedOnly(
         payload,
         payload.getAddressTypeChange(),
         ADDRESS_TYPE_CHANGED,
@@ -160,12 +159,12 @@ public class InvalidAddressReceiverIT {
   }
 
   @Test
-  public void testNewAddressReportedEventTypeLoggedAndRejected()
+  public void testNewAddressReportedEventTypeLoggedOnly()
       throws InterruptedException, JSONException {
     PayloadDTO payload = new PayloadDTO();
     payload.setNewAddressReported(createNewAddressReportedJson(TEST_CASE_ID));
 
-    testEventTypeLoggedAndRejected(
+    testEventTypeLoggedOnly(
         payload,
         payload.getNewAddressReported(),
         NEW_ADDRESS_REPORTED,
@@ -173,7 +172,7 @@ public class InvalidAddressReceiverIT {
         "New Address reported");
   }
 
-  public void testEventTypeLoggedAndRejected(
+  public void testEventTypeLoggedOnly(
       PayloadDTO payload,
       String expectedEventPayloadJson,
       EventTypeDTO eventTypeDTO,

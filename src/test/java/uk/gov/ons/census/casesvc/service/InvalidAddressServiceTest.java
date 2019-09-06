@@ -90,11 +90,11 @@ public class InvalidAddressServiceTest {
   }
 
   @Test
-  public void testAddressModifiedEventTypeLoggedAndRejected() throws JSONException {
+  public void testAddressModifiedEventTypeLoggedOnly() throws JSONException {
     PayloadDTO payload = new PayloadDTO();
     payload.setAddressModification(createTestAddressModifiedJson(TEST_CASE_ID));
 
-    testEventTypeLoggedAndRejected(
+    testEventTypeLoggedOnly(
         payload,
         payload.getAddressModification(),
         ADDRESS_MODIFIED,
@@ -103,11 +103,11 @@ public class InvalidAddressServiceTest {
   }
 
   @Test
-  public void testAddressTypeChangeEventTypeLoggedAndRejected() throws JSONException {
+  public void testAddressTypeChangeEventTypeLoggedOnly() throws JSONException {
     PayloadDTO payload = new PayloadDTO();
     payload.setAddressTypeChange(createTestAddressTypeChangeJson(TEST_CASE_ID));
 
-    testEventTypeLoggedAndRejected(
+    testEventTypeLoggedOnly(
         payload,
         payload.getAddressTypeChange(),
         ADDRESS_TYPE_CHANGED,
@@ -116,11 +116,11 @@ public class InvalidAddressServiceTest {
   }
 
   @Test
-  public void testNewAddressReportedEventTypeLoggedAndRejected() throws JSONException {
+  public void testNewAddressReportedEventTypeLoggedOnly() throws JSONException {
     PayloadDTO payload = new PayloadDTO();
     payload.setNewAddressReported(createNewAddressReportedJson(TEST_CASE_ID));
 
-    testEventTypeLoggedAndRejected(
+    testEventTypeLoggedOnly(
         payload,
         payload.getNewAddressReported(),
         NEW_ADDRESS_REPORTED,
@@ -128,7 +128,7 @@ public class InvalidAddressServiceTest {
         "New Address reported");
   }
 
-  private void testEventTypeLoggedAndRejected(
+  private void testEventTypeLoggedOnly(
       PayloadDTO payload,
       String expectedEventPayloadJson,
       EventTypeDTO eventTypeDTO,
