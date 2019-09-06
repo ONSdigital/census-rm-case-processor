@@ -41,6 +41,7 @@ import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
+import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 import uk.gov.ons.census.casesvc.testutil.DataUtils;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 
@@ -60,6 +61,7 @@ public class InvalidAddressReceiverIT {
 
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
   @Autowired private CaseRepository caseRepository;
+  @Autowired private UacQidLinkRepository uacQidLinkRepository;
   @Autowired private EventRepository eventRepository;
 
   @Before
@@ -68,6 +70,7 @@ public class InvalidAddressReceiverIT {
     rabbitQueueHelper.purgeQueue(invalidAddressInboundQueue);
     rabbitQueueHelper.purgeQueue(rhCaseQueue);
     eventRepository.deleteAllInBatch();
+    uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
   }
 
@@ -174,9 +177,9 @@ public class InvalidAddressReceiverIT {
     assertThat(event.getEventDescription()).isEqualTo("Address modified");
     assertThat(event.getEventType()).isEqualTo(EventType.ADDRESS_MODIFIED);
 
-    String actualAddressModifiedJson = event.getEventPayload();
+    String actualEventPayloadJson = event.getEventPayload();
     JSONAssert.assertEquals(
-        actualAddressModifiedJson, expectedAddressModifiedJson, JSONCompareMode.STRICT);
+        actualEventPayloadJson, expectedAddressModifiedJson, JSONCompareMode.STRICT);
   }
 
   @Test
@@ -201,8 +204,8 @@ public class InvalidAddressReceiverIT {
     managementEvent.getEvent().setType(EventTypeDTO.ADDRESS_TYPE_CHANGED);
 
     PayloadDTO payload = new PayloadDTO();
-    String expectedAddressTypeChangeJson = DataUtils.createTestAddressTypeChangeJson(TEST_CASE_ID);
-    payload.setAddressTypeChange(expectedAddressTypeChangeJson);
+    String expectedEventPayloadJson = DataUtils.createTestAddressTypeChangeJson(TEST_CASE_ID);
+    payload.setAddressTypeChange(expectedEventPayloadJson);
 
     managementEvent.setPayload(payload);
 
@@ -230,8 +233,64 @@ public class InvalidAddressReceiverIT {
     assertThat(event.getEventDescription()).isEqualTo("Address type changed");
     assertThat(event.getEventType()).isEqualTo(EventType.ADDRESS_TYPE_CHANGED);
 
-    String actualAddressTypeChangeJson = event.getEventPayload();
+    String actualEventPayloadJson = event.getEventPayload();
     JSONAssert.assertEquals(
-        actualAddressTypeChangeJson, expectedAddressTypeChangeJson, JSONCompareMode.STRICT);
+        actualEventPayloadJson, expectedEventPayloadJson, JSONCompareMode.STRICT);
+  }
+
+  @Test
+  public void testNewAddressReportedEventTypeLoggedAndRejected()
+      throws InterruptedException, JSONException {
+    // GIVEN
+    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
+
+    EasyRandom easyRandom = new EasyRandom();
+    Case caze = easyRandom.nextObject(Case.class);
+    caze.setCaseId(TEST_CASE_ID);
+    caze.setUacQidLinks(null);
+    caze.setEvents(null);
+    caze.setAddressInvalid(false);
+    caze = caseRepository.saveAndFlush(caze);
+
+    ResponseManagementEvent managementEvent = new ResponseManagementEvent();
+    managementEvent.setEvent(new EventDTO());
+    managementEvent.getEvent().setDateTime(OffsetDateTime.now());
+    managementEvent.getEvent().setChannel("Test channel");
+    managementEvent.getEvent().setSource("Test source");
+    managementEvent.getEvent().setType(EventTypeDTO.NEW_ADDRESS_REPORTED);
+
+    PayloadDTO payload = new PayloadDTO();
+    String expectedEventPayloadJson = DataUtils.createNewAddressReportedJson(TEST_CASE_ID);
+    payload.setNewAddressReported(expectedEventPayloadJson);
+
+    managementEvent.setPayload(payload);
+
+    String json = convertObjectToJson(managementEvent);
+    Message message =
+        MessageBuilder.withBody(json.getBytes())
+            .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+            .build();
+    rabbitQueueHelper.sendMessage(invalidAddressInboundQueue, message);
+
+    // Check no message emitted
+    rabbitQueueHelper.checkMessageIsNotReceived(outboundQueue, 3);
+
+    // Check case not changed
+    Optional<Case> actualCaseOpt = caseRepository.findByCaseId(caze.getCaseId());
+    Case actualCase = actualCaseOpt.get();
+    assertThat(actualCase.isAddressInvalid()).isFalse();
+
+    // Event logged is as expected
+    List<Event> events = eventRepository.findAll(new Sort(ASC, "rmEventProcessed"));
+    assertThat(events.size()).isEqualTo(1);
+    Event event = events.get(0);
+    assertThat(event.getEventChannel()).isEqualTo("Test channel");
+    assertThat(event.getEventSource()).isEqualTo("Test source");
+    assertThat(event.getEventDescription()).isEqualTo("New Address reported");
+    assertThat(event.getEventType()).isEqualTo(EventType.NEW_ADDRESS_REPORTED);
+
+    String actualEventPayloadJson = event.getEventPayload();
+    JSONAssert.assertEquals(
+        actualEventPayloadJson, expectedEventPayloadJson, JSONCompareMode.STRICT);
   }
 }

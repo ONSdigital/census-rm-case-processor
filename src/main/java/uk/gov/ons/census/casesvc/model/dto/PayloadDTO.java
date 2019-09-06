@@ -17,6 +17,8 @@ public class PayloadDTO {
   private InvalidAddress invalidAddress;
   private FieldCaseSelected fieldCaseSelected;
   private FulfilmentInformation fulfilmentInformation;
+
   private String addressModification;
   private String addressTypeChange;
+  private String newAddressReported;
 }

@@ -44,7 +44,7 @@ public class SurveyServiceTest {
 
   @InjectMocks SurveyService underTest;
 
-  private EasyRandom easyRandom = new EasyRandom();
+  private final EasyRandom easyRandom = new EasyRandom();
 
   @Test
   public void testHappyPath() {

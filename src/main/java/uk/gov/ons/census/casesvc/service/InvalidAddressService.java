@@ -66,6 +66,12 @@ public class InvalidAddressService {
         logEventPayload = addressEvent.getPayload().getAddressTypeChange();
         break;
 
+      case NEW_ADDRESS_REPORTED:
+        logEventDescription = "New Address reported";
+        logEventType = EventType.NEW_ADDRESS_REPORTED;
+        logEventPayload = addressEvent.getPayload().getNewAddressReported();
+        break;
+
       default:
         // Should never get here
         throw new RuntimeException(String.format("Event type '%s' not found", event.getType()));

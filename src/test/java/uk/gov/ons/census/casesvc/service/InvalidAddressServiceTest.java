@@ -8,6 +8,15 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.skyscreamer.jsonassert.JSONCompareMode.STRICT;
+import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.ADDRESS_MODIFIED;
+import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.ADDRESS_NOT_VALID;
+import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.ADDRESS_TYPE_CHANGED;
+import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.CASE_CREATED;
+import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.NEW_ADDRESS_REPORTED;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.createNewAddressReportedJson;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.createTestAddressModifiedJson;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.createTestAddressTypeChangeJson;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 
 import java.time.OffsetDateTime;
@@ -21,7 +30,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCaseCaseId;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
@@ -31,7 +39,6 @@ import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
-import uk.gov.ons.census.casesvc.testutil.DataUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InvalidAddressServiceTest {
@@ -49,7 +56,7 @@ public class InvalidAddressServiceTest {
     ResponseManagementEvent managementEvent = new ResponseManagementEvent();
     managementEvent.setEvent(new EventDTO());
     managementEvent.getEvent().setDateTime(OffsetDateTime.now());
-    managementEvent.getEvent().setType(EventTypeDTO.ADDRESS_NOT_VALID);
+    managementEvent.getEvent().setType(ADDRESS_NOT_VALID);
     managementEvent.setPayload(new PayloadDTO());
     managementEvent.getPayload().setInvalidAddress(new InvalidAddress());
     managementEvent.getPayload().getInvalidAddress().setCollectionCase(new CollectionCaseCaseId());
@@ -84,16 +91,55 @@ public class InvalidAddressServiceTest {
 
   @Test
   public void testAddressModifiedEventTypeLoggedAndRejected() throws JSONException {
+    PayloadDTO payload = new PayloadDTO();
+    payload.setAddressModification(createTestAddressModifiedJson(TEST_CASE_ID));
+
+    testEventTypeLoggedAndRejected(
+        payload,
+        payload.getAddressModification(),
+        ADDRESS_MODIFIED,
+        EventType.ADDRESS_MODIFIED,
+        "Address modified");
+  }
+
+  @Test
+  public void testAddressTypeChangeEventTypeLoggedAndRejected() throws JSONException {
+    PayloadDTO payload = new PayloadDTO();
+    payload.setAddressTypeChange(createTestAddressTypeChangeJson(TEST_CASE_ID));
+
+    testEventTypeLoggedAndRejected(
+        payload,
+        payload.getAddressTypeChange(),
+        ADDRESS_TYPE_CHANGED,
+        EventType.ADDRESS_TYPE_CHANGED,
+        "Address type changed");
+  }
+
+  @Test
+  public void testNewAddressReportedEventTypeLoggedAndRejected() throws JSONException {
+    PayloadDTO payload = new PayloadDTO();
+    payload.setNewAddressReported(createNewAddressReportedJson(TEST_CASE_ID));
+
+    testEventTypeLoggedAndRejected(
+        payload,
+        payload.getNewAddressReported(),
+        NEW_ADDRESS_REPORTED,
+        EventType.NEW_ADDRESS_REPORTED,
+        "New Address reported");
+  }
+
+  private void testEventTypeLoggedAndRejected(
+      PayloadDTO payload,
+      String expectedEventPayloadJson,
+      EventTypeDTO eventTypeDTO,
+      EventType eventType,
+      String eventDescription)
+      throws JSONException {
     // Given
     ResponseManagementEvent managementEvent = new ResponseManagementEvent();
     managementEvent.setEvent(new EventDTO());
     managementEvent.getEvent().setDateTime(OffsetDateTime.now());
-    managementEvent.getEvent().setType(EventTypeDTO.ADDRESS_MODIFIED);
-
-    PayloadDTO payload = new PayloadDTO();
-    String expectedAddressModifiedJson = DataUtils.createTestAddressModifiedJson(TEST_CASE_ID);
-    payload.setAddressModification(expectedAddressModifiedJson);
-
+    managementEvent.getEvent().setType(eventTypeDTO);
     managementEvent.setPayload(payload);
 
     Case expectedCase = getRandomCase();
@@ -114,59 +160,13 @@ public class InvalidAddressServiceTest {
         .logCaseEvent(
             eq(expectedCase),
             any(OffsetDateTime.class),
-            eq("Address modified"),
-            eq(EventType.ADDRESS_MODIFIED),
+            eq(eventDescription),
+            eq(eventType),
             eq(managementEvent.getEvent()),
             addressModifiedCaptor.capture());
 
-    String actualAddressModifiedJson = addressModifiedCaptor.getValue();
-    JSONAssert.assertEquals(
-        actualAddressModifiedJson, expectedAddressModifiedJson, JSONCompareMode.STRICT);
-
-    verifyNoMoreInteractions(caseService);
-    verifyNoMoreInteractions(eventLogger);
-  }
-
-  @Test
-  public void testAddressTypeChangeEventTypeLoggedAndRejected() throws JSONException {
-    // Given
-    ResponseManagementEvent managementEvent = new ResponseManagementEvent();
-    managementEvent.setEvent(new EventDTO());
-    managementEvent.getEvent().setDateTime(OffsetDateTime.now());
-    managementEvent.getEvent().setType(EventTypeDTO.ADDRESS_TYPE_CHANGED);
-
-    PayloadDTO payload = new PayloadDTO();
-    String expectedTypeChangeJson = DataUtils.createTestAddressTypeChangeJson(TEST_CASE_ID);
-    payload.setAddressTypeChange(expectedTypeChangeJson);
-
-    managementEvent.setPayload(payload);
-
-    Case expectedCase = getRandomCase();
-    expectedCase.setAddressInvalid(false);
-    when(caseService.getCaseByCaseId(TEST_CASE_ID)).thenReturn(expectedCase);
-
-    // when
-    underTest.processMessage(managementEvent);
-
-    // then
-    InOrder inOrder = inOrder(caseService, eventLogger);
-
-    inOrder.verify(caseService).getCaseByCaseId(TEST_CASE_ID);
-
-    ArgumentCaptor<String> addressTypeChangeCaptor = ArgumentCaptor.forClass(String.class);
-    inOrder
-        .verify(eventLogger)
-        .logCaseEvent(
-            eq(expectedCase),
-            any(OffsetDateTime.class),
-            eq("Address type changed"),
-            eq(EventType.ADDRESS_TYPE_CHANGED),
-            eq(managementEvent.getEvent()),
-            addressTypeChangeCaptor.capture());
-
-    String actualAddressTypeChangeJson = addressTypeChangeCaptor.getValue();
-    JSONAssert.assertEquals(
-        actualAddressTypeChangeJson, expectedTypeChangeJson, JSONCompareMode.STRICT);
+    String actualEventPayloadJson = addressModifiedCaptor.getValue();
+    JSONAssert.assertEquals(actualEventPayloadJson, expectedEventPayloadJson, STRICT);
 
     verifyNoMoreInteractions(caseService);
     verifyNoMoreInteractions(eventLogger);
@@ -176,10 +176,9 @@ public class InvalidAddressServiceTest {
   public void testInvalidAddressEventTypeException() {
     ResponseManagementEvent managementEvent = new ResponseManagementEvent();
     managementEvent.setEvent(new EventDTO());
-    managementEvent.getEvent().setType(EventTypeDTO.CASE_CREATED);
+    managementEvent.getEvent().setType(CASE_CREATED);
 
-    String expectedErrorMessage =
-        String.format("Event type '%s' not found", EventTypeDTO.CASE_CREATED);
+    String expectedErrorMessage = String.format("Event type '%s' not found", CASE_CREATED);
 
     try {
       // WHEN

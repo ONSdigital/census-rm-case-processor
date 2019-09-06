@@ -26,15 +26,15 @@ public class JsonHelper {
     }
   }
 
-  public static JsonNode convertJsonToJsonNode(String json) {
+  public static UUID getUUIDFromJson(String fieldPath, String json) {
+    return UUID.fromString(convertJsonToJsonNode(json).at(fieldPath).asText());
+  }
+
+  private static JsonNode convertJsonToJsonNode(String json) {
     try {
       return objectMapper.readValue(json, JsonNode.class);
     } catch (IOException e) {
       throw new RuntimeException("Failed converting json to JsonNode", e);
     }
-  }
-
-  public static UUID getUUIDFromJson(String fieldPath, String json) {
-    return UUID.fromString(convertJsonToJsonNode(json).at(fieldPath).asText());
   }
 }
