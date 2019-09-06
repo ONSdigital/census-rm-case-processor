@@ -11,11 +11,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @JsonInclude(Include.NON_NULL)
 public class ResponseDTO {
+
   private String caseId;
 
   private String questionnaireId;
 
-  private boolean unreceipt;
+  private Boolean unreceipt;
 
   private String agentId;
 
