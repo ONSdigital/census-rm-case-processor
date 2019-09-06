@@ -16,7 +16,8 @@ public class ResponseDTO {
 
   private String questionnaireId;
 
-  private boolean unreceipt;
+  @JsonInclude(Include.NON_NULL)
+  private Boolean unreceipt;
 
   private String agentId;
 
