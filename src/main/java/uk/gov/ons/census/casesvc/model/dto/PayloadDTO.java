@@ -14,8 +14,8 @@ public class PayloadDTO {
   private RefusalDTO refusal;
   private FulfilmentRequestDTO fulfilmentRequest;
   private UacCreatedDTO uacQidCreated;
-  private String addressModification;
-  private String addressTypeChange;
   private InvalidAddress invalidAddress;
   private FulfilmentInformation fulfilmentInformation;
+  private String addressModification;
+  private String addressTypeChange;
 }

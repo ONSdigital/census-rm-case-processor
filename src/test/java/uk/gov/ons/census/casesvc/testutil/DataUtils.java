@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -106,6 +107,18 @@ public class DataUtils {
     payload.setCollectionCase(null);
     payload.setRefusal(null);
     payload.setPrintCaseSelected(null);
+
+    return managementEvent;
+  }
+
+  public static ResponseManagementEvent getTestResponseManagementRespondentAuthenticatedEvent() {
+    ResponseManagementEvent managementEvent = getTestResponseManagementSurveyLaunchedEvent();
+
+    managementEvent.getEvent().setChannel("Test channel");
+    managementEvent.getEvent().setSource("Test source");
+
+    managementEvent.getEvent().setType(EventTypeDTO.RESPONDENT_AUTHENTICATED);
+    managementEvent.getPayload().getResponse().setResponseDateTime(OffsetDateTime.now());
 
     return managementEvent;
   }
