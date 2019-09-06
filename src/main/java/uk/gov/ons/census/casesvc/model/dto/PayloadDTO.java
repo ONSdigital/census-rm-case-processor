@@ -15,6 +15,7 @@ public class PayloadDTO {
   private FulfilmentRequestDTO fulfilmentRequest;
   private UacCreatedDTO uacQidCreated;
   private InvalidAddress invalidAddress;
+  private FieldCaseSelected fieldCaseSelected;
   private FulfilmentInformation fulfilmentInformation;
   private String addressModification;
   private String addressTypeChange;
