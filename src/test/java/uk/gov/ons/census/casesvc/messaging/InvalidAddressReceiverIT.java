@@ -3,9 +3,11 @@ package uk.gov.ons.census.casesvc.messaging;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.skyscreamer.jsonassert.JSONCompareMode.STRICT;
 import static org.springframework.data.domain.Sort.Direction.ASC;
+import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.ADDRESS_MODIFIED;
 import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.ADDRESS_TYPE_CHANGED;
 import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.NEW_ADDRESS_REPORTED;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.createNewAddressReportedJson;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.createTestAddressModifiedJson;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.createTestAddressTypeChangeJson;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
@@ -133,14 +135,14 @@ public class InvalidAddressReceiverIT {
   public void testAddressModifiedEventTypeLoggedAndRejected()
       throws InterruptedException, JSONException {
     PayloadDTO payload = new PayloadDTO();
-    payload.setAddressTypeChange(createTestAddressTypeChangeJson(TEST_CASE_ID));
+    payload.setAddressModification(createTestAddressModifiedJson(TEST_CASE_ID));
 
     testEventTypeLoggedAndRejected(
         payload,
-        payload.getAddressTypeChange(),
-        ADDRESS_TYPE_CHANGED,
-        EventType.ADDRESS_TYPE_CHANGED,
-        "Address type changed");
+        payload.getAddressModification(),
+        ADDRESS_MODIFIED,
+        EventType.ADDRESS_MODIFIED,
+        "Address modified");
   }
 
   @Test
