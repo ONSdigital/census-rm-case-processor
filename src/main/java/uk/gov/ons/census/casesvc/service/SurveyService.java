@@ -60,11 +60,11 @@ public class SurveyService {
             String.format("Event Type '%s' is invalid on this topic", event.getType()));
     }
 
-    UacQidLink surveyLaunchedForQid =
+    UacQidLink uacQidLink =
         uacService.findByQid(surveyEvent.getPayload().getResponse().getQuestionnaireId());
 
     eventLogger.logUacQidEvent(
-        surveyLaunchedForQid,
+        uacQidLink,
         surveyEvent.getEvent().getDateTime(),
         logEventDescription,
         logEventType,
