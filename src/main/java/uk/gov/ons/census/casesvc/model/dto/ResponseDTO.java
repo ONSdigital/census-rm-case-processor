@@ -9,18 +9,17 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
+@JsonInclude(Include.NON_NULL)
 public class ResponseDTO {
 
-  @JsonInclude(Include.NON_NULL)
   private String caseId;
 
   private String questionnaireId;
 
-  private boolean unreceipt;
+  private Boolean unreceipt;
 
   private String agentId;
 
-  @JsonInclude(Include.NON_NULL)
   @JsonProperty("dateTime")
   private OffsetDateTime responseDateTime;
 }
