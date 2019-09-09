@@ -104,6 +104,8 @@ public class EventServiceTest {
     // Given
     EasyRandom easyRandom = new EasyRandom();
     Case caze = easyRandom.nextObject(Case.class);
+    caze.setUacQidLinks(null);
+    caze.setEvents(null);
     when(caseService.getCaseByCaseRef(eq(123))).thenReturn(caze);
 
     // When
@@ -133,7 +135,7 @@ public class EventServiceTest {
         .logCaseEvent(
             eq(caze),
             any(OffsetDateTime.class),
-            eq("Case selected by Action Rule for print Pack Code Test packCode"),
+            eq("Case sent to printer with pack code Test packCode"),
             eq(EventType.PRINT_CASE_SELECTED),
             eq(event),
             eq(
@@ -146,6 +148,8 @@ public class EventServiceTest {
     // Given
     EasyRandom easyRandom = new EasyRandom();
     Case caze = easyRandom.nextObject(Case.class);
+    caze.setUacQidLinks(null);
+    caze.setEvents(null);
     when(caseService.getCaseByCaseRef(anyInt())).thenReturn(caze);
 
     // When
@@ -173,7 +177,7 @@ public class EventServiceTest {
         .logCaseEvent(
             eq(caze),
             any(OffsetDateTime.class),
-            eq("Case selected by Action Rule for fieldwork followup"),
+            eq("Case sent for fieldwork followup"),
             eq(EventType.FIELD_CASE_SELECTED),
             eq(event),
             eq("{\"fieldCaseSelected\":{\"caseRef\":123,\"actionRuleId\":\"Test actionRuleId\"}}"));

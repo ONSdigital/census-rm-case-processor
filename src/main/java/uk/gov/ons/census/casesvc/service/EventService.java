@@ -56,7 +56,7 @@ public class EventService {
         responseManagementEvent.getPayload().getPrintCaseSelected().getCaseRef(),
         responseManagementEvent,
         String.format(
-            "Case selected by Action Rule for print Pack Code %s",
+            "Case sent to printer with pack code %s",
             responseManagementEvent.getPayload().getPrintCaseSelected().getPackCode()),
         EventType.PRINT_CASE_SELECTED);
   }
@@ -65,7 +65,7 @@ public class EventService {
     processEvent(
         responseManagementEvent.getPayload().getFieldCaseSelected().getCaseRef(),
         responseManagementEvent,
-        "Case selected by Action Rule for fieldwork followup",
+        "Case sent for fieldwork followup",
         EventType.FIELD_CASE_SELECTED);
   }
 
