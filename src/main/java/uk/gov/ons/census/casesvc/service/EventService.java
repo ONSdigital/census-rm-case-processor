@@ -16,6 +16,7 @@ import uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper;
 
 @Service
 public class EventService {
+
   public static final String CREATE_CASE_SAMPLE_RECEIVED = "Create case sample received";
 
   private final CaseService caseService;
@@ -51,17 +52,35 @@ public class EventService {
   }
 
   public void processPrintCaseSelected(ResponseManagementEvent responseManagementEvent) {
-    Case caze =
-        caseService.getCaseByCaseRef(
-            responseManagementEvent.getPayload().getPrintCaseSelected().getCaseRef());
+    processEvent(
+        responseManagementEvent.getPayload().getPrintCaseSelected().getCaseRef(),
+        responseManagementEvent,
+        String.format(
+            "Case sent to printer with pack code %s",
+            responseManagementEvent.getPayload().getPrintCaseSelected().getPackCode()),
+        EventType.PRINT_CASE_SELECTED);
+  }
+
+  public void processFieldCaseSelected(ResponseManagementEvent responseManagementEvent) {
+    processEvent(
+        responseManagementEvent.getPayload().getFieldCaseSelected().getCaseRef(),
+        responseManagementEvent,
+        "Case sent for fieldwork followup",
+        EventType.FIELD_CASE_SELECTED);
+  }
+
+  private void processEvent(
+      int caseRef,
+      ResponseManagementEvent responseManagementEvent,
+      String eventDescription,
+      EventType eventType) {
+    Case caze = caseService.getCaseByCaseRef(caseRef);
 
     eventLogger.logCaseEvent(
         caze,
         responseManagementEvent.getEvent().getDateTime(),
-        String.format(
-            "Case selected by Action Rule for print Pack Code %s",
-            responseManagementEvent.getPayload().getPrintCaseSelected().getPackCode()),
-        EventType.PRINT_CASE_SELECTED,
+        eventDescription,
+        eventType,
         responseManagementEvent.getEvent(),
         convertObjectToJson(responseManagementEvent.getPayload()));
   }

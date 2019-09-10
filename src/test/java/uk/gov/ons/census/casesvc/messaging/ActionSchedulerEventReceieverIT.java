@@ -110,7 +110,7 @@ public class ActionSchedulerEventReceieverIT {
     assertThat("Test actionRuleId")
         .isEqualTo(actualPayload.getPrintCaseSelected().getActionRuleId());
     assertThat(actualEvent.getRmEventProcessed()).isNotNull();
-    assertThat("Case selected by Action Rule for print Pack Code Test packCode")
+    assertThat("Case sent to printer with pack code Test packCode")
         .isEqualTo(actualEvent.getEventDescription());
   }
 }

@@ -16,6 +16,7 @@ import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
+import uk.gov.ons.census.casesvc.model.dto.FieldCaseSelected;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.PrintCaseSelected;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
@@ -103,6 +104,8 @@ public class EventServiceTest {
     // Given
     EasyRandom easyRandom = new EasyRandom();
     Case caze = easyRandom.nextObject(Case.class);
+    caze.setUacQidLinks(null);
+    caze.setEvents(null);
     when(caseService.getCaseByCaseRef(eq(123))).thenReturn(caze);
 
     // When
@@ -132,11 +135,51 @@ public class EventServiceTest {
         .logCaseEvent(
             eq(caze),
             any(OffsetDateTime.class),
-            eq("Case selected by Action Rule for print Pack Code Test packCode"),
+            eq("Case sent to printer with pack code Test packCode"),
             eq(EventType.PRINT_CASE_SELECTED),
             eq(event),
             eq(
                 "{\"printCaseSelected\":{\"caseRef\":123,\"packCode\":\"Test packCode\","
                     + "\"actionRuleId\":\"Test actionRuleId\",\"batchId\":\"Test batchId\"}}"));
+  }
+
+  @Test
+  public void testProcessFieldCaseSelected() {
+    // Given
+    EasyRandom easyRandom = new EasyRandom();
+    Case caze = easyRandom.nextObject(Case.class);
+    caze.setUacQidLinks(null);
+    caze.setEvents(null);
+    when(caseService.getCaseByCaseRef(anyInt())).thenReturn(caze);
+
+    // When
+    ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
+    EventDTO event = new EventDTO();
+    event.setType(EventTypeDTO.FIELD_CASE_SELECTED);
+    event.setChannel("Test channel");
+    event.setDateTime(OffsetDateTime.now());
+    event.setSource("Test source");
+    event.setTransactionId(UUID.randomUUID());
+    responseManagementEvent.setEvent(event);
+
+    FieldCaseSelected fieldCaseSelected = new FieldCaseSelected();
+    fieldCaseSelected.setActionRuleId("Test actionRuleId");
+    fieldCaseSelected.setCaseRef(123);
+
+    PayloadDTO payload = new PayloadDTO();
+    payload.setFieldCaseSelected(fieldCaseSelected);
+    responseManagementEvent.setPayload(payload);
+
+    underTest.processFieldCaseSelected(responseManagementEvent);
+
+    // Then
+    verify(eventLogger, times(1))
+        .logCaseEvent(
+            eq(caze),
+            any(OffsetDateTime.class),
+            eq("Case sent for fieldwork followup"),
+            eq(EventType.FIELD_CASE_SELECTED),
+            eq(event),
+            eq("{\"fieldCaseSelected\":{\"caseRef\":123,\"actionRuleId\":\"Test actionRuleId\"}}"));
   }
 }

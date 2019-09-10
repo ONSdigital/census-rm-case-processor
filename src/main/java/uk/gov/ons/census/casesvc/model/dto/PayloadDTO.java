@@ -5,32 +5,20 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.Data;
 
 @Data
+@JsonInclude(Include.NON_NULL)
 public class PayloadDTO {
-
-  @JsonInclude(Include.NON_NULL)
   private CollectionCase collectionCase;
-
-  @JsonInclude(Include.NON_NULL)
   private UacDTO uac;
-
-  @JsonInclude(Include.NON_NULL)
   private PrintCaseSelected printCaseSelected;
-
-  @JsonInclude(Include.NON_NULL)
   private ResponseDTO response;
-
-  @JsonInclude(Include.NON_NULL)
   private RefusalDTO refusal;
-
-  @JsonInclude(Include.NON_NULL)
   private FulfilmentRequestDTO fulfilmentRequest;
-
-  @JsonInclude(Include.NON_NULL)
   private UacCreatedDTO uacQidCreated;
-
-  @JsonInclude(Include.NON_NULL)
   private InvalidAddress invalidAddress;
-
-  @JsonInclude(Include.NON_NULL)
+  private FieldCaseSelected fieldCaseSelected;
   private FulfilmentInformation fulfilmentInformation;
+
+  private String addressModification;
+  private String addressTypeChange;
+  private String newAddressReported;
 }
