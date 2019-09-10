@@ -87,7 +87,7 @@ public class UacService {
     Case caze = uacQidLink.getCaze();
     if (caze != null) {
       uac.setCaseId(caze.getCaseId().toString());
-      uac.setCaseType(caze.getAddressType());
+      uac.setCaseType(caze.getCaseType());
       uac.setCollectionExerciseId(caze.getCollectionExerciseId());
       uac.setRegion(caze.getRegion());
     }
