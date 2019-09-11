@@ -59,6 +59,11 @@ public class FulfilmentRequestService {
 
     Case caze = caseService.getCaseByCaseId(UUID.fromString(fulfilmentRequestPayload.getCaseId()));
 
+    handleIndividualFulfilment(fulfilmentRequestPayload, caze);
+
+    // we do not want to log contact details for fulfillment requests
+    fulfilmentRequestPayload.setContact(null);
+
     eventLogger.logCaseEvent(
         caze,
         fulfilmentRequestEvent.getDateTime(),
@@ -66,8 +71,6 @@ public class FulfilmentRequestService {
         FULFILMENT_REQUESTED,
         fulfilmentRequestEvent,
         convertObjectToJson(fulfilmentRequestPayload));
-
-    handleIndividualFulfilment(fulfilmentRequestPayload, caze);
   }
 
   private void handleIndividualFulfilment(

@@ -157,6 +157,8 @@ public class FulfilmentRequestReceiverIT {
     assertThat(actualFulfilmentRequest.getFulfilmentCode())
         .isEqualTo(TEST_INDIVIDUAL_RESPONSE_FULFILMENT_CODE);
 
+    assertThat(actualFulfilmentRequest.getContact()).isNull();
+
     List<Case> cases = caseRepository.findAll();
     assertThat(cases.size()).isEqualTo(2);
 
