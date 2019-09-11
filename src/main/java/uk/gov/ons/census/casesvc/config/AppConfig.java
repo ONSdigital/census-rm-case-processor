@@ -318,11 +318,13 @@ public class AppConfig {
 
   @Bean
   public SimpleMessageListenerContainer invalidAddressContainer(
-      ConnectionFactory connectionFactory) {
+      ConnectionFactory connectionFactory,
+      MangledMessageErrorHandler mangledMessageErrorHandler) {
     SimpleMessageListenerContainer container =
         new SimpleMessageListenerContainer(connectionFactory);
     container.setQueueNames(invalidAddressInboundQueue);
     container.setConcurrentConsumers(consumers);
+    container.setErrorHandler(mangledMessageErrorHandler);
     return container;
   }
 
