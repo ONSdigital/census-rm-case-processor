@@ -16,4 +16,6 @@ public class FulfilmentRequestDTO {
 
   @JsonInclude(Include.NON_NULL)
   private String individualCaseId;
+
+  private Contact contact;
 }

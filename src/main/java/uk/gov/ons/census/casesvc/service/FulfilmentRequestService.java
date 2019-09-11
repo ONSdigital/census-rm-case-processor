@@ -20,26 +20,29 @@ import uk.gov.ons.census.casesvc.model.entity.CaseState;
 public class FulfilmentRequestService {
   private static final String FULFILMENT_REQUEST_RECEIVED = "Fulfilment Request Received";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_CASE_TYPE = "HI";
-  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_SMS = "UACIT1";
-  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH_SMS = "UACIT2";
-  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH_SMS = "UACIT2W";
-  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NI_SMS = "UACIT4";
-  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_PRINT = "P_OR_I1";
-  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH_PRINT = "P_OR_I2";
-  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH_PRINT = "P_OR_I2W";
-  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NI_PRINT = "P_OR_I4";
 
-  private static final Set<String> individualResponseRequestCodes =
+  private static final Set<String> individualResponsePrintRequestCodes =
       new HashSet<>(
           Arrays.asList(
-              HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_SMS,
-              HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH_SMS,
-              HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH_SMS,
-              HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NI_SMS,
-              HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_PRINT,
-              HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH_PRINT,
-              HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH_PRINT,
-              HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NI_PRINT));
+              "P_OR_I1", // HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_PRINT,
+              "P_OR_I2", // HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH_PRINT,
+              "P_OR_I2W", // HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH_PRINT,
+              "P_OR_I4" // HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NI_PRINT
+              ));
+
+  private static final Set<String> individualResponseRequestCodes;
+
+  static {
+    individualResponseRequestCodes =
+        new HashSet<>(
+            Arrays.asList(
+                "UACIT1", // HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_SMS,
+                "UACIT2", // HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH_SMS,
+                "UACIT2W", // HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH_SMS,
+                "UACIT4" // HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NI_SMS
+                ));
+    individualResponseRequestCodes.addAll(individualResponsePrintRequestCodes);
+  }
 
   private final EventLogger eventLogger;
   private final CaseService caseService;
@@ -56,6 +59,11 @@ public class FulfilmentRequestService {
 
     Case caze = caseService.getCaseByCaseId(UUID.fromString(fulfilmentRequestPayload.getCaseId()));
 
+    handleIndividualFulfilment(fulfilmentRequestPayload, caze);
+
+    // we do not want to log contact details for fulfillment requests
+    fulfilmentRequestPayload.setContact(null);
+
     eventLogger.logCaseEvent(
         caze,
         fulfilmentRequestEvent.getDateTime(),
@@ -63,15 +71,22 @@ public class FulfilmentRequestService {
         FULFILMENT_REQUESTED,
         fulfilmentRequestEvent,
         convertObjectToJson(fulfilmentRequestPayload));
+  }
 
+  private void handleIndividualFulfilment(
+      FulfilmentRequestDTO fulfilmentRequestPayload, Case caze) {
     if (individualResponseRequestCodes.contains(fulfilmentRequestPayload.getFulfilmentCode())) {
-
       Case individualResponseCase =
           prepareIndividualResponseCase(
-              caze,
-              UUID.fromString(
-                  fulfilmentRequest.getPayload().getFulfilmentRequest().getIndividualCaseId()));
-      caseService.saveAndEmitCaseCreatedEvent(individualResponseCase);
+              caze, UUID.fromString(fulfilmentRequestPayload.getIndividualCaseId()));
+
+      if (individualResponsePrintRequestCodes.contains(
+          fulfilmentRequestPayload.getFulfilmentCode())) {
+        // If the fulfilment is for PRINT then we need to send the case to Action Scheduler as well
+        caseService.saveAndEmitCaseCreatedEvent(individualResponseCase, fulfilmentRequestPayload);
+      } else {
+        caseService.saveAndEmitCaseCreatedEvent(individualResponseCase);
+      }
     }
   }
 
