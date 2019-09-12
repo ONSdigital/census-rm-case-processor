@@ -39,6 +39,7 @@ import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
+import uk.gov.ons.census.casesvc.utility.JsonHelper;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InvalidAddressServiceTest {
@@ -96,7 +97,7 @@ public class InvalidAddressServiceTest {
 
     testEventTypeLoggedOnly(
         payload,
-        payload.getAddressModification(),
+        JsonHelper.convertObjectToJson(payload.getAddressModification()),
         ADDRESS_MODIFIED,
         EventType.ADDRESS_MODIFIED,
         "Address modified");
@@ -109,7 +110,7 @@ public class InvalidAddressServiceTest {
 
     testEventTypeLoggedOnly(
         payload,
-        payload.getAddressTypeChange(),
+        JsonHelper.convertObjectToJson(payload.getAddressTypeChange()),
         ADDRESS_TYPE_CHANGED,
         EventType.ADDRESS_TYPE_CHANGED,
         "Address type changed");
@@ -122,7 +123,7 @@ public class InvalidAddressServiceTest {
 
     testEventTypeLoggedOnly(
         payload,
-        payload.getNewAddressReported(),
+        JsonHelper.convertObjectToJson(payload.getNewAddressReported()),
         NEW_ADDRESS_REPORTED,
         EventType.NEW_ADDRESS_REPORTED,
         "New Address reported");

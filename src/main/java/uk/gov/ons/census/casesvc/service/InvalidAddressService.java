@@ -1,8 +1,8 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.getUUIDFromJson;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
@@ -11,6 +11,7 @@ import uk.gov.ons.census.casesvc.model.dto.InvalidAddress;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
+import uk.gov.ons.census.casesvc.utility.JsonHelper;
 
 @Component
 public class InvalidAddressService {
@@ -47,8 +48,9 @@ public class InvalidAddressService {
   private boolean processEvent(ResponseManagementEvent addressEvent) {
     String logEventDescription;
     EventType logEventType;
-    String logEventPayload;
+    JsonNode logEventPayload;
     EventDTO event = addressEvent.getEvent();
+    UUID caseId;
 
     switch (event.getType()) {
       case ADDRESS_NOT_VALID:
@@ -58,18 +60,21 @@ public class InvalidAddressService {
         logEventDescription = "Address modified";
         logEventType = EventType.ADDRESS_MODIFIED;
         logEventPayload = addressEvent.getPayload().getAddressModification();
+        caseId = getCaseId(logEventPayload);
         break;
 
       case ADDRESS_TYPE_CHANGED:
         logEventDescription = "Address type changed";
         logEventType = EventType.ADDRESS_TYPE_CHANGED;
         logEventPayload = addressEvent.getPayload().getAddressTypeChange();
+        caseId = getCaseId(logEventPayload);
         break;
 
       case NEW_ADDRESS_REPORTED:
         logEventDescription = "New Address reported";
         logEventType = EventType.NEW_ADDRESS_REPORTED;
         logEventPayload = addressEvent.getPayload().getNewAddressReported();
+        caseId = getCaseId(logEventPayload);
         break;
 
       default:
@@ -78,7 +83,7 @@ public class InvalidAddressService {
             String.format("Event Type '%s' is invalid on this topic", event.getType()));
     }
 
-    Case caze = caseService.getCaseByCaseId(getUUIDFromJson("/collectionCase/id", logEventPayload));
+    Case caze = caseService.getCaseByCaseId(caseId);
 
     eventLogger.logCaseEvent(
         caze,
@@ -86,8 +91,12 @@ public class InvalidAddressService {
         logEventDescription,
         logEventType,
         event,
-        logEventPayload);
+        JsonHelper.convertObjectToJson(logEventPayload));
 
     return false;
+  }
+
+  public UUID getCaseId(JsonNode json) {
+    return UUID.fromString(json.at("/collectionCase/id").asText());
   }
 }
