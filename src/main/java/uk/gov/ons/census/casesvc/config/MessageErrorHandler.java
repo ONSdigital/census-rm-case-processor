@@ -45,15 +45,17 @@ public class MessageErrorHandler implements ErrorHandler {
           (ListenerExecutionFailedException) throwable;
       byte[] rawMessageBody = failedException.getFailedMessage().getBody();
       String messageBody = new String(rawMessageBody);
+      String messageHash = bytesToHexString(digest.digest(rawMessageBody));
 
-      log.with("message_hash", bytesToHexString(digest.digest(rawMessageBody)))
+      log.with("message_hash", messageHash)
           .with("cause", failedException.getCause().getMessage())
           .error("Could not process message");
 
       try {
         objectMapper.readValue(messageBody, expectedType);
       } catch (IOException e) {
-        log.with("cause", e.getMessage())
+        log.with("message_hash", messageHash)
+            .with("cause", e.getMessage())
             .error("Could not deserialise. JSON not in expected format or invalid");
       }
     } else {
