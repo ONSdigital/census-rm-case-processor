@@ -50,7 +50,6 @@ public class InvalidAddressService {
     EventType logEventType;
     JsonNode logEventPayload;
     EventDTO event = addressEvent.getEvent();
-    UUID caseId;
 
     switch (event.getType()) {
       case ADDRESS_NOT_VALID:
@@ -60,21 +59,18 @@ public class InvalidAddressService {
         logEventDescription = "Address modified";
         logEventType = EventType.ADDRESS_MODIFIED;
         logEventPayload = addressEvent.getPayload().getAddressModification();
-        caseId = getCaseId(logEventPayload);
         break;
 
       case ADDRESS_TYPE_CHANGED:
         logEventDescription = "Address type changed";
         logEventType = EventType.ADDRESS_TYPE_CHANGED;
         logEventPayload = addressEvent.getPayload().getAddressTypeChange();
-        caseId = getCaseId(logEventPayload);
         break;
 
       case NEW_ADDRESS_REPORTED:
         logEventDescription = "New Address reported";
         logEventType = EventType.NEW_ADDRESS_REPORTED;
         logEventPayload = addressEvent.getPayload().getNewAddressReported();
-        caseId = getCaseId(logEventPayload);
         break;
 
       default:
@@ -83,7 +79,7 @@ public class InvalidAddressService {
             String.format("Event Type '%s' is invalid on this topic", event.getType()));
     }
 
-    Case caze = caseService.getCaseByCaseId(caseId);
+    Case caze = caseService.getCaseByCaseId(getCaseId(logEventPayload));
 
     eventLogger.logCaseEvent(
         caze,
