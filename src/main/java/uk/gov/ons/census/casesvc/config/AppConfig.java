@@ -22,6 +22,8 @@ import org.springframework.integration.amqp.inbound.AmqpInboundChannelAdapter;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
+import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 
 @Configuration
 @EnableScheduling
@@ -234,107 +236,92 @@ public class AppConfig {
   }
 
   @Bean
-  public SimpleMessageListenerContainer sampleContainer(ConnectionFactory connectionFactory) {
-    SimpleMessageListenerContainer container =
-        new SimpleMessageListenerContainer(connectionFactory);
-    container.setQueueNames(inboundQueue);
-    container.setConcurrentConsumers(consumers);
-    return container;
+  public SimpleMessageListenerContainer sampleContainer(
+      ConnectionFactory connectionFactory, MessageErrorHandler messageErrorHandler) {
+    return setupListenerContainer(
+        connectionFactory, inboundQueue, messageErrorHandler, CreateCaseSample.class);
   }
 
   @Bean
   public SimpleMessageListenerContainer surveyLaunchedContainer(
-      ConnectionFactory connectionFactory) {
-    SimpleMessageListenerContainer container =
-        new SimpleMessageListenerContainer(connectionFactory);
-    container.setQueueNames(surveyLaunchedQueue);
-    container.setConcurrentConsumers(consumers);
-    return container;
+      ConnectionFactory connectionFactory, MessageErrorHandler messageErrorHandler) {
+    return setupListenerContainer(
+        connectionFactory, surveyLaunchedQueue, messageErrorHandler, ResponseManagementEvent.class);
   }
 
   @Bean
-  public SimpleMessageListenerContainer unaddressedContainer(ConnectionFactory connectionFactory) {
-    SimpleMessageListenerContainer container =
-        new SimpleMessageListenerContainer(connectionFactory);
-    container.setQueueNames(unaddressedQueue);
-    container.setConcurrentConsumers(consumers);
-    return container;
+  public SimpleMessageListenerContainer unaddressedContainer(
+      ConnectionFactory connectionFactory, MessageErrorHandler messageErrorHandler) {
+    return setupListenerContainer(
+        connectionFactory, unaddressedQueue, messageErrorHandler, ResponseManagementEvent.class);
   }
 
   @Bean
-  public SimpleMessageListenerContainer receiptContainer(ConnectionFactory connectionFactory) {
-    SimpleMessageListenerContainer container =
-        new SimpleMessageListenerContainer(connectionFactory);
-    container.setQueueNames(receiptInboundQueue);
-    container.setConcurrentConsumers(consumers);
-    return container;
+  public SimpleMessageListenerContainer receiptContainer(
+      ConnectionFactory connectionFactory, MessageErrorHandler messageErrorHandler) {
+    return setupListenerContainer(
+        connectionFactory, receiptInboundQueue, messageErrorHandler, ResponseManagementEvent.class);
   }
 
   @Bean
-  public SimpleMessageListenerContainer refusalContainer(ConnectionFactory connectionFactory) {
-    SimpleMessageListenerContainer container =
-        new SimpleMessageListenerContainer(connectionFactory);
-    container.setQueueNames(refusalInboundQueue);
-    container.setConcurrentConsumers(consumers);
-    return container;
+  public SimpleMessageListenerContainer refusalContainer(
+      ConnectionFactory connectionFactory, MessageErrorHandler messageErrorHandler) {
+    return setupListenerContainer(
+        connectionFactory, refusalInboundQueue, messageErrorHandler, ResponseManagementEvent.class);
   }
 
   @Bean
-  public SimpleMessageListenerContainer fulfilmentContainer(ConnectionFactory connectionFactory) {
-    SimpleMessageListenerContainer container =
-        new SimpleMessageListenerContainer(connectionFactory);
-    container.setQueueNames(fulfilmentInboundQueue);
-    container.setConcurrentConsumers(consumers);
-    return container;
+  public SimpleMessageListenerContainer fulfilmentContainer(
+      ConnectionFactory connectionFactory, MessageErrorHandler messageErrorHandler) {
+    return setupListenerContainer(
+        connectionFactory,
+        fulfilmentInboundQueue,
+        messageErrorHandler,
+        ResponseManagementEvent.class);
   }
 
   @Bean
   public SimpleMessageListenerContainer questionnaireLinkedContainer(
-      ConnectionFactory connectionFactory) {
-    SimpleMessageListenerContainer container =
-        new SimpleMessageListenerContainer(connectionFactory);
-    container.setQueueNames(questionnaireLinkedInboundQueue);
-    container.setConcurrentConsumers(consumers);
-    return container;
+      ConnectionFactory connectionFactory, MessageErrorHandler messageErrorHandler) {
+    return setupListenerContainer(
+        connectionFactory,
+        questionnaireLinkedInboundQueue,
+        messageErrorHandler,
+        ResponseManagementEvent.class);
   }
 
   @Bean
-  public SimpleMessageListenerContainer actionCaseContainer(ConnectionFactory connectionFactory) {
-    SimpleMessageListenerContainer container =
-        new SimpleMessageListenerContainer(connectionFactory);
-    container.setQueueNames(actionCaseQueue);
-    container.setConcurrentConsumers(consumers);
-    return container;
+  public SimpleMessageListenerContainer actionCaseContainer(
+      ConnectionFactory connectionFactory, MessageErrorHandler messageErrorHandler) {
+    return setupListenerContainer(
+        connectionFactory, actionCaseQueue, messageErrorHandler, ResponseManagementEvent.class);
   }
 
   @Bean
-  public SimpleMessageListenerContainer uacCreatedContainer(ConnectionFactory connectionFactory) {
-    SimpleMessageListenerContainer container =
-        new SimpleMessageListenerContainer(connectionFactory);
-    container.setQueueNames(uacQidCreatedQueue);
-    container.setConcurrentConsumers(consumers);
-    return container;
+  public SimpleMessageListenerContainer uacCreatedContainer(
+      ConnectionFactory connectionFactory, MessageErrorHandler messageErrorHandler) {
+    return setupListenerContainer(
+        connectionFactory, uacQidCreatedQueue, messageErrorHandler, ResponseManagementEvent.class);
   }
 
   @Bean
   public SimpleMessageListenerContainer invalidAddressContainer(
-      ConnectionFactory connectionFactory, MangledMessageErrorHandler mangledMessageErrorHandler) {
-    SimpleMessageListenerContainer container =
-        new SimpleMessageListenerContainer(connectionFactory);
-    container.setQueueNames(invalidAddressInboundQueue);
-    container.setConcurrentConsumers(consumers);
-    container.setErrorHandler(mangledMessageErrorHandler);
-    return container;
+      ConnectionFactory connectionFactory, MessageErrorHandler messageErrorHandler) {
+    return setupListenerContainer(
+        connectionFactory,
+        invalidAddressInboundQueue,
+        messageErrorHandler,
+        ResponseManagementEvent.class);
   }
 
   @Bean
   public SimpleMessageListenerContainer undeliveredMailContainer(
-      ConnectionFactory connectionFactory) {
-    SimpleMessageListenerContainer container =
-        new SimpleMessageListenerContainer(connectionFactory);
-    container.setQueueNames(undeliveredMailQueue);
-    container.setConcurrentConsumers(consumers);
-    return container;
+      ConnectionFactory connectionFactory, MessageErrorHandler messageErrorHandler) {
+    return setupListenerContainer(
+        connectionFactory,
+        undeliveredMailQueue,
+        messageErrorHandler,
+        ResponseManagementEvent.class);
   }
 
   @Bean
@@ -352,5 +339,19 @@ public class AppConfig {
   @PostConstruct
   public void init() {
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+  }
+
+  private SimpleMessageListenerContainer setupListenerContainer(
+      ConnectionFactory connectionFactory,
+      String queueName,
+      MessageErrorHandler messageErrorHandler,
+      Class expectedClass) {
+    SimpleMessageListenerContainer container =
+        new SimpleMessageListenerContainer(connectionFactory);
+    container.setQueueNames(queueName);
+    container.setConcurrentConsumers(consumers);
+    messageErrorHandler.setExpectedType(expectedClass);
+    container.setErrorHandler(messageErrorHandler);
+    return container;
   }
 }
