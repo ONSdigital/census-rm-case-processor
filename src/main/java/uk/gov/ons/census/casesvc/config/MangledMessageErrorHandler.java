@@ -18,7 +18,8 @@ public class MangledMessageErrorHandler implements ErrorHandler {
   @Override
   public void handleError(Throwable throwable) {
     if (throwable instanceof ListenerExecutionFailedException) {
-      ListenerExecutionFailedException failedException = (ListenerExecutionFailedException)throwable;
+      ListenerExecutionFailedException failedException =
+          (ListenerExecutionFailedException) throwable;
       String messageBody = new String(failedException.getFailedMessage().getBody());
       log.with("message_body", messageBody).error("Could not process message");
 
