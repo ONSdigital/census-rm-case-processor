@@ -49,6 +49,7 @@ import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
+import uk.gov.ons.census.casesvc.utility.JsonHelper;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -138,7 +139,7 @@ public class InvalidAddressReceiverIT {
 
     testEventTypeLoggedOnly(
         payload,
-        payload.getAddressModification(),
+        JsonHelper.convertObjectToJson(payload.getAddressModification()),
         ADDRESS_MODIFIED,
         EventType.ADDRESS_MODIFIED,
         "Address modified");
@@ -152,7 +153,7 @@ public class InvalidAddressReceiverIT {
 
     testEventTypeLoggedOnly(
         payload,
-        payload.getAddressTypeChange(),
+        JsonHelper.convertObjectToJson(payload.getAddressTypeChange()),
         ADDRESS_TYPE_CHANGED,
         EventType.ADDRESS_TYPE_CHANGED,
         "Address type changed");
@@ -166,7 +167,7 @@ public class InvalidAddressReceiverIT {
 
     testEventTypeLoggedOnly(
         payload,
-        payload.getNewAddressReported(),
+        JsonHelper.convertObjectToJson(payload.getNewAddressReported()),
         NEW_ADDRESS_REPORTED,
         EventType.NEW_ADDRESS_REPORTED,
         "New Address reported");

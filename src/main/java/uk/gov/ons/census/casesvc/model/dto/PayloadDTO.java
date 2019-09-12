@@ -2,6 +2,7 @@ package uk.gov.ons.census.casesvc.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Data;
 
 @Data
@@ -18,7 +19,7 @@ public class PayloadDTO {
   private FieldCaseSelected fieldCaseSelected;
   private FulfilmentInformation fulfilmentInformation;
 
-  private String addressModification;
-  private String addressTypeChange;
-  private String newAddressReported;
+  private JsonNode addressModification;
+  private JsonNode addressTypeChange;
+  private JsonNode newAddressReported;
 }

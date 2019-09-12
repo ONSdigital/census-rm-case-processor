@@ -1,5 +1,10 @@
 package uk.gov.ons.census.casesvc.testutil;
 
+import static org.jeasy.random.FieldPredicates.inClass;
+import static org.jeasy.random.FieldPredicates.named;
+import static org.jeasy.random.FieldPredicates.ofType;
+
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -10,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 import org.jeasy.random.EasyRandom;
+import org.jeasy.random.EasyRandomParameters;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
@@ -20,7 +26,6 @@ import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.UacCreatedDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
-import uk.gov.ons.census.casesvc.utility.JsonHelper;
 
 public class DataUtils {
 
@@ -30,7 +35,21 @@ public class DataUtils {
   private static final ObjectMapper objectMapper;
 
   static {
-    easyRandom = new EasyRandom();
+    EasyRandomParameters parameters =
+        new EasyRandomParameters()
+            .excludeField(
+                named("addressModification")
+                    .and(ofType(JsonNode.class))
+                    .and(inClass(PayloadDTO.class)))
+            .excludeField(
+                named("addressTypeChange")
+                    .and(ofType(JsonNode.class))
+                    .and(inClass(PayloadDTO.class)))
+            .excludeField(
+                named("newAddressReported")
+                    .and(ofType(JsonNode.class))
+                    .and(inClass(PayloadDTO.class)));
+    easyRandom = new EasyRandom(parameters);
     objectMapper =
         new ObjectMapper()
             .registerModule(new JavaTimeModule())
@@ -214,7 +233,7 @@ public class DataUtils {
     return uacCreatedEvent;
   }
 
-  public static String createTestAddressModifiedJson(UUID caseId) {
+  public static JsonNode createTestAddressModifiedJson(UUID caseId) {
     ObjectNode collectionCaseNode =
         objectMapper.createObjectNode().put("id", caseId.toString()).put("ceExpectedResponses", 20);
 
@@ -235,10 +254,10 @@ public class DataUtils {
     parentNode.set("collectionCase", collectionCaseNode);
     parentNode.set("address", addressNode);
 
-    return JsonHelper.convertObjectToJson(parentNode);
+    return parentNode;
   }
 
-  public static String createTestAddressTypeChangeJson(UUID caseId) {
+  public static JsonNode createTestAddressTypeChangeJson(UUID caseId) {
     ObjectNode collectionCaseNode =
         objectMapper.createObjectNode().put("id", caseId.toString()).put("ceExpectedResponses", 20);
 
@@ -255,10 +274,10 @@ public class DataUtils {
     ObjectNode parentNode = objectMapper.createObjectNode();
     parentNode.set("collectionCase", collectionCaseNode);
 
-    return JsonHelper.convertObjectToJson(parentNode);
+    return parentNode;
   }
 
-  public static String createNewAddressReportedJson(UUID caseId) {
+  public static JsonNode createNewAddressReportedJson(UUID caseId) {
     ObjectNode collectionCaseNode =
         objectMapper.createObjectNode().put("id", caseId.toString()).put("ceExpectedResponses", 20);
 
@@ -280,6 +299,6 @@ public class DataUtils {
     ObjectNode parentNode = objectMapper.createObjectNode();
     parentNode.set("collectionCase", collectionCaseNode);
 
-    return JsonHelper.convertObjectToJson(parentNode);
+    return parentNode;
   }
 }
