@@ -1,4 +1,4 @@
-FROM openjdk:11-slim
+FROM openjdk:11-jdk-slim
 
 ARG JAR_FILE=census-rm-case-processor*.jar
 COPY target/$JAR_FILE /opt/census-rm-case-processor.jar

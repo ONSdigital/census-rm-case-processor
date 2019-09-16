@@ -1,5 +1,6 @@
 package uk.gov.ons.census.casesvc.config;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -27,6 +28,7 @@ public class MessageErrorHandler implements ErrorHandler {
     objectMapper = new ObjectMapper();
     objectMapper.registerModule(new JavaTimeModule());
     objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     try {
       digest = MessageDigest.getInstance("SHA-256");
@@ -48,22 +50,15 @@ public class MessageErrorHandler implements ErrorHandler {
       String messageHash = bytesToHexString(digest.digest(rawMessageBody));
 
       log.with("message_hash", messageHash)
+          .with("valid_json", validateJson(messageBody))
           .with("cause", failedException.getCause().getMessage())
           .error("Could not process message");
-
-      try {
-        objectMapper.readValue(messageBody, expectedType);
-      } catch (IOException e) {
-        log.with("message_hash", messageHash)
-            .with("cause", e.getMessage())
-            .error("Could not deserialise. JSON not in expected format or invalid");
-      }
     } else {
       log.error("Unexpected exception has occurred", throwable);
     }
   }
 
-  private static String bytesToHexString(byte[] hash) {
+  private String bytesToHexString(byte[] hash) {
     StringBuffer hexString = new StringBuffer();
     for (int i = 0; i < hash.length; i++) {
       String hex = Integer.toHexString(0xff & hash[i]);
@@ -71,5 +66,14 @@ public class MessageErrorHandler implements ErrorHandler {
       hexString.append(hex);
     }
     return hexString.toString();
+  }
+
+  private String validateJson(String messageBody) {
+    try {
+      objectMapper.readValue(messageBody, expectedType);
+      return "Valid JSON";
+    } catch (IOException e) {
+      return String.format("Invalid JSON: %s", e.getMessage());
+    }
   }
 }
