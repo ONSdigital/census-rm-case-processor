@@ -34,7 +34,7 @@ public class MessageErrorHandler implements ErrorHandler {
       digest = MessageDigest.getInstance("SHA-256");
     } catch (NoSuchAlgorithmException e) {
       log.error("Could not initialise hashing", e);
-      throw new RuntimeException(e);
+      throw new RuntimeException("Could not initialise hashing", e);
     }
   }
 

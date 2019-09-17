@@ -65,7 +65,7 @@ public class CaseService {
 
     // Check for collisions
     if (caseRepository.existsById(caseRef)) {
-      throw new RuntimeException();
+      throw new RuntimeException("Case ref collision");
     }
     return caseRef;
   }
@@ -212,7 +212,7 @@ public class CaseService {
     Optional<Case> caseOptional = caseRepository.findById(caseRef);
 
     if (caseOptional.isEmpty()) {
-      throw new RuntimeException(); // This case should definitely exist
+      throw new RuntimeException(String.format("Case ref '%s' not present", caseRef));
     }
 
     return caseOptional.get();

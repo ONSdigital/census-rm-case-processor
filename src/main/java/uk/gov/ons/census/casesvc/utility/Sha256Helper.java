@@ -12,7 +12,7 @@ public class Sha256Helper {
     try {
       digest = MessageDigest.getInstance("SHA-256");
     } catch (NoSuchAlgorithmException e) {
-      throw new RuntimeException();
+      throw new RuntimeException("Could not initialise hashing", e);
     }
   }
 

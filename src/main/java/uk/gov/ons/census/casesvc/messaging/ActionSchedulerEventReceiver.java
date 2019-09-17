@@ -24,7 +24,7 @@ public class ActionSchedulerEventReceiver {
     } else if (event.getEvent().getType() == EventTypeDTO.FIELD_CASE_SELECTED) {
       eventService.processFieldCaseSelected(event);
     } else {
-      throw new RuntimeException(); // Unexpected event type received
+      throw new RuntimeException("Unexpected event type received");
     }
   }
 }
