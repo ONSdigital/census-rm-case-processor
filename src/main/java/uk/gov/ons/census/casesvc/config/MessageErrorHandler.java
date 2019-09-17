@@ -51,7 +51,11 @@ public class MessageErrorHandler implements ErrorHandler {
           (ListenerExecutionFailedException) throwable;
       byte[] rawMessageBody = failedException.getFailedMessage().getBody();
       String messageBody = new String(rawMessageBody);
-      String messageHash = bytesToHexString(digest.digest(rawMessageBody));
+      String messageHash;
+      // Digest is not thread-safe
+      synchronized (digest) {
+        messageHash = bytesToHexString(digest.digest(rawMessageBody));
+      }
 
       if (logStackTraces) {
         log.with("message_hash", messageHash)
