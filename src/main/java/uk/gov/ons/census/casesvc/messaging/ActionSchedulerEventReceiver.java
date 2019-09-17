@@ -19,12 +19,14 @@ public class ActionSchedulerEventReceiver {
   @Transactional
   @ServiceActivator(inputChannel = "actionCaseInputChannel")
   public void receiveMessage(ResponseManagementEvent event) {
-    if (event.getEvent().getType() == EventTypeDTO.PRINT_CASE_SELECTED) {
+    EventTypeDTO eventType = event.getEvent().getType();
+
+    if (eventType == EventTypeDTO.PRINT_CASE_SELECTED) {
       eventService.processPrintCaseSelected(event);
-    } else if (event.getEvent().getType() == EventTypeDTO.FIELD_CASE_SELECTED) {
+    } else if (eventType == EventTypeDTO.FIELD_CASE_SELECTED) {
       eventService.processFieldCaseSelected(event);
     } else {
-      throw new RuntimeException("Unexpected event type received");
+      throw new RuntimeException(String.format("Unexpected event type '%s' received", eventType));
     }
   }
 }

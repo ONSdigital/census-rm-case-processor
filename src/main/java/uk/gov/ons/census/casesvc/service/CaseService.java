@@ -65,7 +65,7 @@ public class CaseService {
 
     // Check for collisions
     if (caseRepository.existsById(caseRef)) {
-      throw new RuntimeException("Case ref collision");
+      throw new RuntimeException(String.format("Case ref '%s' collision", caseRef));
     }
     return caseRef;
   }
