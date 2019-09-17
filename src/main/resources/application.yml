@@ -54,3 +54,6 @@ uacservice:
     scheme: http
     host: localhost
     port: 8164
+
+messagelogging:
+  logstacktraces: false
