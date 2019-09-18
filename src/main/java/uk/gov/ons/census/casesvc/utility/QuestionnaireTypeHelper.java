@@ -62,7 +62,7 @@ public class QuestionnaireTypeHelper {
       throw new IllegalArgumentException();
     }
 
-    throw new RuntimeException(); // This code should be unreachable
+    throw new RuntimeException(String.format("Unprocessable treatment code '%s'", treatmentCode));
   }
 
   public static boolean isQuestionnaireWelsh(String treatmentCode) {
