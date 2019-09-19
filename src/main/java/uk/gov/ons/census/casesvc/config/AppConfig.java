@@ -354,6 +354,7 @@ public class AppConfig {
     container.setConcurrentConsumers(consumers);
     messageErrorHandler.setExpectedType(expectedClass);
     container.setErrorHandler(messageErrorHandler);
+    container.setChannelTransacted(true);
     return container;
   }
 }
