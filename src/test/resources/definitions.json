@@ -191,7 +191,7 @@
       "vhost": "/",
       "destination": "case.questionnairelinked",
       "destination_type": "queue",
-      "routing_key": "event.respondent.questionnaire.linked",
+      "routing_key": "event.questionnaire.linked",
       "arguments": {}
     },
     {
