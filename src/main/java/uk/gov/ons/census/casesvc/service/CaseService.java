@@ -202,7 +202,6 @@ public class CaseService {
     Optional<Case> cazeResult = caseRepository.findByCaseId(caseId);
 
     if (cazeResult.isEmpty()) {
-      log.error(CASE_NOT_FOUND_ERROR);
       throw new RuntimeException(String.format("Case ID '%s' not present", caseId));
     }
     return cazeResult.get();
