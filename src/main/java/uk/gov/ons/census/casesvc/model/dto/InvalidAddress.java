@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class InvalidAddress {
-  private InvalidAddressReason reason;
+  private String reason;
   private CollectionCaseCaseId collectionCase;
 }
