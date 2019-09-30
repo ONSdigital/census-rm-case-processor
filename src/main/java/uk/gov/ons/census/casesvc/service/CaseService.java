@@ -17,6 +17,7 @@ import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
+import uk.gov.ons.census.casesvc.model.dto.SampleUnitDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.CaseState;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
@@ -56,6 +57,24 @@ public class CaseService {
     caze.setState(CaseState.ACTIONABLE);
     caze.setCreatedDateTime(OffsetDateTime.now());
     caze.setReceiptReceived(false);
+    caze = caseRepository.saveAndFlush(caze);
+    return caze;
+  }
+
+  public Case saveCCSCase(
+      String caseId, SampleUnitDTO sampleUnit, String actionPlanId, String collectionExerciseId) {
+    int caseRef = getUniqueCaseRef();
+
+    Case caze = mapperFacade.map(sampleUnit, Case.class);
+    caze.setCaseRef(caseRef);
+    caze.setCaseType(sampleUnit.getAddressType());
+    caze.setCaseId(UUID.fromString(caseId));
+    caze.setActionPlanId(actionPlanId);
+    caze.setCollectionExerciseId(collectionExerciseId);
+    caze.setState(CaseState.ACTIONABLE);
+    caze.setCreatedDateTime(OffsetDateTime.now());
+    caze.setCCS(true);
+
     caze = caseRepository.saveAndFlush(caze);
     return caze;
   }
