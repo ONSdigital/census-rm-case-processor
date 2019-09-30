@@ -43,8 +43,8 @@ queueconfig:
   uac-qid-created-exchange: uac-qid-created-exchange
   invalid-address-inbound-queue: case.invalidAddressQueue
   undelivered-mail-queue: case.undeliveredMailQueue
+  ccs-property-listed-queue: case.ccsPropertyListedQueue
   consumers: 50
-
 healthcheck:
   frequency: 1000 #milliseconds
   filename: /tmp/case-service-healthy
