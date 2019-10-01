@@ -23,6 +23,7 @@ public class CCSPropertyListedService {
   private final UacService uacService;
   private final EventLogger eventLogger;
   private final CaseService caseService;
+  private final CcsToFieldService ccsToFieldService;
 
   @Value("${ccsconfig.action-plan-id}")
   private String actionPlanId;
@@ -34,11 +35,13 @@ public class CCSPropertyListedService {
       UacQidLinkRepository uacQidLinkRepository,
       UacService uacService,
       EventLogger eventLogger,
-      CaseService caseService) {
+      CaseService caseService,
+      CcsToFieldService ccsToFieldService) {
     this.uacQidLinkRepository = uacQidLinkRepository;
     this.uacService = uacService;
     this.eventLogger = eventLogger;
     this.caseService = caseService;
+    this.ccsToFieldService = ccsToFieldService;
   }
 
   public void processCCSPropertyListed(ResponseManagementEvent ccsPropertyListedEvent) {
@@ -60,6 +63,8 @@ public class CCSPropertyListedService {
         EventType.CCS_ADDRESS_LISTED,
         ccsPropertyListedEvent.getEvent(),
         convertObjectToJson(ccsProperty));
+
+    ccsToFieldService.convertAndSendCCSToField(caze);
   }
 
   private UacQidLink getNextCCSUacQidLink(Case caze) {
