@@ -65,6 +65,9 @@ public class AppConfig {
   @Value("${queueconfig.undelivered-mail-queue}")
   private String undeliveredMailQueue;
 
+  @Value("${queueconfig.ccs-property-listed-queue}")
+  private String ccsPropertyListedQueue;
+
   @Bean
   public MessageChannel caseSampleInputChannel() {
     return new DirectChannel();
@@ -92,6 +95,11 @@ public class AppConfig {
 
   @Bean
   public MessageChannel questionnaireLinkedInputChannel() {
+    return new DirectChannel();
+  }
+
+  @Bean
+  public MessageChannel ccsPropertyListedInputChannel() {
     return new DirectChannel();
   }
 
@@ -220,6 +228,15 @@ public class AppConfig {
   }
 
   @Bean
+  AmqpInboundChannelAdapter ccsPropertyListedInbound(
+      @Qualifier("ccsPropertyListedContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("ccsPropertyListedInputChannel") MessageChannel channel) {
+    AmqpInboundChannelAdapter adapter = new AmqpInboundChannelAdapter(listenerContainer);
+    adapter.setOutputChannel(channel);
+    return adapter;
+  }
+
+  @Bean
   public RabbitTemplate rabbitTemplate(
       ConnectionFactory connectionFactory, Jackson2JsonMessageConverter messageConverter) {
     RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
@@ -322,6 +339,16 @@ public class AppConfig {
     return setupListenerContainer(
         connectionFactory,
         undeliveredMailQueue,
+        messageErrorHandler,
+        ResponseManagementEvent.class);
+  }
+
+  @Bean
+  public SimpleMessageListenerContainer ccsPropertyListedContainer(
+      ConnectionFactory connectionFactory, MessageErrorHandler messageErrorHandler) {
+    return setupListenerContainer(
+        connectionFactory,
+        ccsPropertyListedQueue,
         messageErrorHandler,
         ResponseManagementEvent.class);
   }
