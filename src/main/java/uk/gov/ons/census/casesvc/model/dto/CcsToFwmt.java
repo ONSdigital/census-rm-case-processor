@@ -3,7 +3,7 @@ package uk.gov.ons.census.casesvc.model.dto;
 import lombok.Data;
 
 @Data
-public class CcsToField {
+public class CcsToFwmt {
   private String addressLine1;
   private String addressLine2;
   private String addressLine3;

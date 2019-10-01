@@ -1,15 +1,33 @@
-package uk.gov.ons.census.casesvc.builders;
+package uk.gov.ons.census.casesvc.service;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import uk.gov.ons.census.casesvc.model.dto.CcsToField;
+import uk.gov.ons.census.casesvc.model.dto.CcsToFwmt;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 
 @Component
-public class CcsToFieldBuilder {
+public class CcsToFieldService {
 
-  public CcsToField buildCcsToField(Case caze, String actionPlan, String actionType) {
+  private static final String ACTION_FIELD_BINDING = "Action.Field.binding";
+  private final RabbitTemplate rabbitTemplate;
 
-    CcsToField ccsToField = new CcsToField();
+  @Value("${queueconfig.outbound-field-exchange}")
+  private String outboundExchange;
+
+  public CcsToFieldService(RabbitTemplate rabbitTemplate) {
+    this.rabbitTemplate = rabbitTemplate;
+  }
+
+  public void convertAndSendCCSToField(Case caze) {
+    CcsToFwmt ccsFwmt = buildCcsToField(caze);
+
+    rabbitTemplate.convertAndSend(outboundExchange, ACTION_FIELD_BINDING, ccsFwmt);
+  }
+
+  private CcsToFwmt buildCcsToField(Case caze) {
+
+    CcsToFwmt ccsToField = new CcsToFwmt();
     ccsToField.setAddressLine1(caze.getAddressLine1());
     ccsToField.setAddressLine2(caze.getAddressLine2());
     ccsToField.setAddressLine3(caze.getAddressLine3());
@@ -23,13 +41,8 @@ public class CcsToFieldBuilder {
     ccsToField.setAddressType(caze.getAddressType());
     ccsToField.setFieldCoordinatorId(caze.getFieldCoordinatorId());
     ccsToField.setUndeliveredAsAddress(false);
-
-    // TODO: set surveyName, undeliveredAsAddress and blankQreReturned from caze
     ccsToField.setSurveyName("CCS");
     ccsToField.setBlankQreReturned(false);
-
-    // TODO: ccsQuestionnaireUrl, ceDeliveryReqd,
-    // ceCE1Complete, ceActualResponses
 
     return ccsToField;
   }

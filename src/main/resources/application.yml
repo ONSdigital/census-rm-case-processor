@@ -43,6 +43,7 @@ queueconfig:
   uac-qid-created-exchange: uac-qid-created-exchange
   invalid-address-inbound-queue: case.invalidAddressQueue
   undelivered-mail-queue: case.undeliveredMailQueue
+  outbound-field-exchange: action-outbound-exchange
   consumers: 50
 
 healthcheck:
