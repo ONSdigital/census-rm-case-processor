@@ -204,6 +204,17 @@ public class DataUtils {
     return managementEvent;
   }
 
+  public static ResponseManagementEvent getTestResponseManagementCCSAddressListedEvent() {
+    ResponseManagementEvent managementEvent = easyRandom.nextObject(ResponseManagementEvent.class);
+    managementEvent
+        .getPayload()
+        .getCcsProperty()
+        .getCollectionCase()
+        .setId(TEST_CASE_ID.toString());
+
+    return managementEvent;
+  }
+
   public static RefusalDTO convertJsonToRefusalDTO(String json) {
     try {
       return objectMapper.readValue(json, RefusalDTO.class);
