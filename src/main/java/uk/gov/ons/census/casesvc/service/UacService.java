@@ -73,6 +73,17 @@ public class UacService {
     return uacQidLink;
   }
 
+  public UacQidLink buildCCSUacQidLink(int questionnaireType) {
+    UacQidDTO uacQid = uacQidServiceClient.generateUacQid(questionnaireType);
+    UacQidLink uacQidLink = new UacQidLink();
+    uacQidLink.setId(UUID.randomUUID());
+    uacQidLink.setUac(uacQid.getQid());
+    uacQidLink.setActive(true);
+    uacQidLink.setQid(uacQid.getUac());
+    uacQidLink.setCcsCase(true);
+    return uacQidLink;
+  }
+
   public PayloadDTO saveAndEmitUacUpdatedEvent(UacQidLink uacQidLink) {
     uacQidLinkRepository.save(uacQidLink);
 
