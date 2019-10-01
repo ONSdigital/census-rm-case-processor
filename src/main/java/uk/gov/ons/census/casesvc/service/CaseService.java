@@ -73,7 +73,7 @@ public class CaseService {
     caze.setCollectionExerciseId(collectionExerciseId);
     caze.setState(CaseState.ACTIONABLE);
     caze.setCreatedDateTime(OffsetDateTime.now());
-    caze.setCCS(true);
+    caze.setCcsCase(true);
 
     caze = caseRepository.saveAndFlush(caze);
     return caze;

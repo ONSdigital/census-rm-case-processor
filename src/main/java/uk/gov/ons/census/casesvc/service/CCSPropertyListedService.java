@@ -66,7 +66,7 @@ public class CCSPropertyListedService {
     UacQidLink uacQidLink =
         uacService.buildUacQidLink(
             caze, CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
-    uacQidLink.setCCS(true);
+    uacQidLink.setCcsCase(true);
     return uacQidLink;
   }
 }

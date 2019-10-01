@@ -28,5 +28,5 @@ public class UacQidLink {
   @Column private boolean active;
 
   @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
-  private boolean isCCS;
+  private boolean ccsCase;
 }
