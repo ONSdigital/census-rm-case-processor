@@ -29,7 +29,6 @@ import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 @RunWith(MockitoJUnitRunner.class)
 public class CCSPropertyListedServiceTest {
 
-  private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final UUID TEST_UAC_QID_LINK_ID = UUID.randomUUID();
   private static final UUID TEST_ACTION_PLAN_ID = UUID.randomUUID();
   private static final UUID TEST_COLLECTION_EXERCISE_ID = UUID.randomUUID();
@@ -46,24 +45,23 @@ public class CCSPropertyListedServiceTest {
   public void testGoodCCSPropertyListed() {
     // Given
     ResponseManagementEvent managementEvent = getTestResponseManagementCCSAddressListedEvent();
+    String expectedCaseId =
+        managementEvent.getPayload().getCcsProperty().getCollectionCase().getId();
 
     UacQidLink expectedUacQidLink = new UacQidLink();
     expectedUacQidLink.setId(TEST_UAC_QID_LINK_ID);
     expectedUacQidLink.setCcsCase(true);
 
     Case expectedCase = new Case();
-    expectedCase.setCaseId(TEST_CASE_ID);
+    expectedCase.setCaseId(UUID.fromString(expectedCaseId));
     expectedCase.setCcsCase(true);
     expectedCase.setUacQidLinks(new LinkedList<>(Collections.singletonList(expectedUacQidLink)));
-
-    String expectedCaseId =
-        managementEvent.getPayload().getCcsProperty().getCollectionCase().getId();
 
     ReflectionTestUtils.setField(underTest, "actionPlanId", TEST_ACTION_PLAN_ID.toString());
     ReflectionTestUtils.setField(
         underTest, "collectionExerciseId", TEST_COLLECTION_EXERCISE_ID.toString());
 
-    when(uacService.buildCCSUacQidLink()).thenReturn(expectedUacQidLink);
+    when(uacService.buildCCSUacQidLink(71)).thenReturn(expectedUacQidLink);
     when(caseService.buildCCSCase(
             expectedCaseId,
             managementEvent.getPayload().getCcsProperty().getSampleUnit(),
@@ -79,7 +77,6 @@ public class CCSPropertyListedServiceTest {
     // Then
     InOrder inOrder = inOrder(uacService, caseService, eventLogger);
 
-    inOrder.verify(uacService).buildCCSUacQidLink();
     inOrder
         .verify(caseService)
         .buildCCSCase(
@@ -87,6 +84,7 @@ public class CCSPropertyListedServiceTest {
             managementEvent.getPayload().getCcsProperty().getSampleUnit(),
             TEST_ACTION_PLAN_ID.toString(),
             TEST_COLLECTION_EXERCISE_ID.toString());
+    inOrder.verify(uacService).buildCCSUacQidLink(71);
     inOrder.verify(caseService).saveCCSCaseWithUacQidLink(expectedCase, expectedUacQidLink);
 
     ArgumentCaptor<Case> caseCaptor = ArgumentCaptor.forClass(Case.class);
@@ -101,7 +99,7 @@ public class CCSPropertyListedServiceTest {
             anyString());
 
     Case actualCase = caseCaptor.getValue();
-    assertThat(actualCase.getCaseId()).isEqualTo(TEST_CASE_ID);
+    assertThat(actualCase.getCaseId()).isEqualTo(UUID.fromString(expectedCaseId));
     assertThat(actualCase.isCcsCase()).isTrue();
     assertThat(actualCase.getUacQidLinks().size()).isEqualTo(1);
 

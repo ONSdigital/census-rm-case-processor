@@ -11,13 +11,12 @@ import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
-import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
-import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
 @Service
 public class CCSPropertyListedService {
 
   private static final String CCS_ADDRESS_LISTED = "CCS Address Listed";
+  private static final int CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES = 71;
 
   private final UacService uacService;
   private final EventLogger eventLogger;
@@ -30,11 +29,7 @@ public class CCSPropertyListedService {
   private String collectionExerciseId;
 
   public CCSPropertyListedService(
-      UacQidLinkRepository uacQidLinkRepository,
-      CaseRepository caseRepository,
-      UacService uacService,
-      EventLogger eventLogger,
-      CaseService caseService) {
+      UacService uacService, EventLogger eventLogger, CaseService caseService) {
     this.uacService = uacService;
     this.eventLogger = eventLogger;
     this.caseService = caseService;
@@ -44,10 +39,13 @@ public class CCSPropertyListedService {
     CCSPropertyDTO ccsProperty = ccsPropertyListedEvent.getPayload().getCcsProperty();
     String caseId = ccsProperty.getCollectionCase().getId();
 
-    UacQidLink uacQidLink = uacService.buildCCSUacQidLink();
     Case caze =
         caseService.buildCCSCase(
             caseId, ccsProperty.getSampleUnit(), actionPlanId, collectionExerciseId);
+
+    UacQidLink uacQidLink =
+        uacService.buildCCSUacQidLink(
+            CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
 
     caze = caseService.saveCCSCaseWithUacQidLink(caze, uacQidLink);
 
