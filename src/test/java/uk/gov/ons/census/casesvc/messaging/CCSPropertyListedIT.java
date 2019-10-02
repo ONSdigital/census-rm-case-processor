@@ -91,10 +91,11 @@ public class CCSPropertyListedIT {
     responseManagementEvent.setPayload(payload);
     responseManagementEvent.setEvent(eventDTO);
 
+    //When
     rabbitQueueHelper.sendMessage(ccsPropertyListedQueue, responseManagementEvent);
 
+    //Then
     CcsToFwmt ccsToFwmt = rabbitQueueHelper.checkCcsFwmtEmitted(outboundQueue);
-
     assertThat(ccsToFwmt.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
   }
 }

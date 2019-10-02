@@ -28,11 +28,14 @@ public class CcsToFieldServiceTest {
 
   @Test
   public void testCcsToFwmt() {
+    //Given
     EasyRandom easyRandom = new EasyRandom();
     Case caze = easyRandom.nextObject(Case.class);
 
+    //When
     underTest.convertAndSendCCSToField(caze);
 
+    //Then
     ArgumentCaptor<CcsToFwmt> ccsToFwmtArgumentCaptor = ArgumentCaptor.forClass(CcsToFwmt.class);
     verify(rabbitTemplate)
         .convertAndSend(
