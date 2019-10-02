@@ -11,6 +11,7 @@ import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
+import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
 @Service
 public class CCSPropertyListedService {
@@ -18,9 +19,11 @@ public class CCSPropertyListedService {
   private static final String CCS_ADDRESS_LISTED = "CCS Address Listed";
   private static final int CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES = 71;
 
+  private final UacQidLinkRepository uacQidLinkRepository;
   private final UacService uacService;
   private final EventLogger eventLogger;
   private final CaseService caseService;
+  private final CcsToFieldService ccsToFieldService;
 
   @Value("${ccsconfig.action-plan-id}")
   private String actionPlanId;
@@ -29,10 +32,16 @@ public class CCSPropertyListedService {
   private String collectionExerciseId;
 
   public CCSPropertyListedService(
-      UacService uacService, EventLogger eventLogger, CaseService caseService) {
+      UacQidLinkRepository uacQidLinkRepository,
+      UacService uacService,
+      EventLogger eventLogger,
+      CaseService caseService,
+      CcsToFieldService ccsToFieldService) {
+    this.uacQidLinkRepository = uacQidLinkRepository;
     this.uacService = uacService;
     this.eventLogger = eventLogger;
     this.caseService = caseService;
+    this.ccsToFieldService = ccsToFieldService;
   }
 
   public void processCCSPropertyListed(ResponseManagementEvent ccsPropertyListedEvent) {
@@ -56,5 +65,15 @@ public class CCSPropertyListedService {
         EventType.CCS_ADDRESS_LISTED,
         ccsPropertyListedEvent.getEvent(),
         convertObjectToJson(ccsProperty));
+
+    ccsToFieldService.convertAndSendCCSToField(caze);
+  }
+
+  private UacQidLink getNextCCSUacQidLink(Case caze) {
+    UacQidLink uacQidLink =
+        uacService.buildUacQidLink(
+            caze, CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
+    uacQidLink.setCcsCase(true);
+    return uacQidLink;
   }
 }

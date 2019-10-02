@@ -11,7 +11,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQL94Dialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     properties:
       hibernate:
         default_schema: casev2
@@ -43,6 +43,7 @@ queueconfig:
   uac-qid-created-exchange: uac-qid-created-exchange
   invalid-address-inbound-queue: case.invalidAddressQueue
   undelivered-mail-queue: case.undeliveredMailQueue
+  outbound-field-exchange: action-outbound-exchange
   ccs-property-listed-queue: case.ccsPropertyListedQueue
   consumers: 50
 
