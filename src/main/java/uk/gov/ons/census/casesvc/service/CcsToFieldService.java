@@ -26,6 +26,8 @@ public class CcsToFieldService {
 
   private CcsToFwmt buildCcsToField(Case caze) {
     CcsToFwmt ccsToField = new CcsToFwmt();
+    ccsToField.setActionPlan(caze.getActionPlanId());
+    ccsToField.setActionType("dummy");
     ccsToField.setAddressLine1(caze.getAddressLine1());
     ccsToField.setAddressLine2(caze.getAddressLine2());
     ccsToField.setAddressLine3(caze.getAddressLine3());

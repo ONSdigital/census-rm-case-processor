@@ -28,14 +28,14 @@ public class CcsToFieldServiceTest {
 
   @Test
   public void testCcsToFwmt() {
-    //Given
+    // Given
     EasyRandom easyRandom = new EasyRandom();
     Case caze = easyRandom.nextObject(Case.class);
 
-    //When
+    // When
     underTest.convertAndSendCCSToField(caze);
 
-    //Then
+    // Then
     ArgumentCaptor<CcsToFwmt> ccsToFwmtArgumentCaptor = ArgumentCaptor.forClass(CcsToFwmt.class);
     verify(rabbitTemplate)
         .convertAndSend(
@@ -49,6 +49,8 @@ public class CcsToFieldServiceTest {
 
   private CcsToFwmt getExpectedCcsFwmt(Case caze) {
     CcsToFwmt ccsToField = new CcsToFwmt();
+    ccsToField.setActionPlan(caze.getActionPlanId());
+    ccsToField.setActionType("dummy");
     ccsToField.setAddressLine1(caze.getAddressLine1());
     ccsToField.setAddressLine2(caze.getAddressLine2());
     ccsToField.setAddressLine3(caze.getAddressLine3());

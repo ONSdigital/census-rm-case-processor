@@ -4,6 +4,8 @@ import lombok.Data;
 
 @Data
 public class CcsToFwmt {
+  private String actionPlan;
+  private String actionType;
   private String addressLine1;
   private String addressLine2;
   private String addressLine3;
