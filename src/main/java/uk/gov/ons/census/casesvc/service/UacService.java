@@ -29,6 +29,7 @@ public class UacService {
   private static final Logger log = LoggerFactory.getLogger(UacService.class);
   private static final String UAC_UPDATE_ROUTING_KEY = "event.uac.update";
   private static final String QID_NOT_FOUND_ERROR = "Qid not found error";
+  private static final int CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES = 71;
 
   private final UacQidLinkRepository uacQidLinkRepository;
   private final RabbitTemplate rabbitTemplate;
@@ -73,14 +74,17 @@ public class UacService {
     return uacQidLink;
   }
 
-  public UacQidLink buildCCSUacQidLink(int questionnaireType) {
-    UacQidDTO uacQid = uacQidServiceClient.generateUacQid(questionnaireType);
+  public UacQidLink buildCCSUacQidLink() {
+    UacQidDTO uacQid =
+        uacQidServiceClient.generateUacQid(
+            CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setId(UUID.randomUUID());
     uacQidLink.setUac(uacQid.getQid());
     uacQidLink.setActive(true);
     uacQidLink.setQid(uacQid.getUac());
     uacQidLink.setCcsCase(true);
+
     return uacQidLink;
   }
 

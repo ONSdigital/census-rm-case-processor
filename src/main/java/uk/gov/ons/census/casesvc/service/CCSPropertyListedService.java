@@ -3,8 +3,6 @@ package uk.gov.ons.census.casesvc.service;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.time.OffsetDateTime;
-import java.util.LinkedList;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
@@ -20,10 +18,7 @@ import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 public class CCSPropertyListedService {
 
   private static final String CCS_ADDRESS_LISTED = "CCS Address Listed";
-  private static final int CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES = 71;
 
-  private final UacQidLinkRepository uacQidLinkRepository;
-  private final CaseRepository caseRepository;
   private final UacService uacService;
   private final EventLogger eventLogger;
   private final CaseService caseService;
@@ -40,32 +35,21 @@ public class CCSPropertyListedService {
       UacService uacService,
       EventLogger eventLogger,
       CaseService caseService) {
-    this.uacQidLinkRepository = uacQidLinkRepository;
-    this.caseRepository = caseRepository;
     this.uacService = uacService;
     this.eventLogger = eventLogger;
     this.caseService = caseService;
   }
 
   public void processCCSPropertyListed(ResponseManagementEvent ccsPropertyListedEvent) {
-
-    UacQidLink uacQidLink = uacService.buildCCSUacQidLink(CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
-    uacQidLinkRepository.saveAndFlush(uacQidLink);
-
     CCSPropertyDTO ccsProperty = ccsPropertyListedEvent.getPayload().getCcsProperty();
     String caseId = ccsProperty.getCollectionCase().getId();
+
+    UacQidLink uacQidLink = uacService.buildCCSUacQidLink();
     Case caze =
-        caseService.saveCCSCase(
+        caseService.buildCCSCase(
             caseId, ccsProperty.getSampleUnit(), actionPlanId, collectionExerciseId);
 
-    List<UacQidLink> uacQidLinks = new LinkedList<>();
-    uacQidLinks.add(uacQidLink);
-    caze.setUacQidLinks(uacQidLinks);
-
-    caseRepository.saveAndFlush(caze);
-
-    uacQidLink.setCaze(caze);
-    uacQidLinkRepository.saveAndFlush(uacQidLink);
+    caze = caseService.saveCCSCaseWithUacQidLink(caze, uacQidLink);
 
     eventLogger.logCaseEvent(
         caze,

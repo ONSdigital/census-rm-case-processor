@@ -3,6 +3,8 @@ package uk.gov.ons.census.casesvc.service;
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.Optional;
 import java.util.UUID;
 import ma.glasnost.orika.MapperFacade;
@@ -20,7 +22,9 @@ import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.SampleUnitDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.CaseState;
+import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
+import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 import uk.gov.ons.census.casesvc.utility.EventHelper;
 import uk.gov.ons.census.casesvc.utility.RandomCaseRefGenerator;
 
@@ -34,6 +38,7 @@ public class CaseService {
   private static final String HOUSEHOLD_RESPONSE_ADDRESS_TYPE = "HH";
 
   private final CaseRepository caseRepository;
+  private final UacQidLinkRepository uacQidLinkRepository;
   private final MapperFacade mapperFacade;
   private final RabbitTemplate rabbitTemplate;
 
@@ -41,8 +46,12 @@ public class CaseService {
   private String outboundExchange;
 
   public CaseService(
-      CaseRepository caseRepository, RabbitTemplate rabbitTemplate, MapperFacade mapperFacade) {
+      CaseRepository caseRepository,
+      UacQidLinkRepository uacQidLinkRepository,
+      RabbitTemplate rabbitTemplate,
+      MapperFacade mapperFacade) {
     this.caseRepository = caseRepository;
+    this.uacQidLinkRepository = uacQidLinkRepository;
     this.rabbitTemplate = rabbitTemplate;
     this.mapperFacade = mapperFacade;
   }
@@ -61,7 +70,7 @@ public class CaseService {
     return caze;
   }
 
-  public Case saveCCSCase(
+  public Case buildCCSCase(
       String caseId, SampleUnitDTO sampleUnit, String actionPlanId, String collectionExerciseId) {
     int caseRef = getUniqueCaseRef();
 
@@ -75,7 +84,18 @@ public class CaseService {
     caze.setCreatedDateTime(OffsetDateTime.now());
     caze.setCcsCase(true);
 
-    caze = caseRepository.saveAndFlush(caze);
+    return caze;
+  }
+
+  public Case saveCCSCaseWithUacQidLink(Case caze, UacQidLink uacQidLink) {
+    uacQidLinkRepository.saveAndFlush(uacQidLink);
+
+    caze.setUacQidLinks(new LinkedList<>(Collections.singletonList(uacQidLink)));
+    caseRepository.saveAndFlush(caze);
+
+    uacQidLink.setCaze(caze);
+    uacQidLinkRepository.saveAndFlush(uacQidLink);
+
     return caze;
   }
 
