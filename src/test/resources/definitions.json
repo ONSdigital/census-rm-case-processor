@@ -62,6 +62,13 @@
       "arguments": {}
     },
     {
+      "name": "case.ccsPropertyListedQueue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
       "name": "Case.Responses",
       "vhost": "/",
       "durable": true,
@@ -240,6 +247,14 @@
       "destination": "survey.launched",
       "destination_type": "queue",
       "routing_key": "event.response.authentication",
+      "arguments": {}
+    },
+    {
+      "source": "events",
+      "vhost": "/",
+      "destination": "case.ccsPropertyListedQueue",
+      "destination_type": "queue",
+      "routing_key": "event.ccs.propertylisting",
       "arguments": {}
     }
   ]
