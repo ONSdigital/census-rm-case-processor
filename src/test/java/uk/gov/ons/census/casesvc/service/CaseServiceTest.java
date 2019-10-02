@@ -3,6 +3,7 @@ package uk.gov.ons.census.casesvc.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.service.CaseService.CASE_UPDATE_ROUTING_KEY;
@@ -23,12 +24,16 @@ import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
+import uk.gov.ons.census.casesvc.model.dto.SampleUnitDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.CaseState;
+import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
+import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CaseServiceTest {
+
   private static final String FIELD_CORD_ID = "FIELD_CORD_ID";
   private static final String FIELD_OFFICER_ID = "FIELD_OFFICER_ID";
   private static final String CE_CAPACITY = "CE_CAPACITY";
@@ -38,6 +43,8 @@ public class CaseServiceTest {
   private static final UUID TEST_UUID = UUID.randomUUID();
 
   @Mock CaseRepository caseRepository;
+
+  @Mock UacQidLinkRepository uacQidLinkRepository;
 
   @Spy
   private MapperFacade mapperFacade = new DefaultMapperFactory.Builder().build().getMapperFacade();
@@ -69,6 +76,46 @@ public class CaseServiceTest {
     assertThat(savedCase.getFieldCoordinatorId()).isEqualTo(FIELD_CORD_ID);
     assertThat(savedCase.getFieldOfficerId()).isEqualTo(FIELD_OFFICER_ID);
     assertThat(savedCase.getCeExpectedCapacity()).isEqualTo(CE_CAPACITY);
+  }
+
+  @Test
+  public void testBuildCCSCase() {
+    // Given
+    String caseId = TEST_UUID.toString();
+    SampleUnitDTO sampleUnit = new SampleUnitDTO();
+    String collectionExerciseId = TEST_UUID.toString();
+    String actionPlanId = TEST_UUID.toString();
+
+    // When
+    Case actualCase =
+        underTest.buildCCSCase(caseId, sampleUnit, collectionExerciseId, actionPlanId);
+
+    // Then
+    verify(mapperFacade).map(sampleUnit, Case.class);
+    assertThat(actualCase.isCcsCase()).isTrue();
+    assertThat(actualCase.getCaseId()).isEqualTo(UUID.fromString(caseId));
+    assertThat(actualCase.getActionPlanId()).isEqualTo(actionPlanId);
+    assertThat(actualCase.getCollectionExerciseId()).isEqualTo(collectionExerciseId);
+  }
+
+  @Test
+  public void testSaveCCSCaseWithUacQidLink() {
+    // Given
+    UacQidLink uacQidLink = new UacQidLink();
+    uacQidLink.setId(TEST_UUID);
+    Case caze = new Case();
+
+    // When
+    Case actualCase = underTest.saveCCSCaseWithUacQidLink(caze, uacQidLink);
+
+    // Then
+    ArgumentCaptor<UacQidLink> uacQidLinkArgCapt = ArgumentCaptor.forClass(UacQidLink.class);
+    verify(uacQidLinkRepository, times(2)).saveAndFlush(uacQidLinkArgCapt.capture());
+    verify(caseRepository, times(1)).saveAndFlush(caze);
+
+    assertThat(uacQidLinkArgCapt.getAllValues().get(0)).isEqualTo(uacQidLink);
+    assertThat(uacQidLinkArgCapt.getAllValues().get(1)).isEqualTo(uacQidLink);
+    assertThat(actualCase).isEqualTo(caze);
   }
 
   @Test
