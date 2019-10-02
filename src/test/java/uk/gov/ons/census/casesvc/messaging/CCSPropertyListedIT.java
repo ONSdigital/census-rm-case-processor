@@ -34,7 +34,6 @@ import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @RunWith(SpringJUnit4ClassRunner.class)
 public class CCSPropertyListedIT {
-
   private static String FIELD_QUEUE = "Action.Field";
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
 

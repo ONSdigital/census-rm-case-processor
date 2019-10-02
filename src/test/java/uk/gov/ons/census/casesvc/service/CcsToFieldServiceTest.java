@@ -64,33 +64,4 @@ public class CcsToFieldServiceTest {
 
     return ccsToField;
   }
-
-  //  @Test
-  //  public void testCcsToFieldBuilder() {
-  //    EasyRandom easyRandom = new EasyRandom();
-  //    Case caze = easyRandom.nextObject(Case.class);
-  //    RabbitTemplate rabbitTemplate = new RabbitTemplate();
-  //
-  //    CcsToFieldService underTest = new CcsToFieldService(rabbitTemplate);
-  //
-  //    CcsToFwmt actualResult =
-  //        underTest.buildCcsToField(caze, UUID.randomUUID().toString(),
-  // UUID.randomUUID().toString());
-  //
-  //    assertThat(actualResult.getSurveyName()).isEqualTo("CCS");
-  //    assertThat(actualResult.getUndeliveredAsAddress()).isEqualTo(false);
-  //    assertThat(actualResult.getBlankQreReturned()).isFalse();
-  //    assertThat(actualResult.getCaseId()).isEqualTo(caze.getCaseId().toString());
-  //    assertThat(actualResult.getCaseRef()).isEqualTo(Integer.toString(caze.getCaseRef()));
-  //    assertThat(actualResult.getAddressLine1()).isEqualTo(caze.getAddressLine1());
-  //    assertThat(actualResult.getAddressLine2()).isEqualTo(caze.getAddressLine2());
-  //    assertThat(actualResult.getAddressLine3()).isEqualTo(caze.getAddressLine3());
-  //    assertThat(actualResult.getTownName()).isEqualTo(caze.getTownName());
-  //    assertThat(actualResult.getPostcode()).isEqualTo(caze.getPostcode());
-  //    assertThat(actualResult.getEstabType()).isEqualTo(caze.getEstabType());
-  //    assertThat(actualResult.getLatitude()).isEqualTo(caze.getLatitude());
-  //    assertThat(actualResult.getLongitude()).isEqualTo(caze.getLongitude());
-  //    assertThat(actualResult.getAddressType()).isEqualTo(caze.getAddressType());
-  //    assertThat(actualResult.getFieldCoordinatorId()).isEqualTo(caze.getFieldCoordinatorId());
-  //  }
 }

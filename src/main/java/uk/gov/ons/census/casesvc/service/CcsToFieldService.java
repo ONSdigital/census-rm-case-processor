@@ -21,12 +21,10 @@ public class CcsToFieldService {
 
   public void convertAndSendCCSToField(Case caze) {
     CcsToFwmt ccsFwmt = buildCcsToField(caze);
-
     rabbitTemplate.convertAndSend(outboundExchange, ACTION_FIELD_BINDING, ccsFwmt);
   }
 
   private CcsToFwmt buildCcsToField(Case caze) {
-
     CcsToFwmt ccsToField = new CcsToFwmt();
     ccsToField.setAddressLine1(caze.getAddressLine1());
     ccsToField.setAddressLine2(caze.getAddressLine2());
