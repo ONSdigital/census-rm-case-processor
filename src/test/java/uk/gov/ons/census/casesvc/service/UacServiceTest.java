@@ -2,7 +2,10 @@ package uk.gov.ons.census.casesvc.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.generateUacCreatedEvent;
@@ -30,6 +33,8 @@ import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UacServiceTest {
+
+  private static final UUID TEST_CASE_ID = UUID.randomUUID();
 
   @Mock UacQidLinkRepository uacQidLinkRepository;
 
@@ -171,17 +176,25 @@ public class UacServiceTest {
   }
 
   @Test
-  public void testCCSUacQidLink() {
+  public void testCreateUacQidLinkedToCCSCase() {
     // Given
+    Case expectedCase = new Case();
+    expectedCase.setCaseId(TEST_CASE_ID);
+    expectedCase.setCcsCase(true);
+
     UacQidDTO expectedUacQidDTO = new UacQidDTO();
     when(uacQidServiceClient.generateUacQid(71)).thenReturn(expectedUacQidDTO);
 
     // When
-    UacQidLink actualUacQidLink = underTest.buildCCSUacQidLink(71);
+    UacQidLink actualUacQidLink = underTest.createUacQidLinkedToCCSCase(expectedCase);
 
     // Then
     assertThat(actualUacQidLink.isCcsCase()).isTrue();
-    assertThat(actualUacQidLink.getCaze()).isNull();
+    assertThat(actualUacQidLink.getCaze()).isNotNull();
+
+    Case actualCase = actualUacQidLink.getCaze();
+    assertThat(actualCase.getCaseId()).isEqualTo(TEST_CASE_ID);
+    assertThat(actualCase.isCcsCase()).isTrue();
   }
 
   @Test

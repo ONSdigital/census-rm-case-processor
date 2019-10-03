@@ -2,8 +2,9 @@ package uk.gov.ons.census.casesvc.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.times;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.service.CaseService.CASE_UPDATE_ROUTING_KEY;
@@ -27,9 +28,7 @@ import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.SampleUnitDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.CaseState;
-import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
-import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CaseServiceTest {
@@ -41,10 +40,10 @@ public class CaseServiceTest {
   private static final String TEST_POSTCODE = "TEST_POSTCODE";
   private static final String TEST_EXCHANGE = "TEST_EXCHANGE";
   private static final UUID TEST_UUID = UUID.randomUUID();
+  private static final UUID TEST_ACTION_PLAN_ID = UUID.randomUUID();
+  private static final UUID TEST_COLLECTION_EXERCISE_ID = UUID.randomUUID();
 
   @Mock CaseRepository caseRepository;
-
-  @Mock UacQidLinkRepository uacQidLinkRepository;
 
   @Spy
   private MapperFacade mapperFacade = new DefaultMapperFactory.Builder().build().getMapperFacade();
@@ -79,43 +78,25 @@ public class CaseServiceTest {
   }
 
   @Test
-  public void testBuildCCSCase() {
+  public void testCreateCCSCase() {
     // Given
     String caseId = TEST_UUID.toString();
     SampleUnitDTO sampleUnit = new SampleUnitDTO();
-    String collectionExerciseId = TEST_UUID.toString();
-    String actionPlanId = TEST_UUID.toString();
+
+    ReflectionTestUtils.setField(underTest, "actionPlanId", TEST_ACTION_PLAN_ID.toString());
+    ReflectionTestUtils.setField(
+        underTest, "collectionExerciseId", TEST_COLLECTION_EXERCISE_ID.toString());
 
     // When
-    Case actualCase =
-        underTest.buildCCSCase(caseId, sampleUnit, collectionExerciseId, actionPlanId);
+    Case actualCase = underTest.createCCSCase(caseId, sampleUnit);
 
     // Then
     verify(mapperFacade).map(sampleUnit, Case.class);
     assertThat(actualCase.isCcsCase()).isTrue();
     assertThat(actualCase.getCaseId()).isEqualTo(UUID.fromString(caseId));
-    assertThat(actualCase.getActionPlanId()).isEqualTo(actionPlanId);
-    assertThat(actualCase.getCollectionExerciseId()).isEqualTo(collectionExerciseId);
-  }
-
-  @Test
-  public void testSaveCCSCaseWithUacQidLink() {
-    // Given
-    UacQidLink uacQidLink = new UacQidLink();
-    uacQidLink.setId(TEST_UUID);
-    Case caze = new Case();
-
-    // When
-    Case actualCase = underTest.saveCCSCaseWithUacQidLink(caze, uacQidLink);
-
-    // Then
-    ArgumentCaptor<UacQidLink> uacQidLinkArgCapt = ArgumentCaptor.forClass(UacQidLink.class);
-    verify(uacQidLinkRepository, times(2)).saveAndFlush(uacQidLinkArgCapt.capture());
-    verify(caseRepository, times(1)).saveAndFlush(caze);
-
-    assertThat(uacQidLinkArgCapt.getAllValues().get(0)).isEqualTo(uacQidLink);
-    assertThat(uacQidLinkArgCapt.getAllValues().get(1)).isEqualTo(uacQidLink);
-    assertThat(actualCase).isEqualTo(caze);
+    assertThat(actualCase.getActionPlanId()).isEqualTo(TEST_ACTION_PLAN_ID.toString());
+    assertThat(actualCase.getCollectionExerciseId())
+        .isEqualTo(TEST_COLLECTION_EXERCISE_ID.toString());
   }
 
   @Test
