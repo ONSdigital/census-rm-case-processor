@@ -1,5 +1,6 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
@@ -167,6 +168,35 @@ public class UacServiceTest {
             eq(EventType.RM_UAC_CREATED),
             eq(uacCreatedEvent.getEvent()),
             anyString());
+  }
+
+  @Test
+  public void testCCSUacQidLink() {
+    // Given
+    UacQidDTO expectedUacQidDTO = new UacQidDTO();
+    when(uacQidServiceClient.generateUacQid(71)).thenReturn(expectedUacQidDTO);
+
+    // When
+    UacQidLink actualUacQidLink = underTest.buildCCSUacQidLink(71);
+
+    // Then
+    assertThat(actualUacQidLink.isCcsCase()).isTrue();
+    assertThat(actualUacQidLink.getCaze()).isNull();
+  }
+
+  @Test
+  public void testFindUacLinkExists() {
+    // Given
+    UacQidLink expectedUacQidLink = new UacQidLink();
+    expectedUacQidLink.setId(UUID.randomUUID());
+
+    when(uacQidLinkRepository.findByQid(anyString())).thenReturn(Optional.of(expectedUacQidLink));
+
+    // When
+    UacQidLink actualUacQidLink = underTest.findByQid("Test qid");
+
+    // Then
+    assertThat(actualUacQidLink.getId()).isEqualTo(expectedUacQidLink.getId());
   }
 
   @Test(expected = RuntimeException.class)
