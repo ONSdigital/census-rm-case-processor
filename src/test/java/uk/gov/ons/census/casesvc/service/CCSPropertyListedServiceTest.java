@@ -39,6 +39,8 @@ public class CCSPropertyListedServiceTest {
 
   @Mock CaseService caseService;
 
+  @Mock CcsToFieldService ccsToFieldService;
+
   @InjectMocks CCSPropertyListedService underTest;
 
   @Test
@@ -75,7 +77,7 @@ public class CCSPropertyListedServiceTest {
     underTest.processCCSPropertyListed(managementEvent);
 
     // Then
-    InOrder inOrder = inOrder(uacService, caseService, eventLogger);
+    InOrder inOrder = inOrder(uacService, caseService, eventLogger, ccsToFieldService);
 
     inOrder
         .verify(caseService)
@@ -97,6 +99,8 @@ public class CCSPropertyListedServiceTest {
             eq(EventType.CCS_ADDRESS_LISTED),
             eq(managementEvent.getEvent()),
             anyString());
+
+    inOrder.verify(ccsToFieldService).convertAndSendCCSToField(caseCaptor.capture());
 
     Case actualCase = caseCaptor.getValue();
     assertThat(actualCase.getCaseId()).isEqualTo(UUID.fromString(expectedCaseId));
