@@ -13,7 +13,7 @@ public class CcsToFieldService {
   @Value("${queueconfig.outbound-field-exchange}")
   private String outboundExchange;
 
-  @Value("${queueconfig.field-binding")
+  @Value("${queueconfig.field-binding}")
   private String fieldBinding;
 
   public CcsToFieldService(RabbitTemplate rabbitTemplate) {
