@@ -8,12 +8,13 @@ import uk.gov.ons.census.casesvc.model.entity.Case;
 
 @Component
 public class CcsToFieldService {
-
-  private static final String ACTION_FIELD_BINDING = "Action.Field.binding";
   private final RabbitTemplate rabbitTemplate;
 
   @Value("${queueconfig.outbound-field-exchange}")
   private String outboundExchange;
+
+  @Value("${queueconfig.field-binding")
+  private String fieldBinding;
 
   public CcsToFieldService(RabbitTemplate rabbitTemplate) {
     this.rabbitTemplate = rabbitTemplate;
@@ -21,7 +22,7 @@ public class CcsToFieldService {
 
   public void convertAndSendCCSToField(Case caze) {
     CcsToFwmt ccsFwmt = buildCcsToField(caze);
-    rabbitTemplate.convertAndSend(outboundExchange, ACTION_FIELD_BINDING, ccsFwmt);
+    rabbitTemplate.convertAndSend(outboundExchange, fieldBinding, ccsFwmt);
   }
 
   private CcsToFwmt buildCcsToField(Case caze) {

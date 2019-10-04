@@ -44,6 +44,7 @@ queueconfig:
   invalid-address-inbound-queue: case.invalidAddressQueue
   undelivered-mail-queue: case.undeliveredMailQueue
   outbound-field-exchange: action-outbound-exchange
+  field-binding: Action.Field.binding
   ccs-property-listed-queue: case.ccsPropertyListedQueue
   consumers: 50
 

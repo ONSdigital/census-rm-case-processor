@@ -13,6 +13,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.util.ReflectionUtils;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.ons.census.casesvc.model.dto.CcsToFwmt;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 
@@ -31,6 +33,8 @@ public class CcsToFieldServiceTest {
     // Given
     EasyRandom easyRandom = new EasyRandom();
     Case caze = easyRandom.nextObject(Case.class);
+
+    ReflectionTestUtils.setField(underTest, "fieldBinding", "Action.Field.binding");
 
     // When
     underTest.convertAndSendCCSToField(caze);
