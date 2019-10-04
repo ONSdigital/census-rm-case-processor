@@ -8,6 +8,7 @@ import uk.gov.ons.census.casesvc.model.dto.CCSPropertyDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
+import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
 @Service
 public class CCSPropertyListedService {
@@ -37,7 +38,18 @@ public class CCSPropertyListedService {
         caseService.createCCSCase(
             ccsProperty.getCollectionCase().getId(), ccsProperty.getSampleUnit());
 
-    uacService.createUacQidLinkedToCCSCase(caze);
+    if (ccsProperty.getUac() == null) {
+      uacService.createUacQidLinkedToCCSCase(caze);
+    } else {
+      UacQidLink uacQidLink = uacService.findByQid(ccsProperty.getUac().getQuestionnaireId());
+      uacQidLink.setCaze(caze);
+
+      if (uacQidLink == null) {
+        throw new RuntimeException(
+            "Received unknown QID for CSSProperty Listed Event: "
+                + ccsProperty.getUac().getQuestionnaireId());
+      }
+    }
 
     eventLogger.logCaseEvent(
         caze,
@@ -47,6 +59,8 @@ public class CCSPropertyListedService {
         ccsPropertyListedEvent.getEvent(),
         convertObjectToJson(ccsProperty));
 
-    ccsToFieldService.convertAndSendCCSToField(caze);
+    if (ccsProperty.getUac() == null) {
+      ccsToFieldService.convertAndSendCCSToField(caze);
+    }
   }
 }
