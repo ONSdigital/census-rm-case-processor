@@ -104,7 +104,6 @@ public class CCSPropertyListedIT {
     Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
     assertThat(actualCase.isCcsCase()).isTrue();
 
-    // Check database that HI Case is linked to UacQidLink
     List<UacQidLink> actualUacQidLinks = uacQidLinkRepository.findAll();
     assertThat(actualUacQidLinks.size()).isEqualTo(1);
     UacQidLink actualUacQidLink = actualUacQidLinks.get(0);
@@ -160,12 +159,12 @@ public class CCSPropertyListedIT {
     Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
     assertThat(actualCase.isCcsCase()).isTrue();
 
-    // Check database that HI Case is linked to UacQidLink
     List<UacQidLink> actualUacQidLinks = uacQidLinkRepository.findAll();
     assertThat(actualUacQidLinks.size()).isEqualTo(1);
     UacQidLink actualUacQidLink = actualUacQidLinks.get(0);
     assertThat(actualUacQidLink.getQid().substring(0, 2)).isEqualTo("71");
     assertThat(actualUacQidLink.isCcsCase()).isTrue();
+    assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
 
     validateEvents(eventRepository.findAll(), ccsPropertyDTO);
   }
