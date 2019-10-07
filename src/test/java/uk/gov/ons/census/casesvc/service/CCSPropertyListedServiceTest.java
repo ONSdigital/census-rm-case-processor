@@ -21,6 +21,7 @@ import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
+import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CCSPropertyListedServiceTest {
@@ -35,6 +36,8 @@ public class CCSPropertyListedServiceTest {
   @Mock UacService uacService;
 
   @Mock CcsToFieldService ccsToFieldService;
+
+  @Mock UacQidLinkRepository uacQidLinkRepository;
 
   @InjectMocks CCSPropertyListedService underTest;
 
@@ -125,31 +128,5 @@ public class CCSPropertyListedServiceTest {
             anyString());
 
     verifyZeroInteractions(ccsToFieldService);
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testCaseWhereQidProvideButQidIsInvalid() {
-    // Given
-    ResponseManagementEvent responseManagementEvent =
-        getTestResponseManagementCCSAddressListedEvent();
-
-    responseManagementEvent.getPayload().getCcsProperty().getUac().setQuestionnaireId(TEST_QID);
-
-    String expectedCaseId =
-        responseManagementEvent.getPayload().getCcsProperty().getCollectionCase().getId();
-
-    // null is the default value returned by the mocked function findByQid.  But being explicit
-    // here.
-    when(uacService.findByQid(TEST_QID)).thenReturn(null);
-
-    Case expectedCase = new Case();
-    expectedCase.setCaseId(UUID.fromString(expectedCaseId));
-    expectedCase.setCcsCase(true);
-    expectedCase.setUacQidLinks(null);
-    when(caseService.createCCSCase(
-            expectedCaseId, responseManagementEvent.getPayload().getCcsProperty().getSampleUnit()))
-        .thenReturn(expectedCase);
-
-    underTest.processCCSPropertyListed(responseManagementEvent);
   }
 }

@@ -71,7 +71,6 @@ public class CCSPropertyListedIT {
 
   @Test
   public void CCSSubmittedToFieldIT() throws IOException, InterruptedException, JSONException {
-
     // GIVEN
     BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(FIELD_QUEUE);
 
@@ -154,7 +153,8 @@ public class CCSPropertyListedIT {
     // When
     rabbitQueueHelper.sendMessage(ccsPropertyListedQueue, responseManagementEvent);
 
-    rabbitQueueHelper.checkMessageIsNotReceived(outboundQueue, 10);
+    // Then
+    rabbitQueueHelper.checkMessageIsNotReceived(outboundQueue, 5);
 
     Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
     assertThat(actualCase.isCcsCase()).isTrue();
@@ -162,6 +162,7 @@ public class CCSPropertyListedIT {
     List<UacQidLink> actualUacQidLinks = uacQidLinkRepository.findAll();
     assertThat(actualUacQidLinks.size()).isEqualTo(1);
     UacQidLink actualUacQidLink = actualUacQidLinks.get(0);
+    assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID);
     assertThat(actualUacQidLink.getQid().substring(0, 2)).isEqualTo("71");
     assertThat(actualUacQidLink.isCcsCase()).isTrue();
     assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
