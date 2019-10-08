@@ -17,7 +17,6 @@ public class ReceiptReceiver {
   @Transactional
   @ServiceActivator(inputChannel = "receiptInputChannel", adviceChain = "messageHandlingAdvice")
   public void receiveMessage(ResponseManagementEvent receiptEvent) {
-    throw new RuntimeException("I really wish we would skip this");
-    //    receiptService.processReceipt(receiptEvent);
+    receiptService.processReceipt(receiptEvent);
   }
 }
