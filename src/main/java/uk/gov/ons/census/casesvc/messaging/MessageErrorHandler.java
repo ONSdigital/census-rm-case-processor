@@ -59,6 +59,7 @@ public class MessageErrorHandler implements ErrorHandler {
       byte[] rawMessageBody = failedException.getFailedMessage().getBody();
       String messageBody = new String(rawMessageBody);
       String messageHash;
+      
       // Digest is not thread-safe
       synchronized (digest) {
         messageHash = bytesToHexString(digest.digest(rawMessageBody));
@@ -76,13 +77,25 @@ public class MessageErrorHandler implements ErrorHandler {
       }
 
       if (reportResult != null && reportResult.isSkipIt()) {
-        // Make damn certain that we have a copy of the message before skipping it
-        exceptionManagerClient.storeMessageBeforeSkipping(
-            messageHash, rawMessageBody, serviceName, queueName);
-        log.with("message_hash", messageHash).warn("Skipping message");
+        boolean haveStored = false;
 
-        // There's no going back after this point - better be certain about this!
-        throw new AmqpRejectAndDontRequeueException("Skipping message", throwable);
+        // Make damn certain that we have a copy of the message before skipping it
+        try {
+          exceptionManagerClient.storeMessageBeforeSkipping(
+              messageHash, rawMessageBody, serviceName, queueName);
+          haveStored = true;
+        } catch (Exception storeException) {
+          log.with("message_hash", messageHash)
+              .warn("Unable to store a copy of the message. Will NOT be skipping", storeException);
+        }
+
+        // OK the message is stored... we can go ahead and skip it
+        if (haveStored) {
+          log.with("message_hash", messageHash).warn("Skipping message");
+
+          // There's no going back after this point - better be certain about this!
+          throw new AmqpRejectAndDontRequeueException("Skipping message", throwable);
+        }
       }
 
       if (reportResult != null && reportResult.isPeek()) {
@@ -107,7 +120,7 @@ public class MessageErrorHandler implements ErrorHandler {
         }
       }
     } else {
-      // Unfortunately this is a weird one. Very likely that we'd see one, so let's log it.
+      // Very unlikely that this'd happen but let's log it anyway
       log.error("Unexpected exception has occurred", throwable);
     }
   }
