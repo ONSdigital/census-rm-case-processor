@@ -8,26 +8,30 @@ import uk.gov.ons.census.casesvc.model.dto.CCSPropertyDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
+import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
+import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
 @Service
 public class CCSPropertyListedService {
-
   private static final String CCS_ADDRESS_LISTED = "CCS Address Listed";
 
   private final UacService uacService;
   private final EventLogger eventLogger;
   private final CaseService caseService;
   private final CcsToFieldService ccsToFieldService;
+  private final UacQidLinkRepository uacQidLinkRepository;
 
   public CCSPropertyListedService(
       UacService uacService,
       EventLogger eventLogger,
       CaseService caseService,
-      CcsToFieldService ccsToFieldService) {
+      CcsToFieldService ccsToFieldService,
+      UacQidLinkRepository uacQidLinkRepository) {
     this.uacService = uacService;
     this.eventLogger = eventLogger;
     this.caseService = caseService;
     this.ccsToFieldService = ccsToFieldService;
+    this.uacQidLinkRepository = uacQidLinkRepository;
   }
 
   public void processCCSPropertyListed(ResponseManagementEvent ccsPropertyListedEvent) {
@@ -37,7 +41,14 @@ public class CCSPropertyListedService {
         caseService.createCCSCase(
             ccsProperty.getCollectionCase().getId(), ccsProperty.getSampleUnit());
 
-    uacService.createUacQidLinkedToCCSCase(caze);
+    if (ccsProperty.getUac() == null) {
+      uacService.createUacQidLinkedToCCSCase(caze);
+      ccsToFieldService.convertAndSendCCSToField(caze);
+    } else {
+      UacQidLink uacQidLink = uacService.findByQid(ccsProperty.getUac().getQuestionnaireId());
+      uacQidLink.setCaze(caze);
+      uacQidLinkRepository.saveAndFlush(uacQidLink);
+    }
 
     eventLogger.logCaseEvent(
         caze,
@@ -46,7 +57,5 @@ public class CCSPropertyListedService {
         EventType.CCS_ADDRESS_LISTED,
         ccsPropertyListedEvent.getEvent(),
         convertObjectToJson(ccsProperty));
-
-    ccsToFieldService.convertAndSendCCSToField(caze);
   }
 }

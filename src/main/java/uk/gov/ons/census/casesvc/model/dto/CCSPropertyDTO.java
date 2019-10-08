@@ -6,4 +6,5 @@ import lombok.Data;
 public class CCSPropertyDTO {
   private CollectionCase collectionCase;
   private SampleUnitDTO sampleUnit;
+  private UacDTO uac;
 }
