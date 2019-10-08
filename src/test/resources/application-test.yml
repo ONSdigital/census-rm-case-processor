@@ -8,3 +8,6 @@ spring:
 uacservice:
   connection:
     port: 18164
+
+queueconfig:
+  consumers: 1

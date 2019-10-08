@@ -103,7 +103,8 @@ public class ReceiptReceiverIT {
     managementEvent.getPayload().getResponse().setQuestionnaireId(uacQidLink.getQid());
     managementEvent.getEvent().setTransactionId(UUID.randomUUID());
 
-    String json = convertObjectToJson(managementEvent);
+    String json = convertObjectToJson(managementEvent) + "GARBAGE";
+    //    String json = "GARBAGE";
     Message message =
         MessageBuilder.withBody(json.getBytes())
             .setContentType(MessageProperties.CONTENT_TYPE_JSON)

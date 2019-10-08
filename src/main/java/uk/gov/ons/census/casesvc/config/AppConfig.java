@@ -23,6 +23,8 @@ import org.springframework.integration.amqp.inbound.AmqpInboundChannelAdapter;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import uk.gov.ons.census.casesvc.client.BadMessageHandlerClient;
+import uk.gov.ons.census.casesvc.messaging.MessageHandlingAdvice;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 
@@ -363,6 +365,12 @@ public class AppConfig {
     MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
 
     return mapperFactory.getMapperFacade();
+  }
+
+  @Bean
+  public MessageHandlingAdvice messageHandlingAdvice(
+      BadMessageHandlerClient badMessageHandlerClient) {
+    return new MessageHandlingAdvice(badMessageHandlerClient, ResponseManagementEvent.class);
   }
 
   @PostConstruct
