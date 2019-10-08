@@ -127,6 +127,16 @@ public class CCSPropertyListedServiceTest {
             eq(responseManagementEvent.getEvent()),
             anyString());
 
+    Case actualCase = caseCaptor.getValue();
+    assertThat(actualCase.getCaseId()).isEqualTo(UUID.fromString(expectedCaseId));
+    assertThat(actualCase.isCcsCase()).isTrue();
+
+    ArgumentCaptor<UacQidLink> uacQidLinkArgumentCaptor = ArgumentCaptor.forClass(UacQidLink.class);
+    verify(uacQidLinkRepository).saveAndFlush(uacQidLinkArgumentCaptor.capture());
+    UacQidLink actualUacQidLink = uacQidLinkArgumentCaptor.getValue();
+    assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID);
+    assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(expectedCase.getCaseId());
+
     verifyZeroInteractions(ccsToFieldService);
   }
 }
