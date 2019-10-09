@@ -51,14 +51,7 @@ public class ExceptionManagerClient {
     restTemplate.postForObject(uriComponents.toUri(), peekReply, Void.class);
   }
 
-  public void storeMessageBeforeSkipping(
-      String messageHash, byte[] payload, String service, String queue) {
-
-    SkippedMessage skippedMessage = new SkippedMessage();
-    skippedMessage.setMessageHash(messageHash);
-    skippedMessage.setMessagePayload(payload);
-    skippedMessage.setService(service);
-    skippedMessage.setQueue(queue);
+  public void storeMessageBeforeSkipping(SkippedMessage skippedMessage) {
 
     RestTemplate restTemplate = new RestTemplate();
     UriComponents uriComponents = createUriComponents("/storeskippedmessage");

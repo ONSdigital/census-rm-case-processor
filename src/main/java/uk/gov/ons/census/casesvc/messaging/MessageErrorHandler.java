@@ -13,6 +13,7 @@ import org.springframework.amqp.rabbit.listener.exception.ListenerExecutionFaile
 import org.springframework.util.ErrorHandler;
 import uk.gov.ons.census.casesvc.client.ExceptionManagerClient;
 import uk.gov.ons.census.casesvc.model.dto.ExceptionReportResponse;
+import uk.gov.ons.census.casesvc.model.dto.SkippedMessage;
 
 public class MessageErrorHandler implements ErrorHandler {
   private static final Logger log = LoggerFactory.getLogger(MessageErrorHandler.class);
@@ -66,10 +67,7 @@ public class MessageErrorHandler implements ErrorHandler {
       }
 
       if (skipPeekAndDecideIfWeShouldLog(
-          throwable,
-          listenerExecutionFailedException.getCause().getCause(),
-          messageHash,
-          rawMessageBody)) {
+          listenerExecutionFailedException, messageHash, rawMessageBody)) {
         if (logStackTraces) {
           log.with("message_hash", messageHash)
               .with("valid_json", validateJson(messageBody))
@@ -88,11 +86,17 @@ public class MessageErrorHandler implements ErrorHandler {
   }
 
   private boolean skipPeekAndDecideIfWeShouldLog(
-      Throwable throwable, Throwable cause, String messageHash, byte[] rawMessageBody) {
+      ListenerExecutionFailedException listenerExecutionFailedException,
+      String messageHash,
+      byte[] rawMessageBody) {
     ExceptionReportResponse reportResult = null;
     try {
       reportResult =
-          exceptionManagerClient.reportException(messageHash, serviceName, queueName, cause);
+          exceptionManagerClient.reportException(
+              messageHash,
+              serviceName,
+              queueName,
+              listenerExecutionFailedException.getCause().getCause());
     } catch (Exception exceptionManagerClientException) {
       log.warn(
           "Could not report exception. There will be excessive logging until this is resolved",
@@ -105,8 +109,27 @@ public class MessageErrorHandler implements ErrorHandler {
 
       // Make damn certain that we have a copy of the message before skipping it
       try {
-        exceptionManagerClient.storeMessageBeforeSkipping(
-            messageHash, rawMessageBody, serviceName, queueName);
+        SkippedMessage skippedMessage = new SkippedMessage();
+        skippedMessage.setMessageHash(messageHash);
+        skippedMessage.setMessagePayload(rawMessageBody);
+        skippedMessage.setService(serviceName);
+        skippedMessage.setQueue(queueName);
+        skippedMessage.setContentType(
+            listenerExecutionFailedException
+                .getFailedMessage()
+                .getMessageProperties()
+                .getContentType());
+        skippedMessage.setHeaders(
+            listenerExecutionFailedException
+                .getFailedMessage()
+                .getMessageProperties()
+                .getHeaders());
+        skippedMessage.setRoutingKey(
+            listenerExecutionFailedException
+                .getFailedMessage()
+                .getMessageProperties()
+                .getReceivedRoutingKey());
+        exceptionManagerClient.storeMessageBeforeSkipping(skippedMessage);
         haveStored = true;
       } catch (Exception exceptionManagerClientException) {
         log.with("message_hash", messageHash)
@@ -120,7 +143,8 @@ public class MessageErrorHandler implements ErrorHandler {
         log.with("message_hash", messageHash).warn("Skipping message");
 
         // There's no going back after this point - better be certain about this!
-        throw new AmqpRejectAndDontRequeueException("Skipping message", throwable);
+        throw new AmqpRejectAndDontRequeueException(
+            "Skipping message", listenerExecutionFailedException);
       }
     }
 
