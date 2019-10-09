@@ -26,8 +26,8 @@ public class QuestionnaireTypeHelper {
   public static int calculateQuestionnaireType(String treatmentCode) {
     String country = treatmentCode.substring(treatmentCode.length() - 1);
     if (!country.equals("E") && !country.equals("W") && !country.equals("N")) {
-      log.with("treatment_code", treatmentCode).error(UNKNOWN_COUNTRY_ERROR);
-      throw new IllegalArgumentException();
+      throw new IllegalArgumentException(
+          String.format("Unknown Country from treatment code %s", treatmentCode));
     }
 
     if (treatmentCode.startsWith("HH")) {

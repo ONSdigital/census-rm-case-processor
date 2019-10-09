@@ -27,7 +27,6 @@ import uk.gov.ons.census.casesvc.utility.RandomCaseRefGenerator;
 @Service
 public class CaseService {
   private static final Logger log = LoggerFactory.getLogger(CaseService.class);
-  private static final String CASE_NOT_FOUND_ERROR = "Case not found error";
   private static final String SURVEY = "CENSUS";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_CASE_TYPE = "HI";
   public static final String CASE_UPDATE_ROUTING_KEY = "event.case.update";
@@ -227,7 +226,6 @@ public class CaseService {
     Optional<Case> cazeResult = caseRepository.findByCaseId(caseId);
 
     if (cazeResult.isEmpty()) {
-      log.error(CASE_NOT_FOUND_ERROR);
       throw new RuntimeException(String.format("Case ID '%s' not present", caseId));
     }
     return cazeResult.get();

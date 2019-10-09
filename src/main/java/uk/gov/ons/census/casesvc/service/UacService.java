@@ -28,7 +28,6 @@ import uk.gov.ons.census.casesvc.utility.Sha256Helper;
 public class UacService {
   private static final Logger log = LoggerFactory.getLogger(UacService.class);
   private static final String UAC_UPDATE_ROUTING_KEY = "event.uac.update";
-  private static final String QID_NOT_FOUND_ERROR = "Qid not found error";
   private static final int CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES = 71;
 
   private final UacQidLinkRepository uacQidLinkRepository;
@@ -141,7 +140,6 @@ public class UacService {
     Optional<UacQidLink> uacQidLinkOpt = uacQidLinkRepository.findByQid(questionnaireId);
 
     if (uacQidLinkOpt.isEmpty()) {
-      log.error(QID_NOT_FOUND_ERROR);
       throw new RuntimeException(
           String.format("Questionnaire Id '%s' not found!", questionnaireId));
     }

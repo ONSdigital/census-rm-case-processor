@@ -54,9 +54,9 @@ public class MessageErrorHandler implements ErrorHandler {
   @Override
   public void handleError(Throwable throwable) {
     if (throwable instanceof ListenerExecutionFailedException) {
-      ListenerExecutionFailedException failedException =
+      ListenerExecutionFailedException listenerExecutionFailedException =
           (ListenerExecutionFailedException) throwable;
-      byte[] rawMessageBody = failedException.getFailedMessage().getBody();
+      byte[] rawMessageBody = listenerExecutionFailedException.getFailedMessage().getBody();
       String messageBody = new String(rawMessageBody);
       String messageHash;
 
@@ -65,59 +65,19 @@ public class MessageErrorHandler implements ErrorHandler {
         messageHash = bytesToHexString(digest.digest(rawMessageBody));
       }
 
-      ExceptionReportResponse reportResult = null;
-      try {
-        reportResult =
-            exceptionManagerClient.reportException(
-                messageHash, serviceName, queueName, throwable.getCause().getCause());
-      } catch (Exception exceptionManagerClientException) {
-        log.warn(
-            "Could not report exception. There will be excessive logging until this is resolved",
-            exceptionManagerClientException);
-      }
-
-      if (reportResult != null && reportResult.isSkipIt()) {
-        boolean haveStored = false;
-
-        // Make damn certain that we have a copy of the message before skipping it
-        try {
-          exceptionManagerClient.storeMessageBeforeSkipping(
-              messageHash, rawMessageBody, serviceName, queueName);
-          haveStored = true;
-        } catch (Exception exceptionManagerClientException) {
-          log.with("message_hash", messageHash)
-              .warn(
-                  "Unable to store a copy of the message. Will NOT be skipping",
-                  exceptionManagerClientException);
-        }
-
-        // OK the message is stored... we can go ahead and skip it
-        if (haveStored) {
-          log.with("message_hash", messageHash).warn("Skipping message");
-
-          // There's no going back after this point - better be certain about this!
-          throw new AmqpRejectAndDontRequeueException("Skipping message", throwable);
-        }
-      }
-
-      if (reportResult != null && reportResult.isPeek()) {
-        try {
-          // Send it back to the exception manager so it can be peeked
-          exceptionManagerClient.respondToPeek(messageHash, rawMessageBody);
-        } catch (Exception respondException) {
-          // Nothing we can do about this - ignore it
-        }
-      }
-
-      if (reportResult == null || reportResult.isLogIt()) {
+      if (skipPeekAndDecideIfWeShouldLog(
+          throwable,
+          listenerExecutionFailedException.getCause().getCause(),
+          messageHash,
+          rawMessageBody)) {
         if (logStackTraces) {
           log.with("message_hash", messageHash)
               .with("valid_json", validateJson(messageBody))
-              .error("Could not process message", failedException.getCause());
+              .error("Could not process message", listenerExecutionFailedException.getCause());
         } else {
           log.with("message_hash", messageHash)
               .with("valid_json", validateJson(messageBody))
-              .with("cause", failedException.getCause().getMessage())
+              .with("cause", listenerExecutionFailedException.getCause().getMessage())
               .error("Could not process message");
         }
       }
@@ -125,6 +85,57 @@ public class MessageErrorHandler implements ErrorHandler {
       // Very unlikely that this'd happen but let's log it anyway
       log.error("Unexpected exception has occurred", throwable);
     }
+  }
+
+  private boolean skipPeekAndDecideIfWeShouldLog(
+      Throwable throwable, Throwable cause, String messageHash, byte[] rawMessageBody) {
+    ExceptionReportResponse reportResult = null;
+    try {
+      reportResult =
+          exceptionManagerClient.reportException(messageHash, serviceName, queueName, cause);
+    } catch (Exception exceptionManagerClientException) {
+      log.warn(
+          "Could not report exception. There will be excessive logging until this is resolved",
+          exceptionManagerClientException);
+    }
+
+    // This block is responsible for skipping messages, if instructed
+    if (reportResult != null && reportResult.isSkipIt()) {
+      boolean haveStored = false;
+
+      // Make damn certain that we have a copy of the message before skipping it
+      try {
+        exceptionManagerClient.storeMessageBeforeSkipping(
+            messageHash, rawMessageBody, serviceName, queueName);
+        haveStored = true;
+      } catch (Exception exceptionManagerClientException) {
+        log.with("message_hash", messageHash)
+            .warn(
+                "Unable to store a copy of the message. Will NOT be skipping",
+                exceptionManagerClientException);
+      }
+
+      // OK the message is stored... we can go ahead and skip it
+      if (haveStored) {
+        log.with("message_hash", messageHash).warn("Skipping message");
+
+        // There's no going back after this point - better be certain about this!
+        throw new AmqpRejectAndDontRequeueException("Skipping message", throwable);
+      }
+    }
+
+    // This block is responsible for 'peeking' at messages, if instructed
+    if (reportResult != null && reportResult.isPeek()) {
+      try {
+        // Send it back to the exception manager so it can be peeked
+        exceptionManagerClient.respondToPeek(messageHash, rawMessageBody);
+      } catch (Exception respondException) {
+        // Nothing we can do about this - ignore it
+      }
+    }
+
+    // Finally, do we log the error or not (if instructed not to)
+    return reportResult == null || reportResult.isLogIt();
   }
 
   private String bytesToHexString(byte[] hash) {
