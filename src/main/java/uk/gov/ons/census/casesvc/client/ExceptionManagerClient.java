@@ -1,5 +1,6 @@
 package uk.gov.ons.census.casesvc.client;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
@@ -12,13 +13,16 @@ import uk.gov.ons.census.casesvc.model.dto.SkippedMessage;
 @Component
 public class ExceptionManagerClient {
 
-  private String scheme = "http";
+  @Value("${exceptionmanager.connection.scheme}")
+  private String scheme;
 
-  private String host = "localhost";
+  @Value("${exceptionmanager.connection.host}")
+  private String host;
 
-  private String port = "8666";
+  @Value("${exceptionmanager.connection.port}")
+  private String port;
 
-  public ExceptionReportResponse reportError(
+  public ExceptionReportResponse reportException(
       String messageHash, String service, String queue, Throwable cause) {
 
     ExceptionReport exceptionReport = new ExceptionReport();

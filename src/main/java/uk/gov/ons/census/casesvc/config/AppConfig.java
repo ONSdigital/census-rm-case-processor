@@ -391,14 +391,18 @@ public class AppConfig {
       ConnectionFactory connectionFactory,
       String queueName,
       ExceptionManagerClient exceptionManagerClient,
-      Class expectedType) {
+      Class expectedMessageType) {
     SimpleMessageListenerContainer container =
         new SimpleMessageListenerContainer(connectionFactory);
     container.setQueueNames(queueName);
     container.setConcurrentConsumers(consumers);
     MessageErrorHandler messageErrorHandler =
         new MessageErrorHandler(
-            exceptionManagerClient, expectedType, logStackTraces, "CaseService", queueName);
+            exceptionManagerClient,
+            expectedMessageType,
+            logStackTraces,
+            "Case Processor",
+            queueName);
     container.setErrorHandler(messageErrorHandler);
     container.setChannelTransacted(true);
     return container;

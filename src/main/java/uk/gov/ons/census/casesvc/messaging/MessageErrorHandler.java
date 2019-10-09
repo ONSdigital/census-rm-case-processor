@@ -33,19 +33,19 @@ public class MessageErrorHandler implements ErrorHandler {
   }
 
   private final ExceptionManagerClient exceptionManagerClient;
-  private final Class expectedType;
+  private final Class expectedMessageType;
   private final boolean logStackTraces;
   private final String serviceName;
   private final String queueName;
 
   public MessageErrorHandler(
       ExceptionManagerClient exceptionManagerClient,
-      Class expectedType,
+      Class expectedMessageType,
       boolean logStackTraces,
       String serviceName,
       String queueName) {
     this.exceptionManagerClient = exceptionManagerClient;
-    this.expectedType = expectedType;
+    this.expectedMessageType = expectedMessageType;
     this.logStackTraces = logStackTraces;
     this.serviceName = serviceName;
     this.queueName = queueName;
@@ -59,7 +59,7 @@ public class MessageErrorHandler implements ErrorHandler {
       byte[] rawMessageBody = failedException.getFailedMessage().getBody();
       String messageBody = new String(rawMessageBody);
       String messageHash;
-      
+
       // Digest is not thread-safe
       synchronized (digest) {
         messageHash = bytesToHexString(digest.digest(rawMessageBody));
@@ -68,12 +68,12 @@ public class MessageErrorHandler implements ErrorHandler {
       ExceptionReportResponse reportResult = null;
       try {
         reportResult =
-            exceptionManagerClient.reportError(
+            exceptionManagerClient.reportException(
                 messageHash, serviceName, queueName, throwable.getCause().getCause());
-      } catch (Exception exceptionReportException) {
+      } catch (Exception exceptionManagerClientException) {
         log.warn(
             "Could not report exception. There will be excessive logging until this is resolved",
-            exceptionReportException);
+            exceptionManagerClientException);
       }
 
       if (reportResult != null && reportResult.isSkipIt()) {
@@ -84,9 +84,11 @@ public class MessageErrorHandler implements ErrorHandler {
           exceptionManagerClient.storeMessageBeforeSkipping(
               messageHash, rawMessageBody, serviceName, queueName);
           haveStored = true;
-        } catch (Exception storeException) {
+        } catch (Exception exceptionManagerClientException) {
           log.with("message_hash", messageHash)
-              .warn("Unable to store a copy of the message. Will NOT be skipping", storeException);
+              .warn(
+                  "Unable to store a copy of the message. Will NOT be skipping",
+                  exceptionManagerClientException);
         }
 
         // OK the message is stored... we can go ahead and skip it
@@ -137,7 +139,7 @@ public class MessageErrorHandler implements ErrorHandler {
 
   private String validateJson(String messageBody) {
     try {
-      objectMapper.readValue(messageBody, expectedType);
+      objectMapper.readValue(messageBody, expectedMessageType);
       return "Valid JSON";
     } catch (IOException e) {
       return String.format("Invalid JSON: %s", e.getMessage());
