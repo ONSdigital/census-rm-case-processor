@@ -36,14 +36,18 @@ public class CCSPropertyListedService {
 
   public void processCCSPropertyListed(ResponseManagementEvent ccsPropertyListedEvent) {
     CCSPropertyDTO ccsProperty = ccsPropertyListedEvent.getPayload().getCcsProperty();
+    boolean isRefused = ccsProperty.getRefusal() != null;
 
     Case caze =
         caseService.createCCSCase(
-            ccsProperty.getCollectionCase().getId(), ccsProperty.getSampleUnit());
+            ccsProperty.getCollectionCase().getId(), ccsProperty.getSampleUnit(), isRefused);
 
     if (ccsProperty.getUac() == null) {
       uacService.createUacQidLinkedToCCSCase(caze);
-      ccsToFieldService.convertAndSendCCSToField(caze);
+
+      if (!caze.isRefusalReceived()) {
+        ccsToFieldService.convertAndSendCCSToField(caze);
+      }
     } else {
       UacQidLink uacQidLink = uacService.findByQid(ccsProperty.getUac().getQuestionnaireId());
       uacQidLink.setCaze(caze);
