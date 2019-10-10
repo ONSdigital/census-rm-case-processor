@@ -78,7 +78,7 @@ public class CaseServiceTest {
   }
 
   @Test
-  public void testCreateCCSCase() {
+  public void testCreateCCSCaseWithRefusalNotReceived() {
     // Given
     String caseId = TEST_UUID.toString();
     SampleUnitDTO sampleUnit = new SampleUnitDTO();
@@ -88,12 +88,36 @@ public class CaseServiceTest {
         underTest, "collectionExerciseId", TEST_COLLECTION_EXERCISE_ID.toString());
 
     // When
-    Case actualCase = underTest.createCCSCase(caseId, sampleUnit);
+    Case actualCase = underTest.createCCSCase(caseId, sampleUnit, false);
 
     // Then
     verify(mapperFacade).map(sampleUnit, Case.class);
     assertThat(actualCase.isCcsCase()).isTrue();
     assertThat(actualCase.getCaseId()).isEqualTo(UUID.fromString(caseId));
+    assertThat(actualCase.isRefusalReceived()).isFalse();
+    assertThat(actualCase.getActionPlanId()).isEqualTo(TEST_ACTION_PLAN_ID.toString());
+    assertThat(actualCase.getCollectionExerciseId())
+        .isEqualTo(TEST_COLLECTION_EXERCISE_ID.toString());
+  }
+
+  @Test
+  public void testCreateCCSCaseWithRefusalReceived() {
+    // Given
+    String caseId = TEST_UUID.toString();
+    SampleUnitDTO sampleUnit = new SampleUnitDTO();
+
+    ReflectionTestUtils.setField(underTest, "actionPlanId", TEST_ACTION_PLAN_ID.toString());
+    ReflectionTestUtils.setField(
+        underTest, "collectionExerciseId", TEST_COLLECTION_EXERCISE_ID.toString());
+
+    // When
+    Case actualCase = underTest.createCCSCase(caseId, sampleUnit, true);
+
+    // Then
+    verify(mapperFacade).map(sampleUnit, Case.class);
+    assertThat(actualCase.isCcsCase()).isTrue();
+    assertThat(actualCase.getCaseId()).isEqualTo(UUID.fromString(caseId));
+    assertThat(actualCase.isRefusalReceived()).isTrue();
     assertThat(actualCase.getActionPlanId()).isEqualTo(TEST_ACTION_PLAN_ID.toString());
     assertThat(actualCase.getCollectionExerciseId())
         .isEqualTo(TEST_COLLECTION_EXERCISE_ID.toString());

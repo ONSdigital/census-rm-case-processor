@@ -7,4 +7,5 @@ public class CCSPropertyDTO {
   private CollectionCase collectionCase;
   private SampleUnitDTO sampleUnit;
   private UacDTO uac;
+  private RefusalDTO refusal;
 }

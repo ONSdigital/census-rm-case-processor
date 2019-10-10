@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import org.jeasy.random.EasyRandom;
-import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,6 +26,8 @@ import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
+import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
+import uk.gov.ons.census.casesvc.model.dto.RefusalType;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.SampleUnitDTO;
 import uk.gov.ons.census.casesvc.model.dto.UacDTO;
@@ -70,7 +71,7 @@ public class CCSPropertyListedIT {
   }
 
   @Test
-  public void CCSSubmittedToFieldIT() throws IOException, InterruptedException, JSONException {
+  public void testCCSSubmittedToFieldIT() throws IOException, InterruptedException {
     // GIVEN
     BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(FIELD_QUEUE);
 
@@ -113,8 +114,7 @@ public class CCSPropertyListedIT {
   }
 
   @Test
-  public void testCCSListedEventWithQidSet()
-      throws InterruptedException, JSONException, IOException {
+  public void testCCSListedEventWithQidSet() throws InterruptedException, IOException {
     // GIVEN
     BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(FIELD_QUEUE);
     EasyRandom easyRandom = new EasyRandom();
@@ -163,6 +163,59 @@ public class CCSPropertyListedIT {
     assertThat(actualUacQidLinks.size()).isEqualTo(1);
     UacQidLink actualUacQidLink = actualUacQidLinks.get(0);
     assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID);
+    assertThat(actualUacQidLink.getQid().substring(0, 2)).isEqualTo("71");
+    assertThat(actualUacQidLink.isCcsCase()).isTrue();
+    assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
+
+    validateEvents(eventRepository.findAll(), ccsPropertyDTO);
+  }
+
+  @Test
+  public void testCCSListedEventForRefusal() throws IOException, InterruptedException {
+    // GIVEN
+    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(FIELD_QUEUE);
+
+    CCSPropertyDTO ccsPropertyDTO = new CCSPropertyDTO();
+    ccsPropertyDTO.setUac(null);
+    ccsPropertyDTO.setSampleUnit(setUpSampleUnitDTO());
+
+    CollectionCase collectionCase = new CollectionCase();
+    collectionCase.setId(TEST_CASE_ID.toString());
+    ccsPropertyDTO.setCollectionCase(collectionCase);
+
+    RefusalDTO refusal = new RefusalDTO();
+    refusal.setType(RefusalType.HARD_REFUSAL);
+    refusal.setAgentId("test agent");
+    refusal.setReport("test report");
+    ccsPropertyDTO.setRefusal(refusal);
+
+    EventDTO eventDTO = new EventDTO();
+    eventDTO.setType(EventTypeDTO.CCS_ADDRESS_LISTED);
+    eventDTO.setSource("FIELDWORK_GATEWAY");
+    eventDTO.setChannel("FIELD");
+    eventDTO.setDateTime(OffsetDateTime.now());
+    eventDTO.setTransactionId(UUID.randomUUID());
+
+    ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
+    PayloadDTO payload = new PayloadDTO();
+    payload.setCcsProperty(ccsPropertyDTO);
+    responseManagementEvent.setPayload(payload);
+    responseManagementEvent.setEvent(eventDTO);
+
+    // When
+    rabbitQueueHelper.sendMessage(ccsPropertyListedQueue, responseManagementEvent);
+
+    // Then
+    rabbitQueueHelper.checkMessageIsNotReceived(outboundQueue, 5);
+    System.out.println(1);
+
+    Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
+    assertThat(actualCase.isCcsCase()).isTrue();
+    assertThat(actualCase.isRefusalReceived()).isTrue();
+
+    List<UacQidLink> actualUacQidLinks = uacQidLinkRepository.findAll();
+    assertThat(actualUacQidLinks.size()).isEqualTo(1);
+    UacQidLink actualUacQidLink = actualUacQidLinks.get(0);
     assertThat(actualUacQidLink.getQid().substring(0, 2)).isEqualTo("71");
     assertThat(actualUacQidLink.isCcsCase()).isTrue();
     assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
