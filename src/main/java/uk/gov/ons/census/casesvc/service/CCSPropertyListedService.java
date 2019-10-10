@@ -37,21 +37,21 @@ public class CCSPropertyListedService {
   public void processCCSPropertyListed(ResponseManagementEvent ccsPropertyListedEvent) {
     CCSPropertyDTO ccsProperty = ccsPropertyListedEvent.getPayload().getCcsProperty();
     boolean isRefused = ccsProperty.getRefusal() != null;
+    boolean isInvalidAddress = ccsProperty.getInvalidAddress() != null;
+    boolean isQidProvided = ccsProperty.getUac() != null;
 
     Case caze =
         caseService.createCCSCase(
-            ccsProperty.getCollectionCase().getId(), ccsProperty.getSampleUnit(), isRefused);
+            ccsProperty.getCollectionCase().getId(),
+            ccsProperty.getSampleUnit(),
+            isRefused,
+            isInvalidAddress);
 
-    if (ccsProperty.getUac() == null) {
-      uacService.createUacQidLinkedToCCSCase(caze);
-
-      if (!caze.isRefusalReceived()) {
-        ccsToFieldService.convertAndSendCCSToField(caze);
-      }
+    if (isQidProvided) {
+      addUacLinkForQidAndCaze(ccsProperty.getUac().getQuestionnaireId(), caze);
     } else {
-      UacQidLink uacQidLink = uacService.findByQid(ccsProperty.getUac().getQuestionnaireId());
-      uacQidLink.setCaze(caze);
-      uacQidLinkRepository.saveAndFlush(uacQidLink);
+      uacService.createUacQidLinkedToCCSCase(caze);
+      sendActiveCSSCaseToField(caze);
     }
 
     eventLogger.logCaseEvent(
@@ -61,5 +61,17 @@ public class CCSPropertyListedService {
         EventType.CCS_ADDRESS_LISTED,
         ccsPropertyListedEvent.getEvent(),
         convertObjectToJson(ccsProperty));
+  }
+
+  private void sendActiveCSSCaseToField(Case caze) {
+    if (!caze.isRefusalReceived() && !caze.isAddressInvalid()) {
+      ccsToFieldService.convertAndSendCCSToField(caze);
+    }
+  }
+
+  private void addUacLinkForQidAndCaze(String qid, Case caze) {
+    UacQidLink uacQidLink = uacService.findByQid(qid);
+    uacQidLink.setCaze(caze);
+    uacQidLinkRepository.saveAndFlush(uacQidLink);
   }
 }
