@@ -141,7 +141,6 @@ public class CCSPropertyListedIT {
 
     // Then
     rabbitQueueHelper.checkMessageIsNotReceived(outboundQueue, 5);
-    System.out.println(1);
 
     Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
     assertThat(actualCase.isCcsCase()).isTrue();
@@ -169,7 +168,6 @@ public class CCSPropertyListedIT {
 
     // Then
     rabbitQueueHelper.checkMessageIsNotReceived(outboundQueue, 5);
-    System.out.println(1);
 
     Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
     assertThat(actualCase.isCcsCase()).isTrue();
