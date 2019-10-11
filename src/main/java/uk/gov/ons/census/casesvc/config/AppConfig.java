@@ -23,12 +23,17 @@ import org.springframework.integration.amqp.inbound.AmqpInboundChannelAdapter;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import uk.gov.ons.census.casesvc.client.ExceptionManagerClient;
+import uk.gov.ons.census.casesvc.messaging.MessageErrorHandler;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 
 @Configuration
 @EnableScheduling
 public class AppConfig {
+  @Value("${messagelogging.logstacktraces}")
+  private boolean logStackTraces;
+
   @Value("${queueconfig.inbound-queue}")
   private String inboundQueue;
 
@@ -239,90 +244,102 @@ public class AppConfig {
 
   @Bean
   public SimpleMessageListenerContainer sampleContainer(
-      ConnectionFactory connectionFactory, MessageErrorHandler messageErrorHandler) {
+      ConnectionFactory connectionFactory, ExceptionManagerClient exceptionManagerClient) {
     return setupListenerContainer(
-        connectionFactory, inboundQueue, messageErrorHandler, CreateCaseSample.class);
+        connectionFactory, inboundQueue, exceptionManagerClient, CreateCaseSample.class);
   }
 
   @Bean
   public SimpleMessageListenerContainer surveyLaunchedContainer(
-      ConnectionFactory connectionFactory, MessageErrorHandler messageErrorHandler) {
+      ConnectionFactory connectionFactory, ExceptionManagerClient exceptionManagerClient) {
     return setupListenerContainer(
-        connectionFactory, surveyLaunchedQueue, messageErrorHandler, ResponseManagementEvent.class);
+        connectionFactory,
+        surveyLaunchedQueue,
+        exceptionManagerClient,
+        ResponseManagementEvent.class);
   }
 
   @Bean
   public SimpleMessageListenerContainer unaddressedContainer(
-      ConnectionFactory connectionFactory, MessageErrorHandler messageErrorHandler) {
+      ConnectionFactory connectionFactory, ExceptionManagerClient exceptionManagerClient) {
     return setupListenerContainer(
-        connectionFactory, unaddressedQueue, messageErrorHandler, ResponseManagementEvent.class);
+        connectionFactory, unaddressedQueue, exceptionManagerClient, ResponseManagementEvent.class);
   }
 
   @Bean
   public SimpleMessageListenerContainer receiptContainer(
-      ConnectionFactory connectionFactory, MessageErrorHandler messageErrorHandler) {
+      ConnectionFactory connectionFactory, ExceptionManagerClient exceptionManagerClient) {
     return setupListenerContainer(
-        connectionFactory, receiptInboundQueue, messageErrorHandler, ResponseManagementEvent.class);
+        connectionFactory,
+        receiptInboundQueue,
+        exceptionManagerClient,
+        ResponseManagementEvent.class);
   }
 
   @Bean
   public SimpleMessageListenerContainer refusalContainer(
-      ConnectionFactory connectionFactory, MessageErrorHandler messageErrorHandler) {
+      ConnectionFactory connectionFactory, ExceptionManagerClient exceptionManagerClient) {
     return setupListenerContainer(
-        connectionFactory, refusalInboundQueue, messageErrorHandler, ResponseManagementEvent.class);
+        connectionFactory,
+        refusalInboundQueue,
+        exceptionManagerClient,
+        ResponseManagementEvent.class);
   }
 
   @Bean
   public SimpleMessageListenerContainer fulfilmentContainer(
-      ConnectionFactory connectionFactory, MessageErrorHandler messageErrorHandler) {
+      ConnectionFactory connectionFactory, ExceptionManagerClient exceptionManagerClient) {
     return setupListenerContainer(
         connectionFactory,
         fulfilmentInboundQueue,
-        messageErrorHandler,
+        exceptionManagerClient,
         ResponseManagementEvent.class);
   }
 
   @Bean
   public SimpleMessageListenerContainer questionnaireLinkedContainer(
-      ConnectionFactory connectionFactory, MessageErrorHandler messageErrorHandler) {
+      ConnectionFactory connectionFactory, ExceptionManagerClient exceptionManagerClient) {
     return setupListenerContainer(
         connectionFactory,
         questionnaireLinkedInboundQueue,
-        messageErrorHandler,
+        exceptionManagerClient,
         ResponseManagementEvent.class);
   }
 
   @Bean
   public SimpleMessageListenerContainer actionCaseContainer(
-      ConnectionFactory connectionFactory, MessageErrorHandler messageErrorHandler) {
+      ConnectionFactory connectionFactory, ExceptionManagerClient exceptionManagerClient) {
     return setupListenerContainer(
-        connectionFactory, actionCaseQueue, messageErrorHandler, ResponseManagementEvent.class);
+        connectionFactory, actionCaseQueue, exceptionManagerClient, ResponseManagementEvent.class);
   }
 
   @Bean
   public SimpleMessageListenerContainer uacCreatedContainer(
-      ConnectionFactory connectionFactory, MessageErrorHandler messageErrorHandler) {
+      ConnectionFactory connectionFactory, ExceptionManagerClient exceptionManagerClient) {
     return setupListenerContainer(
-        connectionFactory, uacQidCreatedQueue, messageErrorHandler, ResponseManagementEvent.class);
+        connectionFactory,
+        uacQidCreatedQueue,
+        exceptionManagerClient,
+        ResponseManagementEvent.class);
   }
 
   @Bean
   public SimpleMessageListenerContainer invalidAddressContainer(
-      ConnectionFactory connectionFactory, MessageErrorHandler messageErrorHandler) {
+      ConnectionFactory connectionFactory, ExceptionManagerClient exceptionManagerClient) {
     return setupListenerContainer(
         connectionFactory,
         invalidAddressInboundQueue,
-        messageErrorHandler,
+        exceptionManagerClient,
         ResponseManagementEvent.class);
   }
 
   @Bean
   public SimpleMessageListenerContainer undeliveredMailContainer(
-      ConnectionFactory connectionFactory, MessageErrorHandler messageErrorHandler) {
+      ConnectionFactory connectionFactory, ExceptionManagerClient exceptionManagerClient) {
     return setupListenerContainer(
         connectionFactory,
         undeliveredMailQueue,
-        messageErrorHandler,
+        exceptionManagerClient,
         ResponseManagementEvent.class);
   }
 
@@ -346,13 +363,19 @@ public class AppConfig {
   private SimpleMessageListenerContainer setupListenerContainer(
       ConnectionFactory connectionFactory,
       String queueName,
-      MessageErrorHandler messageErrorHandler,
-      Class expectedClass) {
+      ExceptionManagerClient exceptionManagerClient,
+      Class expectedMessageType) {
     SimpleMessageListenerContainer container =
         new SimpleMessageListenerContainer(connectionFactory);
     container.setQueueNames(queueName);
     container.setConcurrentConsumers(consumers);
-    messageErrorHandler.setExpectedType(expectedClass);
+    MessageErrorHandler messageErrorHandler =
+        new MessageErrorHandler(
+            exceptionManagerClient,
+            expectedMessageType,
+            logStackTraces,
+            "Case Processor",
+            queueName);
     container.setErrorHandler(messageErrorHandler);
     container.setChannelTransacted(true);
     return container;

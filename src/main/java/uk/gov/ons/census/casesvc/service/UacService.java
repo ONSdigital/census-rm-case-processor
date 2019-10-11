@@ -2,8 +2,6 @@ package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -26,9 +24,7 @@ import uk.gov.ons.census.casesvc.utility.Sha256Helper;
 
 @Service
 public class UacService {
-  private static final Logger log = LoggerFactory.getLogger(UacService.class);
   private static final String UAC_UPDATE_ROUTING_KEY = "event.uac.update";
-  private static final String QID_NOT_FOUND_ERROR = "Qid not found error";
 
   private final UacQidLinkRepository uacQidLinkRepository;
   private final RabbitTemplate rabbitTemplate;
@@ -130,7 +126,6 @@ public class UacService {
     Optional<UacQidLink> uacQidLinkOpt = uacQidLinkRepository.findByQid(questionnaireId);
 
     if (uacQidLinkOpt.isEmpty()) {
-      log.error(QID_NOT_FOUND_ERROR);
       throw new RuntimeException(
           String.format("Questionnaire Id '%s' not found!", questionnaireId));
     }

@@ -1,16 +1,10 @@
 package uk.gov.ons.census.casesvc.utility;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 public class QuestionnaireTypeHelper {
-  private static final Logger log = LoggerFactory.getLogger(QuestionnaireTypeHelper.class);
-
-  private static final String UNKNOWN_COUNTRY_ERROR = "Unknown Country";
-  private static final String UNEXPECTED_CASE_TYPE_ERROR = "Unexpected Case Type";
   private static final String HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_ENGLAND = "21";
   private static final String HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_WALES_ENGLISH = "22";
   private static final String HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_WALES_WELSH = "23";
@@ -26,8 +20,8 @@ public class QuestionnaireTypeHelper {
   public static int calculateQuestionnaireType(String treatmentCode) {
     String country = treatmentCode.substring(treatmentCode.length() - 1);
     if (!country.equals("E") && !country.equals("W") && !country.equals("N")) {
-      log.with("treatment_code", treatmentCode).error(UNKNOWN_COUNTRY_ERROR);
-      throw new IllegalArgumentException();
+      throw new IllegalArgumentException(
+          String.format("Unknown Country for treatment code %s", treatmentCode));
     }
 
     if (treatmentCode.startsWith("HH")) {
@@ -58,8 +52,8 @@ public class QuestionnaireTypeHelper {
           return 34;
       }
     } else {
-      log.with("treatment_code", treatmentCode).error(UNEXPECTED_CASE_TYPE_ERROR);
-      throw new IllegalArgumentException();
+      throw new IllegalArgumentException(
+          String.format("Unexpected Case Type fortreatment code '%s'", treatmentCode));
     }
 
     throw new RuntimeException(String.format("Unprocessable treatment code '%s'", treatmentCode));

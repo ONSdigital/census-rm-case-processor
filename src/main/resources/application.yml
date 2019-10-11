@@ -55,5 +55,11 @@ uacservice:
     host: localhost
     port: 8164
 
+exceptionmanager:
+  connection:
+    scheme: http
+    host: localhost
+    port: 8666
+
 messagelogging:
   logstacktraces: false
