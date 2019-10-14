@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.UUID;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
-import uk.gov.ons.census.casesvc.model.dto.CCSPropertyDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
@@ -201,18 +200,6 @@ public class DataUtils {
     payload.setFulfilmentRequest(null);
     payload.setUacQidCreated(null);
     payload.setInvalidAddress(null);
-
-    return managementEvent;
-  }
-
-  public static ResponseManagementEvent getTestResponseManagementCCSAddressListedEvent() {
-    ResponseManagementEvent managementEvent = easyRandom.nextObject(ResponseManagementEvent.class);
-    CCSPropertyDTO ccsPropertyDTO = managementEvent.getPayload().getCcsProperty();
-    ccsPropertyDTO.getCollectionCase().setId(TEST_CASE_ID.toString());
-    ccsPropertyDTO.setRefusal(null);
-    ccsPropertyDTO.setInvalidAddress(null);
-    ccsPropertyDTO.setUac(null);
-    managementEvent.getPayload().setCcsProperty(ccsPropertyDTO);
 
     return managementEvent;
   }

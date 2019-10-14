@@ -123,20 +123,6 @@
       "durable": true,
       "auto_delete": false,
       "arguments": {}
-    },
-    {
-      "name": "case.ccsPropertyListedQueue",
-      "vhost": "/",
-      "durable": true,
-      "auto_delete": false,
-      "arguments": {}
-    },
-    {
-      "name": "Action.Field",
-      "vhost": "/",
-      "durable": true,
-      "auto_delete": false,
-      "arguments": {}
     }
   ],
   "exchanges": [
@@ -153,15 +139,6 @@
       "name": "events",
       "vhost": "/",
       "type": "topic",
-      "durable": true,
-      "auto_delete": false,
-      "internal": false,
-      "arguments": {}
-    },
-    {
-      "name": "action-outbound-exchange",
-      "vhost": "/",
-      "type": "direct",
       "durable": true,
       "auto_delete": false,
       "internal": false,
@@ -263,22 +240,6 @@
       "destination": "survey.launched",
       "destination_type": "queue",
       "routing_key": "event.response.authentication",
-      "arguments": {}
-    },
-    {
-      "source": "events",
-      "vhost": "/",
-      "destination": "case.ccsPropertyListedQueue",
-      "destination_type": "queue",
-      "routing_key": "event.ccs.propertylisting",
-      "arguments": {}
-    },
-    {
-      "source": "action-outbound-exchange",
-      "vhost": "/",
-      "destination": "Action.Field",
-      "destination_type": "queue",
-      "routing_key": "Action.Field.binding",
       "arguments": {}
     }
   ]

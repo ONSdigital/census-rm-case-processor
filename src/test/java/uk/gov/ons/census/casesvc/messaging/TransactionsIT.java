@@ -95,6 +95,7 @@ public class TransactionsIT {
     assertThat(eventRepository.findAll().size()).isEqualTo(0);
 
     // Save case and UacQidLink
+    EasyRandom easyRandom = new EasyRandom();
     Case caze = easyRandom.nextObject(Case.class);
     caze.setCaseId(TEST_CASE_ID);
     caze.setUacQidLinks(null);
@@ -141,7 +142,8 @@ public class TransactionsIT {
     // Log events empty
     assertThat(eventRepository.findAll().size()).isEqualTo(0);
 
-    // Save case
+    // Save case and UacQidLink
+    EasyRandom easyRandom = new EasyRandom();
     Case caze = easyRandom.nextObject(Case.class);
     caze.setCaseId(TEST_CASE_ID);
     caze.setUacQidLinks(null);
