@@ -31,6 +31,7 @@ public class QuestionnaireLinkedService {
     UacDTO uac = questionnaireLinkedEvent.getPayload().getUac();
     String questionnaireId = uac.getQuestionnaireId();
     UacQidLink uacQidLink = uacService.findByQid(questionnaireId);
+
     checkQidNotLinkedToAnotherCase(uac, uacQidLink);
 
     Case caze;
@@ -63,10 +64,10 @@ public class QuestionnaireLinkedService {
   }
 
   private void checkQidNotLinkedToAnotherCase(UacDTO uac, UacQidLink uacQidLink) {
-    if (uacQidLink.getCaze() != null) {
-      if (!uacQidLink.getCaze().getCaseId().equals(UUID.fromString(uac.getCaseId()))) {
-        throw new RuntimeException("UacQidLink already linked to a different case");
-      }
+    if (uacQidLink.getCaze() != null
+        && !uacQidLink.getCaze().getCaseId().equals(UUID.fromString(uac.getCaseId()))) {
+      throw new RuntimeException(
+          "UacQidLink already linked to case id: " + uacQidLink.getCaze().getCaseId());
     }
   }
 }

@@ -266,7 +266,8 @@ public class QuestionnaireLinkedServiceTest {
     try {
       underTest.processQuestionnaireLinked(managementEvent);
     } catch (RuntimeException rte) {
-      assertThat(rte.getMessage()).isEqualTo("UacQidLink already linked to a different case");
+      assertThat(rte.getMessage())
+          .isEqualTo("UacQidLink already linked to case id: " + caze.getCaseId());
       throw rte;
     }
   }
