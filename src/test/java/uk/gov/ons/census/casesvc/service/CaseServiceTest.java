@@ -88,7 +88,7 @@ public class CaseServiceTest {
         underTest, "collectionExerciseId", TEST_COLLECTION_EXERCISE_ID.toString());
 
     // When
-    Case actualCase = underTest.createCCSCase(caseId, sampleUnit, false);
+    Case actualCase = underTest.createCCSCase(caseId, sampleUnit, false, false);
 
     // Then
     verify(mapperFacade).map(sampleUnit, Case.class);
@@ -111,7 +111,7 @@ public class CaseServiceTest {
         underTest, "collectionExerciseId", TEST_COLLECTION_EXERCISE_ID.toString());
 
     // When
-    Case actualCase = underTest.createCCSCase(caseId, sampleUnit, true);
+    Case actualCase = underTest.createCCSCase(caseId, sampleUnit, true, false);
 
     // Then
     verify(mapperFacade).map(sampleUnit, Case.class);

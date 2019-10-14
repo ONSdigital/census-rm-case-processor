@@ -15,7 +15,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -25,6 +24,7 @@ import uk.gov.ons.census.casesvc.model.dto.CcsToFwmt;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
+import uk.gov.ons.census.casesvc.model.dto.InvalidAddress;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
 import uk.gov.ons.census.casesvc.model.dto.RefusalType;
@@ -43,7 +43,6 @@ import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 @ContextConfiguration
 @ActiveProfiles("test")
 @SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @RunWith(SpringJUnit4ClassRunner.class)
 public class CCSPropertyListedIT {
   private static String FIELD_QUEUE = "Action.Field";
@@ -74,25 +73,7 @@ public class CCSPropertyListedIT {
   public void testCCSSubmittedToFieldIT() throws IOException, InterruptedException {
     // GIVEN
     BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(FIELD_QUEUE);
-
-    CCSPropertyDTO ccsPropertyDTO = new CCSPropertyDTO();
-    CollectionCase collectionCase = new CollectionCase();
-    collectionCase.setId(TEST_CASE_ID.toString());
-    ccsPropertyDTO.setCollectionCase(collectionCase);
-    ccsPropertyDTO.setSampleUnit(setUpSampleUnitDTO());
-
-    EventDTO eventDTO = new EventDTO();
-    eventDTO.setType(EventTypeDTO.CCS_ADDRESS_LISTED);
-    eventDTO.setSource("FIELDWORK_GATEWAY");
-    eventDTO.setChannel("FIELD");
-    eventDTO.setDateTime(OffsetDateTime.now());
-    eventDTO.setTransactionId(UUID.randomUUID());
-
-    ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-    PayloadDTO payload = new PayloadDTO();
-    payload.setCcsProperty(ccsPropertyDTO);
-    responseManagementEvent.setPayload(payload);
-    responseManagementEvent.setEvent(eventDTO);
+    ResponseManagementEvent responseManagementEvent = getResponseManagementEvent();
 
     // When
     rabbitQueueHelper.sendMessage(ccsPropertyListedQueue, responseManagementEvent);
@@ -104,13 +85,10 @@ public class CCSPropertyListedIT {
     Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
     assertThat(actualCase.isCcsCase()).isTrue();
 
-    List<UacQidLink> actualUacQidLinks = uacQidLinkRepository.findAll();
-    assertThat(actualUacQidLinks.size()).isEqualTo(1);
-    UacQidLink actualUacQidLink = actualUacQidLinks.get(0);
-    assertThat(actualUacQidLink.getQid().substring(0, 2)).isEqualTo("71");
-    assertThat(actualUacQidLink.isCcsCase()).isTrue();
+    checkUacQidLinks(null);
 
-    validateEvents(eventRepository.findAll(), ccsPropertyDTO);
+    validateEvents(
+        eventRepository.findAll(), responseManagementEvent.getPayload().getCcsProperty());
   }
 
   @Test
@@ -118,7 +96,6 @@ public class CCSPropertyListedIT {
     // GIVEN
     BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(FIELD_QUEUE);
     EasyRandom easyRandom = new EasyRandom();
-
     UacQidLink uacQidLink = easyRandom.nextObject(UacQidLink.class);
     uacQidLink.setQid(TEST_QID);
     uacQidLink.setCaze(null);
@@ -126,29 +103,11 @@ public class CCSPropertyListedIT {
     uacQidLink.setEvents(null);
     uacQidLinkRepository.save(uacQidLink);
 
-    CCSPropertyDTO ccsPropertyDTO = new CCSPropertyDTO();
-    CollectionCase collectionCase = new CollectionCase();
-    collectionCase.setId(TEST_CASE_ID.toString());
-    ccsPropertyDTO.setCollectionCase(collectionCase);
-
-    ccsPropertyDTO.setSampleUnit(setUpSampleUnitDTO());
-
     UacDTO uacDTO = new UacDTO();
     uacDTO.setQuestionnaireId(TEST_QID);
-    ccsPropertyDTO.setUac(uacDTO);
 
-    EventDTO eventDTO = new EventDTO();
-    eventDTO.setType(EventTypeDTO.CCS_ADDRESS_LISTED);
-    eventDTO.setSource("FIELDWORK_GATEWAY");
-    eventDTO.setChannel("FIELD");
-    eventDTO.setDateTime(OffsetDateTime.now());
-    eventDTO.setTransactionId(UUID.randomUUID());
-
-    ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-    PayloadDTO payload = new PayloadDTO();
-    payload.setCcsProperty(ccsPropertyDTO);
-    responseManagementEvent.setPayload(payload);
-    responseManagementEvent.setEvent(eventDTO);
+    ResponseManagementEvent responseManagementEvent = getResponseManagementEvent();
+    responseManagementEvent.getPayload().getCcsProperty().setUac(uacDTO);
 
     // When
     rabbitQueueHelper.sendMessage(ccsPropertyListedQueue, responseManagementEvent);
@@ -158,16 +117,10 @@ public class CCSPropertyListedIT {
 
     Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
     assertThat(actualCase.isCcsCase()).isTrue();
+    checkUacQidLinks(TEST_QID);
 
-    List<UacQidLink> actualUacQidLinks = uacQidLinkRepository.findAll();
-    assertThat(actualUacQidLinks.size()).isEqualTo(1);
-    UacQidLink actualUacQidLink = actualUacQidLinks.get(0);
-    assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID);
-    assertThat(actualUacQidLink.getQid().substring(0, 2)).isEqualTo("71");
-    assertThat(actualUacQidLink.isCcsCase()).isTrue();
-    assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
-
-    validateEvents(eventRepository.findAll(), ccsPropertyDTO);
+    validateEvents(
+        eventRepository.findAll(), responseManagementEvent.getPayload().getCcsProperty());
   }
 
   @Test
@@ -175,52 +128,55 @@ public class CCSPropertyListedIT {
     // GIVEN
     BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(FIELD_QUEUE);
 
-    CCSPropertyDTO ccsPropertyDTO = new CCSPropertyDTO();
-    ccsPropertyDTO.setUac(null);
-    ccsPropertyDTO.setSampleUnit(setUpSampleUnitDTO());
-
-    CollectionCase collectionCase = new CollectionCase();
-    collectionCase.setId(TEST_CASE_ID.toString());
-    ccsPropertyDTO.setCollectionCase(collectionCase);
-
     RefusalDTO refusal = new RefusalDTO();
     refusal.setType(RefusalType.HARD_REFUSAL);
     refusal.setAgentId("test agent");
     refusal.setReport("test report");
-    ccsPropertyDTO.setRefusal(refusal);
 
-    EventDTO eventDTO = new EventDTO();
-    eventDTO.setType(EventTypeDTO.CCS_ADDRESS_LISTED);
-    eventDTO.setSource("FIELDWORK_GATEWAY");
-    eventDTO.setChannel("FIELD");
-    eventDTO.setDateTime(OffsetDateTime.now());
-    eventDTO.setTransactionId(UUID.randomUUID());
-
-    ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-    PayloadDTO payload = new PayloadDTO();
-    payload.setCcsProperty(ccsPropertyDTO);
-    responseManagementEvent.setPayload(payload);
-    responseManagementEvent.setEvent(eventDTO);
+    ResponseManagementEvent responseManagementEvent = getResponseManagementEvent();
+    responseManagementEvent.getPayload().getCcsProperty().setRefusal(refusal);
 
     // When
     rabbitQueueHelper.sendMessage(ccsPropertyListedQueue, responseManagementEvent);
 
     // Then
     rabbitQueueHelper.checkMessageIsNotReceived(outboundQueue, 5);
-    System.out.println(1);
 
     Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
     assertThat(actualCase.isCcsCase()).isTrue();
     assertThat(actualCase.isRefusalReceived()).isTrue();
 
-    List<UacQidLink> actualUacQidLinks = uacQidLinkRepository.findAll();
-    assertThat(actualUacQidLinks.size()).isEqualTo(1);
-    UacQidLink actualUacQidLink = actualUacQidLinks.get(0);
-    assertThat(actualUacQidLink.getQid().substring(0, 2)).isEqualTo("71");
-    assertThat(actualUacQidLink.isCcsCase()).isTrue();
-    assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
+    checkUacQidLinks(null);
 
-    validateEvents(eventRepository.findAll(), ccsPropertyDTO);
+    validateEvents(
+        eventRepository.findAll(), responseManagementEvent.getPayload().getCcsProperty());
+  }
+
+  @Test
+  public void testCCSListedEventForInvalidAddress() throws IOException, InterruptedException {
+    // GIVEN
+    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(FIELD_QUEUE);
+
+    InvalidAddress invalidAddress = new InvalidAddress();
+    invalidAddress.setReason("HOUSE DEMOLISHED");
+
+    ResponseManagementEvent responseManagementEvent = getResponseManagementEvent();
+    responseManagementEvent.getPayload().getCcsProperty().setInvalidAddress(invalidAddress);
+
+    // When
+    rabbitQueueHelper.sendMessage(ccsPropertyListedQueue, responseManagementEvent);
+
+    // Then
+    rabbitQueueHelper.checkMessageIsNotReceived(outboundQueue, 5);
+
+    Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
+    assertThat(actualCase.isCcsCase()).isTrue();
+    assertThat(actualCase.isAddressInvalid()).isTrue();
+
+    checkUacQidLinks(null);
+
+    validateEvents(
+        eventRepository.findAll(), responseManagementEvent.getPayload().getCcsProperty());
   }
 
   private SampleUnitDTO setUpSampleUnitDTO() {
@@ -257,5 +213,47 @@ public class CCSPropertyListedIT {
         objectMapper.readValue(event.getEventPayload(), CCSPropertyDTO.class);
 
     assertThat(actualCCSPropertyDTO).isEqualTo(expectedCCSPropertyDto);
+  }
+
+  private void checkUacQidLinks(String expectedQid) {
+    List<UacQidLink> actualUacQidLinks = uacQidLinkRepository.findAll();
+    assertThat(actualUacQidLinks.size()).isEqualTo(1);
+    UacQidLink actualUacQidLink = actualUacQidLinks.get(0);
+    assertThat(actualUacQidLink.getQid().substring(0, 2)).isEqualTo("71");
+    assertThat(actualUacQidLink.isCcsCase()).isTrue();
+    assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
+
+    if (expectedQid != null) {
+      assertThat(actualUacQidLink.getQid()).isEqualTo(expectedQid);
+    }
+  }
+
+  private ResponseManagementEvent getResponseManagementEvent() {
+    CCSPropertyDTO ccsPropertyDTO = getCCSProperty();
+
+    EventDTO eventDTO = new EventDTO();
+    eventDTO.setType(EventTypeDTO.CCS_ADDRESS_LISTED);
+    eventDTO.setSource("FIELDWORK_GATEWAY");
+    eventDTO.setChannel("FIELD");
+    eventDTO.setDateTime(OffsetDateTime.now());
+    eventDTO.setTransactionId(UUID.randomUUID());
+
+    ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
+    PayloadDTO payload = new PayloadDTO();
+    payload.setCcsProperty(ccsPropertyDTO);
+    responseManagementEvent.setPayload(payload);
+    responseManagementEvent.setEvent(eventDTO);
+
+    return responseManagementEvent;
+  }
+
+  private CCSPropertyDTO getCCSProperty() {
+    CCSPropertyDTO ccsPropertyDTO = new CCSPropertyDTO();
+    CollectionCase collectionCase = new CollectionCase();
+    collectionCase.setId(TEST_CASE_ID.toString());
+    ccsPropertyDTO.setCollectionCase(collectionCase);
+    ccsPropertyDTO.setSampleUnit(setUpSampleUnitDTO());
+
+    return ccsPropertyDTO;
   }
 }

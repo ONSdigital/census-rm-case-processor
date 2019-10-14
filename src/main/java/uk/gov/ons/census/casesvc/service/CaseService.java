@@ -67,7 +67,8 @@ public class CaseService {
     return caze;
   }
 
-  public Case createCCSCase(String caseId, SampleUnitDTO sampleUnit, boolean isRefused) {
+  public Case createCCSCase(
+      String caseId, SampleUnitDTO sampleUnit, boolean isRefused, boolean isInvalidAddress) {
     int caseRef = getUniqueCaseRef();
 
     Case caze = mapperFacade.map(sampleUnit, Case.class);
@@ -79,6 +80,7 @@ public class CaseService {
     caze.setState(CaseState.ACTIONABLE);
     caze.setCreatedDateTime(OffsetDateTime.now());
     caze.setRefusalReceived(isRefused);
+    caze.setAddressInvalid(isInvalidAddress);
     caze.setCcsCase(true);
 
     caseRepository.saveAndFlush(caze);

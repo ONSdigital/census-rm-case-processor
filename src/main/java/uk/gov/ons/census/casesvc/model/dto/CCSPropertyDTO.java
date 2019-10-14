@@ -8,4 +8,5 @@ public class CCSPropertyDTO {
   private SampleUnitDTO sampleUnit;
   private UacDTO uac;
   private RefusalDTO refusal;
+  private InvalidAddress invalidAddress;
 }

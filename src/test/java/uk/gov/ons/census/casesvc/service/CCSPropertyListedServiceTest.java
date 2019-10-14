@@ -2,13 +2,13 @@ package uk.gov.ons.census.casesvc.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementCCSAddressListedEvent;
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.time.OffsetDateTime;
 import java.util.Collections;
@@ -21,9 +21,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
-import uk.gov.ons.census.casesvc.model.dto.CCSPropertyDTO;
-import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
+import uk.gov.ons.census.casesvc.model.dto.InvalidAddress;
+import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
+import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
@@ -36,31 +37,19 @@ public class CCSPropertyListedServiceTest {
   private static final String TEST_QID = "710000000043";
 
   @Mock EventLogger eventLogger;
-
   @Mock CaseService caseService;
-
   @Mock UacService uacService;
-
   @Mock CcsToFieldService ccsToFieldService;
-
   @Mock UacQidLinkRepository uacQidLinkRepository;
 
   @InjectMocks CCSPropertyListedService underTest;
 
   @Test
-  public void testGoodCCSPropertyListed() {
+  public void testCCSPropertyListedWithoutQid() {
     // Given
     ResponseManagementEvent managementEvent = getTestResponseManagementCCSAddressListedEvent();
-    PayloadDTO payload = managementEvent.getPayload();
-    payload.getCcsProperty().setRefusal(null);
-    payload.getCcsProperty().setUac(null);
-
-    String expectedCaseId =
-        managementEvent.getPayload().getCcsProperty().getCollectionCase().getId();
-
-    Case expectedCase = new Case();
-    expectedCase.setCaseId(UUID.fromString(expectedCaseId));
-    expectedCase.setCcsCase(true);
+    Case expectedCase =
+        getExpectedCase(managementEvent.getPayload().getCcsProperty().getCollectionCase().getId());
 
     UacQidLink expectedUacQidLink = new UacQidLink();
     expectedUacQidLink.setId(TEST_UAC_QID_LINK_ID);
@@ -68,78 +57,57 @@ public class CCSPropertyListedServiceTest {
     expectedUacQidLink.setCaze(expectedCase);
 
     when(caseService.createCCSCase(
-            expectedCaseId, managementEvent.getPayload().getCcsProperty().getSampleUnit(), false))
+            managementEvent.getPayload().getCcsProperty().getCollectionCase().getId(),
+            managementEvent.getPayload().getCcsProperty().getSampleUnit(),
+            false,
+            false))
         .thenReturn(expectedCase);
 
     // When
     underTest.processCCSPropertyListed(managementEvent);
 
     // Then
-    verify(caseService)
-        .createCCSCase(
-            expectedCaseId, managementEvent.getPayload().getCcsProperty().getSampleUnit(), false);
+    InOrder inOrder = inOrder(caseService, uacQidLinkRepository, uacService, eventLogger);
+    checkCorrectEventLogging(inOrder, expectedCase, managementEvent);
 
     ArgumentCaptor<Case> caseCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(eventLogger)
-        .logCaseEvent(
-            caseCaptor.capture(),
-            any(OffsetDateTime.class),
-            eq("CCS Address Listed"),
-            eq(EventType.CCS_ADDRESS_LISTED),
-            eq(managementEvent.getEvent()),
-            anyString());
-    Case actualCase = caseCaptor.getValue();
-    assertThat(actualCase.getCaseId()).isEqualTo(UUID.fromString(expectedCaseId));
-    assertThat(actualCase.isCcsCase()).isTrue();
-
     verify(ccsToFieldService).convertAndSendCCSToField(caseCaptor.capture());
-    actualCase = caseCaptor.getValue();
-    assertThat(actualCase.getCaseId()).isEqualTo(UUID.fromString(expectedCaseId));
-    assertThat(actualCase.isCcsCase()).isTrue();
+    Case actualCaseToFieldService = caseCaptor.getValue();
+    assertThat(actualCaseToFieldService.getCaseId())
+        .isEqualTo(UUID.fromString(expectedCase.getCaseId().toString()));
+    assertThat(actualCaseToFieldService.isCcsCase()).isTrue();
   }
 
   @Test
   public void testCaseListedWithQidSet() {
     // Given
     ResponseManagementEvent managementEvent = getTestResponseManagementCCSAddressListedEvent();
-
-    managementEvent.getPayload().getCcsProperty().getUac().setQuestionnaireId(TEST_QID);
-    CCSPropertyDTO ccsProperty = managementEvent.getPayload().getCcsProperty();
-    ccsProperty.setRefusal(null);
-
-    String expectedCaseId = ccsProperty.getCollectionCase().getId();
+    UacDTO uacDTO = new UacDTO();
+    uacDTO.setQuestionnaireId(TEST_QID);
+    managementEvent.getPayload().getCcsProperty().setUac(uacDTO);
 
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setId(TEST_UAC_QID_LINK_ID);
     uacQidLink.setQid(TEST_QID);
     when(uacService.findByQid(TEST_QID)).thenReturn(uacQidLink);
 
-    Case expectedCase = new Case();
-    expectedCase.setCaseId(UUID.fromString(expectedCaseId));
-    expectedCase.setCcsCase(true);
+    Case expectedCase =
+        getExpectedCase(managementEvent.getPayload().getCcsProperty().getCollectionCase().getId());
     expectedCase.setUacQidLinks(Collections.singletonList(uacQidLink));
 
     when(caseService.createCCSCase(
-            expectedCaseId, managementEvent.getPayload().getCcsProperty().getSampleUnit(), false))
+            expectedCase.getCaseId().toString(),
+            managementEvent.getPayload().getCcsProperty().getSampleUnit(),
+            false,
+            false))
         .thenReturn(expectedCase);
 
     // When
     underTest.processCCSPropertyListed(managementEvent);
 
     // Then
-    ArgumentCaptor<Case> caseCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(eventLogger)
-        .logCaseEvent(
-            caseCaptor.capture(),
-            any(OffsetDateTime.class),
-            eq("CCS Address Listed"),
-            eq(EventType.CCS_ADDRESS_LISTED),
-            eq(managementEvent.getEvent()),
-            anyString());
-
-    Case actualCase = caseCaptor.getValue();
-    assertThat(actualCase.getCaseId()).isEqualTo(UUID.fromString(expectedCaseId));
-    assertThat(actualCase.isCcsCase()).isTrue();
+    InOrder inOrder = inOrder(caseService, uacService, uacQidLinkRepository, eventLogger);
+    checkCorrectEventLogging(inOrder, expectedCase, managementEvent);
 
     ArgumentCaptor<UacQidLink> uacQidLinkArgumentCaptor = ArgumentCaptor.forClass(UacQidLink.class);
     verify(uacQidLinkRepository).saveAndFlush(uacQidLinkArgumentCaptor.capture());
@@ -154,18 +122,18 @@ public class CCSPropertyListedServiceTest {
   public void testRefusedCaseListed() {
     // Given
     ResponseManagementEvent managementEvent = getTestResponseManagementCCSAddressListedEvent();
-    managementEvent.getPayload().getCcsProperty().setUac(null);
+    RefusalDTO refusalDto = new RefusalDTO();
+    managementEvent.getPayload().getCcsProperty().setRefusal(refusalDto);
 
-    String expectedCaseId =
-        managementEvent.getPayload().getCcsProperty().getCollectionCase().getId();
-
-    Case expectedCase = new Case();
-    expectedCase.setCaseId(UUID.fromString(expectedCaseId));
-    expectedCase.setCcsCase(true);
+    Case expectedCase =
+        getExpectedCase(managementEvent.getPayload().getCcsProperty().getCollectionCase().getId());
     expectedCase.setRefusalReceived(true);
 
     when(caseService.createCCSCase(
-            expectedCaseId, managementEvent.getPayload().getCcsProperty().getSampleUnit(), true))
+            expectedCase.getCaseId().toString(),
+            managementEvent.getPayload().getCcsProperty().getSampleUnit(),
+            true,
+            false))
         .thenReturn(expectedCase);
 
     // When
@@ -173,27 +141,63 @@ public class CCSPropertyListedServiceTest {
 
     // Then
     InOrder inOrder = inOrder(caseService, eventLogger);
+    checkCorrectEventLogging(inOrder, expectedCase, managementEvent);
+    verifyZeroInteractions(ccsToFieldService);
+  }
 
-    inOrder
-        .verify(caseService)
-        .createCCSCase(
-            expectedCaseId, managementEvent.getPayload().getCcsProperty().getSampleUnit(), true);
+  @Test
+  public void testInvalidAddressCaseListed() {
+    // Given
+    ResponseManagementEvent managementEvent = getTestResponseManagementCCSAddressListedEvent();
+    InvalidAddress invalidAddress = new InvalidAddress();
+    managementEvent.getPayload().getCcsProperty().setInvalidAddress(invalidAddress);
 
-    ArgumentCaptor<Case> caseCaptor = ArgumentCaptor.forClass(Case.class);
+    Case expectedCase =
+        getExpectedCase(managementEvent.getPayload().getCcsProperty().getCollectionCase().getId());
+    expectedCase.setAddressInvalid(true);
+
+    when(caseService.createCCSCase(
+            expectedCase.getCaseId().toString(),
+            managementEvent.getPayload().getCcsProperty().getSampleUnit(),
+            false,
+            true))
+        .thenReturn(expectedCase);
+
+    // When
+    underTest.processCCSPropertyListed(managementEvent);
+
+    // Then
+    InOrder inOrder = inOrder(caseService, eventLogger);
+    checkCorrectEventLogging(inOrder, expectedCase, managementEvent);
+    verifyZeroInteractions(ccsToFieldService);
+  }
+
+  private Case getExpectedCase(String id) {
+    Case caze = new Case();
+    caze.setCaseId(UUID.fromString(id));
+    caze.setCcsCase(true);
+    caze.setRefusalReceived(false);
+    caze.setAddressInvalid(false);
+
+    return caze;
+  }
+
+  private void checkCorrectEventLogging(
+      InOrder inOrder, Case expectedCase, ResponseManagementEvent managementEvent) {
+    ArgumentCaptor<String> ccsPayload = ArgumentCaptor.forClass(String.class);
+
     inOrder
         .verify(eventLogger)
         .logCaseEvent(
-            caseCaptor.capture(),
+            eq(expectedCase),
             any(OffsetDateTime.class),
             eq("CCS Address Listed"),
             eq(EventType.CCS_ADDRESS_LISTED),
             eq(managementEvent.getEvent()),
-            anyString());
+            ccsPayload.capture());
 
-    Case actualCase = caseCaptor.getValue();
-    assertThat(actualCase.getCaseId().toString()).isEqualTo(expectedCaseId);
-    assertThat(actualCase.isRefusalReceived()).isTrue();
-
-    verifyZeroInteractions(ccsToFieldService);
+    String actualLoggedPayload = ccsPayload.getValue();
+    assertThat(actualLoggedPayload)
+        .isEqualTo(convertObjectToJson(managementEvent.getPayload().getCcsProperty()));
   }
 }
