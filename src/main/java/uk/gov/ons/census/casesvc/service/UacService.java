@@ -69,6 +69,16 @@ public class UacService {
     return uacQidLink;
   }
 
+  public UacQidLink createUacQidLinkedToCCSCase(Case caze) {
+    UacQidLink uacQidLink =
+        buildUacQidLink(caze, CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
+    uacQidLink.setCcsCase(true);
+
+    uacQidLinkRepository.saveAndFlush(uacQidLink);
+
+    return uacQidLink;
+  }
+
   public PayloadDTO saveAndEmitUacUpdatedEvent(UacQidLink uacQidLink) {
     uacQidLinkRepository.save(uacQidLink);
 
