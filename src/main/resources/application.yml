@@ -44,6 +44,10 @@ queueconfig:
   invalid-address-inbound-queue: case.invalidAddressQueue
   undelivered-mail-queue: case.undeliveredMailQueue
   consumers: 50
+  retry-attempts: 3
+  retry-delay: 1000 #milliseconds
+  retry-exchange: delayedRedeliveryExchange
+  quarantine-exchange: quarantineExchange
 
 healthcheck:
   frequency: 1000 #milliseconds
@@ -54,6 +58,12 @@ uacservice:
     scheme: http
     host: localhost
     port: 8164
+
+exceptionmanager:
+  connection:
+    scheme: http
+    host: localhost
+    port: 8666
 
 messagelogging:
   logstacktraces: false
