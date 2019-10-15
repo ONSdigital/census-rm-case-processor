@@ -53,7 +53,7 @@ public class CaseService {
     this.mapperFacade = mapperFacade;
   }
 
-  public Case saveCase(CreateCaseSample createCaseSample) {
+  public Case saveCaseSample(CreateCaseSample createCaseSample) {
     int caseRef = getUniqueCaseRef();
 
     Case caze = mapperFacade.map(createCaseSample, Case.class);

@@ -63,7 +63,7 @@ public class CaseServiceTest {
     when(caseRepository.saveAndFlush(any(Case.class))).then(obj -> obj.getArgument(0));
 
     // When
-    underTest.saveCase(createCaseSample);
+    underTest.saveCaseSample(createCaseSample);
 
     // Then
     verify(mapperFacade).map(createCaseSample, Case.class);

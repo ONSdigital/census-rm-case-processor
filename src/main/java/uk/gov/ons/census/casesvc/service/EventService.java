@@ -30,7 +30,7 @@ public class EventService {
   }
 
   public void processSampleReceivedMessage(CreateCaseSample createCaseSample) {
-    Case caze = caseService.saveCase(createCaseSample);
+    Case caze = caseService.saveCaseSample(createCaseSample);
     int questionnaireType =
         QuestionnaireTypeHelper.calculateQuestionnaireType(caze.getTreatmentCode());
     UacQidLink uacQidLink = uacService.buildUacQidLink(caze, questionnaireType);
