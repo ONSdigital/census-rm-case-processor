@@ -43,11 +43,18 @@ queueconfig:
   uac-qid-created-exchange: uac-qid-created-exchange
   invalid-address-inbound-queue: case.invalidAddressQueue
   undelivered-mail-queue: case.undeliveredMailQueue
+  outbound-field-exchange: action-outbound-exchange
+  field-binding: Action.Field.binding
+  ccs-property-listed-queue: case.ccsPropertyListedQueue
   consumers: 50
   retry-attempts: 3
   retry-delay: 1000 #milliseconds
   retry-exchange: delayedRedeliveryExchange
   quarantine-exchange: quarantineExchange
+
+ccsconfig:
+  action-plan-id: 38a48608-1c2a-4c2b-b7bc-cb52fcbb4927
+  collection-exercise-id: 6e56db3a-293d-42e6-87b7-556c6c6c92d5
 
 healthcheck:
   frequency: 1000 #milliseconds

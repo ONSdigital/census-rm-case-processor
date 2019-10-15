@@ -22,6 +22,15 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class AppConfig {
   @Bean
+  AmqpInboundChannelAdapter ccsPropertyListedInbound(
+      @Qualifier("ccsPropertyListedContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("ccsPropertyListedInputChannel") MessageChannel channel) {
+    AmqpInboundChannelAdapter adapter = new AmqpInboundChannelAdapter(listenerContainer);
+    adapter.setOutputChannel(channel);
+    return adapter;
+  }
+
+  @Bean
   public RabbitTemplate rabbitTemplate(
       ConnectionFactory connectionFactory, Jackson2JsonMessageConverter messageConverter) {
     RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
