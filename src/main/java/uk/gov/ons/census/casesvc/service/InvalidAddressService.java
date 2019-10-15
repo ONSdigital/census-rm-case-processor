@@ -35,7 +35,9 @@ public class InvalidAddressService {
 
     caze.setAddressInvalid(true);
 
-    if (!caze.isCcsCase()) {
+    if (caze.isCcsCase()) {
+      caseService.saveCase(caze);
+    } else {
       caseService.saveAndEmitCaseUpdatedEvent(caze);
     }
 

@@ -26,7 +26,9 @@ public class RefusalService {
     Case caze = caseService.getCaseByCaseId(UUID.fromString(refusal.getCollectionCase().getId()));
     caze.setRefusalReceived(true);
 
-    if (!caze.isCcsCase()) {
+    if (caze.isCcsCase()) {
+      caseService.saveCase(caze);
+    } else {
       caseService.saveAndEmitCaseUpdatedEvent(caze);
     }
 

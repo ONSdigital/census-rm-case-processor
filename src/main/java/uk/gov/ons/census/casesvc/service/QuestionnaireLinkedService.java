@@ -47,14 +47,18 @@ public class QuestionnaireLinkedService {
     if (!uacQidLink.isActive() && !caze.isReceiptReceived()) {
       caze.setReceiptReceived(true);
 
-      if (!caze.isCcsCase()) {
+      if (caze.isCcsCase()) {
+        caseService.saveCase(caze);
+      } else {
         caseService.saveAndEmitCaseUpdatedEvent(caze);
       }
     }
 
     uacQidLink.setCaze(caze);
 
-    if (!isCCSQuestionnaireType(uacQidLink.getQid())) {
+    if (isCCSQuestionnaireType(uacQidLink.getQid())) {
+      uacService.saveUacQidLink(uacQidLink);
+    } else {
       uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
     }
 

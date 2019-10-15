@@ -53,6 +53,10 @@ public class CaseService {
     this.mapperFacade = mapperFacade;
   }
 
+  public Case saveCase(Case caze) {
+    return caseRepository.saveAndFlush(caze);
+  }
+
   public Case saveCaseSample(CreateCaseSample createCaseSample) {
     int caseRef = getUniqueCaseRef();
 

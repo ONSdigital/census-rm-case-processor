@@ -37,7 +37,9 @@ public class ReceiptService {
     if (caze != null) {
       caze.setReceiptReceived(true);
 
-      if (!caze.isCcsCase()) {
+      if (caze.isCcsCase()) {
+        caseService.saveCase(caze);
+      } else {
         caseService.saveAndEmitCaseUpdatedEvent(caze);
       }
     } else {
@@ -47,7 +49,9 @@ public class ReceiptService {
           .warn("Receipt received for unaddressed UAC/QID pair not yet linked to a case");
     }
 
-    if (!isCCSQuestionnaireType(uacQidLink.getQid())) {
+    if (isCCSQuestionnaireType(uacQidLink.getQid())) {
+      uacService.saveUacQidLink(uacQidLink);
+    } else {
       uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
     }
 
