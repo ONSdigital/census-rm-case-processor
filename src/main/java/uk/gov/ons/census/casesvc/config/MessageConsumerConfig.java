@@ -75,6 +75,9 @@ public class MessageConsumerConfig {
   @Value("${queueconfig.undelivered-mail-queue}")
   private String undeliveredMailQueue;
 
+  @Value("${queueconfig.ccs-property-listed-queue}")
+  private String ccsPropertyListedQueue;
+
   public MessageConsumerConfig(
       ExceptionManagerClient exceptionManagerClient,
       RabbitTemplate rabbitTemplate,
@@ -136,6 +139,11 @@ public class MessageConsumerConfig {
 
   @Bean
   public MessageChannel undeliveredMailInputChannel() {
+    return new DirectChannel();
+  }
+
+  @Bean
+  public MessageChannel ccsPropertyListedInputChannel() {
     return new DirectChannel();
   }
 
@@ -239,6 +247,15 @@ public class MessageConsumerConfig {
   }
 
   @Bean
+  AmqpInboundChannelAdapter ccsPropertyListedInbound(
+      @Qualifier("ccsPropertyListedContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("ccsPropertyListedInputChannel") MessageChannel channel) {
+    AmqpInboundChannelAdapter adapter = new AmqpInboundChannelAdapter(listenerContainer);
+    adapter.setOutputChannel(channel);
+    return adapter;
+  }
+
+  @Bean
   public SimpleMessageListenerContainer sampleContainer() {
     return setupListenerContainer(inboundQueue, CreateCaseSample.class);
   }
@@ -291,6 +308,11 @@ public class MessageConsumerConfig {
   @Bean
   public SimpleMessageListenerContainer undeliveredMailContainer() {
     return setupListenerContainer(undeliveredMailQueue, ResponseManagementEvent.class);
+  }
+
+  @Bean
+  public SimpleMessageListenerContainer ccsPropertyListedContainer() {
+    return setupListenerContainer(ccsPropertyListedQueue, ResponseManagementEvent.class);
   }
 
   private SimpleMessageListenerContainer setupListenerContainer(
