@@ -81,6 +81,7 @@ public class UndeliveredMailReceiverIT {
     caze.setUacQidLinks(null);
     caze.setEvents(null);
     caze.setUndeliveredAsAddressed(false);
+    caze.setCcsCase(false);
     caze = caseRepository.saveAndFlush(caze);
 
     UacQidLink uacQidLink = new UacQidLink();
@@ -137,7 +138,8 @@ public class UndeliveredMailReceiverIT {
     caze.setUacQidLinks(null);
     caze.setEvents(null);
     caze.setUndeliveredAsAddressed(false);
-    caze = caseRepository.saveAndFlush(caze);
+    caze.setCcsCase(false);
+    caseRepository.saveAndFlush(caze);
 
     ResponseManagementEvent event = new ResponseManagementEvent();
     event.setEvent(new EventDTO());

@@ -119,6 +119,10 @@ public class CaseService {
   public void saveAndEmitCaseUpdatedEvent(Case caze) {
     caseRepository.saveAndFlush(caze);
 
+    if (caze.isCcsCase()) {
+      return;
+    }
+
     EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_UPDATED);
     ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
     rabbitTemplate.convertAndSend(

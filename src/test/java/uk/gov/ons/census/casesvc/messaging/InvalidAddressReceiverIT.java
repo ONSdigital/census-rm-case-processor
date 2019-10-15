@@ -81,13 +81,15 @@ public class InvalidAddressReceiverIT {
   }
 
   @Test
-  public void testHappyPath() throws InterruptedException, IOException {
+  public void testInvalidAddressEmitsMessageAndLogsEventForNonCCSCase()
+      throws InterruptedException, IOException {
     // GIVEN
     BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
 
     EasyRandom easyRandom = new EasyRandom();
     Case caze = easyRandom.nextObject(Case.class);
     caze.setCaseId(TEST_CASE_ID);
+    caze.setCcsCase(false);
     caze.setUacQidLinks(null);
     caze.setEvents(null);
     caze.setAddressInvalid(false);
@@ -113,7 +115,11 @@ public class InvalidAddressReceiverIT {
         MessageBuilder.withBody(json.getBytes())
             .setContentType(MessageProperties.CONTENT_TYPE_JSON)
             .build();
+
+    // WHEN
     rabbitQueueHelper.sendMessage(invalidAddressInboundQueue, message);
+
+    // THEN
 
     // check the emitted eventDTO
     ResponseManagementEvent responseManagementEvent =
@@ -123,6 +129,66 @@ public class InvalidAddressReceiverIT {
     CollectionCase actualPayloadCase = responseManagementEvent.getPayload().getCollectionCase();
     assertThat(actualPayloadCase.getId()).isEqualTo(caze.getCaseId().toString());
     assertThat(actualPayloadCase.getAddressInvalid()).isTrue();
+
+    Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
+    assertThat(actualCase.isCcsCase()).isFalse();
+    assertThat(actualCase.isAddressInvalid()).isTrue();
+
+    // check database for log eventDTO
+    List<Event> events = eventRepository.findAll();
+    assertThat(events.size()).isEqualTo(1);
+    Event event = events.get(0);
+    assertThat(event.getEventDescription()).isEqualTo("Invalid address");
+    assertThat(event.getEventType()).isEqualTo(EventType.ADDRESS_NOT_VALID);
+  }
+
+  @Test
+  public void testInvalidAddressDoesNotEmitMessageButLogsEventForCCSCase()
+      throws InterruptedException, IOException {
+    // GIVEN
+    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
+
+    EasyRandom easyRandom = new EasyRandom();
+    Case caze = easyRandom.nextObject(Case.class);
+    caze.setCaseId(TEST_CASE_ID);
+    caze.setCcsCase(true);
+    caze.setUacQidLinks(null);
+    caze.setEvents(null);
+    caze.setAddressInvalid(false);
+    caze = caseRepository.saveAndFlush(caze);
+
+    ResponseManagementEvent managementEvent = new ResponseManagementEvent();
+    managementEvent.setEvent(new EventDTO());
+    managementEvent.getEvent().setDateTime(OffsetDateTime.now());
+    managementEvent.getEvent().setChannel("Test channel");
+    managementEvent.getEvent().setSource("Test source");
+    managementEvent.getEvent().setType(EventTypeDTO.ADDRESS_NOT_VALID);
+    managementEvent.setPayload(new PayloadDTO());
+    managementEvent.getPayload().setInvalidAddress(new InvalidAddress());
+    managementEvent.getPayload().getInvalidAddress().setCollectionCase(new CollectionCaseCaseId());
+    managementEvent
+        .getPayload()
+        .getInvalidAddress()
+        .getCollectionCase()
+        .setId(caze.getCaseId().toString());
+
+    String json = convertObjectToJson(managementEvent);
+    Message message =
+        MessageBuilder.withBody(json.getBytes())
+            .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+            .build();
+
+    // WHEN
+    rabbitQueueHelper.sendMessage(invalidAddressInboundQueue, message);
+
+    // THEN
+
+    // check the emitted eventDTO
+    rabbitQueueHelper.checkMessageIsNotReceived(outboundQueue, 5);
+
+    Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
+    assertThat(actualCase.isCcsCase()).isTrue();
+    assertThat(actualCase.isAddressInvalid()).isTrue();
 
     // check database for log eventDTO
     List<Event> events = eventRepository.findAll();

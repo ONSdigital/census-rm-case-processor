@@ -5,7 +5,9 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.service.CaseService.CASE_UPDATE_ROUTING_KEY;
 
@@ -13,6 +15,7 @@ import java.util.Optional;
 import java.util.UUID;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
+import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -163,6 +166,58 @@ public class CaseServiceTest {
 
     // When
     underTest.getUniqueCaseRef();
+  }
+
+  @Test
+  public void testCaseUpdatedEventIsEmittedWhenNonCCSCase() {
+    // Given
+    Case expectedCase = new EasyRandom().nextObject(Case.class);
+    expectedCase.setCaseId(TEST_UUID);
+    expectedCase.setCcsCase(false);
+
+    ReflectionTestUtils.setField(underTest, "outboundExchange", TEST_EXCHANGE);
+
+    // When
+    underTest.saveAndEmitCaseUpdatedEvent(expectedCase);
+
+    // Then
+    ArgumentCaptor<Case> caseCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseRepository).saveAndFlush(caseCaptor.capture());
+
+    Case actualCase = caseCaptor.getValue();
+    assertThat(actualCase.getCaseId()).isEqualTo(expectedCase.getCaseId());
+    assertThat(actualCase.isCcsCase()).isFalse();
+
+    ArgumentCaptor<ResponseManagementEvent> responseManagementCaptor =
+        ArgumentCaptor.forClass(ResponseManagementEvent.class);
+    verify(rabbitTemplate)
+        .convertAndSend(anyString(), anyString(), responseManagementCaptor.capture());
+
+    ResponseManagementEvent actualResponseManagement = responseManagementCaptor.getValue();
+    assertThat(actualResponseManagement.getPayload().getCollectionCase().getId())
+        .isEqualTo(expectedCase.getCaseId().toString());
+
+    verifyZeroInteractions(rabbitTemplate);
+  }
+
+  @Test
+  public void testCaseUpdatedEventIsNotEmittedWhenCCSCase() {
+    // Given
+    Case expectedCase = new EasyRandom().nextObject(Case.class);
+    expectedCase.setCaseId(TEST_UUID);
+    expectedCase.setCcsCase(true);
+
+    // When
+    underTest.saveAndEmitCaseUpdatedEvent(expectedCase);
+
+    // Then
+    ArgumentCaptor<Case> caseCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseRepository).saveAndFlush(caseCaptor.capture());
+    Case actualCase = caseCaptor.getValue();
+    assertThat(actualCase.getCaseId()).isEqualTo(expectedCase.getCaseId());
+    assertThat(actualCase.isCcsCase()).isTrue();
+
+    verifyZeroInteractions(rabbitTemplate);
   }
 
   @Test(expected = RuntimeException.class)

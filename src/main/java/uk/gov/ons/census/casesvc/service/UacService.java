@@ -1,6 +1,7 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.isCCSQuestionnaireType;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
@@ -86,6 +87,10 @@ public class UacService {
 
   public PayloadDTO saveAndEmitUacUpdatedEvent(UacQidLink uacQidLink) {
     uacQidLinkRepository.save(uacQidLink);
+
+    if (isCCSQuestionnaireType(uacQidLink.getQid())) {
+      return new PayloadDTO();
+    }
 
     EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.UAC_UPDATED);
 

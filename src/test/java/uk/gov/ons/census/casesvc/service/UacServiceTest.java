@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.generateUacCreatedEvent;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
@@ -35,6 +36,8 @@ import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 public class UacServiceTest {
 
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
+  private final String TEST_NON_CCS_QID_ID = "1234567890123456";
+  private final String TEST_CCS_QID_ID = "7134567890123456";
 
   @Mock UacQidLinkRepository uacQidLinkRepository;
 
@@ -68,10 +71,11 @@ public class UacServiceTest {
   }
 
   @Test
-  public void testEmitUacUpdatedEvent() {
+  public void testEmitUacUpdatedEventIsEmittedWhenNotCCSCase() {
     // Given
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setUac("12345");
+    uacQidLink.setQid(TEST_NON_CCS_QID_ID);
     Case caze = new Case();
     UUID caseUuid = UUID.randomUUID();
     caze.setCaseId(caseUuid);
@@ -90,6 +94,27 @@ public class UacServiceTest {
             responseManagementEventArgumentCaptor.capture());
     assertEquals(
         "12345", responseManagementEventArgumentCaptor.getValue().getPayload().getUac().getUac());
+  }
+
+  @Test
+  public void testEmitUacUpdatedEventIsNotEmitWhenCCSCase() {
+    // Given
+    UacQidLink expectedUacQidLink = new UacQidLink();
+    expectedUacQidLink.setUac("12345");
+    expectedUacQidLink.setQid(TEST_CCS_QID_ID);
+
+    // When
+    underTest.saveAndEmitUacUpdatedEvent(expectedUacQidLink);
+
+    // Then
+    ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
+    verify(uacQidLinkRepository).save(uacQidLinkCaptor.capture());
+
+    UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
+    assertThat(actualUacQidLink.getUac()).isEqualTo(expectedUacQidLink.getUac());
+    assertThat(actualUacQidLink.getQid()).isEqualTo(expectedUacQidLink.getQid());
+
+    verifyZeroInteractions(rabbitTemplate);
   }
 
   @Test
