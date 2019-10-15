@@ -28,6 +28,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.UacDTO;
@@ -121,9 +122,12 @@ public class ReceiptReceiverIT {
 
     // check messages sent
     ResponseManagementEvent responseManagementEvent =
-        rabbitQueueHelper.checkExpectedMessageReceived(rhUacOutboundQueue);
-    rabbitQueueHelper.checkExpectedMessageReceived(rhCaseOutboundQueue);
+        rabbitQueueHelper.checkExpectedMessageReceived(rhCaseOutboundQueue);
+    CollectionCase actualCollectionCase = responseManagementEvent.getPayload().getCollectionCase();
+    assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID.toString());
+    assertThat(actualCollectionCase.getReceiptReceived()).isTrue();
 
+    responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(rhUacOutboundQueue);
     assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
     UacDTO actualUacDTOObject = responseManagementEvent.getPayload().getUac();
     assertThat(actualUacDTOObject.getUac()).isEqualTo(TEST_UAC);
@@ -153,7 +157,7 @@ public class ReceiptReceiverIT {
 
   @Test
   public void testReceiptDoesNotEmitMessagesButEventIsLoggedForCCSCase()
-      throws InterruptedException, IOException, JSONException {
+      throws InterruptedException, JSONException {
     // GIVEN
     BlockingQueue<String> rhUacOutboundQueue = rabbitQueueHelper.listen(rhUacQueue);
     BlockingQueue<String> rhCaseOutboundQueue = rabbitQueueHelper.listen(rhCaseQueue);

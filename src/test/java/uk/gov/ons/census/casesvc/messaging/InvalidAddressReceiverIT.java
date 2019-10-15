@@ -144,7 +144,7 @@ public class InvalidAddressReceiverIT {
 
   @Test
   public void testInvalidAddressDoesNotEmitMessageButLogsEventForCCSCase()
-      throws InterruptedException, IOException {
+      throws InterruptedException {
     // GIVEN
     BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
 

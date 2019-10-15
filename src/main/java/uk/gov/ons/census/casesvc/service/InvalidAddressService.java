@@ -97,7 +97,7 @@ public class InvalidAddressService {
     return false;
   }
 
-  public UUID getCaseId(JsonNode json) {
+  private UUID getCaseId(JsonNode json) {
     return UUID.fromString(json.at("/collectionCase/id").asText());
   }
 }
