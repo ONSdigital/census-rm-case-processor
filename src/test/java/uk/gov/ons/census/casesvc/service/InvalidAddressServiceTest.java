@@ -70,6 +70,7 @@ public class InvalidAddressServiceTest {
     // Given
     Case expectedCase = getRandomCase();
     expectedCase.setAddressInvalid(false);
+    expectedCase.setCcsCase(false);
     when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
 
     // when

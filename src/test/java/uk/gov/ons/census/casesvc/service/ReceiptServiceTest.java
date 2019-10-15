@@ -35,6 +35,7 @@ public class ReceiptServiceTest {
 
     // Given
     Case expectedCase = getRandomCase();
+    expectedCase.setCcsCase(false);
     UacQidLink expectedUacQidLink = generateRandomUacQidLink(expectedCase);
 
     managementEvent.getPayload().getResponse().setResponseDateTime(OffsetDateTime.now());

@@ -161,7 +161,7 @@ public class QuestionnaireLinkedReceiverIT {
     CreateUacQid createUacQid = new CreateUacQid();
     createUacQid.setQuestionnaireType("71");
     createUacQid.setBatchId(UUID.randomUUID());
-    sendMessageAndDoNotExpectInboundMessage(unaddressedQueue, createUacQid, outboundUacQueue);
+    sendMessageAndExpectInboundMessage(unaddressedQueue, createUacQid, outboundUacQueue);
 
     // Get generated Questionnaire Id
     String expectedQuestionnaireId = uacQidLinkRepository.findAll().get(0).getQid();
@@ -276,7 +276,7 @@ public class QuestionnaireLinkedReceiverIT {
     CreateUacQid createUacQid = new CreateUacQid();
     createUacQid.setQuestionnaireType("71");
     createUacQid.setBatchId(UUID.randomUUID());
-    sendMessageAndDoNotExpectInboundMessage(unaddressedQueue, createUacQid, outboundUacQueue);
+    sendMessageAndExpectInboundMessage(unaddressedQueue, createUacQid, outboundUacQueue);
 
     // Get generated Questionnaire Id
     String expectedQuestionnaireId = uacQidLinkRepository.findAll().get(0).getQid();
@@ -399,7 +399,7 @@ public class QuestionnaireLinkedReceiverIT {
     CreateUacQid createUacQid = new CreateUacQid();
     createUacQid.setQuestionnaireType("71");
     createUacQid.setBatchId(UUID.randomUUID());
-    sendMessageAndDoNotExpectInboundMessage(unaddressedQueue, createUacQid, outboundUacQueue);
+    sendMessageAndExpectInboundMessage(unaddressedQueue, createUacQid, outboundUacQueue);
 
     // Get generated Questionnaire Id
     UacQidLink uacQidLink = uacQidLinkRepository.findAll().get(0);

@@ -34,7 +34,10 @@ public class InvalidAddressService {
         caseService.getCaseByCaseId(UUID.fromString(invalidAddress.getCollectionCase().getId()));
 
     caze.setAddressInvalid(true);
-    caseService.saveAndEmitCaseUpdatedEvent(caze);
+
+    if (!caze.isCcsCase()) {
+      caseService.saveAndEmitCaseUpdatedEvent(caze);
+    }
 
     eventLogger.logCaseEvent(
         caze,

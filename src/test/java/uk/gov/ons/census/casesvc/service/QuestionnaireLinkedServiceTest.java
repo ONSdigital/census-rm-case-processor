@@ -144,6 +144,7 @@ public class QuestionnaireLinkedServiceTest {
     Case testCase = getRandomCaseWithUacQidLinks(1);
     testCase.setCaseId(TEST_CASE_ID_1);
     testCase.setReceiptReceived(false);
+    testCase.setCcsCase(false);
 
     UacQidLink testUacQidLink = testCase.getUacQidLinks().get(0);
     testUacQidLink.setQid(TEST_HI_QID);

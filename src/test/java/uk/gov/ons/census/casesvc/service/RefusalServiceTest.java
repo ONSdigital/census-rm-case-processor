@@ -31,13 +31,14 @@ public class RefusalServiceTest {
   @InjectMocks RefusalService underTest;
 
   @Test
-  public void shouldProcessARefusalReceivedMessageSuccessfully() {
+  public void shouldProcessARefusalReceivedMessageSuccessfullyForNonCCSCase() {
     // GIVEN
     ResponseManagementEvent managementEvent = getTestResponseManagementRefusalEvent();
     CollectionCase collectionCase = managementEvent.getPayload().getRefusal().getCollectionCase();
     collectionCase.setId(TEST_CASE_ID.toString());
     collectionCase.setRefusalReceived(false);
     Case testCase = getRandomCase();
+    testCase.setCcsCase(false);
 
     when(caseService.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);
 
@@ -50,6 +51,34 @@ public class RefusalServiceTest {
     Case actualCase = caseArgumentCaptor.getValue();
 
     assertThat(actualCase.isRefusalReceived()).isTrue();
+    verify(eventLogger, times(1))
+        .logCaseEvent(
+            eq(testCase),
+            any(OffsetDateTime.class),
+            eq(REFUSAL_RECEIVED),
+            eq(EventType.REFUSAL_RECEIVED),
+            eq(managementEvent.getEvent()),
+            anyString());
+  }
+
+  @Test
+  public void shouldProcessARefusalReceivedMessageSuccessfullyForCCSCase() {
+    // GIVEN
+    ResponseManagementEvent managementEvent = getTestResponseManagementRefusalEvent();
+    CollectionCase collectionCase = managementEvent.getPayload().getRefusal().getCollectionCase();
+    collectionCase.setId(TEST_CASE_ID.toString());
+    collectionCase.setRefusalReceived(false);
+    Case testCase = getRandomCase();
+    testCase.setCcsCase(true);
+
+    when(caseService.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);
+
+    // WHEN
+    underTest.processRefusal(managementEvent);
+
+    // THEN
+    verifyZeroInteractions(caseService);
+
     verify(eventLogger, times(1))
         .logCaseEvent(
             eq(testCase),
