@@ -47,7 +47,8 @@ public class CCSPropertyListedService {
             isRefused,
             isInvalidAddress);
 
-    // always generate a new uac-qid pair even if linking existing pair, this is in case field worker has to visit
+    // always generate a new uac-qid pair even if linking existing pair, this is in case field
+    // worker has to visit
     // address again and launch an EQ
     uacService.createUacQidLinkedToCCSCase(caze);
     if (isQidProvided) {
