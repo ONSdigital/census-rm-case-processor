@@ -47,11 +47,13 @@ public class CCSPropertyListedService {
             isRefused,
             isInvalidAddress);
 
+    // always generate a new uac-qid pair even if linking existing pair, this is in case field worker has to visit
+    // address again and launch an EQ
+    uacService.createUacQidLinkedToCCSCase(caze);
     if (isQidProvided) {
       addUacLinkForQidAndCaze(ccsProperty.getUac().getQuestionnaireId(), caze);
     } else {
-      uacService.createUacQidLinkedToCCSCase(caze);
-      sendActiveCSSCaseToField(caze);
+      sendActiveCCSCaseToField(caze);
     }
 
     eventLogger.logCaseEvent(
@@ -63,7 +65,7 @@ public class CCSPropertyListedService {
         convertObjectToJson(ccsProperty));
   }
 
-  private void sendActiveCSSCaseToField(Case caze) {
+  private void sendActiveCCSCaseToField(Case caze) {
     if (!caze.isRefusalReceived() && !caze.isAddressInvalid()) {
       ccsToFieldService.convertAndSendCCSToField(caze);
     }
