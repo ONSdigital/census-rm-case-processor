@@ -32,6 +32,9 @@ public class QuestionnaireLinkedService {
     UacDTO uac = questionnaireLinkedEvent.getPayload().getUac();
     String questionnaireId = uac.getQuestionnaireId();
     UacQidLink uacQidLink = uacService.findByQid(questionnaireId);
+
+    checkQidNotLinkedToAnotherCase(uac, uacQidLink);
+
     Case caze;
 
     if (isIndividualQuestionnaireType(questionnaireId)) {
@@ -69,5 +72,13 @@ public class QuestionnaireLinkedService {
         EventType.QUESTIONNAIRE_LINKED,
         questionnaireLinkedEvent.getEvent(),
         convertObjectToJson(uac));
+  }
+
+  private void checkQidNotLinkedToAnotherCase(UacDTO uac, UacQidLink uacQidLink) {
+    if (uacQidLink.getCaze() != null
+        && !uacQidLink.getCaze().getCaseId().equals(UUID.fromString(uac.getCaseId()))) {
+      throw new RuntimeException(
+          "UacQidLink already linked to case id: " + uacQidLink.getCaze().getCaseId());
+    }
   }
 }
