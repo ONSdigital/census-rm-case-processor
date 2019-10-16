@@ -85,7 +85,7 @@ public class CCSPropertyListedIT {
     Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
     assertThat(actualCase.isCcsCase()).isTrue();
 
-    checkUacQidLinks(null, 1);
+    checkUacQidLinks(1);
 
     validateEvents(
         eventRepository.findAll(), responseManagementEvent.getPayload().getCcsProperty());
@@ -117,7 +117,7 @@ public class CCSPropertyListedIT {
 
     Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
     assertThat(actualCase.isCcsCase()).isTrue();
-    checkUacQidLinks(TEST_QID, 2);
+    checkUacQidLinks(2);
 
     validateEvents(
         eventRepository.findAll(), responseManagementEvent.getPayload().getCcsProperty());
@@ -146,7 +146,7 @@ public class CCSPropertyListedIT {
     assertThat(actualCase.isCcsCase()).isTrue();
     assertThat(actualCase.isRefusalReceived()).isTrue();
 
-    checkUacQidLinks(null, 1);
+    checkUacQidLinks(1);
 
     validateEvents(
         eventRepository.findAll(), responseManagementEvent.getPayload().getCcsProperty());
@@ -173,7 +173,7 @@ public class CCSPropertyListedIT {
     assertThat(actualCase.isCcsCase()).isTrue();
     assertThat(actualCase.isAddressInvalid()).isTrue();
 
-    checkUacQidLinks(null, 1);
+    checkUacQidLinks(1);
 
     validateEvents(
         eventRepository.findAll(), responseManagementEvent.getPayload().getCcsProperty());
@@ -215,9 +215,9 @@ public class CCSPropertyListedIT {
     assertThat(actualCCSPropertyDTO).isEqualTo(expectedCCSPropertyDto);
   }
 
-  private void checkUacQidLinks(String expectedQid, int linksCount) {
+  private void checkUacQidLinks(int expectedLinksTotal) {
     List<UacQidLink> actualUacQidLinks = uacQidLinkRepository.findAll();
-    assertThat(actualUacQidLinks.size()).isEqualTo(linksCount);
+    assertThat(actualUacQidLinks.size()).isEqualTo(expectedLinksTotal);
     UacQidLink actualUacQidLink = actualUacQidLinks.get(0);
     assertThat(actualUacQidLink.getQid().substring(0, 2)).isEqualTo("71");
     assertThat(actualUacQidLink.isCcsCase()).isTrue();
