@@ -43,7 +43,7 @@ public class ReceiptServiceTest {
     Case expectedCase = getRandomCase();
     expectedCase.setReceiptReceived(false);
     expectedCase.setCcsCase(false);
-    UacQidLink expectedUacQidLink = generateRandomUacQidLink(expectedCase);
+    UacQidLink expectedUacQidLink = generateRandomUacQidLinkedToCase(expectedCase);
     expectedUacQidLink.setQid(TEST_NON_CCS_QID_ID);
 
     managementEvent.getPayload().getResponse().setResponseDateTime(OffsetDateTime.now());
@@ -91,7 +91,7 @@ public class ReceiptServiceTest {
     Case expectedCase = getRandomCase();
     expectedCase.setReceiptReceived(false);
     expectedCase.setCcsCase(true);
-    UacQidLink expectedUacQidLink = generateRandomUacQidLink(expectedCase);
+    UacQidLink expectedUacQidLink = generateRandomUacQidLinkedToCase(expectedCase);
     expectedUacQidLink.setQid(TEST_CCS_QID_ID);
 
     managementEvent.getPayload().getResponse().setResponseDateTime(OffsetDateTime.now());

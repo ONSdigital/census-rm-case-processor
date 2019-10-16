@@ -81,8 +81,7 @@ public class InvalidAddressReceiverIT {
   }
 
   @Test
-  public void testInvalidAddressEmitsMessageAndLogsEventForNonCCSCase()
-      throws InterruptedException, IOException {
+  public void testInvalidAddressForNonCCSCase() throws InterruptedException, IOException {
     // GIVEN
     BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
 
@@ -143,8 +142,7 @@ public class InvalidAddressReceiverIT {
   }
 
   @Test
-  public void testInvalidAddressDoesNotEmitMessageButLogsEventForCCSCase()
-      throws InterruptedException {
+  public void testInvalidAddressForCCSCase() throws InterruptedException {
     // GIVEN
     BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
 

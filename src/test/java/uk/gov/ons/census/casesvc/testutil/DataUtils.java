@@ -81,8 +81,12 @@ public class DataUtils {
     return randomCase;
   }
 
-  public static UacQidLink generateRandomUacQidLink(Case linkedCase) {
-    UacQidLink uacQidLink = easyRandom.nextObject(UacQidLink.class);
+  public static UacQidLink generateRandomUacQidLink() {
+    return easyRandom.nextObject(UacQidLink.class);
+  }
+
+  public static UacQidLink generateRandomUacQidLinkedToCase(Case linkedCase) {
+    UacQidLink uacQidLink = generateRandomUacQidLink();
     uacQidLink.setCaze(linkedCase);
     uacQidLink.setEvents(null);
     linkedCase.setUacQidLinks(List.of(uacQidLink));
