@@ -25,7 +25,12 @@ public class RefusalService {
     RefusalDTO refusal = refusalEvent.getPayload().getRefusal();
     Case caze = caseService.getCaseByCaseId(UUID.fromString(refusal.getCollectionCase().getId()));
     caze.setRefusalReceived(true);
-    caseService.saveAndEmitCaseUpdatedEvent(caze);
+
+    if (caze.isCcsCase()) {
+      caseService.saveCase(caze);
+    } else {
+      caseService.saveAndEmitCaseUpdatedEvent(caze);
+    }
 
     eventLogger.logCaseEvent(
         caze,

@@ -1,6 +1,7 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.isCCSQuestionnaireType;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
@@ -35,7 +36,12 @@ public class ReceiptService {
 
     if (caze != null) {
       caze.setReceiptReceived(true);
-      caseService.saveAndEmitCaseUpdatedEvent(caze);
+
+      if (caze.isCcsCase()) {
+        caseService.saveCase(caze);
+      } else {
+        caseService.saveAndEmitCaseUpdatedEvent(caze);
+      }
     } else {
       log.with("qid", receiptPayload.getQuestionnaireId())
           .with("tx_id", receiptEvent.getEvent().getTransactionId())
@@ -43,7 +49,11 @@ public class ReceiptService {
           .warn("Receipt received for unaddressed UAC/QID pair not yet linked to a case");
     }
 
-    uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
+    if (isCCSQuestionnaireType(uacQidLink.getQid())) {
+      uacService.saveUacQidLink(uacQidLink);
+    } else {
+      uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
+    }
 
     eventLogger.logUacQidEvent(
         uacQidLink,
