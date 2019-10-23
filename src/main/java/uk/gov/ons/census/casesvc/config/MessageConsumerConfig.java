@@ -325,7 +325,7 @@ public class MessageConsumerConfig {
             exceptionManagerClient,
             expectedMessageType,
             logStackTraces,
-            "Action Scheduler",
+            "Case Processor",
             queueName,
             retryExchange,
             quarantineExchange,
