@@ -29,7 +29,7 @@ received by it.
 #Entrypoints / MessageEndpoints
 
 There are multiple entry points to this application, these can be found in the messaging folder/package, each 
-class in here is a listener to a queue (defined in the application yml).  This classes are annotated 
+class in here is a listener to a queue (defined in the application yml).  These classes are annotated 
 @MessageEndpoint and each consists of a receiveMessage function bound to a queue and marked @Transactional.  The 
  @Transactional part wraps every queuing & database action under this function into 1 big transaction.  If any of this 
 fails they all get rolled back and the original message will be returned unharmed to the rabbit queue.  After several
