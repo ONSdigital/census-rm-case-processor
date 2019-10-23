@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.com/ONSdigital/census-rm-case-processor.svg?branch=master)](https://travis-ci.com/ONSdigital/census-rm-case-processor)
 
-#Overview
+# Overview
 Case Processor is implemented with Java 11 & Spring Integration, it is event driven listening and publishing to 
 rabbitmq and persisting data to a SQL DB.
 
@@ -26,7 +26,7 @@ Case Processor also performs Event Logging against cases and uacquids.  These Ev
 received by it.
 
 
-#Entrypoints / MessageEndpoints
+# Entrypoints / MessageEndpoints
 
 There are multiple entry points to this application, these can be found in the messaging folder/package, each 
 class in here is a listener to a queue (defined in the application yml).  These classes are annotated 
@@ -36,7 +36,7 @@ fails they all get rolled back and the original message will be returned unharme
 failures the MessageException Service is configured to place a bad message onto a backoff queue.
 
 
-#Testing
+# Testing
 
 To test this service locally use:
    mvn clean install
@@ -45,7 +45,7 @@ This will run all of the unit tests, then if successful create a docker image fo
 then bring up the required docker images from src/test/resources/docker-compose.yml (postgres, uacqidservice and rabbit)
 to run the Integration Tests.
 
-#Debug    
+# Debug    
  If you want to debug the application/Integration tests start the required docker images by navigating 
  to src/test/resources/ and then  'docker-compose up'
 
