@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageDeliveryMode;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.exception.ListenerExecutionFailedException;
 import org.springframework.amqp.rabbit.retry.MessageRecoverer;
@@ -64,6 +65,10 @@ public class ManagedMessageRecoverer implements MessageRecoverer {
 
   @Override
   public void recover(Message message, Throwable throwable) {
+
+    // At this point message is not persistent
+    message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
+
     if (throwable instanceof ListenerExecutionFailedException) {
       ListenerExecutionFailedException listenerExecutionFailedException =
           (ListenerExecutionFailedException) throwable;
@@ -119,6 +124,10 @@ public class ManagedMessageRecoverer implements MessageRecoverer {
       byte[] rawMessageBody,
       ListenerExecutionFailedException listenerExecutionFailedException,
       Message message) {
+
+    // At this point message is not persistent
+    message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
+
     if (reportResult == null || !reportResult.isSkipIt()) {
       return false;
     }
