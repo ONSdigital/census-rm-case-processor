@@ -65,10 +65,6 @@ public class ManagedMessageRecoverer implements MessageRecoverer {
 
   @Override
   public void recover(Message message, Throwable throwable) {
-
-    // At this point message is not persistent
-    message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
-
     if (throwable instanceof ListenerExecutionFailedException) {
       ListenerExecutionFailedException listenerExecutionFailedException =
           (ListenerExecutionFailedException) throwable;
@@ -92,6 +88,8 @@ public class ManagedMessageRecoverer implements MessageRecoverer {
       logMessage(
           reportResult, listenerExecutionFailedException.getCause(), messageHash, rawMessageBody);
 
+      // At this point message is not persistent, we need it to be persistent
+      message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
       // Send the bad message to an exchange where it'll be retried at some future point in time
       rabbitTemplate.send(delayExchangeName, queueName, message);
     } else {
@@ -124,9 +122,6 @@ public class ManagedMessageRecoverer implements MessageRecoverer {
       byte[] rawMessageBody,
       ListenerExecutionFailedException listenerExecutionFailedException,
       Message message) {
-
-    // At this point message is not persistent
-    message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
 
     if (reportResult == null || !reportResult.isSkipIt()) {
       return false;
@@ -164,14 +159,12 @@ public class ManagedMessageRecoverer implements MessageRecoverer {
 
     // Check if OK and the message is stored... then we can go ahead and quarantine
     if (result) {
-      result = false; // The next bit might go wrong
       log.with("message_hash", messageHash).warn("Skipping message");
 
+      // At this point message is not persistent, we need it to be persistent
+      message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
       // Send the bad message to the quarantine queue
       rabbitTemplate.send(quarantineExchangeName, queueName, message);
-
-      // Presumably the message is now safely quarantined
-      result = true;
     }
 
     return result;
