@@ -53,26 +53,27 @@ public class CaseService {
     return caseRepository.saveAndFlush(caze);
   }
 
-  public Case saveCaseSample(CreateCaseSample createCaseSample) {
-    int caseRef = getUniqueCaseRef();
+  public Case saveNewCaseAndStampCaseRef(Case caze) {
+    caze = caseRepository.saveAndFlush(caze);
+    caze.setCaseRef(RandomCaseRefGenerator.getPseudoRandomCaseRef(caze.getId()));
+    caze = caseRepository.saveAndFlush(caze);
 
+    return caze;
+  }
+
+  public Case saveCaseSample(CreateCaseSample createCaseSample) {
     Case caze = mapperFacade.map(createCaseSample, Case.class);
-    caze.setCaseRef(caseRef);
     caze.setCaseType(HOUSEHOLD_RESPONSE_ADDRESS_TYPE);
     caze.setCaseId(UUID.randomUUID());
     caze.setState(CaseState.ACTIONABLE);
     caze.setCreatedDateTime(OffsetDateTime.now());
     caze.setReceiptReceived(false);
-    caze = caseRepository.saveAndFlush(caze);
-    return caze;
+    return saveNewCaseAndStampCaseRef(caze);
   }
 
   public Case createCCSCase(
       String caseId, SampleUnitDTO sampleUnit, boolean isRefused, boolean isInvalidAddress) {
-    int caseRef = getUniqueCaseRef();
-
     Case caze = mapperFacade.map(sampleUnit, Case.class);
-    caze.setCaseRef(caseRef);
     caze.setCaseType(sampleUnit.getAddressType());
     caze.setCaseId(UUID.fromString(caseId));
     caze.setActionPlanId(actionPlanId);
@@ -83,19 +84,7 @@ public class CaseService {
     caze.setAddressInvalid(isInvalidAddress);
     caze.setCcsCase(true);
 
-    caseRepository.saveAndFlush(caze);
-
-    return caze;
-  }
-
-  public int getUniqueCaseRef() {
-    int caseRef = RandomCaseRefGenerator.getCaseRef();
-
-    // Check for collisions
-    if (caseRepository.existsById(caseRef)) {
-      throw new RuntimeException(String.format("Case ref '%s' collision", caseRef));
-    }
-    return caseRef;
+    return saveNewCaseAndStampCaseRef(caze);
   }
 
   public PayloadDTO saveAndEmitCaseCreatedEvent(Case caze) {
@@ -105,6 +94,14 @@ public class CaseService {
   public PayloadDTO saveAndEmitCaseCreatedEvent(Case caze, FulfilmentRequestDTO fulfilmentRequest) {
     caseRepository.saveAndFlush(caze);
 
+    return emitCaseCreatedEvent(caze, fulfilmentRequest);
+  }
+
+  public PayloadDTO emitCaseCreatedEvent(Case caze) {
+    return emitCaseCreatedEvent(caze, null);
+  }
+
+  public PayloadDTO emitCaseCreatedEvent(Case caze, FulfilmentRequestDTO fulfilmentRequest) {
     EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_CREATED);
     ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
 
@@ -197,7 +194,6 @@ public class CaseService {
     Case individualResponseCase = new Case();
 
     individualResponseCase.setCaseId(UUID.randomUUID());
-    individualResponseCase.setCaseRef(getUniqueCaseRef());
     individualResponseCase.setState(CaseState.ACTIONABLE);
     individualResponseCase.setCreatedDateTime(OffsetDateTime.now());
     individualResponseCase.setAddressType(parentCase.getAddressType());
@@ -223,7 +219,7 @@ public class CaseService {
     individualResponseCase.setLad(parentCase.getLad());
     individualResponseCase.setRegion(parentCase.getRegion());
 
-    return individualResponseCase;
+    return saveNewCaseAndStampCaseRef(individualResponseCase);
   }
 
   public Case getCaseByCaseId(UUID caseId) {

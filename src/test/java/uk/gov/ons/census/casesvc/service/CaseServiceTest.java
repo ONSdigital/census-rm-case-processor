@@ -175,15 +175,6 @@ public class CaseServiceTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void testUniqueCaseRefCreationThrowsRuntimeException() {
-    // Given
-    when(caseRepository.existsById(anyInt())).thenReturn(true);
-
-    // When
-    underTest.getUniqueCaseRef();
-  }
-
-  @Test(expected = RuntimeException.class)
   public void testCaseIdNotFound() {
     when(caseRepository.findByCaseId(TEST_UUID)).thenReturn(Optional.empty());
 

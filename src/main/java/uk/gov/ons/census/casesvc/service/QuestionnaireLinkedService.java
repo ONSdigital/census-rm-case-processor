@@ -41,7 +41,7 @@ public class QuestionnaireLinkedService {
       Case householdCase = caseService.getCaseByCaseId(UUID.fromString(uac.getCaseId()));
       caze = caseService.prepareIndividualResponseCaseFromParentCase(householdCase);
 
-      caseService.saveAndEmitCaseCreatedEvent(caze);
+      caseService.emitCaseCreatedEvent(caze);
     } else {
       caze = caseService.getCaseByCaseId(UUID.fromString(uac.getCaseId()));
     }

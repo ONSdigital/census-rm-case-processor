@@ -151,7 +151,6 @@ public class FulfilmentRequestServiceTest {
         .isEqualTo(individualResponseCode);
     Case actualChildCase = caseArgumentCaptor.getValue();
     checkIndivdualFulfilmentRequestCase(parentCase, actualChildCase, managementEvent);
-    verify(caseService, times(1)).getUniqueCaseRef();
   }
 
   private void testIndividualResponseCodeSMS(String individualResponseCode) {
@@ -192,7 +191,6 @@ public class FulfilmentRequestServiceTest {
     verify(caseService).saveAndEmitCaseCreatedEvent(caseArgumentCaptor.capture());
     Case actualChildCase = caseArgumentCaptor.getValue();
     checkIndivdualFulfilmentRequestCase(parentCase, actualChildCase, managementEvent);
-    verify(caseService, times(1)).getUniqueCaseRef();
   }
 
   private void checkIndivdualFulfilmentRequestCase(
