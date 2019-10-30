@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageDeliveryMode;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.exception.ListenerExecutionFailedException;
 import org.springframework.amqp.rabbit.retry.MessageRecoverer;
@@ -87,6 +88,8 @@ public class ManagedMessageRecoverer implements MessageRecoverer {
       logMessage(
           reportResult, listenerExecutionFailedException.getCause(), messageHash, rawMessageBody);
 
+      // At this point message is not persistent, we need it to be persistent
+      message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
       // Send the bad message to an exchange where it'll be retried at some future point in time
       rabbitTemplate.send(delayExchangeName, queueName, message);
     } else {
@@ -158,6 +161,8 @@ public class ManagedMessageRecoverer implements MessageRecoverer {
       result = false; // The next bit might go wrong
       log.with("message_hash", messageHash).warn("Skipping message");
 
+      // At this point message is not persistent, we need it to be persistent
+      message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
       // Send the bad message to the quarantine queue
       rabbitTemplate.send(quarantineExchangeName, queueName, message);
 
