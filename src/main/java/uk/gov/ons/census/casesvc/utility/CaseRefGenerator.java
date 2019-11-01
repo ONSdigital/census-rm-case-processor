@@ -1,26 +1,17 @@
 package uk.gov.ons.census.casesvc.utility;
 
 import java.math.BigInteger;
-import java.security.SecureRandom;
-import java.util.Random;
 import uk.gov.ons.census.casesvc.utility.pseudorandom.FE1;
 import uk.gov.ons.census.casesvc.utility.pseudorandom.FPEException;
 
-public class RandomCaseRefGenerator {
+public class CaseRefGenerator {
   private static final int LOWEST_POSSIBLE_CASE_REF = 10000000;
   private static final int HIGHEST_POSSIBLE_CASE_REF = 99999999;
-  private static final Random random = new SecureRandom();
 
-  public static int getCaseRef() {
-    int caseRef = random.nextInt(HIGHEST_POSSIBLE_CASE_REF - LOWEST_POSSIBLE_CASE_REF);
-    caseRef += LOWEST_POSSIBLE_CASE_REF;
-    return caseRef;
-  }
-
-  public static int getPseudoRandomCaseRef(int sequenceNumber) {
+  public static int getCaseRef(int sequenceNumber) {
     FE1 fe1 = new FE1();
 
-    // The range of plaintext and ciphertext values
+    // The range of plaintext and ciphertext values - we subtract 1 because 89999999 is prime!!
     BigInteger modulus =
         BigInteger.valueOf(HIGHEST_POSSIBLE_CASE_REF - LOWEST_POSSIBLE_CASE_REF - 1);
 

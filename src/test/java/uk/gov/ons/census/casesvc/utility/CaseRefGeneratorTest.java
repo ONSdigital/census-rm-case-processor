@@ -9,20 +9,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 import org.junit.Test;
 
-public class RandomCaseRefGeneratorTest {
+public class CaseRefGeneratorTest {
 
   @Test
   public void testGetCaseRef() {
-    for (int i = 0; i < 10000; i++) {
-      int caseRef = RandomCaseRefGenerator.getCaseRef();
-      assertThat(caseRef).isBetween(10000000, 99999999);
-    }
-  }
-
-  @Test
-  public void testGetPseudorandomCaseRef() {
-    // Be careful with this - on a fact computer this test is very quick, but on a slow one, v. slow
-    int max_num_of_caserefs_to_check = 1000000; // We should probably check 90 million, one day
+    // Be careful - on a fast multi-core CPU this test's very quick, but can be very slow
+    int max_num_of_caserefs_to_check = 1000000; // We should probably check all 90 million... one day
 
     int[] pseudorandomCaseRefs = new int[max_num_of_caserefs_to_check];
     IntStream stream = IntStream.range(0, max_num_of_caserefs_to_check);
@@ -34,7 +26,7 @@ public class RandomCaseRefGeneratorTest {
         .parallel()
         .forEach(
             i -> {
-              pseudorandomCaseRefs[i] = RandomCaseRefGenerator.getPseudoRandomCaseRef(i);
+              pseudorandomCaseRefs[i] = CaseRefGenerator.getCaseRef(i);
               if (caseRefsGenerated.incrementAndGet() % 10000 == 0) {
                 System.out.println(
                     String.format(

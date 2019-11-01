@@ -20,7 +20,7 @@ import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.CaseState;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.utility.EventHelper;
-import uk.gov.ons.census.casesvc.utility.RandomCaseRefGenerator;
+import uk.gov.ons.census.casesvc.utility.CaseRefGenerator;
 
 @Service
 public class CaseService {
@@ -55,7 +55,7 @@ public class CaseService {
 
   public Case saveNewCaseAndStampCaseRef(Case caze) {
     caze = caseRepository.saveAndFlush(caze);
-    caze.setCaseRef(RandomCaseRefGenerator.getPseudoRandomCaseRef(caze.getId()));
+    caze.setCaseRef(CaseRefGenerator.getCaseRef(caze.getId()));
     caze = caseRepository.saveAndFlush(caze);
 
     return caze;
