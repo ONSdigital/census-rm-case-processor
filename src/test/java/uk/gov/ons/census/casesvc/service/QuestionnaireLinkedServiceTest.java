@@ -299,7 +299,7 @@ public class QuestionnaireLinkedServiceTest {
     inOrder.verify(caseService).prepareIndividualResponseCaseFromParentCase(testHHCase);
 
     ArgumentCaptor<Case> caseCaptor = ArgumentCaptor.forClass(Case.class);
-    inOrder.verify(caseService).saveAndEmitCaseCreatedEvent(caseCaptor.capture());
+    inOrder.verify(caseService).emitCaseCreatedEvent(caseCaptor.capture());
     Case actualCase = caseCaptor.getValue();
     assertThat(actualCase.getCaseId()).isEqualTo(TEST_CASE_ID_2);
     assertThat(actualCase.isCcsCase()).isFalse();
@@ -383,7 +383,7 @@ public class QuestionnaireLinkedServiceTest {
     inOrder.verify(uacService).findByQid(TEST_HI_QID);
     inOrder.verify(caseService).getCaseByCaseId(TEST_CASE_ID_1);
     inOrder.verify(caseService).prepareIndividualResponseCaseFromParentCase(testHHCase);
-    inOrder.verify(caseService).saveAndEmitCaseCreatedEvent(testHICase);
+    inOrder.verify(caseService).emitCaseCreatedEvent(testHICase);
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
     inOrder.verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());

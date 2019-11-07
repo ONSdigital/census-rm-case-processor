@@ -7,4 +7,6 @@ import uk.gov.ons.census.casesvc.model.entity.Case;
 
 public interface CaseRepository extends JpaRepository<Case, Integer> {
   Optional<Case> findByCaseId(UUID caseId);
+
+  Optional<Case> findByCaseRef(Integer caseRef);
 }

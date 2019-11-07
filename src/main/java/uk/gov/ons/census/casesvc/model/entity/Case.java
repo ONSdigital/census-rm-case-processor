@@ -7,26 +7,26 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Data;
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.GenerationTime;
 
 @Data
 @Entity
 @Table(name = "cases")
 public class Case {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Id private UUID caseId;
+
+  // This bad boy allows us to generate a pseudorandom unique (non-colliding) caseRef
   @Column(columnDefinition = "serial")
-  private Integer id;
+  @Generated(GenerationTime.INSERT)
+  private int secretSequenceNumber;
 
   @Column private Integer caseRef;
-
-  @Column private UUID caseId;
 
   @Column private String arid;
 

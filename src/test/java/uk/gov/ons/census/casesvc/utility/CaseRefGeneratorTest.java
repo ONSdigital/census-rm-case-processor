@@ -7,14 +7,16 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class CaseRefGeneratorTest {
 
   @Test
+  @Ignore
   public void testGetCaseRef() {
     // Be careful - on a fast multi-core CPU this test's very quick, but can be very slow
-    int max_num_of_caserefs_to_check = 1000000; // We should probably check all 90 million... one day
+    int max_num_of_caserefs_to_check = 1000000; // We should probably check all 90 million one day
 
     int[] pseudorandomCaseRefs = new int[max_num_of_caserefs_to_check];
     IntStream stream = IntStream.range(0, max_num_of_caserefs_to_check);

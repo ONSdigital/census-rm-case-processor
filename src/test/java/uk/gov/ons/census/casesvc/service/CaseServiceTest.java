@@ -3,8 +3,8 @@ package uk.gov.ons.census.casesvc.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.service.CaseService.CASE_UPDATE_ROUTING_KEY;
@@ -86,9 +86,9 @@ public class CaseServiceTest {
     // Then
     verify(mapperFacade).map(createCaseSample, Case.class);
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(caseRepository).saveAndFlush(caseArgumentCaptor.capture());
+    verify(caseRepository, times(2)).saveAndFlush(caseArgumentCaptor.capture());
 
-    Case savedCase = caseArgumentCaptor.getValue();
+    Case savedCase = caseArgumentCaptor.getAllValues().get(1);
     assertThat(savedCase.getTreatmentCode()).isEqualTo(TEST_TREATMENT_CODE);
     assertThat(savedCase.getFieldCoordinatorId()).isEqualTo(FIELD_CORD_ID);
     assertThat(savedCase.getFieldOfficerId()).isEqualTo(FIELD_OFFICER_ID);
@@ -104,6 +104,15 @@ public class CaseServiceTest {
     ReflectionTestUtils.setField(underTest, "actionPlanId", TEST_ACTION_PLAN_ID.toString());
     ReflectionTestUtils.setField(
         underTest, "collectionExerciseId", TEST_COLLECTION_EXERCISE_ID.toString());
+
+    // This simulates the DB creating the ID, which it does when the case is persisted
+    when(caseRepository.saveAndFlush(any(Case.class)))
+        .then(
+            invocation -> {
+              Case caze = invocation.getArgument(0);
+              caze.setSecretSequenceNumber(123);
+              return caze;
+            });
 
     // When
     Case actualCase = underTest.createCCSCase(caseId, sampleUnit, false, false);
@@ -128,6 +137,15 @@ public class CaseServiceTest {
     ReflectionTestUtils.setField(
         underTest, "collectionExerciseId", TEST_COLLECTION_EXERCISE_ID.toString());
 
+    // This simulates the DB creating the ID, which it does when the case is persisted
+    when(caseRepository.saveAndFlush(any(Case.class)))
+        .then(
+            invocation -> {
+              Case caze = invocation.getArgument(0);
+              caze.setSecretSequenceNumber(123);
+              return caze;
+            });
+
     // When
     Case actualCase = underTest.createCCSCase(caseId, sampleUnit, true, false);
 
@@ -146,6 +164,7 @@ public class CaseServiceTest {
     // Given
     Case caze = new Case();
     caze.setRegion("E");
+    caze.setCaseRef(123);
     caze.setCaseId(UUID.randomUUID());
     caze.setState(CaseState.ACTIONABLE);
     caze.setPostcode(TEST_POSTCODE);

@@ -19,8 +19,8 @@ import uk.gov.ons.census.casesvc.model.dto.SampleUnitDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.CaseState;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
-import uk.gov.ons.census.casesvc.utility.EventHelper;
 import uk.gov.ons.census.casesvc.utility.CaseRefGenerator;
+import uk.gov.ons.census.casesvc.utility.EventHelper;
 
 @Service
 public class CaseService {
@@ -55,7 +55,7 @@ public class CaseService {
 
   public Case saveNewCaseAndStampCaseRef(Case caze) {
     caze = caseRepository.saveAndFlush(caze);
-    caze.setCaseRef(CaseRefGenerator.getCaseRef(caze.getId()));
+    caze.setCaseRef(CaseRefGenerator.getCaseRef(caze.getSecretSequenceNumber()));
     caze = caseRepository.saveAndFlush(caze);
 
     return caze;
@@ -161,7 +161,7 @@ public class CaseService {
     // These are the mandatory fields required by RH, as documented in the event dictionary
     collectionCase.setActionableFrom(OffsetDateTime.now());
     collectionCase.setAddress(address);
-    collectionCase.setCaseRef(Long.toString(caze.getCaseRef()));
+    collectionCase.setCaseRef(Integer.toString(caze.getCaseRef()));
     collectionCase.setCaseType(caze.getCaseType());
     collectionCase.setCollectionExerciseId(caze.getCollectionExerciseId());
     collectionCase.setId(caze.getCaseId().toString());
@@ -232,7 +232,7 @@ public class CaseService {
   }
 
   public Case getCaseByCaseRef(int caseRef) {
-    Optional<Case> caseOptional = caseRepository.findById(caseRef);
+    Optional<Case> caseOptional = caseRepository.findByCaseRef(caseRef);
 
     if (caseOptional.isEmpty()) {
       throw new RuntimeException(String.format("Case ref '%s' not present", caseRef));
