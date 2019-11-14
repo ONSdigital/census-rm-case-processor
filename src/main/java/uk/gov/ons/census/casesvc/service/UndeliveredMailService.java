@@ -1,36 +1,30 @@
-package uk.gov.ons.census.casesvc.messaging;
+package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
-import org.springframework.integration.annotation.MessageEndpoint;
-import org.springframework.integration.annotation.ServiceActivator;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
-import uk.gov.ons.census.casesvc.service.CaseService;
-import uk.gov.ons.census.casesvc.service.UacService;
 
-@MessageEndpoint
-public class UndeliveredMailReceiver {
+@Service
+public class UndeliveredMailService {
   private static final String LOG_EVENT_DESCRIPTION = "Undelivered mail reported";
   private final UacService uacService;
   private final CaseService caseService;
   private final EventLogger eventLogger;
 
-  public UndeliveredMailReceiver(
+  public UndeliveredMailService(
       UacService uacService, CaseService caseService, EventLogger eventLogger) {
     this.uacService = uacService;
     this.caseService = caseService;
     this.eventLogger = eventLogger;
   }
 
-  @Transactional
-  @ServiceActivator(inputChannel = "undeliveredMailInputChannel")
-  public void receiveMessage(ResponseManagementEvent event) {
+  public void processMessage(ResponseManagementEvent event) {
     String questionnaireId = event.getPayload().getFulfilmentInformation().getQuestionnaireId();
 
     Case caze;

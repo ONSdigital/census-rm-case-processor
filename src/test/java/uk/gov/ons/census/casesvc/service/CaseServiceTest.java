@@ -2,14 +2,13 @@ package uk.gov.ons.census.casesvc.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.service.CaseService.CASE_UPDATE_ROUTING_KEY;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import ma.glasnost.orika.MapperFacade;
@@ -23,12 +22,18 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
+import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
+import uk.gov.ons.census.casesvc.model.dto.CreateUacQid;
+import uk.gov.ons.census.casesvc.model.dto.EventDTO;
+import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.SampleUnitDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.CaseState;
+import uk.gov.ons.census.casesvc.model.entity.EventType;
+import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -196,6 +201,41 @@ public class CaseServiceTest {
       // THEN
       assertThat(re.getMessage()).isEqualTo(expectedErrorMessage);
       throw re;
+    }
+  }
+
+  @RunWith(MockitoJUnitRunner.class)
+  public static class UnaddressedServiceTest {
+
+    @Mock UacService uacService;
+    @Mock EventLogger eventLogger;
+
+    @InjectMocks UnaddressedService underTest;
+
+    @Test
+    public void testReceiveCreateUacQid() {
+      // Given
+      CreateUacQid createUacQid = new CreateUacQid();
+      createUacQid.setQuestionnaireType("21");
+      createUacQid.setBatchId(UUID.randomUUID());
+      UacQidLink uacQidLink = new UacQidLink();
+      when(uacService.buildUacQidLink(null, 21, createUacQid.getBatchId())).thenReturn(uacQidLink);
+      when(uacService.saveAndEmitUacUpdatedEvent(any(UacQidLink.class)))
+          .thenReturn(new PayloadDTO());
+
+      // When
+      underTest.receiveMessage(createUacQid);
+
+      // Then
+      verify(uacService).saveAndEmitUacUpdatedEvent(eq(uacQidLink));
+      verify(eventLogger)
+          .logUacQidEvent(
+              eq(uacQidLink),
+              any(OffsetDateTime.class),
+              eq("Unaddressed UAC/QID pair created"),
+              any(EventType.class),
+              any(EventDTO.class),
+              anyString());
     }
   }
 }

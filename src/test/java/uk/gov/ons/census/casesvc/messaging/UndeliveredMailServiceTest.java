@@ -22,8 +22,9 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.service.CaseService;
 import uk.gov.ons.census.casesvc.service.UacService;
+import uk.gov.ons.census.casesvc.service.UndeliveredMailService;
 
-public class UndeliveredMailReceiverTest {
+public class UndeliveredMailServiceTest {
 
   @Test
   public void testReceiveMessageWithCaseRef() {
@@ -39,14 +40,14 @@ public class UndeliveredMailReceiverTest {
     UacService uacService = mock(UacService.class);
     CaseService caseService = mock(CaseService.class);
     EventLogger eventLogger = mock(EventLogger.class);
-    UndeliveredMailReceiver underTest =
-        new UndeliveredMailReceiver(uacService, caseService, eventLogger);
+    UndeliveredMailService underTest =
+        new UndeliveredMailService(uacService, caseService, eventLogger);
 
     // Given
     when(caseService.getCaseByCaseRef(eq(123))).thenReturn(caze);
 
     // When
-    underTest.receiveMessage(event);
+    underTest.processMessage(event);
 
     // Then
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
@@ -84,14 +85,14 @@ public class UndeliveredMailReceiverTest {
     UacService uacService = mock(UacService.class);
     CaseService caseService = mock(CaseService.class);
     EventLogger eventLogger = mock(EventLogger.class);
-    UndeliveredMailReceiver underTest =
-        new UndeliveredMailReceiver(uacService, caseService, eventLogger);
+    UndeliveredMailService underTest =
+        new UndeliveredMailService(uacService, caseService, eventLogger);
 
     // Given
     when(uacService.findByQid(eq("76543"))).thenReturn(uacQidLink);
 
     // When
-    underTest.receiveMessage(event);
+    underTest.processMessage(event);
 
     // Then
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);

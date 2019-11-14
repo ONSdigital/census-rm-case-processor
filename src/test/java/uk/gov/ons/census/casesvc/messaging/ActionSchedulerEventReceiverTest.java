@@ -8,6 +8,7 @@ import org.junit.Test;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
+import uk.gov.ons.census.casesvc.service.ActionSchedulerEventService;
 import uk.gov.ons.census.casesvc.service.EventService;
 
 public class ActionSchedulerEventReceiverTest {
@@ -16,7 +17,7 @@ public class ActionSchedulerEventReceiverTest {
   public void testReceiveMessage() {
     // Given
     EventService eventService = mock(EventService.class);
-    ActionSchedulerEventReceiver underTest = new ActionSchedulerEventReceiver(eventService);
+    ActionSchedulerEventService underTest = new ActionSchedulerEventService(eventService);
 
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
     EventDTO event = new EventDTO();
@@ -34,7 +35,7 @@ public class ActionSchedulerEventReceiverTest {
   public void testReceiveUnexpectedMessage() {
     // Given
     EventService eventService = mock(EventService.class);
-    ActionSchedulerEventReceiver underTest = new ActionSchedulerEventReceiver(eventService);
+    ActionSchedulerEventService underTest = new ActionSchedulerEventService(eventService);
 
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
     EventDTO event = new EventDTO();

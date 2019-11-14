@@ -1,23 +1,18 @@
-package uk.gov.ons.census.casesvc.messaging;
+package uk.gov.ons.census.casesvc.service;
 
-import org.springframework.integration.annotation.MessageEndpoint;
-import org.springframework.integration.annotation.ServiceActivator;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
-import uk.gov.ons.census.casesvc.service.EventService;
 
-@MessageEndpoint
-public class ActionSchedulerEventReceiver {
+@Service
+public class ActionSchedulerEventService {
 
   private final EventService eventService;
 
-  public ActionSchedulerEventReceiver(EventService eventService) {
+  public ActionSchedulerEventService(EventService eventService) {
     this.eventService = eventService;
   }
 
-  @Transactional
-  @ServiceActivator(inputChannel = "actionCaseInputChannel")
   public void receiveMessage(ResponseManagementEvent event) {
     EventTypeDTO eventType = event.getEvent().getType();
 
