@@ -14,12 +14,10 @@ import javax.crypto.spec.SecretKeySpec;
  * (https://dotfpe.codeplex.com/); which was ported from Botan Library Version 1.10.3
  * (http://botan.randombit.net).
  *
- * <p>Methods on this class are not thread-safe.
+ * <p>Methods on this class are not thread-safe.....
  */
 public class FE1 {
-
-  /** Instantiates a new FE1 instance. */
-  public FE1() {}
+  private static final int LOWEST_SAFE_NUMBER_OF_ROUNDS = 3;
 
   /** A simple round function based on HMAC(SHA-256). */
   private static class FPEEncryptor {
@@ -31,7 +29,6 @@ public class FE1 {
     private static final String HMAC_ALGORITHM = "HmacSHA256";
 
     private byte[] macNT;
-
     private Mac macGenerator;
 
     /**
@@ -75,7 +72,7 @@ public class FE1 {
         throw new IllegalArgumentException("tweak (IV) must be an array of length > 0");
       }
 
-      byte[] encodedModulus = Utility.encode(modulus);
+      byte[] encodedModulus = Utility.convertToByteArrayAndStripLeadingZeros(modulus);
 
       if (encodedModulus.length > MAX_N_BYTES) {
         throw new IllegalArgumentException(
@@ -125,97 +122,41 @@ public class FE1 {
      *
      * @param roundNo to ensure that value is changed in a different way each time, increase this
      *     for each time you call the method on the same value.
-     * @param r the number that we are using as input to the function.
+     * @param valueToEncrypt the number that we are using as input to the function.
      * @return a new BigInteger value that has reversibly encrypted r.
      * @throws FPEException if any problems occur whilst writing to an internal {@link
      *     ByteArrayOutputStream}. This should never happen.
      */
-    BigInteger f(int roundNo, BigInteger r) throws FPEException {
-      byte[] rBin = Utility.encode(r);
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      try {
+    private BigInteger applyReversibleEncryption(int roundNo, BigInteger valueToEncrypt)
+        throws FPEException {
+      byte[] rBin = Utility.convertToByteArrayAndStripLeadingZeros(valueToEncrypt);
+
+      try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
         baos.write(this.macNT);
         baos.write(Utility.toBEBytes(roundNo));
 
         baos.write(Utility.toBEBytes(rBin.length));
         baos.write(rBin);
+        byte[] encyptedValueBtyes = this.macGenerator.doFinal(baos.toByteArray());
+
+        return turnFinalValueIntoPositiveBigInteger(encyptedValueBtyes);
       } catch (IOException e) {
         throw new FPEException(
             "Unable to write to internal byte array, this should never happen so indicates a defect in the code",
             e);
       }
+    }
 
-      byte[] x = this.macGenerator.doFinal(baos.toByteArray());
-      byte[] positiveX = new byte[x.length + 1];
-      System.arraycopy(x, 0, positiveX, 1, x.length);
+    private BigInteger turnFinalValueIntoPositiveBigInteger(byte[] encyptedValueBtyes) {
+      byte[] positiveX = new byte[encyptedValueBtyes.length + 1];
+      System.arraycopy(encyptedValueBtyes, 0, positiveX, 1, encyptedValueBtyes.length);
       // First byte will always be 0 (default value) so BigInteger will always be positive.
-      BigInteger ret = new BigInteger(positiveX);
-      return ret;
+      return new BigInteger(positiveX);
     }
   }
 
   /** Normally FPE is for SSNs, CC#s, etc.; so limit modulus to 128-bit numbers. */
   private static final int MAX_N_BYTES = 128 / 8;
-
-  /**
-   * Generic Z_n FPE decryption, FE1 scheme.
-   *
-   * @param modulus Use to determine the range of the numbers. Example, if the numbers range from 0
-   *     to 999, use "1000" here.
-   * @param ciphertext The number to decrypt. Must be &lt;= modulus.
-   * @param key Secret key, must be compatible with HMAC(SHA256).
-   * @param tweak Non-secret parameter, think of it as an IV - use the same one used to encrypt.
-   *     Must be non-null and non-zero length.
-   * @return The decrypted number
-   * @throws FPEException if the passed data is too large to decrypt.
-   * @throws IllegalArgumentException if any of the parameters are invalid.
-   */
-  public BigInteger decrypt(
-      final BigInteger modulus, final BigInteger ciphertext, final byte[] key, final byte[] tweak)
-      throws FPEException {
-    if (modulus == null) {
-      throw new IllegalArgumentException("modulus must not be null.");
-    }
-    if (ciphertext == null) {
-      throw new IllegalArgumentException("ciphertext must not be null.");
-    }
-
-    if (ciphertext.compareTo(modulus) >= 0) {
-      throw new IllegalArgumentException(
-          "Cannot decrypt a number bigger than the modulus (otherwise this wouldn't be format preserving encryption");
-    }
-
-    FPEEncryptor encryptor = new FPEEncryptor(key, modulus, tweak);
-
-    BigInteger[] factors = NumberTheory.factor(modulus);
-    BigInteger firstFactor = factors[0];
-    BigInteger secondFactor = factors[1];
-
-    int rounds = getNumberOfRounds(firstFactor, secondFactor);
-
-    /*
-     * x starts as the ciphertext value and will be modified by several rounds of encryption in the rest of this method before arriving back at the
-     * plaintext value, which is returned.
-     */
-    BigInteger x = ciphertext;
-
-    /*
-     * Apply the same algorithm repeatedly on x for the number of rounds given by getNumberOfRounds. Each round increases the security. Note that you must
-     * use EXACTLY the same number of rounds to decrypt as you did to encrypt! As the round number is used in the calculation, we count down rather than up.
-     */
-    for (int round = rounds - 1; round >= 0; round--) {
-      /*
-       * Effectively reversing the calculation in encrypt for this.
-       */
-      BigInteger w = x.mod(firstFactor);
-      BigInteger right = x.divide(firstFactor);
-
-      BigInteger left = w.subtract(encryptor.f(round, right)).mod(firstFactor);
-      x = secondFactor.multiply(left).add(right);
-    }
-
-    return x;
-  }
 
   /**
    * Generic Z_n FPE encryption using the FE1 scheme.
@@ -254,47 +195,44 @@ public class FE1 {
     BigInteger firstFactor = factors[0];
     BigInteger secondFactor = factors[1];
 
-    int rounds = getNumberOfRounds(firstFactor, secondFactor);
-
-    /*
-     * x starts as the plaintext value and will be modified by several rounds of encryption in the rest of this method before being returned.
-     */
-    BigInteger x = plaintext;
+    int numberOfRounds = getNumberOfRounds(firstFactor, secondFactor);
+    BigInteger encryptingText = plaintext;
 
     /*
      * Apply the same algorithm repeatedly on x for the number of rounds given by getNumberOfRounds. Each round increases the security. Note that the
      * attribute and method names used align to the paper on FE1, not Java conventions on readability.
      */
-    for (int round = 0; round != rounds; round++) {
+    for (int round = 0; round != numberOfRounds; round++) {
       /*
        * Split the value of x in to left and right values (think splitting the binary in to two halves), around the second (smaller) factor
        */
-      BigInteger left = x.divide(secondFactor);
-      BigInteger right = x.mod(secondFactor);
+      BigInteger left = encryptingText.divide(secondFactor);
+      BigInteger right = encryptingText.mod(secondFactor);
 
       // Recalculate x as firstFactor * right + (left + F(round, right) % firstFactor)
-      BigInteger w = left.add(encryptor.f(round, right)).mod(firstFactor);
-      x = firstFactor.multiply(right).add(w);
+      BigInteger w = left.add(encryptor.applyReversibleEncryption(round, right)).mod(firstFactor);
+      encryptingText = firstFactor.multiply(right).add(w);
     }
 
-    return x;
+    return encryptingText;
   }
 
   /**
    * According to <a href="http://eprint.iacr.org/2009/251.pdf">FPE paper by Rogaway, Bellare,
    * etc.</a>, the minimum safe number of rounds to use for FPE is 2+log_a(b). If a &gt;= b then
    * log_a(b)&lt;= 1 so 3 rounds is safe. The FPE factorization routine should always return a &gt;=
-   * b, so just confirm that and return 3.
+   * b, so check that
    *
-   * @param a first number output from {@link NumberTheory#factor(BigInteger)}
-   * @param b second number output from {@link NumberTheory#factor(BigInteger)}
+   * @param firstFactor first number output from {@link NumberTheory#factor(BigInteger)}
+   * @param secondFactor second number output from {@link NumberTheory#factor(BigInteger)}
    * @return Always returns the value 3
    * @throws FPEException FPE rounds: a &lt; b
    */
-  private static int getNumberOfRounds(BigInteger a, BigInteger b) throws FPEException {
-    if (a.compareTo(b) == -1) {
+  private static int getNumberOfRounds(BigInteger firstFactor, BigInteger secondFactor)
+      throws FPEException {
+    if (firstFactor.compareTo(secondFactor) == -1) {
       throw new FPEException("FPE rounds: a < b");
     }
-    return 3;
+    return LOWEST_SAFE_NUMBER_OF_ROUNDS;
   }
 }

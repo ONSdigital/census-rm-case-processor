@@ -16,7 +16,6 @@ public class CaseRefGenerator {
   // An initialisation vector, or tweak, used in the algorithm.
   private static final byte[] iv = new byte[] {0x01, 0x02, 0x03, 0x04, 0x05, 0x06};
 
-
   public static int getCaseRef(int sequenceNumber) {
     BigInteger plaintextValue = BigInteger.valueOf(sequenceNumber);
 

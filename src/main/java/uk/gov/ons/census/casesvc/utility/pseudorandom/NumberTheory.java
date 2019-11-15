@@ -530,7 +530,7 @@ class NumberTheory {
    * @param n the number to examine
    * @return the number of 0's at the end of a binary representation of n.
    */
-  static int countLowZeroBits(BigInteger n) {
+  private static int countLowZeroBits(BigInteger n) {
     int lowZero = 0;
 
     if (n.signum() > 0) {
@@ -556,7 +556,7 @@ class NumberTheory {
    * @param n the byte to count the trailing zeros of.
    * @return the number of trailing zeros found.
    */
-  static int countTrailingZeros(byte n) {
+  private static int countTrailingZeros(byte n) {
     for (int i = 0; i != 8; ++i) {
       if (((n >> i) & 0x01) > 0) {
         return i;
