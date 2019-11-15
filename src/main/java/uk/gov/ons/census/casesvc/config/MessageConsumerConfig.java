@@ -71,7 +71,7 @@ public class MessageConsumerConfig {
   }
 
   @Bean
-  public IntegrationFlow inboundSampleFlow(@Autowired EventService eventService) {
+  public IntegrationFlow inboundSampleFlow(EventService eventService) {
 
     return listenToThisQueueAndSendMsgToThisMethodWithThisType(
         env.getProperty("queueconfig.inbound-queue"),
@@ -80,14 +80,14 @@ public class MessageConsumerConfig {
   }
 
   @Bean
-  public IntegrationFlow inboundReceiptFlow(@Autowired ReceiptService receiptService) {
+  public IntegrationFlow inboundReceiptFlow(ReceiptService receiptService) {
     return listenToThisQueueAndSendMsgToThisMethod(
         env.getProperty("queueconfig.receipt-response-inbound-queue"),
         receiptService::processReceipt);
   }
 
   @Bean
-  public IntegrationFlow refusalFlow(@Autowired RefusalService refusalService) {
+  public IntegrationFlow refusalFlow(RefusalService refusalService) {
     return listenToThisQueueAndSendMsgToThisMethod(
         env.getProperty("queueconfig.refusal-response-inbound-queue"),
         refusalService::processRefusal);
@@ -102,8 +102,7 @@ public class MessageConsumerConfig {
   }
 
   @Bean
-  public IntegrationFlow actionCaseFlow(
-      @Autowired ActionSchedulerEventService actionSchedulerEventService) {
+  public IntegrationFlow actionCaseFlow(ActionSchedulerEventService actionSchedulerEventService) {
     return listenToThisQueueAndSendMsgToThisMethod(
         env.getProperty("queueconfig.action-case-queue"),
         actionSchedulerEventService::receiveMessage);
@@ -111,34 +110,33 @@ public class MessageConsumerConfig {
 
   @Bean
   public IntegrationFlow questionaireLinkedFlow(
-      @Autowired QuestionnaireLinkedService questionnaireLinkedService) {
+      QuestionnaireLinkedService questionnaireLinkedService) {
     return listenToThisQueueAndSendMsgToThisMethod(
         env.getProperty("queueconfig.questionnaire-linked-inbound-queue"),
         questionnaireLinkedService::processQuestionnaireLinked);
   }
 
   @Bean
-  public IntegrationFlow uacQudCreatedFlow(@Autowired UacService uacService) {
+  public IntegrationFlow uacQudCreatedFlow(UacService uacService) {
     return listenToThisQueueAndSendMsgToThisMethod(
         env.getProperty("queueconfig.uac-qid-created-queue"), uacService::ingestUacCreatedEvent);
   }
 
   @Bean
-  public IntegrationFlow SurveyLaunchedFlow(@Autowired SurveyService surveyService) {
+  public IntegrationFlow SurveyLaunchedFlow(SurveyService surveyService) {
     return listenToThisQueueAndSendMsgToThisMethod(
         env.getProperty("queueconfig.survey-launched-queue"), surveyService::processMessage);
   }
 
   @Bean
-  public IntegrationFlow ccsPropertyListedFlow(
-      @Autowired CCSPropertyListedService ccsPropertyListedService) {
+  public IntegrationFlow ccsPropertyListedFlow(CCSPropertyListedService ccsPropertyListedService) {
     return listenToThisQueueAndSendMsgToThisMethod(
         env.getProperty("queueconfig.ccs-property-listed-queue"),
         ccsPropertyListedService::processCCSPropertyListed);
   }
 
   @Bean
-  public IntegrationFlow unaddressedFlow(@Autowired UnaddressedService unaddressedService) {
+  public IntegrationFlow unaddressedFlow(UnaddressedService unaddressedService) {
     return listenToThisQueueAndSendMsgToThisMethodWithThisType(
         env.getProperty("queueconfig.unaddressed-inbound-queue"),
         unaddressedService::receiveMessage,
@@ -154,8 +152,7 @@ public class MessageConsumerConfig {
   }
 
   @Bean
-  public IntegrationFlow undeliveredMailFlow(
-      @Autowired UndeliveredMailService undeliveredMailService) {
+  public IntegrationFlow undeliveredMailFlow(UndeliveredMailService undeliveredMailService) {
     return listenToThisQueueAndSendMsgToThisMethod(
         env.getProperty("queueconfig.undelivered-mail-queue"),
         undeliveredMailService::processMessage);
