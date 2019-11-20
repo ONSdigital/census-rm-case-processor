@@ -8,3 +8,5 @@ spring:
 uacservice:
   connection:
     port: 18164
+
+hmacKey: 12, 32, 24, 32, 13, 32, 2, 32

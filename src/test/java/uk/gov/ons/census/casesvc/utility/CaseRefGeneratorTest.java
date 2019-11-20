@@ -12,6 +12,7 @@ import org.junit.Test;
 
 public class CaseRefGeneratorTest {
 
+  //    Marked ignored as it takes a couple of minutes to run
   @Test
   @Ignore
   public void testGetCaseRef() {
@@ -24,11 +25,13 @@ public class CaseRefGeneratorTest {
 
     System.out.println("About to generate pseudorandom case refs");
 
+    final byte[] hmacKey = new byte[] {0x10, 0x20, 0x10, 0x20, 0x10, 0x20, 0x10, 0x20};
+
     stream
         .parallel()
         .forEach(
             i -> {
-              pseudorandomCaseRefs[i] = CaseRefGenerator.getCaseRef(i);
+              pseudorandomCaseRefs[i] = CaseRefGenerator.getCaseRef(i, hmacKey);
               if (caseRefsGenerated.incrementAndGet() % 10000 == 0) {
                 System.out.println(
                     String.format(

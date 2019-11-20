@@ -21,7 +21,7 @@ public class Case {
 
   @Id private UUID caseId;
 
-  // This bad boy allows us to generate a pseudorandom unique (non-colliding) caseRef
+  // This bad boy allows us to ge;nerate a pseudorandom unique (non-colliding) caseRef
   @Column(columnDefinition = "serial")
   @Generated(GenerationTime.INSERT)
   private int secretSequenceNumber;
