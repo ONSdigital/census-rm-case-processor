@@ -8,6 +8,7 @@ import com.godaddy.logging.LoggerFactory;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageDeliveryMode;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -91,7 +92,8 @@ public class ManagedMessageRecoverer implements MessageRecoverer {
       // At this point message is not persistent, we need it to be persistent
       message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
       // Send the bad message to an exchange where it'll be retried at some future point in time
-      rabbitTemplate.send(delayExchangeName, queueName, message);
+      throw new AmqpRejectAndDontRequeueException(
+          String.format("Message sent to DLQ exchange, message_hash is: %s", messageHash));
     } else {
       // Very unlikely that this'd happen but let's log it anyway
       log.error("Unexpected exception has occurred", throwable);
@@ -209,7 +211,9 @@ public class ManagedMessageRecoverer implements MessageRecoverer {
     StringBuffer hexString = new StringBuffer();
     for (int i = 0; i < hash.length; i++) {
       String hex = Integer.toHexString(0xff & hash[i]);
-      if (hex.length() == 1) hexString.append('0');
+      if (hex.length() == 1) {
+        hexString.append('0');
+      }
       hexString.append(hex);
     }
     return hexString.toString();
