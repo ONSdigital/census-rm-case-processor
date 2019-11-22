@@ -1,12 +1,10 @@
 package uk.gov.ons.census.casesvc.utility.pseudorandom;
 
-import java.math.BigInteger;
-
 /** Utility methods to factor large numbers and count zero bits on numbers. */
-public class NumberTheory {
+class NumberTheory {
 
   /** All primes up to 2^16. */
-  static final int[] PRIMES =
+  private static final int[] PRIMES =
       new int[] {
         3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97,
         101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191,
@@ -550,8 +548,8 @@ public class NumberTheory {
    * @return a pair (always 2) factors of the num passed in which are as close to each other as
    *     possible.
    */
-  public static BigInteger[] factor(BigInteger number) {
-    int n = number.intValue();
+  static int[] factor(int number) {
+    int n = number;
     int a = 1;
     int b = 1;
 
@@ -594,7 +592,7 @@ public class NumberTheory {
           "Could not factor passed number for use in FPE.  This is usually caused by passing a prime number for a modulus.");
     }
 
-    return new BigInteger[] {BigInteger.valueOf(a), BigInteger.valueOf(b)};
+    return new int[] {a, b};
   }
 
   /** Prevents construction of a utility class. */

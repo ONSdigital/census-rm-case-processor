@@ -1,6 +1,5 @@
 package uk.gov.ons.census.casesvc.utility.pseudorandom;
 
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -10,12 +9,12 @@ import java.nio.ByteOrder;
  */
 class Utility {
 
-  static byte[] convertToByteArrayAndStripLeadingZeros(BigInteger n) {
+  static byte[] convertToByteArrayAndStripLeadingZeros(int n) {
     byte[] encodedN;
-    if (n.signum() == 0) {
+    if (n == 0) {
       encodedN = new byte[0];
     } else {
-      byte[] nAsByteArray = n.toByteArray();
+      byte[] nAsByteArray = Utility.toBEBytes(n);
       int firstNonZeroIndex = 0;
 
       while ((nAsByteArray[firstNonZeroIndex] == 0) && (firstNonZeroIndex < nAsByteArray.length)) {
