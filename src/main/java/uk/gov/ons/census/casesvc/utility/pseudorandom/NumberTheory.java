@@ -547,8 +547,6 @@ public class NumberTheory {
    *
    * @param number the number to factor. This is typically the modulus. This must NOT be a prime
    *     number or an exception will be thrown.
-   * @throws FPEException thrown if we could not factor n for use in FPE (i.e. passed number is
-   *     prime).
    * @return a pair (always 2) factors of the num passed in which are as close to each other as
    *     possible.
    */
