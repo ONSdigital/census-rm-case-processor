@@ -89,8 +89,7 @@ public class ManagedMessageRecoverer implements MessageRecoverer {
       logMessage(
           reportResult, listenerExecutionFailedException.getCause(), messageHash, rawMessageBody);
 
-      // Send the originating message to an exchange where it'll be retried at some future point in
-      // time
+      // Reject the original message where it'll be retried at some future point in time
       throw new AmqpRejectAndDontRequeueException(
           String.format("Message sent to DLQ exchange, message_hash is: %s", messageHash));
     } else {
