@@ -11,9 +11,9 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * Format Preserving Encryption using the scheme FE1 from the paper "Format-Preserving Encryption"
  * by Bellare, Rogaway, et al (http://eprint.iacr.org/2009/251).
+ *
  */
 public class FE1 {
-
   private static final int LOWEST_SAFE_NUMBER_OF_ROUNDS = 3;
   private final int modulus;
   private final int firstFactor;
@@ -30,9 +30,7 @@ public class FE1 {
     this.tweak = tweak;
   }
 
-  /**
-   * A simple round function based on HMAC(SHA-256).
-   */
+  /** A simple round function based on HMAC(SHA-256). */
   private static class FPEEncryptor {
 
     /**
@@ -58,14 +56,14 @@ public class FE1 {
      *   <li>Writing the length of the tweak.
      *   <li>Writing the tweak.
      * </ol>
-     * <p>
+     *
      * And then setting {@link #macNT} to the HMAC'd value of this byte array.
      *
-     * @param key     the key to initiate the HMAC with SHA256 generator with (must be valid for
-     *                this algorithm).
+     * @param key the key to initiate the HMAC with SHA256 generator with (must be valid for this
+     *     algorithm).
      * @param modulus the range of the output numbers.
-     * @param tweak   an initialisation vector (IV) that will be used in the initialisation of the
-     *                HMAC generator. Must be non-null and length &gt; 0.
+     * @param tweak an initialisation vector (IV) that will be used in the initialisation of the
+     *     HMAC generator. Must be non-null and length &gt; 0.
      */
     private FPEEncryptor(byte[] key, int modulus, byte[] tweak) {
       try {
@@ -134,8 +132,8 @@ public class FE1 {
      *       is the encrypted r.
      * </ol>
      *
-     * @param roundNo        to ensure that value is changed in a different way each time, increase
-     *                       this for each time you call the method on the same value.
+     * @param roundNo to ensure that value is changed in a different way each time, increase this
+     *     for each time you call the method on the same value.
      * @param valueToEncrypt the number that we are using as input to the function.
      * @return a new BigInteger value that has reversibly encrypted r.
      */
@@ -166,19 +164,17 @@ public class FE1 {
     }
   }
 
-  /**
-   * Normally FPE is for SSNs, CC#s, etc.; so limit modulus to 128-bit numbers.
-   */
+  /** Normally FPE is for SSNs, CC#s, etc.; so limit modulus to 128-bit numbers. */
   private static final int MAX_N_BYTES = 128 / 8;
 
   /**
    * Generic Z_n FPE encryption using the FE1 scheme.
    *
    * @param plaintext The number to encrypt. Must not be null.
-   * @param key       Secret key to encrypt with. Must be compatible with HMAC(SHA256). See
-   *                  https://tools.ietf.org/html/rfc2104#section-3 for recommendations, on key
-   *                  length and generation. Anything over 64 bytes is hashed to a 64 byte value, 32
-   *                  bytes is generally considered "good enough" for most applications.
+   * @param key Secret key to encrypt with. Must be compatible with HMAC(SHA256). See
+   *     https://tools.ietf.org/html/rfc2104#section-3 for recommendations, on key length and
+   *     generation. Anything over 64 bytes is hashed to a 64 byte value, 32 bytes is generally
+   *     considered "good enough" for most applications.
    * @return the encrypted version of <code>plaintext</code>.
    * @throws IllegalArgumentException if any of the parameters are invalid.
    */
