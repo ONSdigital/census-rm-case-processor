@@ -41,7 +41,6 @@ public class ManagedMessageRecoverer implements MessageRecoverer {
   private final boolean logStackTraces;
   private final String serviceName;
   private final String queueName;
-  private final String delayExchangeName;
   private final String quarantineExchangeName;
   private final RabbitTemplate rabbitTemplate;
 
@@ -51,7 +50,6 @@ public class ManagedMessageRecoverer implements MessageRecoverer {
       boolean logStackTraces,
       String serviceName,
       String queueName,
-      String delayExchangeName,
       String quarantineExchangeName,
       RabbitTemplate rabbitTemplate) {
     this.exceptionManagerClient = exceptionManagerClient;
@@ -59,7 +57,6 @@ public class ManagedMessageRecoverer implements MessageRecoverer {
     this.logStackTraces = logStackTraces;
     this.serviceName = serviceName;
     this.queueName = queueName;
-    this.delayExchangeName = delayExchangeName;
     this.quarantineExchangeName = quarantineExchangeName;
     this.rabbitTemplate = rabbitTemplate;
   }

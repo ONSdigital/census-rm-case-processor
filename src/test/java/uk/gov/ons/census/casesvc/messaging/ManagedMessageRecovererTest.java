@@ -40,7 +40,6 @@ public class ManagedMessageRecovererTest {
             false,
             "test service",
             "test queue",
-            "test delay exchange",
             "test quarantine exchange",
             rabbitTemplate);
 
@@ -84,7 +83,6 @@ public class ManagedMessageRecovererTest {
             false,
             "test service",
             "test queue",
-            "test delay exchange",
             "test quarantine exchange",
             rabbitTemplate);
 
@@ -121,7 +119,6 @@ public class ManagedMessageRecovererTest {
             false,
             "test service",
             "test queue",
-            "test delay exchange",
             "test quarantine exchange",
             rabbitTemplate);
 
@@ -183,7 +180,6 @@ public class ManagedMessageRecovererTest {
             false,
             "test service",
             "test queue",
-            "test delay exchange",
             "test quarantine exchange",
             rabbitTemplate);
 
