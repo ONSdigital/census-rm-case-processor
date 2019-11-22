@@ -53,19 +53,20 @@ public class FE1 {
      * @param modulus the range of the output numbers.
      * @param tweak an initialisation vector (IV) that will be used in the initialisation of the
      *     HMAC generator. Must be non-null and length &gt; 0.
-     * @throws FPEException if either the HMAC algorithm or the key is incompatible with the HMAC.
      */
-    private FPEEncryptor(byte[] key, BigInteger modulus, byte[] tweak) throws FPEException {
+    private FPEEncryptor(byte[] key, BigInteger modulus, byte[] tweak) {
       try {
         this.macGenerator = Mac.getInstance(HMAC_ALGORITHM);
         this.macGenerator.init(new SecretKeySpec(key, HMAC_ALGORITHM));
       } catch (NoSuchAlgorithmException e) {
         // This should never happen as HMAC/SHA-2 are built in to the JVM.
-        throw new FPEException(HMAC_ALGORITHM + " is not a valid MAC algorithm on this JVM", e);
+        throw new IllegalArgumentException(
+            HMAC_ALGORITHM + " is not a valid MAC algorithm on this JVM", e);
       } catch (InvalidKeyException e) {
         // Outer class checks that key is more than 1 byte, so don't think this can happen, included
         // for completeness though.
-        throw new FPEException("The key passed was not valid for use with " + HMAC_ALGORITHM, e);
+        throw new IllegalArgumentException(
+            "The key passed was not valid for use with " + HMAC_ALGORITHM, e);
       }
 
       if (tweak == null || tweak.length == 0) {
@@ -95,7 +96,7 @@ public class FE1 {
         baos.flush();
       } catch (IOException e) {
         // Can't imagine why this would ever happen!
-        throw new FPEException("Unable to write to byte array output stream!", e);
+        throw new RuntimeException("Unable to write to byte array output stream!", e);
       }
       this.macNT = this.macGenerator.doFinal(baos.toByteArray());
     }
@@ -124,11 +125,8 @@ public class FE1 {
      *     for each time you call the method on the same value.
      * @param valueToEncrypt the number that we are using as input to the function.
      * @return a new BigInteger value that has reversibly encrypted r.
-     * @throws FPEException if any problems occur whilst writing to an internal {@link
-     *     ByteArrayOutputStream}. This should never happen.
      */
-    private BigInteger applyReversibleEncryption(int roundNo, BigInteger valueToEncrypt)
-        throws FPEException {
+    private BigInteger applyReversibleEncryption(int roundNo, BigInteger valueToEncrypt) {
       byte[] rBin = Utility.convertToByteArrayAndStripLeadingZeros(valueToEncrypt);
 
       try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
@@ -141,7 +139,7 @@ public class FE1 {
 
         return turnFinalValueIntoPositiveBigInteger(encyptedValueBtyes);
       } catch (IOException e) {
-        throw new FPEException(
+        throw new RuntimeException(
             "Unable to write to internal byte array, this should never happen so indicates a defect in the code",
             e);
       }
@@ -171,12 +169,14 @@ public class FE1 {
    * @param tweak Non-secret parameter, think of it as an initialisation vector. Must be non-null
    *     and at least 1 byte long, no upper limit.
    * @return the encrypted version of <code>plaintext</code>.
-   * @throws FPEException if encryption was not possible.
    * @throws IllegalArgumentException if any of the parameters are invalid.
    */
   public BigInteger encrypt(
-      final BigInteger modulus, final BigInteger plaintext, final byte[] key, final byte[] tweak)
-      throws FPEException {
+      final BigInteger modulus,
+      final BigInteger plaintext,
+      final byte[] key,
+      final byte[] tweak,
+      BigInteger[] factors) {
     if (modulus == null) {
       throw new IllegalArgumentException("modulus must not be null.");
     }
@@ -191,7 +191,6 @@ public class FE1 {
 
     FPEEncryptor encryptor = new FPEEncryptor(key, modulus, tweak);
 
-    BigInteger[] factors = NumberTheory.factor(modulus);
     BigInteger firstFactor = factors[0];
     BigInteger secondFactor = factors[1];
 
@@ -226,12 +225,10 @@ public class FE1 {
    * @param firstFactor first number output from {@link NumberTheory#factor(BigInteger)}
    * @param secondFactor second number output from {@link NumberTheory#factor(BigInteger)}
    * @return Always returns the value 3
-   * @throws FPEException FPE rounds: a &lt; b
    */
-  private static int getNumberOfRounds(BigInteger firstFactor, BigInteger secondFactor)
-      throws FPEException {
+  private static int getNumberOfRounds(BigInteger firstFactor, BigInteger secondFactor) {
     if (firstFactor.compareTo(secondFactor) == -1) {
-      throw new FPEException("FPE rounds: a < b");
+      throw new RuntimeException("FPE rounds: a < b");
     }
     return LOWEST_SAFE_NUMBER_OF_ROUNDS;
   }

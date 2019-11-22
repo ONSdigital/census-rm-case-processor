@@ -3,14 +3,9 @@ package uk.gov.ons.census.casesvc.utility.pseudorandom;
 import java.math.BigInteger;
 
 /** Utility methods to factor large numbers and count zero bits on numbers. */
-class NumberTheory {
+public class NumberTheory {
 
-  /**
-   * All primes up to 2^16.
-   *
-   * <p>This is an easy-to-declare version. The useful version of this array is set up in the static
-   * initialiser, which initalises {@link #PRIMES_BI}.
-   */
+  /** All primes up to 2^16. */
   static final int[] PRIMES =
       new int[] {
         3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97,
@@ -505,36 +500,16 @@ class NumberTheory {
       };
 
   /**
-   * All primes up to 2^16 in {@link BigInteger} form, initialised from {@link #PRIMES} in the class
-   * static initialiser.
-   *
-   * <p>Used in {@link #factor(BigInteger)}.
-   */
-  private static final BigInteger[] PRIMES_BI;
-
-  /**
-   * Initialise PRIMES_BI from PRIMES.
-   *
-   * <p>This is done in code to make the syntax initialisation of primes sane.
-   */
-  static {
-    PRIMES_BI = new BigInteger[PRIMES.length];
-    for (int i = 0; i < PRIMES.length; i++) {
-      PRIMES_BI[i] = BigInteger.valueOf(PRIMES[i]);
-    }
-  }
-
-  /**
    * Return the number of 0 bits at the end of a binary representation of n.
    *
    * @param n the number to examine
    * @return the number of 0's at the end of a binary representation of n.
    */
-  private static int countLowZeroBits(BigInteger n) {
+  private static int countLowZeroBits(int n) {
     int lowZero = 0;
 
-    if (n.signum() > 0) {
-      byte[] bytes = n.toByteArray();
+    if (n > 0) {
+      byte[] bytes = Utility.toBEBytes(n);
 
       for (int i = bytes.length - 1; i >= 0; i--) {
         byte x = bytes[i];
@@ -577,51 +552,51 @@ class NumberTheory {
    * @return a pair (always 2) factors of the num passed in which are as close to each other as
    *     possible.
    */
-  static BigInteger[] factor(BigInteger number) throws FPEException {
-    BigInteger n = number;
-    BigInteger a = BigInteger.valueOf(1);
-    BigInteger b = BigInteger.valueOf(1);
+  public static BigInteger[] factor(BigInteger number) {
+    int n = number.intValue();
+    int a = 1;
+    int b = 1;
 
     int nLowZero = countLowZeroBits(n);
 
-    a = a.shiftLeft(nLowZero / 2);
-    b = b.shiftLeft(nLowZero - (nLowZero / 2));
-    n = n.shiftRight(nLowZero);
+    a = a << (nLowZero / 2);
+    b = b << (nLowZero - (nLowZero / 2));
+    n = n >> (nLowZero);
 
-    for (int i = 0; i != PRIMES_BI.length; i++) {
-      while (n.mod(PRIMES_BI[i]).signum() == 0) {
-        a = a.multiply(PRIMES_BI[i]);
+    for (int i = 0; i != PRIMES.length; i++) {
+      while (n % (PRIMES[i]) == 0) {
+        a = a * (PRIMES[i]);
         // if a > b swap A & B
-        if (a.compareTo(b) == 1) {
-          BigInteger t = a;
+        if (a > b) {
+          int t = a;
           a = b;
           b = t;
         }
-        n = n.divide(PRIMES_BI[i]);
+        n = n / (PRIMES[i]);
       }
     }
 
-    if (a.compareTo(b) == 1) {
+    if (a > b) {
       // If a>b then swap a & b
-      BigInteger t = a;
+      int t = a;
       a = b;
       b = t;
     }
-    a = a.multiply(n);
-    if (a.compareTo(b) == -1) {
+    a = a * (n);
+    if (a < b) {
       // If a<b then swap a & b
-      BigInteger t = a;
+      int t = a;
       a = b;
       b = t;
     }
 
     // if (a <= 1 || b <= 1) then no factors exist, i.e. you've passed a prime number
-    if ((a.compareTo(BigInteger.ONE) <= 0) || (b.compareTo(BigInteger.ONE) <= 0)) {
-      throw new FPEException(
+    if (a <= 1 || b <= 1) {
+      throw new IllegalArgumentException(
           "Could not factor passed number for use in FPE.  This is usually caused by passing a prime number for a modulus.");
     }
 
-    return new BigInteger[] {a, b};
+    return new BigInteger[] {BigInteger.valueOf(a), BigInteger.valueOf(b)};
   }
 
   /** Prevents construction of a utility class. */

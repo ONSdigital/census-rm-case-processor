@@ -1,10 +1,9 @@
 package uk.gov.ons.census.casesvc.utility;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 
+import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 import org.junit.Ignore;
@@ -12,12 +11,12 @@ import org.junit.Test;
 
 public class CaseRefGeneratorTest {
 
-  //    Marked ignored as it takes a couple of minutes to run
+  // Marked ignored as it takes a couple of minutes to run
   @Test
   @Ignore
   public void testGetCaseRef() {
-    // Be careful - on a fast multi-core CPU this test's very quick, but can be very slow
-    int max_num_of_caserefs_to_check = 1000000; // We should probably check all 90 million one day
+    // Be careful - on a fast multi-core CPU this test takes minutes, but could be very slow
+    int max_num_of_caserefs_to_check = 89999998;
 
     int[] pseudorandomCaseRefs = new int[max_num_of_caserefs_to_check];
     IntStream stream = IntStream.range(0, max_num_of_caserefs_to_check);
@@ -47,7 +46,7 @@ public class CaseRefGeneratorTest {
     part of the process very much */
     System.out.println("About to check pseudorandom case refs are unique and within bounds");
 
-    Set<Integer> uniqueCaseRefs = new ConcurrentHashMap<>().newKeySet();
+    Set<Integer> uniqueCaseRefs = new HashSet<>();
     stream = IntStream.range(0, max_num_of_caserefs_to_check);
     stream
         .parallel()
@@ -56,11 +55,13 @@ public class CaseRefGeneratorTest {
               int caseRef = pseudorandomCaseRefs[i];
               assertThat(caseRef).isBetween(10000000, 99999999);
 
-              if (uniqueCaseRefs.contains(caseRef)) {
-                fail("Duplicate case ref found " + caseRef);
-              }
+              synchronized (uniqueCaseRefs) {
+                if (uniqueCaseRefs.contains(caseRef)) {
+                  throw new RuntimeException("Duplicate case ref found " + caseRef);
+                }
 
-              uniqueCaseRefs.add(caseRef);
+                uniqueCaseRefs.add(caseRef);
+              }
 
               if (uniqueCaseRefs.size() % 10000 == 0) {
                 System.out.println(
