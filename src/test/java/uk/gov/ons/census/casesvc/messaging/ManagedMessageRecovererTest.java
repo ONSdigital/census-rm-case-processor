@@ -7,12 +7,14 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -22,11 +24,13 @@ import uk.gov.ons.census.casesvc.model.dto.ExceptionReportResponse;
 import uk.gov.ons.census.casesvc.model.dto.SkippedMessage;
 
 public class ManagedMessageRecovererTest {
+
   private static final String MESSAGE_HASH =
       "4f1ec3a5f36117da0e9ba42c2eda77dea47b279358a7b2bb538a51d3e13bd229";
 
-  @Test
+  @Test(expected = AmqpRejectAndDontRequeueException.class)
   public void testRecover() {
+    // Given
     ExceptionManagerClient exceptionManagerClient = mock(ExceptionManagerClient.class);
     RabbitTemplate rabbitTemplate = mock(RabbitTemplate.class);
     ManagedMessageRecoverer underTest =
@@ -52,19 +56,24 @@ public class ManagedMessageRecovererTest {
     when(exceptionManagerClient.reportException(any(), any(), any(), any()))
         .thenReturn(exceptionReportResponse);
 
-    underTest.recover(message, failedException);
+    // When
+    try {
+      underTest.recover(message, failedException);
+    } catch (AmqpRejectAndDontRequeueException expectedException) {
 
-    verify(exceptionManagerClient)
-        .reportException(
-            eq(MESSAGE_HASH), eq("test service"), eq("test queue"), eq(cause.getCause()));
+      // Then
+      verify(exceptionManagerClient)
+          .reportException(
+              eq(MESSAGE_HASH), eq("test service"), eq("test queue"), eq(cause.getCause()));
 
-    verify(rabbitTemplate).send(eq("test delay exchange"), eq("test queue"), eq(message));
+      verifyNoMoreInteractions(exceptionManagerClient);
+      verifyZeroInteractions(rabbitTemplate);
 
-    verifyNoMoreInteractions(exceptionManagerClient);
-    verifyNoMoreInteractions(rabbitTemplate);
+      throw expectedException;
+    }
   }
 
-  @Test
+  @Test(expected = AmqpRejectAndDontRequeueException.class)
   public void testRecoverExceptionManagerUnavailable() {
     ExceptionManagerClient exceptionManagerClient = mock(ExceptionManagerClient.class);
     RabbitTemplate rabbitTemplate = mock(RabbitTemplate.class);
@@ -87,16 +96,18 @@ public class ManagedMessageRecovererTest {
     when(exceptionManagerClient.reportException(any(), any(), any(), any()))
         .thenThrow(new RuntimeException());
 
-    underTest.recover(message, failedException);
+    try {
+      underTest.recover(message, failedException);
+    } catch (AmqpRejectAndDontRequeueException expectedException) {
 
-    verify(exceptionManagerClient)
-        .reportException(
-            eq(MESSAGE_HASH), eq("test service"), eq("test queue"), eq(cause.getCause()));
+      verify(exceptionManagerClient)
+          .reportException(
+              eq(MESSAGE_HASH), eq("test service"), eq("test queue"), eq(cause.getCause()));
 
-    verify(rabbitTemplate).send(eq("test delay exchange"), eq("test queue"), eq(message));
-
-    verifyNoMoreInteractions(exceptionManagerClient);
-    verifyNoMoreInteractions(rabbitTemplate);
+      verifyNoMoreInteractions(exceptionManagerClient);
+      verifyZeroInteractions(rabbitTemplate);
+      throw expectedException;
+    }
   }
 
   @Test
@@ -161,7 +172,7 @@ public class ManagedMessageRecovererTest {
     verifyNoMoreInteractions(rabbitTemplate);
   }
 
-  @Test
+  @Test(expected = AmqpRejectAndDontRequeueException.class)
   public void testRecoverPeek() {
     ExceptionManagerClient exceptionManagerClient = mock(ExceptionManagerClient.class);
     RabbitTemplate rabbitTemplate = mock(RabbitTemplate.class);
@@ -192,18 +203,21 @@ public class ManagedMessageRecovererTest {
     when(exceptionManagerClient.reportException(any(), any(), any(), any()))
         .thenReturn(exceptionReportResponse);
 
-    underTest.recover(message, failedException);
+    try {
+      underTest.recover(message, failedException);
+    } catch (AmqpRejectAndDontRequeueException expectedException) {
 
-    verify(exceptionManagerClient)
-        .reportException(
-            eq(MESSAGE_HASH), eq("test service"), eq("test queue"), eq(cause.getCause()));
+      verify(exceptionManagerClient)
+          .reportException(
+              eq(MESSAGE_HASH), eq("test service"), eq("test queue"), eq(cause.getCause()));
 
-    verify(exceptionManagerClient)
-        .respondToPeek(eq(MESSAGE_HASH), eq("test message body".getBytes()));
+      verify(exceptionManagerClient)
+          .respondToPeek(eq(MESSAGE_HASH), eq("test message body".getBytes()));
 
-    verify(rabbitTemplate).send(eq("test delay exchange"), eq("test queue"), eq(message));
+      verifyNoMoreInteractions(exceptionManagerClient);
+      verifyZeroInteractions(rabbitTemplate);
 
-    verifyNoMoreInteractions(exceptionManagerClient);
-    verifyNoMoreInteractions(rabbitTemplate);
+      throw expectedException;
+    }
   }
 }

@@ -89,9 +89,8 @@ public class ManagedMessageRecoverer implements MessageRecoverer {
       logMessage(
           reportResult, listenerExecutionFailedException.getCause(), messageHash, rawMessageBody);
 
-      // At this point message is not persistent, we need it to be persistent
-      message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
-      // Send the bad message to an exchange where it'll be retried at some future point in time
+      // Send the originating message to an exchange where it'll be retried at some future point in
+      // time
       throw new AmqpRejectAndDontRequeueException(
           String.format("Message sent to DLQ exchange, message_hash is: %s", messageHash));
     } else {
