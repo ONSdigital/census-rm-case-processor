@@ -74,3 +74,7 @@ exceptionmanager:
 
 messagelogging:
   logstacktraces: false
+
+logging:
+  level:
+    org.springframework.amqp.rabbit.listener.ConditionalRejectingErrorHandler: ERROR
