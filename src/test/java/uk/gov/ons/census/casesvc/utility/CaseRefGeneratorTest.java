@@ -22,7 +22,7 @@ public class CaseRefGeneratorTest {
     IntStream stream = IntStream.range(0, max_num_of_caserefs_to_check);
     AtomicInteger caseRefsGenerated = new AtomicInteger(0);
 
-    System.out.println("About to generate pseudorandom case refs");
+    System.out.println("About to generatxe pseudorandom case refs");
 
     final byte[] hmacKey = new byte[] {0x10, 0x20, 0x10, 0x20, 0x10, 0x20, 0x10, 0x20};
 
