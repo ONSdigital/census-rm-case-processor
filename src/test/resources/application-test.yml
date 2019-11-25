@@ -9,4 +9,4 @@ uacservice:
   connection:
     port: 18164
 
-hmacKey: vw8R3zY=
+hmacKey: 12, 32, 24, 32, 13, 32, 2, 32
