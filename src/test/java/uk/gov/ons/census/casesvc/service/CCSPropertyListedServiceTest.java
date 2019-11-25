@@ -141,6 +141,15 @@ public class CCSPropertyListedServiceTest {
 
     // Then
     InOrder inOrder = inOrder(caseService, eventLogger);
+
+    inOrder
+        .verify(caseService)
+        .createCCSCase(
+            expectedCase.getCaseId().toString(),
+            managementEvent.getPayload().getCcsProperty().getSampleUnit(),
+            true,
+            false);
+
     checkCorrectEventLogging(inOrder, expectedCase, managementEvent);
     verifyZeroInteractions(ccsToFieldService);
   }

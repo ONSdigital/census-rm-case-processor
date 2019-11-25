@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.service.CaseService.CASE_UPDATE_ROUTING_KEY;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -54,6 +55,23 @@ public class CaseServiceTest {
 
   @Test
   public void testSaveCase() {
+    Case expectedCase = getRandomCase();
+
+    // Given
+    when(caseRepository.saveAndFlush(any(Case.class))).then(obj -> obj.getArgument(0));
+
+    // When
+    underTest.saveCase(expectedCase);
+
+    // Then
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseRepository).saveAndFlush(caseArgumentCaptor.capture());
+    Case actualCase = caseArgumentCaptor.getValue();
+    assertThat(actualCase).isEqualTo(expectedCase);
+  }
+
+  @Test
+  public void testSaveCaseSample() {
     CreateCaseSample createCaseSample = new CreateCaseSample();
     createCaseSample.setTreatmentCode(TEST_TREATMENT_CODE);
     createCaseSample.setFieldCoordinatorId(FIELD_CORD_ID);
@@ -63,7 +81,7 @@ public class CaseServiceTest {
     when(caseRepository.saveAndFlush(any(Case.class))).then(obj -> obj.getArgument(0));
 
     // When
-    underTest.saveCase(createCaseSample);
+    underTest.saveCaseSample(createCaseSample);
 
     // Then
     verify(mapperFacade).map(createCaseSample, Case.class);

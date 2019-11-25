@@ -34,7 +34,12 @@ public class InvalidAddressService {
         caseService.getCaseByCaseId(UUID.fromString(invalidAddress.getCollectionCase().getId()));
 
     caze.setAddressInvalid(true);
-    caseService.saveAndEmitCaseUpdatedEvent(caze);
+
+    if (caze.isCcsCase()) {
+      caseService.saveCase(caze);
+    } else {
+      caseService.saveAndEmitCaseUpdatedEvent(caze);
+    }
 
     eventLogger.logCaseEvent(
         caze,
@@ -92,7 +97,7 @@ public class InvalidAddressService {
     return false;
   }
 
-  public UUID getCaseId(JsonNode json) {
+  private UUID getCaseId(JsonNode json) {
     return UUID.fromString(json.at("/collectionCase/id").asText());
   }
 }

@@ -1,7 +1,9 @@
 package uk.gov.ons.census.casesvc.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.*;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToRefusalDTO;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementRefusalEvent;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.io.IOException;
@@ -67,13 +69,15 @@ public class RefusalReceiverIT {
   }
 
   @Test
-  public void testGoodRefusalEmitsMessageAndLogsEvent() throws InterruptedException, IOException {
+  public void testRefusalEmitsMessageAndLogsEventForNonCCSCase()
+      throws InterruptedException, IOException {
     // GIVEN
     BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
 
     Case caze = getRandomCase();
     caze.setCaseId(TEST_CASE_ID);
     caze.setRefusalReceived(false);
+    caze.setCcsCase(false);
     caze.setUacQidLinks(null);
     caze.setEvents(null);
     caseRepository.saveAndFlush(caze);
@@ -100,6 +104,55 @@ public class RefusalReceiverIT {
     assertThat(eventDTO.getType()).isEqualTo(EventTypeDTO.CASE_UPDATED);
     assertThat(eventDTO.getSource()).isEqualTo("CASE_SERVICE");
     assertThat(eventDTO.getChannel()).isEqualTo("RM");
+
+    Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
+    assertThat(actualCase.isCcsCase()).isFalse();
+    assertThat(actualCase.isRefusalReceived()).isTrue();
+
+    List<Event> events = eventRepository.findAll();
+    assertThat(events.size()).isEqualTo(1);
+
+    RefusalDTO actualRefusal = convertJsonToRefusalDTO(events.get(0).getEventPayload());
+    assertThat(actualRefusal.getType()).isEqualTo(expectedRefusal.getType());
+    assertThat(actualRefusal.getReport()).isEqualTo(expectedRefusal.getReport());
+    assertThat(actualRefusal.getAgentId()).isEqualTo(expectedRefusal.getAgentId());
+    assertThat(actualRefusal.getCollectionCase().getId())
+        .isEqualTo(expectedRefusal.getCollectionCase().getId());
+  }
+
+  @Test
+  public void testRefusalDoesNotEmitMessageButLogsEventForCCSCase() throws InterruptedException {
+    // GIVEN
+    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
+
+    Case caze = getRandomCase();
+    caze.setCaseId(TEST_CASE_ID);
+    caze.setRefusalReceived(false);
+    caze.setCcsCase(true);
+    caze.setUacQidLinks(null);
+    caze.setEvents(null);
+    caseRepository.saveAndFlush(caze);
+
+    ResponseManagementEvent managementEvent = getTestResponseManagementRefusalEvent();
+    managementEvent.getEvent().setTransactionId(UUID.randomUUID());
+    RefusalDTO expectedRefusal = managementEvent.getPayload().getRefusal();
+    expectedRefusal.getCollectionCase().setId(TEST_CASE_ID.toString());
+
+    String json = convertObjectToJson(managementEvent);
+    Message message =
+        MessageBuilder.withBody(json.getBytes())
+            .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+            .build();
+
+    // WHEN
+    rabbitQueueHelper.sendMessage(inboundQueue, message);
+
+    // THEN
+    rabbitQueueHelper.checkMessageIsNotReceived(outboundQueue, 5);
+
+    Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
+    assertThat(actualCase.isCcsCase()).isTrue();
+    assertThat(actualCase.isRefusalReceived()).isTrue();
 
     List<Event> events = eventRepository.findAll();
     assertThat(events.size()).isEqualTo(1);

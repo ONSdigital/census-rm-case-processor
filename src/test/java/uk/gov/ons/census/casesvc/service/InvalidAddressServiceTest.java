@@ -5,7 +5,6 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.skyscreamer.jsonassert.JSONCompareMode.STRICT;
@@ -53,7 +52,7 @@ public class InvalidAddressServiceTest {
   @InjectMocks InvalidAddressService underTest;
 
   @Test
-  public void testHappyPath() {
+  public void testInvalidAddressForNonCCSCase() {
     ResponseManagementEvent managementEvent = new ResponseManagementEvent();
     managementEvent.setEvent(new EventDTO());
     managementEvent.getEvent().setDateTime(OffsetDateTime.now());
@@ -70,17 +69,26 @@ public class InvalidAddressServiceTest {
     // Given
     Case expectedCase = getRandomCase();
     expectedCase.setAddressInvalid(false);
+    expectedCase.setCcsCase(false);
     when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
 
     // when
     underTest.processMessage(managementEvent);
 
     // then
+    InOrder inOrder = inOrder(caseService, eventLogger);
+
+    inOrder.verify(caseService).getCaseByCaseId(any(UUID.class));
+
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(caseService).saveAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture());
+    inOrder.verify(caseService).saveAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture());
     Case actualCase = caseArgumentCaptor.getValue();
     assertThat(actualCase.isAddressInvalid()).isTrue();
-    verify(eventLogger)
+    assertThat(actualCase.isCcsCase()).isFalse();
+    verifyNoMoreInteractions(caseService);
+
+    inOrder
+        .verify(eventLogger)
         .logCaseEvent(
             eq(expectedCase),
             any(OffsetDateTime.class),
@@ -88,6 +96,55 @@ public class InvalidAddressServiceTest {
             eq(EventType.ADDRESS_NOT_VALID),
             eq(managementEvent.getEvent()),
             anyString());
+    verifyNoMoreInteractions(eventLogger);
+  }
+
+  @Test
+  public void testInvalidAddressForCCSCase() {
+    ResponseManagementEvent managementEvent = new ResponseManagementEvent();
+    managementEvent.setEvent(new EventDTO());
+    managementEvent.getEvent().setDateTime(OffsetDateTime.now());
+    managementEvent.getEvent().setType(ADDRESS_NOT_VALID);
+    managementEvent.setPayload(new PayloadDTO());
+    managementEvent.getPayload().setInvalidAddress(new InvalidAddress());
+    managementEvent.getPayload().getInvalidAddress().setCollectionCase(new CollectionCaseCaseId());
+    managementEvent
+        .getPayload()
+        .getInvalidAddress()
+        .getCollectionCase()
+        .setId(UUID.randomUUID().toString());
+
+    // Given
+    Case expectedCase = getRandomCase();
+    expectedCase.setAddressInvalid(false);
+    expectedCase.setCcsCase(true);
+    when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
+
+    // when
+    underTest.processMessage(managementEvent);
+
+    // then
+    InOrder inOrder = inOrder(caseService, eventLogger);
+
+    inOrder.verify(caseService).getCaseByCaseId(any(UUID.class));
+
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    inOrder.verify(caseService).saveCase(caseArgumentCaptor.capture());
+    Case actualCase = caseArgumentCaptor.getValue();
+    assertThat(actualCase.isAddressInvalid()).isTrue();
+    assertThat(actualCase.isCcsCase()).isTrue();
+    verifyNoMoreInteractions(caseService);
+
+    inOrder
+        .verify(eventLogger)
+        .logCaseEvent(
+            eq(expectedCase),
+            any(OffsetDateTime.class),
+            eq("Invalid address"),
+            eq(EventType.ADDRESS_NOT_VALID),
+            eq(managementEvent.getEvent()),
+            anyString());
+    verifyNoMoreInteractions(eventLogger);
   }
 
   @Test

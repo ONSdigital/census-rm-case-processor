@@ -41,7 +41,7 @@ public class EventServiceTest {
     CreateCaseSample createCaseSample = new CreateCaseSample();
     Case caze = new Case();
     caze.setTreatmentCode("HH_LF2R3BE");
-    when(caseService.saveCase(createCaseSample)).thenReturn(caze);
+    when(caseService.saveCaseSample(createCaseSample)).thenReturn(caze);
     UacQidLink uacQidLink = new UacQidLink();
     when(uacService.buildUacQidLink(caze, 1)).thenReturn(uacQidLink);
     when(uacService.saveAndEmitUacUpdatedEvent(any(UacQidLink.class))).thenReturn(new PayloadDTO());
@@ -51,7 +51,7 @@ public class EventServiceTest {
     underTest.processSampleReceivedMessage(createCaseSample);
 
     // Then
-    verify(caseService).saveCase(createCaseSample);
+    verify(caseService).saveCaseSample(createCaseSample);
     verify(uacService).buildUacQidLink(eq(caze), eq(1));
     verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLink);
     verify(caseService).saveAndEmitCaseCreatedEvent(caze);
@@ -72,7 +72,7 @@ public class EventServiceTest {
     CreateCaseSample createCaseSample = new CreateCaseSample();
     Case caze = new Case();
     caze.setTreatmentCode("HH_QF2R1W");
-    when(caseService.saveCase(createCaseSample)).thenReturn(caze);
+    when(caseService.saveCaseSample(createCaseSample)).thenReturn(caze);
     UacQidLink uacQidLink = new UacQidLink();
     UacQidLink secondUacQidLink = new UacQidLink();
     when(uacService.buildUacQidLink(caze, 2)).thenReturn(uacQidLink);
@@ -84,7 +84,7 @@ public class EventServiceTest {
     underTest.processSampleReceivedMessage(createCaseSample);
 
     // Then
-    verify(caseService).saveCase(createCaseSample);
+    verify(caseService).saveCaseSample(createCaseSample);
     verify(uacService, times(1)).buildUacQidLink(eq(caze), eq(2));
     verify(uacService, times(2)).saveAndEmitUacUpdatedEvent(uacQidLink);
     verify(caseService).saveAndEmitCaseCreatedEvent(caze);

@@ -1,6 +1,7 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.isCCSQuestionnaireType;
 import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.isIndividualQuestionnaireType;
 
 import java.util.UUID;
@@ -48,11 +49,21 @@ public class QuestionnaireLinkedService {
     // If UAC/QID has been receipted before case, update case
     if (!uacQidLink.isActive() && !caze.isReceiptReceived()) {
       caze.setReceiptReceived(true);
-      caseService.saveAndEmitCaseUpdatedEvent(caze);
+
+      if (caze.isCcsCase()) {
+        caseService.saveCase(caze);
+      } else {
+        caseService.saveAndEmitCaseUpdatedEvent(caze);
+      }
     }
 
     uacQidLink.setCaze(caze);
-    uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
+
+    if (isCCSQuestionnaireType(uacQidLink.getQid())) {
+      uacService.saveUacQidLink(uacQidLink);
+    } else {
+      uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
+    }
 
     eventLogger.logUacQidEvent(
         uacQidLink,
