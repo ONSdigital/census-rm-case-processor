@@ -11,7 +11,6 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * Format Preserving Encryption using the scheme FE1 from the paper "Format-Preserving Encryption"
  * by Bellare, Rogaway, et al (http://eprint.iacr.org/2009/251).
- *
  */
 public class FE1 {
   private static final int LOWEST_SAFE_NUMBER_OF_ROUNDS = 3;
