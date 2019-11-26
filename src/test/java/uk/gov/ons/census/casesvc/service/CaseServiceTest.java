@@ -79,7 +79,7 @@ public class CaseServiceTest {
     createCaseSample.setFieldOfficerId(FIELD_OFFICER_ID);
     createCaseSample.setCeExpectedCapacity(CE_CAPACITY);
 
-    ReflectionTestUtils.setField(underTest, "hmacKey", hmacKey);
+    ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", hmacKey);
 
     // Given
     when(caseRepository.saveAndFlush(any(Case.class))).then(obj -> obj.getArgument(0));
@@ -108,7 +108,7 @@ public class CaseServiceTest {
     ReflectionTestUtils.setField(underTest, "actionPlanId", TEST_ACTION_PLAN_ID.toString());
     ReflectionTestUtils.setField(
         underTest, "collectionExerciseId", TEST_COLLECTION_EXERCISE_ID.toString());
-    ReflectionTestUtils.setField(underTest, "hmacKey", hmacKey);
+    ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", hmacKey);
 
     // This simulates the DB creating the ID, which it does when the case is persisted
     when(caseRepository.saveAndFlush(any(Case.class)))
@@ -141,7 +141,7 @@ public class CaseServiceTest {
     ReflectionTestUtils.setField(underTest, "actionPlanId", TEST_ACTION_PLAN_ID.toString());
     ReflectionTestUtils.setField(
         underTest, "collectionExerciseId", TEST_COLLECTION_EXERCISE_ID.toString());
-    ReflectionTestUtils.setField(underTest, "hmacKey", hmacKey);
+    ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", hmacKey);
 
     // This simulates the DB creating the ID, which it does when the case is persisted
     when(caseRepository.saveAndFlush(any(Case.class)))

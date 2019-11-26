@@ -9,4 +9,4 @@ uacservice:
   connection:
     port: 18164
 
-hmacKey: rPr3qsjlU42hsDX5npfuCzlyF4UYfDTO
+caserefgeneratorkey: rPr3qsjlU42hsDX5npfuCzlyF4UYfDTO

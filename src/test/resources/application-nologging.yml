@@ -9,4 +9,4 @@ logging:
   level:
     ROOT: OFF
 
-hmacKey: 6+VLkvz5XYkF7vFLVX7FDnfxavQ7M+iY
+caserefgeneratorkey: 6+VLkvz5XYkF7vFLVX7FDnfxavQ7M+iY

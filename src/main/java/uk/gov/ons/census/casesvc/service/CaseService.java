@@ -42,8 +42,8 @@ public class CaseService {
   @Value("${ccsconfig.collection-exercise-id}")
   private String collectionExerciseId;
 
-  @Value("${hmacKey}")
-  private byte[] hmacKey;
+  @Value("${caserefgeneratorkey}")
+  private byte[] caserefgeneratorkey;
 
   public CaseService(
       CaseRepository caseRepository, RabbitTemplate rabbitTemplate, MapperFacade mapperFacade) {
@@ -58,7 +58,8 @@ public class CaseService {
 
   public Case saveNewCaseAndStampCaseRef(Case caze) {
     caze = caseRepository.saveAndFlush(caze);
-    caze.setCaseRef(CaseRefGenerator.getCaseRef(caze.getSecretSequenceNumber(), hmacKey));
+    caze.setCaseRef(
+        CaseRefGenerator.getCaseRef(caze.getSecretSequenceNumber(), caserefgeneratorkey));
     caze = caseRepository.saveAndFlush(caze);
 
     return caze;
