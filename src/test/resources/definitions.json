@@ -31,112 +31,170 @@
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
-      "arguments": {}
+      "arguments": {
+        "x-dead-letter-exchange": "delayedRedeliveryExchange",
+        "x-dead-letter-routing-key": "case.rh.case"
+      }
     },
     {
       "name": "case.invalidAddressQueue",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
-      "arguments": {}
+      "arguments": {
+        "x-dead-letter-exchange": "delayedRedeliveryExchange",
+        "x-dead-letter-routing-key": "case.invalidAddressQueue"
+      }
     },
     {
       "name": "case.undeliveredMailQueue",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
-      "arguments": {}
+      "arguments": {
+        "x-dead-letter-exchange": "delayedRedeliveryExchange",
+        "x-dead-letter-routing-key": "case.undeliveredMailQueue"
+      }
     },
     {
       "name": "case.action",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
-      "arguments": {}
+      "arguments": {
+        "x-dead-letter-exchange": "delayedRedeliveryExchange",
+        "x-dead-letter-routing-key": "case.action"
+      }
     },
     {
       "name": "unaddressedRequestQueue",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
-      "arguments": {}
+      "arguments": {
+        "x-dead-letter-exchange": "delayedRedeliveryExchange",
+        "x-dead-letter-routing-key": "unaddressedRequestQueue"
+      }
     },
     {
       "name": "Case.Responses",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
-      "arguments": {}
+      "arguments": {
+        "x-dead-letter-exchange": "delayedRedeliveryExchange",
+        "x-dead-letter-routing-key": "Case.Responses"
+      }
     },
     {
       "name": "action.events",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
-      "arguments": {}
+      "arguments": {
+        "x-dead-letter-exchange": "delayedRedeliveryExchange",
+        "x-dead-letter-routing-key": "action.events"
+      }
     },
     {
       "name": "case.rh.uac",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
-      "arguments": {}
+      "arguments": {
+        "x-dead-letter-exchange": "delayedRedeliveryExchange",
+        "x-dead-letter-routing-key": "case.rh.uac"
+      }
     },
     {
       "name": "case.fulfilments",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
-      "arguments": {}
+      "arguments": {
+        "x-dead-letter-exchange": "delayedRedeliveryExchange",
+        "x-dead-letter-routing-key": "case.fulfilments"
+      }
     },
     {
       "name": "case.sample.inbound",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
-      "arguments": {}
+      "arguments": {
+        "x-dead-letter-exchange": "delayedRedeliveryExchange",
+        "x-dead-letter-routing-key": "case.sample.inbound"
+      }
     },
     {
       "name": "case.uac-qid-created",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
-      "arguments": {}
+      "arguments": {
+        "x-dead-letter-exchange": "delayedRedeliveryExchange",
+        "x-dead-letter-routing-key": "case.uac-qid-created"
+      }
     },
     {
       "name": "case.refusals",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
-      "arguments": {}
+      "arguments": {
+        "x-dead-letter-exchange": "delayedRedeliveryExchange",
+        "x-dead-letter-routing-key": "case.refusals"
+      }
     },
     {
       "name": "case.questionnairelinked",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
-      "arguments": {}
+      "arguments": {
+        "x-dead-letter-exchange": "delayedRedeliveryExchange",
+        "x-dead-letter-routing-key": "case.questionnairelinked"
+      }
     },
     {
       "name": "survey.launched",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
-      "arguments": {}
+      "arguments": {
+        "x-dead-letter-exchange": "delayedRedeliveryExchange",
+        "x-dead-letter-routing-key": "survey.launched"
+      }
     },
     {
       "name": "case.ccsPropertyListedQueue",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
-      "arguments": {}
+      "arguments": {
+        "x-dead-letter-exchange": "delayedRedeliveryExchange",
+        "x-dead-letter-routing-key": "case.ccsPropertyListedQueue"
+      }
     },
     {
       "name": "Action.Field",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
-      "arguments": {}
+      "arguments": {
+        "x-dead-letter-exchange": "delayedRedeliveryExchange",
+        "x-dead-letter-routing-key": "Action.Field"
+      }
+    },
+    {
+      "name": "delayedRedeliveryQueue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "",
+        "x-message-ttl": 2000
+      }
     }
   ],
   "exchanges": [
@@ -162,6 +220,15 @@
       "name": "action-outbound-exchange",
       "vhost": "/",
       "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "delayedRedeliveryExchange",
+      "vhost": "/",
+      "type": "headers",
       "durable": true,
       "auto_delete": false,
       "internal": false,
@@ -279,6 +346,14 @@
       "destination": "Action.Field",
       "destination_type": "queue",
       "routing_key": "Action.Field.binding",
+      "arguments": {}
+    },
+    {
+      "source": "delayedRedeliveryExchange",
+      "vhost": "/",
+      "destination": "delayedRedeliveryQueue",
+      "destination_type": "queue",
+      "routing_key": "",
       "arguments": {}
     }
   ]
