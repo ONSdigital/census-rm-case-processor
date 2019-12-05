@@ -8,3 +8,7 @@ spring:
 uacservice:
   connection:
     port: 18164
+
+queueconfig:
+  fieldwork-uacupdated-queue: FieldworkAdapter.uacUpdated
+  uacupdated-routingkey: event.uac.update

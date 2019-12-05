@@ -195,6 +195,16 @@
         "x-dead-letter-exchange": "",
         "x-message-ttl": 2000
       }
+    },
+    {
+      "name": "FieldworkAdapter.uacUpdated",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "delayedRedeliveryExchange",
+        "x-dead-letter-routing-key": "FieldworkAdapter.uacUpdated"
+      }
     }
   ],
   "exchanges": [
@@ -242,6 +252,14 @@
       "destination": "case.action",
       "destination_type": "queue",
       "routing_key": "event.case.*",
+      "arguments": {}
+    },
+    {
+      "source": "events",
+      "vhost": "/",
+      "destination": "FieldworkAdapter.uacUpdated",
+      "destination_type": "queue",
+      "routing_key": "event.uac.update",
       "arguments": {}
     },
     {
@@ -355,6 +373,7 @@
       "destination_type": "queue",
       "routing_key": "",
       "arguments": {}
-    }
+    },
+
   ]
 }

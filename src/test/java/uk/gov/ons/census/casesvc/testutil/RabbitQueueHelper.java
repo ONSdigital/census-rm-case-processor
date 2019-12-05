@@ -79,6 +79,17 @@ public class RabbitQueueHelper {
     return responseManagementEvent;
   }
 
+  public ResponseManagementEvent checkExpectedMessageReceivedUnreceipt(BlockingQueue<String> queue)
+          throws IOException, InterruptedException {
+    String actualMessage = queue.poll(20, TimeUnit.SECONDS);
+    assertNotNull("Did not receive message before timeout", actualMessage);
+    ResponseManagementEvent responseManagementEvent =
+            objectMapper.readValue(actualMessage, ResponseManagementEvent.class);
+    assertNotNull(responseManagementEvent);
+    assertEquals("EQ", responseManagementEvent.getEvent().getChannel());
+    return responseManagementEvent;
+  }
+
   public void checkMessageIsNotReceived(BlockingQueue<String> queue, int timeOut)
       throws InterruptedException {
     String actualMessage = queue.poll(timeOut, TimeUnit.SECONDS);
