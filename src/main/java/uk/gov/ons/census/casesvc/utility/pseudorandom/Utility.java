@@ -14,7 +14,7 @@ class Utility {
     if (n == 0) {
       encodedN = new byte[0];
     } else {
-      byte[] nAsByteArray = Utility.toBEBytes(n);
+      byte[] nAsByteArray = Utility.toBytes(n);
       int firstNonZeroIndex = 0;
 
       while ((nAsByteArray[firstNonZeroIndex] == 0) && (firstNonZeroIndex < nAsByteArray.length)) {
@@ -35,7 +35,7 @@ class Utility {
    * @param i the integer to create the byte array for
    * @return the 4 element byte array. Never null.
    */
-  static byte[] toBEBytes(int i) {
+  static byte[] toBytes(int i) {
     return ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(i).array();
   }
 

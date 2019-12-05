@@ -507,7 +507,7 @@ class NumberTheory {
     int lowZero = 0;
 
     if (n > 0) {
-      byte[] bytes = Utility.toBEBytes(n);
+      byte[] bytes = Utility.toBytes(n);
 
       for (int i = bytes.length - 1; i >= 0; i--) {
         byte x = bytes[i];

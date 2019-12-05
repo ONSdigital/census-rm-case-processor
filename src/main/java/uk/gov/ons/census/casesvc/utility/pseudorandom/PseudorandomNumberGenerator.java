@@ -68,10 +68,10 @@ public class PseudorandomNumberGenerator {
 
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       try {
-        baos.write(Utility.toBEBytes(encodedModulus.length));
+        baos.write(Utility.toBytes(encodedModulus.length));
         baos.write(encodedModulus);
 
-        baos.write(Utility.toBEBytes(key.length));
+        baos.write(Utility.toBytes(key.length));
         baos.write(key);
 
         // Flushing most likely a no-op, but best be sure.
@@ -113,9 +113,9 @@ public class PseudorandomNumberGenerator {
 
       try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
         baos.write(wip);
-        baos.write(Utility.toBEBytes(roundNo));
+        baos.write(Utility.toBytes(roundNo));
 
-        baos.write(Utility.toBEBytes(rBin.length));
+        baos.write(Utility.toBytes(rBin.length));
         baos.write(rBin);
         byte[] digestBtyes = digest.digest(baos.toByteArray());
 

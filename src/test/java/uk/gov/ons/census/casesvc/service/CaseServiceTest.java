@@ -43,7 +43,8 @@ public class CaseServiceTest {
   private static final UUID TEST_UUID = UUID.randomUUID();
   private static final UUID TEST_ACTION_PLAN_ID = UUID.randomUUID();
   private static final UUID TEST_COLLECTION_EXERCISE_ID = UUID.randomUUID();
-  private static final byte[] hmacKey = new byte[] {0x10, 0x20, 0x10, 0x20, 0x10, 0x20, 0x10, 0x20};
+  private static final byte[] caserefgeneratorkey =
+      new byte[] {0x10, 0x20, 0x10, 0x20, 0x10, 0x20, 0x10, 0x20};
 
   @Mock CaseRepository caseRepository;
 
@@ -79,7 +80,7 @@ public class CaseServiceTest {
     createCaseSample.setFieldOfficerId(FIELD_OFFICER_ID);
     createCaseSample.setCeExpectedCapacity(CE_CAPACITY);
 
-    ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", hmacKey);
+    ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
 
     // Given
     when(caseRepository.saveAndFlush(any(Case.class))).then(obj -> obj.getArgument(0));
@@ -108,7 +109,7 @@ public class CaseServiceTest {
     ReflectionTestUtils.setField(underTest, "actionPlanId", TEST_ACTION_PLAN_ID.toString());
     ReflectionTestUtils.setField(
         underTest, "collectionExerciseId", TEST_COLLECTION_EXERCISE_ID.toString());
-    ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", hmacKey);
+    ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
 
     // This simulates the DB creating the ID, which it does when the case is persisted
     when(caseRepository.saveAndFlush(any(Case.class)))
@@ -141,7 +142,7 @@ public class CaseServiceTest {
     ReflectionTestUtils.setField(underTest, "actionPlanId", TEST_ACTION_PLAN_ID.toString());
     ReflectionTestUtils.setField(
         underTest, "collectionExerciseId", TEST_COLLECTION_EXERCISE_ID.toString());
-    ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", hmacKey);
+    ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
 
     // This simulates the DB creating the ID, which it does when the case is persisted
     when(caseRepository.saveAndFlush(any(Case.class)))

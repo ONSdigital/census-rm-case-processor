@@ -24,13 +24,13 @@ public class CaseRefGeneratorTest {
 
     System.out.println("About to generate pseudorandom case refs");
 
-    final byte[] hmacKey = new byte[] {0x10, 0x20, 0x10, 0x20, 0x10, 0x20, 0x10, 0x20};
+    final byte[] caserefgeneratorkey = new byte[] {0x10, 0x20, 0x10, 0x20, 0x10, 0x20, 0x10, 0x20};
 
     stream
         .parallel()
         .forEach(
             i -> {
-              pseudorandomCaseRefs[i] = CaseRefGenerator.getCaseRef(i, hmacKey);
+              pseudorandomCaseRefs[i] = CaseRefGenerator.getCaseRef(i, caserefgeneratorkey);
               if (caseRefsGenerated.incrementAndGet() % 10000 == 0) {
                 System.out.println(
                     String.format(
