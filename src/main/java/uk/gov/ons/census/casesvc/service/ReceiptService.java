@@ -41,9 +41,27 @@ public class ReceiptService {
   public void processReceipt(ResponseManagementEvent receiptEvent) {
     ResponseDTO receiptPayload = receiptEvent.getPayload().getResponse();
     UacQidLink uacQidLink = uacService.findByQid(receiptPayload.getQuestionnaireId());
-    uacQidLink.setActive(false);
 
     Case caze = uacQidLink.getCaze();
+
+    //An unreceipt doesn't un-un-active a uacQidPair
+    if( !receiptPayload.getUnreceipt() )
+      uacQidLink.setActive(false);
+
+      //Has this uacQidLink Already been set to unreceipted, if so log it and leave.
+      if(uacQidLink.isUnreceipted()) {
+        eventLogger.logUacQidEvent(
+                uacQidLink,
+                receiptEvent.getEvent().getDateTime(),
+                QID_RECEIPTED,
+                EventType.RESPONSE_RECEIVED,
+                receiptEvent.getEvent(),
+                convertObjectToJson(receiptPayload));
+
+        return;
+      }
+    else
+      uacQidLink.setUnreceipted(true);
 
     if (caze != null) {
       caze.setReceiptReceived(true);
@@ -53,7 +71,6 @@ public class ReceiptService {
       uacService.saveUacQidLink(uacQidLink);
     } else {
       uacService.saveAndEmitUacUpdatedEvent(uacQidLink, receiptEvent.getPayload().getResponse().getUnreceipt());
-
       ifIUnreceiptedNeedsNewFieldWorkFolloup(caze,receiptEvent.getPayload().getResponse().getUnreceipt());
     }
 
@@ -71,12 +88,12 @@ public class ReceiptService {
     }
 
     eventLogger.logUacQidEvent(
-        uacQidLink,
-        receiptEvent.getEvent().getDateTime(),
-        QID_RECEIPTED,
-        EventType.RESPONSE_RECEIVED,
-        receiptEvent.getEvent(),
-        convertObjectToJson(receiptPayload));
+            uacQidLink,
+            receiptEvent.getEvent().getDateTime(),
+            QID_RECEIPTED,
+            EventType.RESPONSE_RECEIVED,
+            receiptEvent.getEvent(),
+            convertObjectToJson(receiptPayload));
   }
 
   private void ifIUnreceiptedNeedsNewFieldWorkFolloup(Case caze, boolean unreceipted) {

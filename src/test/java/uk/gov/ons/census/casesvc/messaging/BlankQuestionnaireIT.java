@@ -71,13 +71,15 @@ public class BlankQuestionnaireIT {
     rabbitQueueHelper.purgeQueue(actionQueue);
     rabbitQueueHelper.purgeQueue(rhCaseQueue);
     rabbitQueueHelper.purgeQueue(rhUacQueue);
+    rabbitQueueHelper.purgeQueue(fieldWorkFollowupQueue);
+    rabbitQueueHelper.purgeQueue(fieldworkAdapterQueue);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
   }
 
   @Test
-  public void testBlankQuestionnaireReceiptHappyPath() throws InterruptedException, IOException {
+  public void testPQRSSendReciptForQidThenQMSendBlankEvent() throws InterruptedException, IOException {
     // GIVEN
     BlockingQueue<String> rhUacOutboundQueue = rabbitQueueHelper.listen(rhUacQueue);
     BlockingQueue<String> rhCaseOutboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
@@ -88,7 +90,7 @@ public class BlankQuestionnaireIT {
     Case caze = setUpTestCase();
     setUpUacQidLink(caze);
 
-    ResponseManagementEvent managementEvent = createResponseReceivedUnreceiptedEvent(false);
+    ResponseManagementEvent managementEvent = createValidReceiptEvent();
 
     // WHEN
     rabbitQueueHelper.sendMessage(inboundQueue, managementEvent);
@@ -101,13 +103,13 @@ public class BlankQuestionnaireIT {
     checkDatabaseUpdatedCorrectly(expectedReceipted, 1);
 
     // Now send out a unreceipted event
-    ResponseManagementEvent unreceiptedEvent = createResponseReceivedUnreceiptedEvent(true);
+    ResponseManagementEvent unreceiptedEvent = createBlankQuestionaireEvent();
     rabbitQueueHelper.sendMessage(inboundQueue, unreceiptedEvent);
 
     checkMsgSentToRhCaseAndUacAndToFieldUAcUpdated(
         false, rhCaseOutboundQueue, rhUacOutboundQueue, fieldworkAdapterUacUpdated);
 
-    //Finally a new Event, a fieldworkFollowup should be sent out to fieldworkAdapter
+    //Finally a new Event we're really interested in, a fieldworkFollowup should be sent out to fieldworkAdapter
     FieldWorkFollowup fieldWorkFollowup = rabbitQueueHelper.checkExpectedMessageReceived(
             fieldworkFollowupQueue, FieldWorkFollowup.class);
 
@@ -117,6 +119,55 @@ public class BlankQuestionnaireIT {
     // Also check all the database gubbins again
     expectedReceipted = false;
     checkDatabaseUpdatedCorrectly(expectedReceipted, 2);
+
+  }
+
+  @Test
+  public void testQMSendBlankForQidThenPQRSSendsItsReceipt() throws IOException, InterruptedException {
+    // GIVEN
+    BlockingQueue<String> rhUacOutboundQueue = rabbitQueueHelper.listen(rhUacQueue);
+    BlockingQueue<String> rhCaseOutboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
+    BlockingQueue<String> fieldworkAdapterUacUpdated =
+            rabbitQueueHelper.listen(fieldworkAdapterQueue);
+    BlockingQueue<String> fieldworkFollowupQueue = rabbitQueueHelper.listen(fieldWorkFollowupQueue);
+
+    Case caze = setUpTestCase();
+    setUpUacQidLink(caze);
+
+    ResponseManagementEvent blankQuestionaireEvent = createResponseReceivedUnreceiptedEvent(true);
+
+    // WHEN
+    rabbitQueueHelper.sendMessage(inboundQueue, blankQuestionaireEvent);
+
+    //THEN
+    boolean expectedReceipted = false;
+    checkMsgSentToRhCaseAndUacAndToFieldUAcUpdated(
+            expectedReceipted, rhCaseOutboundQueue, rhUacOutboundQueue, fieldworkAdapterUacUpdated);
+    checkDatabaseUpdatedCorrectly(expectedReceipted, 1);
+
+    FieldWorkFollowup fieldWorkFollowup = rabbitQueueHelper.checkExpectedMessageReceived(
+            fieldworkFollowupQueue, FieldWorkFollowup.class);
+
+    assertThat(fieldWorkFollowup.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
+    assertThat(fieldWorkFollowup.getBlankQreReturned()).isTrue();
+
+    //Now we receive the PQRS 'valid' receipt, where they believe it to receipted and all is happy.
+    ResponseManagementEvent validReceiptEvent = createValidReceiptEvent();
+
+    //WHEN
+    rabbitQueueHelper.sendMessage(inboundQueue, validReceiptEvent);
+
+    Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
+    assertThat(actualCase.isReceiptReceived()).isEqualTo(false);
+
+
+    //Send nothing to no one, the uacqid/case should remain unreceipted
+    //With this ordering we wait a long time for the 1st one, if the others were ready they'd be there
+    rabbitQueueHelper.checkMessageIsNotReceived(rhUacOutboundQueue, 5);
+    rabbitQueueHelper.checkMessageIsNotReceived(rhCaseOutboundQueue, 1);
+    rabbitQueueHelper.checkMessageIsNotReceived(fieldworkAdapterUacUpdated, 1);
+    rabbitQueueHelper.checkMessageIsNotReceived(fieldworkFollowupQueue, 1);
+
 
   }
 
@@ -157,6 +208,14 @@ public class BlankQuestionnaireIT {
     caze = caseRepository.saveAndFlush(caze);
 
     return caze;
+  }
+
+  private ResponseManagementEvent createBlankQuestionaireEvent() {
+    return createResponseReceivedUnreceiptedEvent(true);
+  }
+
+  private ResponseManagementEvent createValidReceiptEvent() {
+    return createResponseReceivedUnreceiptedEvent(false);
   }
 
   private ResponseManagementEvent createResponseReceivedUnreceiptedEvent(boolean unreceiped) {
