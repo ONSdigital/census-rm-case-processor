@@ -166,7 +166,10 @@ public class BlankQuestionnaireIT {
 
     FieldWorkFollowup fieldWorkFollowup = rabbitQueueHelper.checkFieldWorkFollowUpSent(fieldworkFollowupQueue);
 
-    assertThat(fieldWorkFollowup.getCaseId()).isEqualTo(TEST_CASE_ID);
+    assertThat(fieldWorkFollowup.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
+    assertThat(fieldWorkFollowup.getBlankQreReturned()).isTrue();
+    actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
+    assertThat(actualCase.isReceiptReceived()).isFalse();
 
 
     //    responseManagementEvent =

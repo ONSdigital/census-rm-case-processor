@@ -5,8 +5,11 @@ import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.isCCSQue
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
+import uk.gov.ons.census.casesvc.model.dto.FieldWorkFollowup;
 import uk.gov.ons.census.casesvc.model.dto.ResponseDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -20,11 +23,19 @@ public class ReceiptService {
   private final CaseService caseService;
   private final UacService uacService;
   private final EventLogger eventLogger;
+  private RabbitTemplate rabbitTemplate;
 
-  public ReceiptService(CaseService caseService, UacService uacService, EventLogger eventLogger) {
+  @Value("${queueconfig.outbound-field-exchange}")
+  private String outboundExchange;
+
+  @Value("${queueconfig.field-binding}")
+  private String actionFieldBinding;
+
+  public ReceiptService(CaseService caseService, UacService uacService, EventLogger eventLogger, RabbitTemplate rabbitTemplate) {
     this.caseService = caseService;
     this.uacService = uacService;
     this.eventLogger = eventLogger;
+    this.rabbitTemplate = rabbitTemplate;
   }
 
   public void processReceipt(ResponseManagementEvent receiptEvent) {
@@ -36,17 +47,6 @@ public class ReceiptService {
 
     if (caze != null) {
       caze.setReceiptReceived(true);
-
-      if (caze.isCcsCase()) {
-        caseService.saveCase(caze);
-      } else {
-        caseService.saveAndEmitCaseUpdatedEvent(caze);
-      }
-    } else {
-      log.with("qid", receiptPayload.getQuestionnaireId())
-          .with("tx_id", receiptEvent.getEvent().getTransactionId())
-          .with("channel", receiptEvent.getEvent().getChannel())
-          .warn("Receipt received for unaddressed UAC/QID pair not yet linked to a case");
     }
 
     if (isCCSQuestionnaireType(uacQidLink.getQid())) {
@@ -54,7 +54,20 @@ public class ReceiptService {
     } else {
       uacService.saveAndEmitUacUpdatedEvent(uacQidLink, receiptEvent.getPayload().getResponse().getUnreceipt());
 
-      ifIUnreceiptedNeedsNewFieldWorkFolloup(uacQidLink,receiptEvent.getPayload().getResponse().getUnreceipt());
+      ifIUnreceiptedNeedsNewFieldWorkFolloup(caze,receiptEvent.getPayload().getResponse().getUnreceipt());
+    }
+
+    if (caze != null) {
+      if (caze.isCcsCase()) {
+        caseService.saveCase(caze);
+      } else {
+        caseService.saveAndEmitCaseUpdatedEvent(caze);
+      }
+    } else {
+      log.with("qid", receiptPayload.getQuestionnaireId())
+              .with("tx_id", receiptEvent.getEvent().getTransactionId())
+              .with("channel", receiptEvent.getEvent().getChannel())
+              .warn("Receipt received for unaddressed UAC/QID pair not yet linked to a case");
     }
 
     eventLogger.logUacQidEvent(
@@ -66,52 +79,58 @@ public class ReceiptService {
         convertObjectToJson(receiptPayload));
   }
 
-  private void ifIUnreceiptedNeedsNewFieldWorkFolloup(UacQidLink uacQidLink, boolean unreceipted) {
+  private void ifIUnreceiptedNeedsNewFieldWorkFolloup(Case caze, boolean unreceipted) {
      if( !unreceipted )
        return;
 
      // in future look at case table and use black magic to decide if it needs a followup.
 
      //buildAFieldworkFollowup
+    FieldWorkFollowup followup = buildFieldworkFollowup(caze);
 
     //sendfieldworkFollowup
+    rabbitTemplate.convertAndSend(
+            outboundExchange,actionFieldBinding, followup);
+
+    caze.setReceiptReceived(false);
+
   }
 
-//  public FieldworkFollowup buildFieldworkFollowup(Case caze, String actionPlan, String actionType) {
-//
-//    FieldworkFollowup followup = new FieldworkFollowup();
-//    followup.setAddressLine1(caze.getAddressLine1());
-//    followup.setAddressLine2(caze.getAddressLine2());
-//    followup.setAddressLine3(caze.getAddressLine3());
-//    followup.setTownName(caze.getTownName());
-//    followup.setPostcode(caze.getPostcode());
-//    followup.setEstabType(caze.getEstabType());
-//    followup.setOrganisationName(caze.getOrganisationName());
-//    followup.setArid(caze.getArid());
-//    followup.setUprn(caze.getUprn());
-//    followup.setOa(caze.getOa());
-//    followup.setArid(caze.getArid());
-//    followup.setLatitude(caze.getLatitude());
-//    followup.setLongitude(caze.getLongitude());
-//    followup.setActionPlan(actionPlan);
-//    followup.setActionType(actionType);
-//    followup.setCaseId(caze.getCaseId().toString());
-//    followup.setCaseRef(Integer.toString(caze.getCaseRef()));
-//    followup.setAddressType(caze.getAddressType());
-//    followup.setAddressLevel(caze.getAddressLevel());
-//    followup.setTreatmentCode(caze.getTreatmentCode());
-//    followup.setFieldOfficerId(caze.getFieldOfficerId());
-//    followup.setFieldCoordinatorId(caze.getFieldCoordinatorId());
-//    followup.setCeExpectedCapacity(caze.getCeExpectedCapacity());
-//    followup.setUndeliveredAsAddress(caze.isUndeliveredAsAddressed());
-//
-//    // TODO: set surveyName, undeliveredAsAddress and blankQreReturned from caze
-//    followup.setSurveyName("CENSUS");
-//    followup.setBlankQreReturned(false);
-//
-//    // TODO: ccsQuestionnaireUrl, ceDeliveryReqd,
-//    // ceCE1Complete, ceActualResponses
-//
-//    return followup;
-//  }
+  public FieldWorkFollowup buildFieldworkFollowup(Case caze) {
+
+    FieldWorkFollowup followup = new FieldWorkFollowup();
+    followup.setAddressLine1(caze.getAddressLine1());
+    followup.setAddressLine2(caze.getAddressLine2());
+    followup.setAddressLine3(caze.getAddressLine3());
+    followup.setTownName(caze.getTownName());
+    followup.setPostcode(caze.getPostcode());
+    followup.setEstabType(caze.getEstabType());
+    followup.setOrganisationName(caze.getOrganisationName());
+    followup.setArid(caze.getArid());
+    followup.setUprn(caze.getUprn());
+    followup.setOa(caze.getOa());
+    followup.setArid(caze.getArid());
+    followup.setLatitude(caze.getLatitude());
+    followup.setLongitude(caze.getLongitude());
+    followup.setActionPlan(caze.getActionPlanId());
+    followup.setActionType("dummy");
+    followup.setCaseId(caze.getCaseId().toString());
+    followup.setCaseRef(Integer.toString(caze.getCaseRef()));
+    followup.setAddressType(caze.getAddressType());
+    followup.setAddressLevel(caze.getAddressLevel());
+    followup.setTreatmentCode(caze.getTreatmentCode());
+    followup.setFieldOfficerId(caze.getFieldOfficerId());
+    followup.setFieldCoordinatorId(caze.getFieldCoordinatorId());
+    followup.setCeExpectedCapacity(caze.getCeExpectedCapacity());
+    followup.setUndeliveredAsAddress(caze.isUndeliveredAsAddressed());
+
+    // TODO: set surveyName, undeliveredAsAddress and blankQreReturned from caze
+    followup.setSurveyName("CENSUS");
+    followup.setBlankQreReturned(true);
+
+    // TODO: ccsQuestionnaireUrl, ceDeliveryReqd,
+    // ceCE1Complete, ceActualResponses
+
+    return followup;
+  }
 }
