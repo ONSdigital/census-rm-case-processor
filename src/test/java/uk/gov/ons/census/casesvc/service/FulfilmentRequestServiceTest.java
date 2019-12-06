@@ -128,6 +128,16 @@ public class FulfilmentRequestServiceTest {
     when(caseService.getCaseByCaseId(UUID.fromString(expectedFulfilmentRequest.getCaseId())))
         .thenReturn(parentCase);
 
+    // This simulates the DB creating the ID, which it does when the case is persisted
+    when(caseService.saveNewCaseAndStampCaseRef(any(Case.class)))
+        .then(
+            invocation -> {
+              Case caze = invocation.getArgument(0);
+              caze.setSecretSequenceNumber(123);
+              caze.setCaseRef(666);
+              return caze;
+            });
+
     // when
     underTest.processFulfilmentRequest(managementEvent);
 
@@ -145,13 +155,12 @@ public class FulfilmentRequestServiceTest {
     ArgumentCaptor<FulfilmentRequestDTO> fulfilmentRequestArgumentCaptor =
         ArgumentCaptor.forClass(FulfilmentRequestDTO.class);
     verify(caseService)
-        .saveAndEmitCaseCreatedEvent(
+        .emitCaseCreatedEvent(
             caseArgumentCaptor.capture(), fulfilmentRequestArgumentCaptor.capture());
     assertThat(fulfilmentRequestArgumentCaptor.getValue().getFulfilmentCode())
         .isEqualTo(individualResponseCode);
     Case actualChildCase = caseArgumentCaptor.getValue();
     checkIndivdualFulfilmentRequestCase(parentCase, actualChildCase, managementEvent);
-    verify(caseService, times(1)).getUniqueCaseRef();
   }
 
   private void testIndividualResponseCodeSMS(String individualResponseCode) {
@@ -175,6 +184,16 @@ public class FulfilmentRequestServiceTest {
     when(caseService.getCaseByCaseId(UUID.fromString(expectedFulfilmentRequest.getCaseId())))
         .thenReturn(parentCase);
 
+    // This simulates the DB creating the ID, which it does when the case is persisted
+    when(caseService.saveNewCaseAndStampCaseRef(any(Case.class)))
+        .then(
+            invocation -> {
+              Case caze = invocation.getArgument(0);
+              caze.setSecretSequenceNumber(123);
+              caze.setCaseRef(666);
+              return caze;
+            });
+
     // when
     underTest.processFulfilmentRequest(managementEvent);
 
@@ -189,10 +208,9 @@ public class FulfilmentRequestServiceTest {
             anyString());
 
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(caseService).saveAndEmitCaseCreatedEvent(caseArgumentCaptor.capture());
+    verify(caseService).emitCaseCreatedEvent(caseArgumentCaptor.capture());
     Case actualChildCase = caseArgumentCaptor.getValue();
     checkIndivdualFulfilmentRequestCase(parentCase, actualChildCase, managementEvent);
-    verify(caseService, times(1)).getUniqueCaseRef();
   }
 
   private void checkIndivdualFulfilmentRequestCase(

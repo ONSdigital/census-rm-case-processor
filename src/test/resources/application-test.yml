@@ -8,3 +8,5 @@ spring:
 uacservice:
   connection:
     port: 18164
+
+caserefgeneratorkey: rPr3qsjlU42hsDX5npfuCzlyF4UYfDTO

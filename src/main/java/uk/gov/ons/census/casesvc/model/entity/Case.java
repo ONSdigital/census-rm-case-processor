@@ -11,15 +11,22 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Data;
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.GenerationTime;
 
 @Data
 @Entity
 @Table(name = "cases")
 public class Case {
 
-  @Id private int caseRef;
+  @Id private UUID caseId;
 
-  @Column private UUID caseId;
+  // This incrementing column allows us to generate a pseudorandom unique (non-colliding) caseRef
+  @Column(columnDefinition = "serial")
+  @Generated(GenerationTime.INSERT)
+  private int secretSequenceNumber;
+
+  @Column private Integer caseRef;
 
   @Column private String arid;
 

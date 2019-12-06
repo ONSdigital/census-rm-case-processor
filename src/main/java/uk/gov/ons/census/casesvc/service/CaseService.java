@@ -19,8 +19,8 @@ import uk.gov.ons.census.casesvc.model.dto.SampleUnitDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.CaseState;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
+import uk.gov.ons.census.casesvc.utility.CaseRefGenerator;
 import uk.gov.ons.census.casesvc.utility.EventHelper;
-import uk.gov.ons.census.casesvc.utility.RandomCaseRefGenerator;
 
 @Service
 public class CaseService {
@@ -42,6 +42,9 @@ public class CaseService {
   @Value("${ccsconfig.collection-exercise-id}")
   private String collectionExerciseId;
 
+  @Value("${caserefgeneratorkey}")
+  private byte[] caserefgeneratorkey;
+
   public CaseService(
       CaseRepository caseRepository, RabbitTemplate rabbitTemplate, MapperFacade mapperFacade) {
     this.caseRepository = caseRepository;
@@ -53,26 +56,28 @@ public class CaseService {
     return caseRepository.saveAndFlush(caze);
   }
 
-  public Case saveCaseSample(CreateCaseSample createCaseSample) {
-    int caseRef = getUniqueCaseRef();
+  public Case saveNewCaseAndStampCaseRef(Case caze) {
+    caze = caseRepository.saveAndFlush(caze);
+    caze.setCaseRef(
+        CaseRefGenerator.getCaseRef(caze.getSecretSequenceNumber(), caserefgeneratorkey));
+    caze = caseRepository.saveAndFlush(caze);
 
+    return caze;
+  }
+
+  public Case saveCaseSample(CreateCaseSample createCaseSample) {
     Case caze = mapperFacade.map(createCaseSample, Case.class);
-    caze.setCaseRef(caseRef);
     caze.setCaseType(HOUSEHOLD_RESPONSE_ADDRESS_TYPE);
     caze.setCaseId(UUID.randomUUID());
     caze.setState(CaseState.ACTIONABLE);
     caze.setCreatedDateTime(OffsetDateTime.now());
     caze.setReceiptReceived(false);
-    caze = caseRepository.saveAndFlush(caze);
-    return caze;
+    return saveNewCaseAndStampCaseRef(caze);
   }
 
   public Case createCCSCase(
       String caseId, SampleUnitDTO sampleUnit, boolean isRefused, boolean isInvalidAddress) {
-    int caseRef = getUniqueCaseRef();
-
     Case caze = mapperFacade.map(sampleUnit, Case.class);
-    caze.setCaseRef(caseRef);
     caze.setCaseType(sampleUnit.getAddressType());
     caze.setCaseId(UUID.fromString(caseId));
     caze.setActionPlanId(actionPlanId);
@@ -83,19 +88,7 @@ public class CaseService {
     caze.setAddressInvalid(isInvalidAddress);
     caze.setCcsCase(true);
 
-    caseRepository.saveAndFlush(caze);
-
-    return caze;
-  }
-
-  public int getUniqueCaseRef() {
-    int caseRef = RandomCaseRefGenerator.getCaseRef();
-
-    // Check for collisions
-    if (caseRepository.existsById(caseRef)) {
-      throw new RuntimeException(String.format("Case ref '%s' collision", caseRef));
-    }
-    return caseRef;
+    return saveNewCaseAndStampCaseRef(caze);
   }
 
   public PayloadDTO saveAndEmitCaseCreatedEvent(Case caze) {
@@ -105,6 +98,14 @@ public class CaseService {
   public PayloadDTO saveAndEmitCaseCreatedEvent(Case caze, FulfilmentRequestDTO fulfilmentRequest) {
     caseRepository.saveAndFlush(caze);
 
+    return emitCaseCreatedEvent(caze, fulfilmentRequest);
+  }
+
+  public PayloadDTO emitCaseCreatedEvent(Case caze) {
+    return emitCaseCreatedEvent(caze, null);
+  }
+
+  public PayloadDTO emitCaseCreatedEvent(Case caze, FulfilmentRequestDTO fulfilmentRequest) {
     EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_CREATED);
     ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
 
@@ -164,7 +165,7 @@ public class CaseService {
     // These are the mandatory fields required by RH, as documented in the event dictionary
     collectionCase.setActionableFrom(OffsetDateTime.now());
     collectionCase.setAddress(address);
-    collectionCase.setCaseRef(Long.toString(caze.getCaseRef()));
+    collectionCase.setCaseRef(Integer.toString(caze.getCaseRef()));
     collectionCase.setCaseType(caze.getCaseType());
     collectionCase.setCollectionExerciseId(caze.getCollectionExerciseId());
     collectionCase.setId(caze.getCaseId().toString());
@@ -197,7 +198,6 @@ public class CaseService {
     Case individualResponseCase = new Case();
 
     individualResponseCase.setCaseId(UUID.randomUUID());
-    individualResponseCase.setCaseRef(getUniqueCaseRef());
     individualResponseCase.setState(CaseState.ACTIONABLE);
     individualResponseCase.setCreatedDateTime(OffsetDateTime.now());
     individualResponseCase.setAddressType(parentCase.getAddressType());
@@ -223,7 +223,7 @@ public class CaseService {
     individualResponseCase.setLad(parentCase.getLad());
     individualResponseCase.setRegion(parentCase.getRegion());
 
-    return individualResponseCase;
+    return saveNewCaseAndStampCaseRef(individualResponseCase);
   }
 
   public Case getCaseByCaseId(UUID caseId) {
@@ -236,7 +236,7 @@ public class CaseService {
   }
 
   public Case getCaseByCaseRef(int caseRef) {
-    Optional<Case> caseOptional = caseRepository.findById(caseRef);
+    Optional<Case> caseOptional = caseRepository.findByCaseRef(caseRef);
 
     if (caseOptional.isEmpty()) {
       throw new RuntimeException(String.format("Case ref '%s' not present", caseRef));

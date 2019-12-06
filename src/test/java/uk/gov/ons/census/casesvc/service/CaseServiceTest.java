@@ -3,8 +3,8 @@ package uk.gov.ons.census.casesvc.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.service.CaseService.CASE_UPDATE_ROUTING_KEY;
@@ -43,6 +43,8 @@ public class CaseServiceTest {
   private static final UUID TEST_UUID = UUID.randomUUID();
   private static final UUID TEST_ACTION_PLAN_ID = UUID.randomUUID();
   private static final UUID TEST_COLLECTION_EXERCISE_ID = UUID.randomUUID();
+  private static final byte[] caserefgeneratorkey =
+      new byte[] {0x10, 0x20, 0x10, 0x20, 0x10, 0x20, 0x10, 0x20};
 
   @Mock CaseRepository caseRepository;
 
@@ -77,6 +79,9 @@ public class CaseServiceTest {
     createCaseSample.setFieldCoordinatorId(FIELD_CORD_ID);
     createCaseSample.setFieldOfficerId(FIELD_OFFICER_ID);
     createCaseSample.setCeExpectedCapacity(CE_CAPACITY);
+
+    ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
+
     // Given
     when(caseRepository.saveAndFlush(any(Case.class))).then(obj -> obj.getArgument(0));
 
@@ -86,9 +91,9 @@ public class CaseServiceTest {
     // Then
     verify(mapperFacade).map(createCaseSample, Case.class);
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(caseRepository).saveAndFlush(caseArgumentCaptor.capture());
+    verify(caseRepository, times(2)).saveAndFlush(caseArgumentCaptor.capture());
 
-    Case savedCase = caseArgumentCaptor.getValue();
+    Case savedCase = caseArgumentCaptor.getAllValues().get(1);
     assertThat(savedCase.getTreatmentCode()).isEqualTo(TEST_TREATMENT_CODE);
     assertThat(savedCase.getFieldCoordinatorId()).isEqualTo(FIELD_CORD_ID);
     assertThat(savedCase.getFieldOfficerId()).isEqualTo(FIELD_OFFICER_ID);
@@ -104,6 +109,16 @@ public class CaseServiceTest {
     ReflectionTestUtils.setField(underTest, "actionPlanId", TEST_ACTION_PLAN_ID.toString());
     ReflectionTestUtils.setField(
         underTest, "collectionExerciseId", TEST_COLLECTION_EXERCISE_ID.toString());
+    ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
+
+    // This simulates the DB creating the ID, which it does when the case is persisted
+    when(caseRepository.saveAndFlush(any(Case.class)))
+        .then(
+            invocation -> {
+              Case caze = invocation.getArgument(0);
+              caze.setSecretSequenceNumber(123);
+              return caze;
+            });
 
     // When
     Case actualCase = underTest.createCCSCase(caseId, sampleUnit, false, false);
@@ -127,6 +142,16 @@ public class CaseServiceTest {
     ReflectionTestUtils.setField(underTest, "actionPlanId", TEST_ACTION_PLAN_ID.toString());
     ReflectionTestUtils.setField(
         underTest, "collectionExerciseId", TEST_COLLECTION_EXERCISE_ID.toString());
+    ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
+
+    // This simulates the DB creating the ID, which it does when the case is persisted
+    when(caseRepository.saveAndFlush(any(Case.class)))
+        .then(
+            invocation -> {
+              Case caze = invocation.getArgument(0);
+              caze.setSecretSequenceNumber(123);
+              return caze;
+            });
 
     // When
     Case actualCase = underTest.createCCSCase(caseId, sampleUnit, true, false);
@@ -146,6 +171,7 @@ public class CaseServiceTest {
     // Given
     Case caze = new Case();
     caze.setRegion("E");
+    caze.setCaseRef(123);
     caze.setCaseId(UUID.randomUUID());
     caze.setState(CaseState.ACTIONABLE);
     caze.setPostcode(TEST_POSTCODE);
@@ -172,15 +198,6 @@ public class CaseServiceTest {
     assertThat(collectionCase.getFieldCoordinatorId()).isEqualTo(FIELD_CORD_ID);
     assertThat(collectionCase.getFieldOfficerId()).isEqualTo(FIELD_OFFICER_ID);
     assertThat(collectionCase.getCeExpectedCapacity()).isEqualTo(CE_CAPACITY);
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testUniqueCaseRefCreationThrowsRuntimeException() {
-    // Given
-    when(caseRepository.existsById(anyInt())).thenReturn(true);
-
-    // When
-    underTest.getUniqueCaseRef();
   }
 
   @Test(expected = RuntimeException.class)

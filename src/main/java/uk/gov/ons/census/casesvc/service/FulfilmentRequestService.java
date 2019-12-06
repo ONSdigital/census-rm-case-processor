@@ -83,9 +83,9 @@ public class FulfilmentRequestService {
       if (individualResponsePrintRequestCodes.contains(
           fulfilmentRequestPayload.getFulfilmentCode())) {
         // If the fulfilment is for PRINT then we need to send the case to Action Scheduler as well
-        caseService.saveAndEmitCaseCreatedEvent(individualResponseCase, fulfilmentRequestPayload);
+        caseService.emitCaseCreatedEvent(individualResponseCase, fulfilmentRequestPayload);
       } else {
-        caseService.saveAndEmitCaseCreatedEvent(individualResponseCase);
+        caseService.emitCaseCreatedEvent(individualResponseCase);
       }
     }
   }
@@ -94,7 +94,6 @@ public class FulfilmentRequestService {
     Case individualResponseCase = new Case();
 
     individualResponseCase.setCaseId(newCaseId);
-    individualResponseCase.setCaseRef(caseService.getUniqueCaseRef());
     individualResponseCase.setState(CaseState.ACTIONABLE);
     individualResponseCase.setCreatedDateTime(OffsetDateTime.now());
     individualResponseCase.setAddressType(parentCase.getAddressType());
@@ -120,6 +119,6 @@ public class FulfilmentRequestService {
     individualResponseCase.setLad(parentCase.getLad());
     individualResponseCase.setRegion(parentCase.getRegion());
 
-    return individualResponseCase;
+    return caseService.saveNewCaseAndStampCaseRef(individualResponseCase);
   }
 }
