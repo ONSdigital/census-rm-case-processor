@@ -105,14 +105,12 @@ public class RabbitQueueHelper {
     return ccsFwmt;
   }
 
-  // Make these Generics, like in ActionScheduler
-
-  public FieldWorkFollowup checkFieldWorkFollowUpSent(BlockingQueue<String> queue) throws InterruptedException, IOException {
-    String actualMessage = queue.poll(20, TimeUnit.SECONDS);
+  public <T> T checkExpectedMessageReceived(BlockingQueue<String> queue, Class<T> theClass)
+          throws InterruptedException, IOException {
+    ObjectMapper objectMapper = new ObjectMapper();
+    String actualMessage = queue.poll(10, TimeUnit.SECONDS);
     assertNotNull("Did not receive message before timeout", actualMessage);
-    FieldWorkFollowup fieldWorkFollowup = objectMapper.readValue(actualMessage, FieldWorkFollowup.class);
-    assertNotNull(fieldWorkFollowup);
 
-    return fieldWorkFollowup;
+    return objectMapper.readValue(actualMessage, theClass);
   }
 }

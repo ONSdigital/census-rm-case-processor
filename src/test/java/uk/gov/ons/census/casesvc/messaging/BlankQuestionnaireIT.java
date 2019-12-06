@@ -77,8 +77,7 @@ public class BlankQuestionnaireIT {
   }
 
   @Test
-  public void testBlankQuestionnaireReceiptHappyPath()
-      throws InterruptedException, IOException, JSONException {
+  public void testBlankQuestionnaireReceiptHappyPath() throws InterruptedException, IOException {
     // GIVEN
     BlockingQueue<String> rhUacOutboundQueue = rabbitQueueHelper.listen(rhUacQueue);
     BlockingQueue<String> rhCaseOutboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
@@ -86,55 +85,18 @@ public class BlankQuestionnaireIT {
         rabbitQueueHelper.listen(fieldworkAdapterQueue);
     BlockingQueue<String> fieldworkFollowupQueue = rabbitQueueHelper.listen(fieldWorkFollowupQueue);
 
-    EasyRandom easyRandom = new EasyRandom();
-    Case caze = easyRandom.nextObject(Case.class);
-    caze.setCaseId(TEST_CASE_ID);
-    caze.setReceiptReceived(false);
-    caze.setCcsCase(false);
-    caze.setUacQidLinks(null);
-    caze.setEvents(null);
-    caze = caseRepository.saveAndFlush(caze);
+    Case caze = setUpTestCase();
+    setUpUacQidLink(caze);
 
-    UacQidLink uacQidLink = new UacQidLink();
-    uacQidLink.setId(UUID.randomUUID());
-    uacQidLink.setCaze(caze);
-    uacQidLink.setCcsCase(false);
-    uacQidLink.setQid(TEST_QID_ID);
-    uacQidLink.setUac(TEST_UAC);
-    uacQidLinkRepository.saveAndFlush(uacQidLink);
-
-    // TODO Look at changing the management event to PQRS
-    ResponseManagementEvent managementEvent = getTestResponseManagementReceiptEvent();
-    managementEvent.getPayload().getResponse().setQuestionnaireId(uacQidLink.getQid());
-    managementEvent.getEvent().setTransactionId(UUID.randomUUID());
-    managementEvent.getPayload().getResponse().setUnreceipt(false);
+    ResponseManagementEvent managementEvent = createResponseReceivedUnreceiptedEvent(false);
 
     // WHEN
     rabbitQueueHelper.sendMessage(inboundQueue, managementEvent);
 
     // THEN
-
-    // check messages sent
-    ResponseManagementEvent responseManagementEvent =
-        rabbitQueueHelper.checkExpectedMessageReceived(rhCaseOutboundQueue);
-    CollectionCase actualCollectionCase = responseManagementEvent.getPayload().getCollectionCase();
-    assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID.toString());
-    assertThat(actualCollectionCase.getReceiptReceived()).isTrue();
-
-    responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(rhUacOutboundQueue);
-    assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
-    UacDTO actualUacDTOObject = responseManagementEvent.getPayload().getUac();
-    assertThat(actualUacDTOObject.getUac()).isEqualTo(TEST_UAC);
-    assertThat(actualUacDTOObject.getQuestionnaireId()).isEqualTo(TEST_QID_ID);
-    assertThat(actualUacDTOObject.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
-
-    responseManagementEvent =
-        rabbitQueueHelper.checkExpectedMessageReceived(fieldworkAdapterUacUpdated);
-    assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
-    actualUacDTOObject = responseManagementEvent.getPayload().getUac();
-    assertThat(actualUacDTOObject.getUac()).isEqualTo(TEST_UAC);
-    assertThat(actualUacDTOObject.getQuestionnaireId()).isEqualTo(TEST_QID_ID);
-    assertThat(actualUacDTOObject.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
+    // check messages sent out after 1st unreceipted msg
+    checkMsgSentToRhCaseAndUacAndToFieldUAcUpdated(
+        true, rhCaseOutboundQueue, rhUacOutboundQueue, fieldworkAdapterUacUpdated);
 
     Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
     assertThat(actualCase.isReceiptReceived()).isTrue();
@@ -152,61 +114,103 @@ public class BlankQuestionnaireIT {
     assertThat(actualUacQidLink.isActive()).isFalse();
 
     // sending unreceipted event
-    ResponseManagementEvent unreceiptedEvent = createResponseReceivedUnreceiptedEvent();
-    unreceiptedEvent.getPayload().getResponse().setQuestionnaireId(uacQidLink.getQid());
-    unreceiptedEvent.getEvent().setTransactionId(UUID.randomUUID());
-    unreceiptedEvent.getPayload().getResponse().setUnreceipt(true);
-
+    ResponseManagementEvent unreceiptedEvent = createResponseReceivedUnreceiptedEvent(true);
     rabbitQueueHelper.sendMessage(inboundQueue, unreceiptedEvent);
 
-    responseManagementEvent =
-        rabbitQueueHelper.checkExpectedMessageReceivedUnreceipt(fieldworkAdapterUacUpdated);
-    UacDTO unreceiptUacDTO = responseManagementEvent.getPayload().getUac();
-    assertThat(unreceiptUacDTO.getUnreceipted()).isTrue();
+    checkMsgSentToRhCaseAndUacAndToFieldUAcUpdated(
+        false, rhCaseOutboundQueue, rhUacOutboundQueue, fieldworkAdapterUacUpdated);
 
-    FieldWorkFollowup fieldWorkFollowup = rabbitQueueHelper.checkFieldWorkFollowUpSent(fieldworkFollowupQueue);
+    //Finally a new Event, a fieldworkFollowup should be sent out to fieldworkAdapter
+    FieldWorkFollowup fieldWorkFollowup =
+        rabbitQueueHelper.checkExpectedMessageReceived(
+            fieldworkFollowupQueue, FieldWorkFollowup.class);
 
     assertThat(fieldWorkFollowup.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
     assertThat(fieldWorkFollowup.getBlankQreReturned()).isTrue();
+
+    // Also check all the database gubbins again
     actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
     assertThat(actualCase.isReceiptReceived()).isFalse();
-
-
-    //    responseManagementEvent =
-    // rabbitQueueHelper.checkExpectedMessageReceived(rhUacOutboundQueue);
-    ////
-    // assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
-    ////    actualUacDTOObject = responseManagementEvent.getPayload().getUac();
-    ////    assertThat(actualUacDTOObject.getUac()).isEqualTo(TEST_UAC);
-    ////    assertThat(actualUacDTOObject.getQuestionnaireId()).isEqualTo(TEST_NON_CCS_QID_ID);
-    ////    assertThat(actualUacDTOObject.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
-    ////
-    ////    responseManagementEvent =
-    // rabbitQueueHelper.checkExpectedMessageReceived(fieldworkAdapterUacUpdated);
-    ////
-    // assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
-    ////    actualUacDTOObject = responseManagementEvent.getPayload().getUac();
-    ////    assertThat(actualUacDTOObject.getUac()).isEqualTo(TEST_UAC);
-    ////    assertThat(actualUacDTOObject.getQuestionnaireId()).isEqualTo(TEST_NON_CCS_QID_ID);
-    ////    assertThat(actualUacDTOObject.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
-
+    
   }
 
-  private ResponseManagementEvent createResponseReceivedUnreceiptedEvent() {
-    ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
+  private void setUpUacQidLink(Case caze) {
+    UacQidLink uacQidLink = new UacQidLink();
+    uacQidLink.setId(UUID.randomUUID());
+    uacQidLink.setCaze(caze);
+    uacQidLink.setCcsCase(false);
+    uacQidLink.setQid(TEST_QID_ID);
+    uacQidLink.setUac(TEST_UAC);
+    uacQidLinkRepository.saveAndFlush(uacQidLink);
+  }
 
-    EventDTO event = managementEvent.getEvent();
+  private Case setUpTestCase() {
+    Case caze = easyRandom.nextObject(Case.class);
+    caze.setCaseId(TEST_CASE_ID);
+    caze.setReceiptReceived(false);
+    caze.setCcsCase(false);
+    caze.setUacQidLinks(null);
+    caze.setEvents(null);
+    caze = caseRepository.saveAndFlush(caze);
+
+    return caze;
+  }
+
+  private ResponseManagementEvent createResponseReceivedUnreceiptedEvent(boolean unreceiped) {
+    ResponseManagementEvent managementEvent = new ResponseManagementEvent();
+
+    EventDTO event = new EventDTO();
     event.setType(EventTypeDTO.RESPONSE_RECEIVED);
     event.setSource("RECEIPT_SERVICE");
-    event.setChannel("EQ");
+    event.setChannel("PQRS");
+    managementEvent.setEvent(event);
 
-    PayloadDTO payload = managementEvent.getPayload();
-    payload.setUac(null);
-    payload.setCollectionCase(null);
-    payload.setRefusal(null);
-    payload.setPrintCaseSelected(null);
-    payload.getResponse().setUnreceipt(true);
+    ResponseDTO responseDTO = new ResponseDTO();
+    responseDTO.setQuestionnaireId(TEST_QID_ID);
+    responseDTO.setUnreceipt(unreceiped);
+
+    PayloadDTO payloadDTO = new PayloadDTO();
+    payloadDTO.setResponse(responseDTO);
+    managementEvent.setPayload(payloadDTO);
+
+    managementEvent.getEvent().setTransactionId(UUID.randomUUID());
 
     return managementEvent;
+  }
+
+  private void checkMsgSentToRhCaseAndUacAndToFieldUAcUpdated(
+      boolean receipted,
+      BlockingQueue<String> rhCaseOutboundQueue,
+      BlockingQueue<String> rhUacOutboundQueue,
+      BlockingQueue<String> fieldworkAdapterQueue)
+      throws IOException, InterruptedException {
+
+    // Check That Rh receives a case with corrected receipted value
+    CollectionCase actualCollectionCase =
+        rabbitQueueHelper
+            .checkExpectedMessageReceived(rhCaseOutboundQueue)
+            .getPayload()
+            .getCollectionCase();
+    assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID.toString());
+    assertThat(actualCollectionCase.getReceiptReceived()).isEqualTo(receipted);
+
+    // Check that rh receive an uac_updated event
+    ResponseManagementEvent responseManagementEvent =
+        rabbitQueueHelper.checkExpectedMessageReceived(rhUacOutboundQueue);
+    assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
+    UacDTO actualUacDTOObject = responseManagementEvent.getPayload().getUac();
+    assertThat(actualUacDTOObject.getUac()).isEqualTo(TEST_UAC);
+    assertThat(actualUacDTOObject.getQuestionnaireId()).isEqualTo(TEST_QID_ID);
+    assertThat(actualUacDTOObject.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
+
+    // Check that fwmtadapter gets a uacUpdated Event with correct receipted
+    responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(fieldworkAdapterQueue);
+    assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
+    actualUacDTOObject = responseManagementEvent.getPayload().getUac();
+    assertThat(actualUacDTOObject.getUac()).isEqualTo(TEST_UAC);
+    assertThat(actualUacDTOObject.getQuestionnaireId()).isEqualTo(TEST_QID_ID);
+    assertThat(actualUacDTOObject.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
+    // This is the opposite of Receipted, with a BlandQuestionaire Event 'receipted' will be false.
+    assertThat(actualUacDTOObject.getUnreceipted()).isNotEqualTo(receipted);
   }
 }
