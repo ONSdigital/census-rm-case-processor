@@ -95,25 +95,12 @@ public class BlankQuestionnaireIT {
 
     // THEN
     // check messages sent out after 1st unreceipted msg
+    boolean expectedReceipted = true;
     checkMsgSentToRhCaseAndUacAndToFieldUAcUpdated(
-        true, rhCaseOutboundQueue, rhUacOutboundQueue, fieldworkAdapterUacUpdated);
+            expectedReceipted, rhCaseOutboundQueue, rhUacOutboundQueue, fieldworkAdapterUacUpdated);
+    checkDatabaseUpdatedCorrectly(expectedReceipted, 1);
 
-    Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
-    assertThat(actualCase.isReceiptReceived()).isTrue();
-
-    // check database for log eventDTO
-    List<Event> events = eventRepository.findAll();
-    assertThat(events.size()).isEqualTo(1);
-    Event event = events.get(0);
-    assertThat(event.getEventDescription()).isEqualTo(QID_RECEIPTED);
-
-    UacQidLink actualUacQidLink = event.getUacQidLink();
-    assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID_ID);
-    assertThat(actualUacQidLink.getUac()).isEqualTo(TEST_UAC);
-    assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
-    assertThat(actualUacQidLink.isActive()).isFalse();
-
-    // sending unreceipted event
+    // Now send out a unreceipted event
     ResponseManagementEvent unreceiptedEvent = createResponseReceivedUnreceiptedEvent(true);
     rabbitQueueHelper.sendMessage(inboundQueue, unreceiptedEvent);
 
@@ -121,17 +108,33 @@ public class BlankQuestionnaireIT {
         false, rhCaseOutboundQueue, rhUacOutboundQueue, fieldworkAdapterUacUpdated);
 
     //Finally a new Event, a fieldworkFollowup should be sent out to fieldworkAdapter
-    FieldWorkFollowup fieldWorkFollowup =
-        rabbitQueueHelper.checkExpectedMessageReceived(
+    FieldWorkFollowup fieldWorkFollowup = rabbitQueueHelper.checkExpectedMessageReceived(
             fieldworkFollowupQueue, FieldWorkFollowup.class);
 
     assertThat(fieldWorkFollowup.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
     assertThat(fieldWorkFollowup.getBlankQreReturned()).isTrue();
 
     // Also check all the database gubbins again
-    actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
-    assertThat(actualCase.isReceiptReceived()).isFalse();
-    
+    expectedReceipted = false;
+    checkDatabaseUpdatedCorrectly(expectedReceipted, 2);
+
+  }
+
+  private void checkDatabaseUpdatedCorrectly(boolean expectedReceipted, int expectedEventCount) {
+    Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
+    assertThat(actualCase.isReceiptReceived()).isEqualTo(expectedReceipted);
+
+    // check database for log eventDTO
+    List<Event> events = eventRepository.findAll();
+    assertThat(events.size()).isEqualTo(expectedEventCount);
+    Event event = events.get(expectedEventCount - 1);
+    assertThat(event.getEventDescription()).isEqualTo(QID_RECEIPTED);
+
+    UacQidLink actualUacQidLink = event.getUacQidLink();
+    assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID_ID);
+    assertThat(actualUacQidLink.getUac()).isEqualTo(TEST_UAC);
+    assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
+    assertThat(actualUacQidLink.isActive()).isFalse();
   }
 
   private void setUpUacQidLink(Case caze) {
