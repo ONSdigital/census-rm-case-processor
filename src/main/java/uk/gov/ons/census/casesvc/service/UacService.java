@@ -85,6 +85,10 @@ public class UacService {
   }
 
   public PayloadDTO saveAndEmitUacUpdatedEvent(UacQidLink uacQidLink) {
+    return saveAndEmitUacUpdatedEvent(uacQidLink, false);
+  }
+
+  public PayloadDTO saveAndEmitUacUpdatedEvent(UacQidLink uacQidLink, boolean unreceipted) {
     uacQidLinkRepository.save(uacQidLink);
 
     EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.UAC_UPDATED);
@@ -94,6 +98,7 @@ public class UacService {
     uac.setUacHash(Sha256Helper.hash(uacQidLink.getUac()));
     uac.setUac(uacQidLink.getUac());
     uac.setActive(uacQidLink.isActive());
+    uac.setUnreceipted(unreceipted);
 
     Case caze = uacQidLink.getCaze();
     if (caze != null) {
@@ -126,7 +131,7 @@ public class UacService {
             uacCreatedEvent.getPayload().getUacQidCreated().getUac(),
             uacCreatedEvent.getPayload().getUacQidCreated().getQid());
 
-    saveAndEmitUacUpdatedEvent(uacQidLink);
+    saveAndEmitUacUpdatedEvent(uacQidLink, false);
 
     eventLogger.logUacQidEvent(
         uacQidLink,

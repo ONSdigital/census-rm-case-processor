@@ -12,3 +12,5 @@ uacservice:
 queueconfig:
   fieldwork-uacupdated-queue: FieldworkAdapter.uacUpdated
   uacupdated-routingkey: event.uac.update
+  fieldwork-followup-queue: Action.Field
+

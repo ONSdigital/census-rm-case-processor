@@ -109,14 +109,8 @@ public class ReceiptReceiverIT {
     managementEvent.getPayload().getResponse().setQuestionnaireId(uacQidLink.getQid());
     managementEvent.getEvent().setTransactionId(UUID.randomUUID());
 
-    String json = convertObjectToJson(managementEvent);
-    Message message =
-        MessageBuilder.withBody(json.getBytes())
-            .setContentType(MessageProperties.CONTENT_TYPE_JSON)
-            .build();
-
     // WHEN
-    rabbitQueueHelper.sendMessage(inboundQueue, message);
+    rabbitQueueHelper.sendMessage(inboundQueue, managementEvent);
 
     // THEN
 

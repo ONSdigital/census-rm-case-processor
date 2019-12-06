@@ -20,6 +20,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.ons.census.casesvc.model.dto.CcsToFwmt;
+import uk.gov.ons.census.casesvc.model.dto.FieldWorkFollowup;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 
 @Component
@@ -86,7 +87,6 @@ public class RabbitQueueHelper {
     ResponseManagementEvent responseManagementEvent =
             objectMapper.readValue(actualMessage, ResponseManagementEvent.class);
     assertNotNull(responseManagementEvent);
-    assertEquals("EQ", responseManagementEvent.getEvent().getChannel());
     return responseManagementEvent;
   }
 
@@ -103,5 +103,16 @@ public class RabbitQueueHelper {
     CcsToFwmt ccsFwmt = objectMapper.readValue(actualMessage, CcsToFwmt.class);
     assertNotNull(ccsFwmt);
     return ccsFwmt;
+  }
+
+  // Make these Generics, like in ActionScheduler
+
+  public FieldWorkFollowup checkFieldWorkFollowUpSent(BlockingQueue<String> queue) throws InterruptedException, IOException {
+    String actualMessage = queue.poll(20, TimeUnit.SECONDS);
+    assertNotNull("Did not receive message before timeout", actualMessage);
+    FieldWorkFollowup fieldWorkFollowup = objectMapper.readValue(actualMessage, FieldWorkFollowup.class);
+    assertNotNull(fieldWorkFollowup);
+
+    return fieldWorkFollowup;
   }
 }

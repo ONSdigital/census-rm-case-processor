@@ -52,7 +52,9 @@ public class ReceiptService {
     if (isCCSQuestionnaireType(uacQidLink.getQid())) {
       uacService.saveUacQidLink(uacQidLink);
     } else {
-      uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
+      uacService.saveAndEmitUacUpdatedEvent(uacQidLink, receiptEvent.getPayload().getResponse().getUnreceipt());
+
+      ifIUnreceiptedNeedsNewFieldWorkFolloup(uacQidLink,receiptEvent.getPayload().getResponse().getUnreceipt());
     }
 
     eventLogger.logUacQidEvent(
@@ -63,4 +65,53 @@ public class ReceiptService {
         receiptEvent.getEvent(),
         convertObjectToJson(receiptPayload));
   }
+
+  private void ifIUnreceiptedNeedsNewFieldWorkFolloup(UacQidLink uacQidLink, boolean unreceipted) {
+     if( !unreceipted )
+       return;
+
+     // in future look at case table and use black magic to decide if it needs a followup.
+
+     //buildAFieldworkFollowup
+
+    //sendfieldworkFollowup
+  }
+
+//  public FieldworkFollowup buildFieldworkFollowup(Case caze, String actionPlan, String actionType) {
+//
+//    FieldworkFollowup followup = new FieldworkFollowup();
+//    followup.setAddressLine1(caze.getAddressLine1());
+//    followup.setAddressLine2(caze.getAddressLine2());
+//    followup.setAddressLine3(caze.getAddressLine3());
+//    followup.setTownName(caze.getTownName());
+//    followup.setPostcode(caze.getPostcode());
+//    followup.setEstabType(caze.getEstabType());
+//    followup.setOrganisationName(caze.getOrganisationName());
+//    followup.setArid(caze.getArid());
+//    followup.setUprn(caze.getUprn());
+//    followup.setOa(caze.getOa());
+//    followup.setArid(caze.getArid());
+//    followup.setLatitude(caze.getLatitude());
+//    followup.setLongitude(caze.getLongitude());
+//    followup.setActionPlan(actionPlan);
+//    followup.setActionType(actionType);
+//    followup.setCaseId(caze.getCaseId().toString());
+//    followup.setCaseRef(Integer.toString(caze.getCaseRef()));
+//    followup.setAddressType(caze.getAddressType());
+//    followup.setAddressLevel(caze.getAddressLevel());
+//    followup.setTreatmentCode(caze.getTreatmentCode());
+//    followup.setFieldOfficerId(caze.getFieldOfficerId());
+//    followup.setFieldCoordinatorId(caze.getFieldCoordinatorId());
+//    followup.setCeExpectedCapacity(caze.getCeExpectedCapacity());
+//    followup.setUndeliveredAsAddress(caze.isUndeliveredAsAddressed());
+//
+//    // TODO: set surveyName, undeliveredAsAddress and blankQreReturned from caze
+//    followup.setSurveyName("CENSUS");
+//    followup.setBlankQreReturned(false);
+//
+//    // TODO: ccsQuestionnaireUrl, ceDeliveryReqd,
+//    // ceCE1Complete, ceActualResponses
+//
+//    return followup;
+//  }
 }
