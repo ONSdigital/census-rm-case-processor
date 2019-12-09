@@ -23,7 +23,7 @@ public class ReceiptService {
   private final CaseService caseService;
   private final UacService uacService;
   private final EventLogger eventLogger;
-  private RabbitTemplate rabbitTemplate;
+  private final RabbitTemplate rabbitTemplate;
 
   @Value("${queueconfig.outbound-field-exchange}")
   private String outboundExchange;
@@ -70,7 +70,7 @@ public class ReceiptService {
     if (isCCSQuestionnaireType(uacQidLink.getQid())) {
       uacService.saveUacQidLink(uacQidLink);
     } else {
-      uacService.saveAndEmitUacUpdatedEvent(uacQidLink, receiptEvent.getPayload().getResponse().getUnreceipt());
+      uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
       ifIUnreceiptedNeedsNewFieldWorkFolloup(caze,receiptEvent.getPayload().getResponse().getUnreceipt());
     }
 

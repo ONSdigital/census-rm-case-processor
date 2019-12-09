@@ -89,9 +89,11 @@ public class DataUtils {
     UacQidLink uacQidLink = generateRandomUacQidLink();
     uacQidLink.setCaze(linkedCase);
     uacQidLink.setEvents(null);
+    uacQidLink.setUnreceipted(false);
     linkedCase.setUacQidLinks(List.of(uacQidLink));
     return uacQidLink;
   }
+
 
   public static ResponseManagementEvent getTestResponseManagementEvent() {
     ResponseManagementEvent managementEvent = easyRandom.nextObject(ResponseManagementEvent.class);
