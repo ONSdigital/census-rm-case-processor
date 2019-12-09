@@ -45,11 +45,11 @@ public class ReceiptService {
     Case caze = uacQidLink.getCaze();
 
     //An unreceipt doesn't un-un-active a uacQidPair
-    if( !receiptPayload.getUnreceipt() )
+    if( !receiptPayload.getUnreceipt() ) {
       uacQidLink.setActive(false);
 
       //Has this uacQidLink Already been set to unreceipted, if so log it and leave.
-      if(uacQidLink.isUnreceipted()) {
+      if (uacQidLink.isUnreceipted()) {
         eventLogger.logUacQidEvent(
                 uacQidLink,
                 receiptEvent.getEvent().getDateTime(),
@@ -60,6 +60,7 @@ public class ReceiptService {
 
         return;
       }
+    }
     else
       uacQidLink.setUnreceipted(true);
 

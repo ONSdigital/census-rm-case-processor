@@ -51,7 +51,6 @@ public class ReceiptServiceTest {
     expectedCase.setReceiptReceived(false);
     expectedCase.setCcsCase(false);
     UacQidLink expectedUacQidLink = generateUacQidLinkedToCase(expectedCase);
-    expectedUacQidLink.setQid(TEST_NON_CCS_QID_ID);
 
     managementEvent.getPayload().getResponse().setResponseDateTime(OffsetDateTime.now());
     managementEvent.getPayload().getResponse().setUnreceipt(false);
@@ -132,6 +131,55 @@ public class ReceiptServiceTest {
             eq(managementEvent.getEvent()),
             anyString());
     verifyNoMoreInteractions(eventLogger);
+  }
+
+  @Test
+  public void blankQuestionnaireHappyPath() {
+    ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
+    ResponseDTO expectedReceipt = managementEvent.getPayload().getResponse();
+
+    // Given
+    Case expectedCase = getRandomCase();
+    expectedCase.setReceiptReceived(true);
+    expectedCase.setCcsCase(false);
+    UacQidLink expectedUacQidLink = generateUacQidLinkedToCase(expectedCase);
+
+    managementEvent.getPayload().getResponse().setResponseDateTime(OffsetDateTime.now());
+    managementEvent.getPayload().getResponse().setUnreceipt(true);
+
+    when(uacService.findByQid(expectedReceipt.getQuestionnaireId())).thenReturn(expectedUacQidLink);
+
+    // when
+    underTest.processReceipt(managementEvent);
+
+    // then
+    verify(uacService).findByQid(anyString());
+
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseService).saveAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture());
+    Case actualCase = caseArgumentCaptor.getValue();
+    assertThat(actualCase.isReceiptReceived()).isFalse();
+    assertThat(actualCase.isCcsCase()).isFalse();
+    verifyNoMoreInteractions(caseService);
+
+    ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
+    verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
+    UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
+    assertThat(actualUacQidLink.getQid()).isEqualTo(expectedUacQidLink.getQid());
+    assertThat(actualUacQidLink.getUac()).isEqualTo(expectedUacQidLink.getUac());
+    assertThat(actualUacQidLink.isUnreceipted()).isTrue();
+
+    verify(eventLogger)
+            .logUacQidEvent(
+                    eq(expectedUacQidLink),
+                    any(OffsetDateTime.class),
+                    eq(QID_RECEIPTED),
+                    eq(EventType.RESPONSE_RECEIVED),
+                    eq(managementEvent.getEvent()),
+                    anyString());
+    verifyNoMoreInteractions(eventLogger);
+
+
   }
 
 
