@@ -31,5 +31,8 @@ public class UacQidLink {
   private boolean ccsCase;
 
   @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
-  private boolean unreceipted;
+  private boolean blankQuestionnaireReceived;
+
+  @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+  private boolean receipted;
 }

@@ -48,31 +48,39 @@ public class ReceiptService {
 
     //An unreceipt doesn't un-un-active a uacQidPair
     if (!receiptPayload.getUnreceipt()) {
+      //Has this uacQidLink Already been set to unreceipted, if so log it and leave.
+      if (uacQidLink.isBlankQuestionnaireReceived()) {
+        return;
+      }
       uacQidLink.setActive(false);
+      uacQidLink.setReceipted(true);
+
       if (caze != null) {
         caze.setReceiptReceived(true);
       }
-      //Has this uacQidLink Already been set to unreceipted, if so log it and leave.
-      if (uacQidLink.isUnreceipted()) {
+    } else {
+      uacQidLink.setBlankQuestionnaireReceived(true);
+      uacQidLink.setReceipted(false);
+
+      if(hasCaseAlreadyBeenReceiptedByAnotherQid(caze, uacQidLink)) {
+        uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
         return;
       }
-    } else {
-      uacQidLink.setUnreceipted(true);
+
       caze.setReceiptReceived(false);
     }
-
 
     if (isCCSQuestionnaireType(uacQidLink.getQid())) {
       uacService.saveUacQidLink(uacQidLink);
     } else {
       uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
       fieldworkFollowupService.ifIUnreceiptedNeedsNewFieldWorkFolloup(caze, receiptEvent.getPayload().getResponse().getUnreceipt());
-
     }
 
     if (caze != null) {
       if (caze.isCcsCase()) {
         caseService.saveCase(caze);
+        caze.setReceiptReceived(true);
       } else {
         caseService.saveAndEmitCaseUpdatedEvent(caze);
       }
@@ -83,13 +91,9 @@ public class ReceiptService {
               .warn("Receipt received for unaddressed UAC/QID pair not yet linked to a case");
     }
 
-    eventLogger.logUacQidEvent(
-            uacQidLink,
-            receiptEvent.getEvent().getDateTime(),
-            QID_RECEIPTED,
-            EventType.RESPONSE_RECEIVED,
-            receiptEvent.getEvent(),
-            convertObjectToJson(receiptPayload));
   }
 
+  private boolean hasCaseAlreadyBeenReceiptedByAnotherQid(Case caze, UacQidLink receivedUacQidLink) {
+    return caze.getUacQidLinks().stream().anyMatch(u -> u.isReceipted() && !u.getQid().equals(receivedUacQidLink.getQid()));
+  }
 }

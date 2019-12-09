@@ -1,6 +1,7 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.*;
 import static uk.gov.ons.census.casesvc.service.ReceiptService.QID_RECEIPTED;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.*;
@@ -29,7 +30,10 @@ public class ReceiptServiceTest {
   private final String TEST_NON_CCS_QID_ID = "1234567890123456";
   private final String TEST_CCS_QID_ID = "7134567890123456";
   private final static String TEST_QID = "213456787654567";
+  private final static String TEST_QID_2 = "213456787654568";
   private final static String TEST_UAC = "123456789012233";
+  private final static String TEST_UAC_2 = "123456789012237";
+
 
   @Mock
   private CaseService caseService;
@@ -79,6 +83,7 @@ public class ReceiptServiceTest {
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
     assertThat(actualUacQidLink.getQid()).isEqualTo(expectedUacQidLink.getQid());
     assertThat(actualUacQidLink.getUac()).isEqualTo(expectedUacQidLink.getUac());
+    assertThat(actualUacQidLink.isReceipted()).isTrue();
 
     verify(eventLogger)
             .logUacQidEvent(
@@ -171,20 +176,21 @@ public class ReceiptServiceTest {
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
     assertThat(actualUacQidLink.getQid()).isEqualTo(expectedUacQidLink.getQid());
     assertThat(actualUacQidLink.getUac()).isEqualTo(expectedUacQidLink.getUac());
-    assertThat(actualUacQidLink.isUnreceipted()).isTrue();
-//
-//    verify(fieldworkFollowupService).ifIUnreceiptedNeedsNewFieldWorkFolloup(caseArgumentCaptor.capture(), eq(true));
-//    assertThat(caseArgumentCaptor.getValue().getCaseId()).isEqualTo(expectedCase.getCaseId());
+    assertThat(actualUacQidLink.isBlankQuestionnaireReceived()).isTrue();
+    assertThat(actualUacQidLink.isReceipted()).isFalse();
 
-//    verify(eventLogger)
-//            .logUacQidEvent(
-//                    eq(expectedUacQidLink),
-//                    any(OffsetDateTime.class),
-//                    eq(QID_RECEIPTED),
-//                    eq(EventType.RESPONSE_RECEIVED),
-//                    eq(managementEvent.getEvent()),
-//                    anyString());
-//    verifyNoMoreInteractions(eventLogger);
+    verify(fieldworkFollowupService).ifIUnreceiptedNeedsNewFieldWorkFolloup(caseArgumentCaptor.capture(), eq(true));
+    assertThat(caseArgumentCaptor.getValue().getCaseId()).isEqualTo(expectedCase.getCaseId());
+
+    verify(eventLogger)
+            .logUacQidEvent(
+                    eq(expectedUacQidLink),
+                    any(OffsetDateTime.class),
+                    eq(QID_RECEIPTED),
+                    eq(EventType.RESPONSE_RECEIVED),
+                    eq(managementEvent.getEvent()),
+                    anyString());
+    verifyNoMoreInteractions(eventLogger);
 
 
   }
@@ -222,7 +228,7 @@ public class ReceiptServiceTest {
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
     assertThat(actualUacQidLink.getQid()).isEqualTo(expectedUacQidLink.getQid());
     assertThat(actualUacQidLink.getUac()).isEqualTo(expectedUacQidLink.getUac());
-    assertThat(actualUacQidLink.isUnreceipted()).isTrue();
+    assertThat(actualUacQidLink.isBlankQuestionnaireReceived()).isTrue();
 
 //    verify(eventLogger)
 //            .logUacQidEvent(
@@ -234,7 +240,7 @@ public class ReceiptServiceTest {
 //                    anyString());
 
 
-    expectedUacQidLink.setUnreceipted(true);
+    expectedUacQidLink.setBlankQuestionnaireReceived(true);
     ResponseManagementEvent PQRSReceiptmanagementEvent = createResponseReceivedEvent(false);
 
     // when, sending in another response for PQRS which is a receipt
@@ -244,27 +250,177 @@ public class ReceiptServiceTest {
     // then,
     verifyNoMoreInteractions(caseService, uacService);
     // Need to look into why event logger is throwing weird errors
-    //    verify(eventLogger)
+//    verify(eventLogger, times(2))
+//        .logUacQidEvent(
+//                eq(expectedUacQidLink),
+//                any(OffsetDateTime.class),
+//                eq(QID_RECEIPTED),
+//                eq(EventType.RESPONSE_RECEIVED),
+//                eq(managementEvent.getEvent()),
+//                anyString());
+
+  }
+
+  @Test
+  public void blankQuestionnaireReceivedQMBeforePQRSMultipleQIDs() {
+    // Given
+    Case expectedCase = getRandomCase();
+    expectedCase.setReceiptReceived(true);
+    expectedCase.setCcsCase(false);
+    UacQidLink existingReceiptedQidUacLink = generateUacQidLinkedToCase(expectedCase, TEST_QID_2, TEST_UAC_2);
+    existingReceiptedQidUacLink.setReceipted(true);
+    UacQidLink qidUacToReceiveBlankQuestionnaire = generateUacQidLinkedToCase(expectedCase);
+
+    ResponseManagementEvent unreceiptingQuestionnaireEvent = createResponseReceivedEvent(true);
+    ResponseDTO expectedReceipt = unreceiptingQuestionnaireEvent.getPayload().getResponse();
+    unreceiptingQuestionnaireEvent.getPayload().getResponse().setResponseDateTime(OffsetDateTime.now());
+    unreceiptingQuestionnaireEvent.getPayload().getResponse().setUnreceipt(true);
+
+    when(uacService.findByQid(expectedReceipt.getQuestionnaireId())).thenReturn(qidUacToReceiveBlankQuestionnaire);
+
+    // when
+    underTest.processReceipt(unreceiptingQuestionnaireEvent);
+
+    // then
+    verify(uacService).findByQid(TEST_QID);
+
+    // There is already a valid different QID receipted
+    // The case should remain receipted, send nothing to field, mark this qid as blankQuestionnaire Received
+
+    ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
+    verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
+    UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
+    assertThat(actualUacQidLink.getQid()).isEqualTo(qidUacToReceiveBlankQuestionnaire.getQid());
+    assertThat(actualUacQidLink.getUac()).isEqualTo(qidUacToReceiveBlankQuestionnaire.getUac());
+    assertThat(actualUacQidLink.isBlankQuestionnaireReceived()).isTrue();
+    assertThat(actualUacQidLink.isReceipted()).isFalse();
+
+    //Case shouldn't be updated, nothing should be sent to fieldwork
+    verifyZeroInteractions(caseService, fieldworkFollowupService);
+
+    ResponseManagementEvent PQRSReceiptingEvent = createResponseReceivedEvent(false);
+    ResponseDTO expectedPQRSReceipt = PQRSReceiptingEvent.getPayload().getResponse();
+    PQRSReceiptingEvent.getPayload().getResponse().setResponseDateTime(OffsetDateTime.now());
+    unreceiptingQuestionnaireEvent.getPayload().getResponse().setUnreceipt(false);
+
+    underTest.processReceipt(PQRSReceiptingEvent);
+
+    verify(uacService, times(2)).findByQid(TEST_QID);
+
+    // There is already a valid different QID receipted
+    // The case should remain receipted, send nothing to field, mark this qid as blankQuestionnaire Received
+
+    verifyZeroInteractions(uacService, caseService, fieldworkFollowupService);
+
+//    verify(eventLogger)
 //            .logUacQidEvent(
-//                    eq(expectedUacQidLink),
+//                    eq(qidUacToReceiveBlankQuestionnaire),
 //                    any(OffsetDateTime.class),
 //                    eq(QID_RECEIPTED),
 //                    eq(EventType.RESPONSE_RECEIVED),
-//                    eq(managementEvent.getEvent()),
+//                    eq(unreceiptingQuestionnaireEvent.getEvent()),
 //                    anyString());
+
+
+//    expectedUacQidLink.setBlankQuestionnaireReceived(true);
+//    ResponseManagementEvent PQRSReceiptmanagementEvent = createResponseReceivedEvent(false);
+//
+//    // when, sending in another response for PQRS which is a receipt
+//    underTest.processReceipt(PQRSReceiptmanagementEvent);
+//    verify(uacService, times(2)).findByQid(TEST_QID);
+//
+//    // then,
+//    verifyNoMoreInteractions(caseService, uacService);
+    // Need to look into why event logger is throwing weird errors
+//    verify(eventLogger, times(2))
+//        .logUacQidEvent(
+//                eq(expectedUacQidLink),
+//                any(OffsetDateTime.class),
+//                eq(QID_RECEIPTED),
+//                eq(EventType.RESPONSE_RECEIVED),
+//                eq(managementEvent.getEvent()),
+//                anyString());
+
+  }
+
+  private UacQidLink generateUacQidLinkedToCase(Case expectedCase, String testQid, String testUac) {
+    UacQidLink uacQidLink = generateRandomUacQidLinkedToCase(expectedCase);
+    uacQidLink.setQid(testQid);
+    uacQidLink.setUac(testUac);
+    uacQidLink.setCaze(expectedCase);
+    uacQidLink.setEvents(null);
+    uacQidLink.setBlankQuestionnaireReceived(false);
+//    expectedCase.setUacQidLinks(List.of(uacQidLink));
+    expectedCase.getUacQidLinks().add(uacQidLink);
+    return uacQidLink;
 
   }
 
 
-  public static UacQidLink generateUacQidLinkedToCase(Case linkedCase) {
-    UacQidLink uacQidLink = new UacQidLink();
-    uacQidLink.setQid(TEST_QID);
-    uacQidLink.setUac(TEST_UAC);
-    uacQidLink.setCaze(linkedCase);
-    uacQidLink.setEvents(null);
-    uacQidLink.setUnreceipted(false);
-    linkedCase.setUacQidLinks(List.of(uacQidLink));
-    return uacQidLink;
+  @Test
+  public void handleUnlinkedBlankQuestionnaireStuff() {
+    assertFalse(true);
+  }
+
+  @Test
+  public void blankQuestionnaireForAnotherUACQIDPair() {
+
+
+    // Given
+    Case expectedCase = getRandomCase();
+    expectedCase.setReceiptReceived(false);
+    expectedCase.setCcsCase(false);
+    UacQidLink blankUacQidPairLink = generateUacQidLinkedToCase(expectedCase, TEST_QID_2, TEST_UAC_2);
+    blankUacQidPairLink.setActive(false);
+    blankUacQidPairLink.setBlankQuestionnaireReceived(true);
+    blankUacQidPairLink.setReceipted(false);
+
+    UacQidLink newPQRSLink = generateUacQidLinkedToCase(expectedCase);
+
+    ResponseManagementEvent newPQRSEvent = getTestResponseManagementEvent();
+    ResponseDTO expectedReceipt = newPQRSEvent.getPayload().getResponse();
+    newPQRSEvent.getPayload().getResponse().setResponseDateTime(OffsetDateTime.now());
+    newPQRSEvent.getPayload().getResponse().setUnreceipt(false);
+
+    when(uacService.findByQid(expectedReceipt.getQuestionnaireId())).thenReturn(newPQRSLink);
+
+    // when
+    underTest.processReceipt(newPQRSEvent);
+
+    // then
+    verify(uacService).findByQid(anyString());
+
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseService).saveAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture());
+    Case actualCase = caseArgumentCaptor.getValue();
+    assertThat(actualCase.isReceiptReceived()).isTrue();
+    verifyNoMoreInteractions(caseService);
+
+    ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
+    verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
+    UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
+    assertThat(actualUacQidLink.getQid()).isEqualTo(newPQRSLink.getQid());
+    assertThat(actualUacQidLink.getUac()).isEqualTo(newPQRSLink.getUac());
+    assertThat(actualUacQidLink.isReceipted()).isTrue();
+
+    verify(fieldworkFollowupService).ifIUnreceiptedNeedsNewFieldWorkFolloup(caseArgumentCaptor.capture(), eq(true));
+    assertThat(caseArgumentCaptor.getValue().getCaseId()).isEqualTo(expectedCase.getCaseId());
+
+//
+//    verify(eventLogger)
+//            .logUacQidEvent(
+//                    eq(newPQRSLink),
+//                    any(OffsetDateTime.class),
+//                    eq(QID_RECEIPTED),
+//                    eq(EventType.RESPONSE_RECEIVED),
+//                    eq(newPQRSEvent.getEvent()),
+//                    anyString());
+//    verifyNoMoreInteractions(eventLogger);
+  }
+
+
+  private UacQidLink generateUacQidLinkedToCase(Case linkedCase) {
+    return generateUacQidLinkedToCase(linkedCase, TEST_QID, TEST_UAC);
   }
 
   private ResponseManagementEvent createResponseReceivedEvent(boolean unreceiped) {

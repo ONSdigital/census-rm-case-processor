@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -60,7 +61,7 @@ public class DataUtils {
   public static Case getRandomCase() {
     // uacQidLinks and Events have to be set to avoid a stack overflow in easy random
     Case randomCase = easyRandom.nextObject(Case.class);
-    randomCase.setUacQidLinks(null);
+    randomCase.setUacQidLinks(new ArrayList<>());
     randomCase.setEvents(null);
     randomCase.setCaseId(TEST_CASE_ID);
     return randomCase;
@@ -89,7 +90,7 @@ public class DataUtils {
     UacQidLink uacQidLink = generateRandomUacQidLink();
     uacQidLink.setCaze(linkedCase);
     uacQidLink.setEvents(null);
-    uacQidLink.setUnreceipted(false);
+    uacQidLink.setBlankQuestionnaireReceived(false);
     linkedCase.setUacQidLinks(List.of(uacQidLink));
     return uacQidLink;
   }
