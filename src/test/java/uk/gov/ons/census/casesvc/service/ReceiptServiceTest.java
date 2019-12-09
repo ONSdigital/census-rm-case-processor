@@ -108,19 +108,17 @@ public class ReceiptServiceTest {
     underTest.processReceipt(managementEvent);
 
     // then
-    InOrder inOrder = inOrder(uacService, caseService, eventLogger);
-
-    inOrder.verify(uacService).findByQid(anyString());
+    verify(uacService).findByQid(anyString());
 
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    inOrder.verify(caseService).saveCase(caseArgumentCaptor.capture());
+    verify(caseService).saveCase(caseArgumentCaptor.capture());
     Case actualCase = caseArgumentCaptor.getValue();
     assertThat(actualCase.isReceiptReceived()).isTrue();
     assertThat(actualCase.isCcsCase()).isTrue();
     verifyNoMoreInteractions(caseService);
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    inOrder.verify(uacService).saveUacQidLink(uacQidLinkCaptor.capture());
+    verify(uacService).saveUacQidLink(uacQidLinkCaptor.capture());
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
     assertThat(actualUacQidLink.getQid()).isEqualTo(expectedUacQidLink.getQid());
     assertThat(actualUacQidLink.getUac()).isEqualTo(expectedUacQidLink.getUac());
