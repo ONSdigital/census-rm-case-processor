@@ -23,56 +23,51 @@ public class ReceiptService {
   private final CaseService caseService;
   private final UacService uacService;
   private final EventLogger eventLogger;
-  private final RabbitTemplate rabbitTemplate;
+  private final FieldworkFollowupService fieldworkFollowupService;
 
-  @Value("${queueconfig.outbound-field-exchange}")
-  private String outboundExchange;
 
-  @Value("${queueconfig.field-binding}")
-  private String actionFieldBinding;
-
-  public ReceiptService(CaseService caseService, UacService uacService, EventLogger eventLogger, RabbitTemplate rabbitTemplate) {
+  public ReceiptService(CaseService caseService, UacService uacService, EventLogger eventLogger, FieldworkFollowupService fieldworkFollowupService) {
     this.caseService = caseService;
     this.uacService = uacService;
     this.eventLogger = eventLogger;
-    this.rabbitTemplate = rabbitTemplate;
+    this.fieldworkFollowupService = fieldworkFollowupService;
   }
 
   public void processReceipt(ResponseManagementEvent receiptEvent) {
     ResponseDTO receiptPayload = receiptEvent.getPayload().getResponse();
     UacQidLink uacQidLink = uacService.findByQid(receiptPayload.getQuestionnaireId());
+    eventLogger.logUacQidEvent(
+            uacQidLink,
+            receiptEvent.getEvent().getDateTime(),
+            QID_RECEIPTED,
+            EventType.RESPONSE_RECEIVED,
+            receiptEvent.getEvent(),
+            convertObjectToJson(receiptPayload));
 
     Case caze = uacQidLink.getCaze();
 
     //An unreceipt doesn't un-un-active a uacQidPair
-    if( !receiptPayload.getUnreceipt() ) {
+    if (!receiptPayload.getUnreceipt()) {
       uacQidLink.setActive(false);
-
+      if (caze != null) {
+        caze.setReceiptReceived(true);
+      }
       //Has this uacQidLink Already been set to unreceipted, if so log it and leave.
       if (uacQidLink.isUnreceipted()) {
-        eventLogger.logUacQidEvent(
-                uacQidLink,
-                receiptEvent.getEvent().getDateTime(),
-                QID_RECEIPTED,
-                EventType.RESPONSE_RECEIVED,
-                receiptEvent.getEvent(),
-                convertObjectToJson(receiptPayload));
-
         return;
       }
-    }
-    else
+    } else {
       uacQidLink.setUnreceipted(true);
-
-    if (caze != null) {
-      caze.setReceiptReceived(true);
+      caze.setReceiptReceived(false);
     }
+
 
     if (isCCSQuestionnaireType(uacQidLink.getQid())) {
       uacService.saveUacQidLink(uacQidLink);
     } else {
       uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
-      ifIUnreceiptedNeedsNewFieldWorkFolloup(caze,receiptEvent.getPayload().getResponse().getUnreceipt());
+      fieldworkFollowupService.ifIUnreceiptedNeedsNewFieldWorkFolloup(caze, receiptEvent.getPayload().getResponse().getUnreceipt());
+
     }
 
     if (caze != null) {
@@ -97,58 +92,4 @@ public class ReceiptService {
             convertObjectToJson(receiptPayload));
   }
 
-  private void ifIUnreceiptedNeedsNewFieldWorkFolloup(Case caze, boolean unreceipted) {
-     if( !unreceipted )
-       return;
-
-     // in future look at case table and use black magic to decide if it needs a followup.
-
-     //buildAFieldworkFollowup
-    FieldWorkFollowup followup = buildFieldworkFollowup(caze);
-
-    //sendfieldworkFollowup
-    rabbitTemplate.convertAndSend(
-            outboundExchange,actionFieldBinding, followup);
-
-    caze.setReceiptReceived(false);
-
-  }
-
-  public FieldWorkFollowup buildFieldworkFollowup(Case caze) {
-
-    FieldWorkFollowup followup = new FieldWorkFollowup();
-    followup.setAddressLine1(caze.getAddressLine1());
-    followup.setAddressLine2(caze.getAddressLine2());
-    followup.setAddressLine3(caze.getAddressLine3());
-    followup.setTownName(caze.getTownName());
-    followup.setPostcode(caze.getPostcode());
-    followup.setEstabType(caze.getEstabType());
-    followup.setOrganisationName(caze.getOrganisationName());
-    followup.setArid(caze.getArid());
-    followup.setUprn(caze.getUprn());
-    followup.setOa(caze.getOa());
-    followup.setArid(caze.getArid());
-    followup.setLatitude(caze.getLatitude());
-    followup.setLongitude(caze.getLongitude());
-    followup.setActionPlan(caze.getActionPlanId());
-    followup.setActionType("dummy");
-    followup.setCaseId(caze.getCaseId().toString());
-    followup.setCaseRef(Integer.toString(caze.getCaseRef()));
-    followup.setAddressType(caze.getAddressType());
-    followup.setAddressLevel(caze.getAddressLevel());
-    followup.setTreatmentCode(caze.getTreatmentCode());
-    followup.setFieldOfficerId(caze.getFieldOfficerId());
-    followup.setFieldCoordinatorId(caze.getFieldCoordinatorId());
-    followup.setCeExpectedCapacity(caze.getCeExpectedCapacity());
-    followup.setUndeliveredAsAddress(caze.isUndeliveredAsAddressed());
-
-    // TODO: set surveyName, undeliveredAsAddress and blankQreReturned from caze
-    followup.setSurveyName("CENSUS");
-    followup.setBlankQreReturned(true);
-
-    // TODO: ccsQuestionnaireUrl, ceDeliveryReqd,
-    // ceCE1Complete, ceActualResponses
-
-    return followup;
-  }
 }
