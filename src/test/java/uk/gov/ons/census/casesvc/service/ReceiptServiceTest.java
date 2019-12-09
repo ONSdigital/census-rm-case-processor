@@ -7,6 +7,7 @@ import static uk.gov.ons.census.casesvc.service.ReceiptService.QID_RECEIPTED;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.*;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -152,6 +153,7 @@ public class ReceiptServiceTest {
     expectedCase.setReceiptReceived(true);
     expectedCase.setCcsCase(false);
     UacQidLink expectedUacQidLink = generateUacQidLinkedToCase(expectedCase);
+    UacQidLink link2 = generateUacQidLinkedToCase(expectedCase, TEST_QID_2, TEST_UAC_2);
 
     managementEvent.getPayload().getResponse().setResponseDateTime(OffsetDateTime.now());
     managementEvent.getPayload().getResponse().setUnreceipt(true);
@@ -179,7 +181,7 @@ public class ReceiptServiceTest {
     assertThat(actualUacQidLink.isBlankQuestionnaireReceived()).isTrue();
     assertThat(actualUacQidLink.isReceipted()).isFalse();
 
-    verify(fieldworkFollowupService).ifIUnreceiptedNeedsNewFieldWorkFolloup(caseArgumentCaptor.capture(), eq(true));
+    verify(fieldworkFollowupService).ifIUnreceiptedNeedsNewFieldWorkFolloup(caseArgumentCaptor.capture());
     assertThat(caseArgumentCaptor.getValue().getCaseId()).isEqualTo(expectedCase.getCaseId());
 
     verify(eventLogger)
@@ -230,34 +232,33 @@ public class ReceiptServiceTest {
     assertThat(actualUacQidLink.getUac()).isEqualTo(expectedUacQidLink.getUac());
     assertThat(actualUacQidLink.isBlankQuestionnaireReceived()).isTrue();
 
-//    verify(eventLogger)
-//            .logUacQidEvent(
-//                    eq(expectedUacQidLink),
-//                    any(OffsetDateTime.class),
-//                    eq(QID_RECEIPTED),
-//                    eq(EventType.RESPONSE_RECEIVED),
-//                    eq(managementEvent.getEvent()),
-//                    anyString());
-
+    verify(eventLogger)
+            .logUacQidEvent(
+                    eq(expectedUacQidLink),
+                    any(OffsetDateTime.class),
+                    eq(QID_RECEIPTED),
+                    eq(EventType.RESPONSE_RECEIVED),
+                    eq(managementEvent.getEvent()),
+                    anyString());
 
     expectedUacQidLink.setBlankQuestionnaireReceived(true);
-    ResponseManagementEvent PQRSReceiptmanagementEvent = createResponseReceivedEvent(false);
+    ResponseManagementEvent pQRSReceiptmanagementEvent = createResponseReceivedEvent(false);
 
     // when, sending in another response for PQRS which is a receipt
-    underTest.processReceipt(PQRSReceiptmanagementEvent);
+    underTest.processReceipt(pQRSReceiptmanagementEvent);
     verify(uacService, times(2)).findByQid(TEST_QID);
 
     // then,
     verifyNoMoreInteractions(caseService, uacService);
     // Need to look into why event logger is throwing weird errors
-//    verify(eventLogger, times(2))
-//        .logUacQidEvent(
-//                eq(expectedUacQidLink),
-//                any(OffsetDateTime.class),
-//                eq(QID_RECEIPTED),
-//                eq(EventType.RESPONSE_RECEIVED),
-//                eq(managementEvent.getEvent()),
-//                anyString());
+    verify(eventLogger)
+        .logUacQidEvent(
+                eq(expectedUacQidLink),
+                any(OffsetDateTime.class),
+                eq(QID_RECEIPTED),
+                eq(EventType.RESPONSE_RECEIVED),
+                eq(managementEvent.getEvent()),
+                anyString());
 
   }
 
@@ -312,14 +313,14 @@ public class ReceiptServiceTest {
 
     verifyZeroInteractions(uacService, caseService, fieldworkFollowupService);
 
-//    verify(eventLogger)
-//            .logUacQidEvent(
-//                    eq(qidUacToReceiveBlankQuestionnaire),
-//                    any(OffsetDateTime.class),
-//                    eq(QID_RECEIPTED),
-//                    eq(EventType.RESPONSE_RECEIVED),
-//                    eq(unreceiptingQuestionnaireEvent.getEvent()),
-//                    anyString());
+    verify(eventLogger)
+            .logUacQidEvent(
+                    eq(qidUacToReceiveBlankQuestionnaire),
+                    any(OffsetDateTime.class),
+                    eq(QID_RECEIPTED),
+                    eq(EventType.RESPONSE_RECEIVED),
+                    eq(unreceiptingQuestionnaireEvent.getEvent()),
+                    anyString());
 
 
 //    expectedUacQidLink.setBlankQuestionnaireReceived(true);
@@ -344,13 +345,14 @@ public class ReceiptServiceTest {
   }
 
   private UacQidLink generateUacQidLinkedToCase(Case expectedCase, String testQid, String testUac) {
-    UacQidLink uacQidLink = generateRandomUacQidLinkedToCase(expectedCase);
+    UacQidLink uacQidLink = generateRandomUacQidLink();
     uacQidLink.setQid(testQid);
     uacQidLink.setUac(testUac);
     uacQidLink.setCaze(expectedCase);
     uacQidLink.setEvents(null);
     uacQidLink.setBlankQuestionnaireReceived(false);
 //    expectedCase.setUacQidLinks(List.of(uacQidLink));
+
     expectedCase.getUacQidLinks().add(uacQidLink);
     return uacQidLink;
 
@@ -364,10 +366,9 @@ public class ReceiptServiceTest {
 
   @Test
   public void blankQuestionnaireForAnotherUACQIDPair() {
-
-
     // Given
     Case expectedCase = getRandomCase();
+
     expectedCase.setReceiptReceived(false);
     expectedCase.setCcsCase(false);
     UacQidLink blankUacQidPairLink = generateUacQidLinkedToCase(expectedCase, TEST_QID_2, TEST_UAC_2);
@@ -403,19 +404,16 @@ public class ReceiptServiceTest {
     assertThat(actualUacQidLink.getUac()).isEqualTo(newPQRSLink.getUac());
     assertThat(actualUacQidLink.isReceipted()).isTrue();
 
-    verify(fieldworkFollowupService).ifIUnreceiptedNeedsNewFieldWorkFolloup(caseArgumentCaptor.capture(), eq(true));
-    assertThat(caseArgumentCaptor.getValue().getCaseId()).isEqualTo(expectedCase.getCaseId());
 
-//
-//    verify(eventLogger)
-//            .logUacQidEvent(
-//                    eq(newPQRSLink),
-//                    any(OffsetDateTime.class),
-//                    eq(QID_RECEIPTED),
-//                    eq(EventType.RESPONSE_RECEIVED),
-//                    eq(newPQRSEvent.getEvent()),
-//                    anyString());
-//    verifyNoMoreInteractions(eventLogger);
+    verify(eventLogger)
+            .logUacQidEvent(
+                    eq(newPQRSLink),
+                    any(OffsetDateTime.class),
+                    eq(QID_RECEIPTED),
+                    eq(EventType.RESPONSE_RECEIVED),
+                    eq(newPQRSEvent.getEvent()),
+                    anyString());
+    verifyNoMoreInteractions(eventLogger);
   }
 
 
@@ -430,6 +428,7 @@ public class ReceiptServiceTest {
     event.setType(EventTypeDTO.RESPONSE_RECEIVED);
     event.setSource("RECEIPT_SERVICE");
     event.setChannel("DUMMY");
+    event.setDateTime(OffsetDateTime.now());
     managementEvent.setEvent(event);
 
     ResponseDTO responseDTO = new ResponseDTO();

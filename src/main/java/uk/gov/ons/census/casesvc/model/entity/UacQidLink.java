@@ -8,6 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
 @Entity
@@ -18,8 +19,10 @@ public class UacQidLink {
 
   @Column private String uac;
 
+  @ToString.Exclude
   @ManyToOne private Case caze;
 
+  @ToString.Exclude
   @OneToMany(mappedBy = "uacQidLink")
   private List<Event> events;
 

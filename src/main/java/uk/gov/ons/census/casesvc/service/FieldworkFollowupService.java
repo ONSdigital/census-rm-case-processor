@@ -22,20 +22,14 @@ public class FieldworkFollowupService {
     this.rabbitTemplate = rabbitTemplate;
   }
 
-  public void ifIUnreceiptedNeedsNewFieldWorkFolloup(Case caze, boolean unreceipted) {
-    if (!unreceipted)
-      return;
-
+  public void ifIUnreceiptedNeedsNewFieldWorkFolloup(Case caze) {
     // in future look at case table and use black magic to decide if it needs a followup.
 
     //buildAFieldworkFollowup
     FieldWorkFollowup followup = buildFieldworkFollowup(caze);
 
     //sendfieldworkFollowup
-    rabbitTemplate.convertAndSend(
-            outboundExchange, actionFieldBinding, followup);
-
-
+    rabbitTemplate.convertAndSend( outboundExchange, actionFieldBinding, followup);
   }
 
   private FieldWorkFollowup buildFieldworkFollowup(Case caze) {

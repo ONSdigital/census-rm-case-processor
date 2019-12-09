@@ -11,6 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
 @Entity
@@ -86,9 +87,11 @@ public class Case {
   @Enumerated(EnumType.STRING)
   private CaseState state;
 
+  @ToString.Exclude
   @OneToMany(mappedBy = "caze")
   List<UacQidLink> uacQidLinks;
 
+  @ToString.Exclude
   @OneToMany(mappedBy = "caze")
   List<Event> events;
 

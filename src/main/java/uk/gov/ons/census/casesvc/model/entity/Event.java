@@ -10,6 +10,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import lombok.Data;
+import lombok.ToString;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
@@ -20,8 +21,10 @@ import org.hibernate.annotations.TypeDefs;
 public class Event {
   @Id private UUID id;
 
+  @ToString.Exclude
   @ManyToOne private UacQidLink uacQidLink;
 
+  @ToString.Exclude
   @ManyToOne private Case caze;
 
   @Column(columnDefinition = "timestamp with time zone")

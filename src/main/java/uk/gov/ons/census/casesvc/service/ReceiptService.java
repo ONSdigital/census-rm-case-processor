@@ -36,6 +36,7 @@ public class ReceiptService {
   public void processReceipt(ResponseManagementEvent receiptEvent) {
     ResponseDTO receiptPayload = receiptEvent.getPayload().getResponse();
     UacQidLink uacQidLink = uacService.findByQid(receiptPayload.getQuestionnaireId());
+
     eventLogger.logUacQidEvent(
             uacQidLink,
             receiptEvent.getEvent().getDateTime(),
@@ -74,7 +75,10 @@ public class ReceiptService {
       uacService.saveUacQidLink(uacQidLink);
     } else {
       uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
-      fieldworkFollowupService.ifIUnreceiptedNeedsNewFieldWorkFolloup(caze, receiptEvent.getPayload().getResponse().getUnreceipt());
+
+      if (receiptEvent.getPayload().getResponse().getUnreceipt()) {
+        fieldworkFollowupService.ifIUnreceiptedNeedsNewFieldWorkFolloup(caze);
+      }
     }
 
     if (caze != null) {
