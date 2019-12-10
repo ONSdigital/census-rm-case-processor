@@ -27,9 +27,7 @@ import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReceiptServiceTest {
-
-  private final String TEST_NON_CCS_QID_ID = "1234567890123456";
-  private final String TEST_CCS_QID_ID = "7134567890123456";
+  private final static String TEST_CCS_QID_ID = "7134567890123456";
   private final static String TEST_QID = "213456787654567";
   private final static String TEST_QID_2 = "213456787654568";
   private final static String TEST_UAC = "123456789012233";
@@ -47,6 +45,7 @@ public class ReceiptServiceTest {
 
   @Mock
   private FieldworkFollowupService fieldworkFollowupService;
+
   @InjectMocks
   ReceiptService underTest;
 
@@ -153,7 +152,6 @@ public class ReceiptServiceTest {
     expectedCase.setReceiptReceived(true);
     expectedCase.setCcsCase(false);
     UacQidLink expectedUacQidLink = generateUacQidLinkedToCase(expectedCase);
-    UacQidLink link2 = generateUacQidLinkedToCase(expectedCase, TEST_QID_2, TEST_UAC_2);
 
     managementEvent.getPayload().getResponse().setResponseDateTime(OffsetDateTime.now());
     managementEvent.getPayload().getResponse().setUnreceipt(true);
@@ -388,20 +386,18 @@ public class ReceiptServiceTest {
   }
 
   private UacQidLink generateUacQidLinkedToCase(Case expectedCase, String testQid, String testUac) {
-    UacQidLink uacQidLink = generateRandomUacQidLink();
+    UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setQid(testQid);
     uacQidLink.setUac(testUac);
     uacQidLink.setCaze(expectedCase);
     uacQidLink.setEvents(null);
     uacQidLink.setBlankQuestionnaireReceived(false);
-//    expectedCase.setUacQidLinks(List.of(uacQidLink));
-
+    uacQidLink.setReceipted(false);
     expectedCase.getUacQidLinks().add(uacQidLink);
+
     return uacQidLink;
-
   }
-
-
+  
   @Test
   public void handleUnlinkedBlankQuestionnaireStuff() {
     assertFalse(true);

@@ -16,6 +16,8 @@ import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
+import java.util.Optional;
+
 @Service
 public class ReceiptService {
   private static final Logger log = LoggerFactory.getLogger(ReceiptService.class);
@@ -103,9 +105,17 @@ public class ReceiptService {
               .warn("Receipt received for unaddressed UAC/QID pair not yet linked to a case");
     }
   }
-
-
+  
   private boolean hasCaseAlreadyBeenReceiptedByAnotherQid(Case caze, UacQidLink receivedUacQidLink) {
-    return caze.getUacQidLinks().stream().anyMatch(u -> u.isReceipted() && !u.getQid().equals(receivedUacQidLink.getQid()));
+    Optional<UacQidLink> a = caze.getUacQidLinks().stream().filter(u -> u.isReceipted() && !u.getQid().equals(receivedUacQidLink.getQid())).findFirst();
+    
+    if(a.isPresent()) {
+      UacQidLink o = a.get();
+      UacQidLink x = o;
+    }
+
+    boolean res = caze.getUacQidLinks().stream().anyMatch(u -> u.isReceipted() && !u.getQid().equals(receivedUacQidLink.getQid()));
+
+    return res;
   }
 }
