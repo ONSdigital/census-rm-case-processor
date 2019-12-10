@@ -68,7 +68,7 @@ public class ReceiptService {
     if (isCCSQuestionnaireType(uacQidLink.getQid())) {
       uacService.saveUacQidLink(uacQidLink);
     } else {
-      uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
+      uacService.saveAndEmitUacUpdatedEvent(uacQidLink, receiptPayload.getUnreceipt());
 
       if (receiptEvent.getPayload().getResponse().getUnreceipt()) {
         fieldworkFollowupService.buildAndSendFieldWorkFollowUp(caze);
@@ -106,7 +106,9 @@ public class ReceiptService {
     }
   }
 
-  private boolean hasCaseAlreadyBeenReceiptedByAnotherQid(Case caze, UacQidLink receivedUacQidLink) {
-    return caze.getUacQidLinks().stream().anyMatch(u -> u.isReceipted() && !u.getQid().equals(receivedUacQidLink.getQid()));
+  private boolean hasCaseAlreadyBeenReceiptedByAnotherQid(
+      Case caze, UacQidLink receivedUacQidLink) {
+    return caze.getUacQidLinks().stream()
+        .anyMatch(u -> u.isReceipted() && !u.getQid().equals(receivedUacQidLink.getQid()));
   }
 }
