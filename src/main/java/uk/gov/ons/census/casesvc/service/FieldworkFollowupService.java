@@ -17,19 +17,13 @@ public class FieldworkFollowupService {
   @Value("${queueconfig.field-binding}")
   private String actionFieldBinding;
 
-
   public FieldworkFollowupService(RabbitTemplate rabbitTemplate) {
     this.rabbitTemplate = rabbitTemplate;
   }
 
-  public void ifIUnreceiptedNeedsNewFieldWorkFolloup(Case caze) {
-    // in future look at case table and use black magic to decide if it needs a followup.
-
-    //buildAFieldworkFollowup
+  public void buildAndSendFieldWorkFollowUp(Case caze) {
     FieldWorkFollowup followup = buildFieldworkFollowup(caze);
-
-    //sendfieldworkFollowup
-    rabbitTemplate.convertAndSend( outboundExchange, actionFieldBinding, followup);
+    rabbitTemplate.convertAndSend(outboundExchange, actionFieldBinding, followup);
   }
 
   private FieldWorkFollowup buildFieldworkFollowup(Case caze) {

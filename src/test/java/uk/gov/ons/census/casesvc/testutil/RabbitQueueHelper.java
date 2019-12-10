@@ -20,7 +20,6 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.ons.census.casesvc.model.dto.CcsToFwmt;
-import uk.gov.ons.census.casesvc.model.dto.FieldWorkFollowup;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 
 @Component
@@ -81,11 +80,11 @@ public class RabbitQueueHelper {
   }
 
   public ResponseManagementEvent checkExpectedMessageReceivedUnreceipt(BlockingQueue<String> queue)
-          throws IOException, InterruptedException {
+      throws IOException, InterruptedException {
     String actualMessage = queue.poll(20, TimeUnit.SECONDS);
     assertNotNull("Did not receive message before timeout", actualMessage);
     ResponseManagementEvent responseManagementEvent =
-            objectMapper.readValue(actualMessage, ResponseManagementEvent.class);
+        objectMapper.readValue(actualMessage, ResponseManagementEvent.class);
     assertNotNull(responseManagementEvent);
     return responseManagementEvent;
   }
@@ -106,7 +105,7 @@ public class RabbitQueueHelper {
   }
 
   public <T> T checkExpectedMessageReceived(BlockingQueue<String> queue, Class<T> theClass)
-          throws InterruptedException, IOException {
+      throws InterruptedException, IOException {
     ObjectMapper objectMapper = new ObjectMapper();
     String actualMessage = queue.poll(10, TimeUnit.SECONDS);
     assertNotNull("Did not receive message before timeout", actualMessage);

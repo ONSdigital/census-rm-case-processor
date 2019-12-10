@@ -5,18 +5,13 @@ import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.isCCSQue
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
-import uk.gov.ons.census.casesvc.model.dto.FieldWorkFollowup;
 import uk.gov.ons.census.casesvc.model.dto.ResponseDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
-
-import java.util.Optional;
 
 @Service
 public class ReceiptService {
@@ -27,8 +22,11 @@ public class ReceiptService {
   private final EventLogger eventLogger;
   private final FieldworkFollowupService fieldworkFollowupService;
 
-
-  public ReceiptService(CaseService caseService, UacService uacService, EventLogger eventLogger, FieldworkFollowupService fieldworkFollowupService) {
+  public ReceiptService(
+      CaseService caseService,
+      UacService uacService,
+      EventLogger eventLogger,
+      FieldworkFollowupService fieldworkFollowupService) {
     this.caseService = caseService;
     this.uacService = uacService;
     this.eventLogger = eventLogger;
@@ -43,9 +41,9 @@ public class ReceiptService {
 
     Case caze = uacQidLink.getCaze();
 
-    //An unreceipt doesn't un-un-active a uacQidPair
+    // An unreceipt doesn't un-un-active a uacQidPair
     if (!receiptPayload.getUnreceipt()) {
-      //Has this uacQidLink Already been set to unreceipted, if so log it and leave.
+      // Has this uacQidLink Already been set to unreceipted, if so log it and leave.
       if (uacQidLink.isBlankQuestionnaireReceived()) {
         return;
       }
@@ -59,7 +57,7 @@ public class ReceiptService {
       uacQidLink.setBlankQuestionnaireReceived(true);
       uacQidLink.setReceipted(false);
 
-      if(hasCaseAlreadyBeenReceiptedByAnotherQid(caze, uacQidLink)) {
+      if (hasCaseAlreadyBeenReceiptedByAnotherQid(caze, uacQidLink)) {
         uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
         return;
       }
@@ -73,24 +71,26 @@ public class ReceiptService {
       uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
 
       if (receiptEvent.getPayload().getResponse().getUnreceipt()) {
-        fieldworkFollowupService.ifIUnreceiptedNeedsNewFieldWorkFolloup(caze);
+        fieldworkFollowupService.buildAndSendFieldWorkFollowUp(caze);
       }
     }
 
     saveAndEmitNonNullCase(receiptEvent, receiptPayload, caze);
   }
 
-  private void logEvent(ResponseManagementEvent receiptEvent, ResponseDTO receiptPayload, UacQidLink uacQidLink) {
+  private void logEvent(
+      ResponseManagementEvent receiptEvent, ResponseDTO receiptPayload, UacQidLink uacQidLink) {
     eventLogger.logUacQidEvent(
-            uacQidLink,
-            receiptEvent.getEvent().getDateTime(),
-            QID_RECEIPTED,
-            EventType.RESPONSE_RECEIVED,
-            receiptEvent.getEvent(),
-            convertObjectToJson(receiptPayload));
+        uacQidLink,
+        receiptEvent.getEvent().getDateTime(),
+        QID_RECEIPTED,
+        EventType.RESPONSE_RECEIVED,
+        receiptEvent.getEvent(),
+        convertObjectToJson(receiptPayload));
   }
 
-  private void saveAndEmitNonNullCase(ResponseManagementEvent receiptEvent, ResponseDTO receiptPayload, Case caze) {
+  private void saveAndEmitNonNullCase(
+      ResponseManagementEvent receiptEvent, ResponseDTO receiptPayload, Case caze) {
     if (caze != null) {
       if (caze.isCcsCase()) {
         caze.setReceiptReceived(true);
@@ -100,22 +100,13 @@ public class ReceiptService {
       }
     } else {
       log.with("qid", receiptPayload.getQuestionnaireId())
-              .with("tx_id", receiptEvent.getEvent().getTransactionId())
-              .with("channel", receiptEvent.getEvent().getChannel())
-              .warn("Receipt received for unaddressed UAC/QID pair not yet linked to a case");
+          .with("tx_id", receiptEvent.getEvent().getTransactionId())
+          .with("channel", receiptEvent.getEvent().getChannel())
+          .warn("Receipt received for unaddressed UAC/QID pair not yet linked to a case");
     }
   }
-  
+
   private boolean hasCaseAlreadyBeenReceiptedByAnotherQid(Case caze, UacQidLink receivedUacQidLink) {
-    Optional<UacQidLink> a = caze.getUacQidLinks().stream().filter(u -> u.isReceipted() && !u.getQid().equals(receivedUacQidLink.getQid())).findFirst();
-    
-    if(a.isPresent()) {
-      UacQidLink o = a.get();
-      UacQidLink x = o;
-    }
-
-    boolean res = caze.getUacQidLinks().stream().anyMatch(u -> u.isReceipted() && !u.getQid().equals(receivedUacQidLink.getQid()));
-
-    return res;
+    return caze.getUacQidLinks().stream().anyMatch(u -> u.isReceipted() && !u.getQid().equals(receivedUacQidLink.getQid()));
   }
 }

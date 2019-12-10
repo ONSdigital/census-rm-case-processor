@@ -21,11 +21,9 @@ import org.hibernate.annotations.TypeDefs;
 public class Event {
   @Id private UUID id;
 
-  @ToString.Exclude
-  @ManyToOne private UacQidLink uacQidLink;
+  @ToString.Exclude @ManyToOne private UacQidLink uacQidLink;
 
-  @ToString.Exclude
-  @ManyToOne private Case caze;
+  @ToString.Exclude @ManyToOne private Case caze;
 
   @Column(columnDefinition = "timestamp with time zone")
   private OffsetDateTime eventDate;

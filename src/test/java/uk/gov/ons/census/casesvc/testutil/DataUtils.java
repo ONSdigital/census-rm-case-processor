@@ -95,7 +95,6 @@ public class DataUtils {
     return uacQidLink;
   }
 
-
   public static ResponseManagementEvent getTestResponseManagementEvent() {
     ResponseManagementEvent managementEvent = easyRandom.nextObject(ResponseManagementEvent.class);
     managementEvent.getEvent().setChannel("EQ");

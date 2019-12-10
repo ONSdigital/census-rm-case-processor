@@ -1,7 +1,13 @@
 package uk.gov.ons.census.casesvc.messaging;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.ons.census.casesvc.service.ReceiptService.QID_RECEIPTED;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.BlockingQueue;
 import org.jeasy.random.EasyRandom;
-import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,16 +26,6 @@ import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.BlockingQueue;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.ons.census.casesvc.service.ReceiptService.QID_RECEIPTED;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementEvent;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementReceiptEvent;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -79,7 +75,8 @@ public class BlankQuestionnaireIT {
   }
 
   @Test
-  public void testPQRSSendReciptForQidThenQMSendBlankEvent() throws InterruptedException, IOException {
+  public void testPQRSSendReciptForQidThenQMSendBlankEvent()
+      throws InterruptedException, IOException {
     // GIVEN
     BlockingQueue<String> rhUacOutboundQueue = rabbitQueueHelper.listen(rhUacQueue);
     BlockingQueue<String> rhCaseOutboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
@@ -99,7 +96,7 @@ public class BlankQuestionnaireIT {
     // check messages sent out after 1st unreceipted msg
     boolean expectedReceipted = true;
     checkMsgSentToRhCaseAndUacAndToFieldUAcUpdated(
-            expectedReceipted, rhCaseOutboundQueue, rhUacOutboundQueue, fieldworkAdapterUacUpdated);
+        expectedReceipted, rhCaseOutboundQueue, rhUacOutboundQueue, fieldworkAdapterUacUpdated);
     checkDatabaseUpdatedCorrectly(expectedReceipted, 1);
 
     // Now send out a unreceipted event
@@ -109,8 +106,10 @@ public class BlankQuestionnaireIT {
     checkMsgSentToRhCaseAndUacAndToFieldUAcUpdated(
         false, rhCaseOutboundQueue, rhUacOutboundQueue, fieldworkAdapterUacUpdated);
 
-    //Finally a new Event we're really interested in, a fieldworkFollowup should be sent out to fieldworkAdapter
-    FieldWorkFollowup fieldWorkFollowup = rabbitQueueHelper.checkExpectedMessageReceived(
+    // Finally a new Event we're really interested in, a fieldworkFollowup should be sent out to
+    // fieldworkAdapter
+    FieldWorkFollowup fieldWorkFollowup =
+        rabbitQueueHelper.checkExpectedMessageReceived(
             fieldworkFollowupQueue, FieldWorkFollowup.class);
 
     assertThat(fieldWorkFollowup.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
@@ -119,16 +118,16 @@ public class BlankQuestionnaireIT {
     // Also check all the database gubbins again
     expectedReceipted = false;
     checkDatabaseUpdatedCorrectly(expectedReceipted, 2);
-
   }
 
   @Test
-  public void testQMSendBlankForQidThenPQRSSendsItsReceipt() throws IOException, InterruptedException {
+  public void testQMSendBlankForQidThenPQRSSendsItsReceipt()
+      throws IOException, InterruptedException {
     // GIVEN
     BlockingQueue<String> rhUacOutboundQueue = rabbitQueueHelper.listen(rhUacQueue);
     BlockingQueue<String> rhCaseOutboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
     BlockingQueue<String> fieldworkAdapterUacUpdated =
-            rabbitQueueHelper.listen(fieldworkAdapterQueue);
+        rabbitQueueHelper.listen(fieldworkAdapterQueue);
     BlockingQueue<String> fieldworkFollowupQueue = rabbitQueueHelper.listen(fieldWorkFollowupQueue);
 
     Case caze = setUpTestCase();
@@ -139,36 +138,35 @@ public class BlankQuestionnaireIT {
     // WHEN
     rabbitQueueHelper.sendMessage(inboundQueue, blankQuestionaireEvent);
 
-    //THEN
+    // THEN
     boolean expectedReceipted = false;
     checkMsgSentToRhCaseAndUacAndToFieldUAcUpdated(
-            expectedReceipted, rhCaseOutboundQueue, rhUacOutboundQueue, fieldworkAdapterUacUpdated);
+        expectedReceipted, rhCaseOutboundQueue, rhUacOutboundQueue, fieldworkAdapterUacUpdated);
     checkDatabaseUpdatedCorrectly(expectedReceipted, 1);
 
-    FieldWorkFollowup fieldWorkFollowup = rabbitQueueHelper.checkExpectedMessageReceived(
+    FieldWorkFollowup fieldWorkFollowup =
+        rabbitQueueHelper.checkExpectedMessageReceived(
             fieldworkFollowupQueue, FieldWorkFollowup.class);
 
     assertThat(fieldWorkFollowup.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
     assertThat(fieldWorkFollowup.getBlankQreReturned()).isTrue();
 
-    //Now we receive the PQRS 'valid' receipt, where they believe it to receipted and all is happy.
+    // Now we receive the PQRS 'valid' receipt, where they believe it to receipted and all is happy.
     ResponseManagementEvent validReceiptEvent = createValidReceiptEvent();
 
-    //WHEN
+    // WHEN
     rabbitQueueHelper.sendMessage(inboundQueue, validReceiptEvent);
 
     Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
     assertThat(actualCase.isReceiptReceived()).isEqualTo(false);
 
-
-    //Send nothing to no one, the uacqid/case should remain unreceipted
-    //With this ordering we wait a long time for the 1st one, if the others were ready they'd be there
+    // Send nothing to no one, the uacqid/case should remain unreceipted
+    // With this ordering we wait a long time for the 1st one, if the others were ready they'd be
+    // there
     rabbitQueueHelper.checkMessageIsNotReceived(rhUacOutboundQueue, 5);
     rabbitQueueHelper.checkMessageIsNotReceived(rhCaseOutboundQueue, 1);
     rabbitQueueHelper.checkMessageIsNotReceived(fieldworkAdapterUacUpdated, 1);
     rabbitQueueHelper.checkMessageIsNotReceived(fieldworkFollowupQueue, 1);
-
-
   }
 
   private void checkDatabaseUpdatedCorrectly(boolean expectedReceipted, int expectedEventCount) {

@@ -79,7 +79,8 @@ public class CCSPropertyListedIT {
     rabbitQueueHelper.sendMessage(ccsPropertyListedQueue, responseManagementEvent);
 
     // Then
-    CcsToFwmt ccsToFwmt = rabbitQueueHelper.checkExpectedMessageReceived(outboundQueue, CcsToFwmt.class);
+    CcsToFwmt ccsToFwmt =
+        rabbitQueueHelper.checkExpectedMessageReceived(outboundQueue, CcsToFwmt.class);
     assertThat(ccsToFwmt.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
 
     Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
