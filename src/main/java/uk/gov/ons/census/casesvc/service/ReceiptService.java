@@ -37,13 +37,7 @@ public class ReceiptService {
     ResponseDTO receiptPayload = receiptEvent.getPayload().getResponse();
     UacQidLink uacQidLink = uacService.findByQid(receiptPayload.getQuestionnaireId());
 
-    eventLogger.logUacQidEvent(
-            uacQidLink,
-            receiptEvent.getEvent().getDateTime(),
-            QID_RECEIPTED,
-            EventType.RESPONSE_RECEIVED,
-            receiptEvent.getEvent(),
-            convertObjectToJson(receiptPayload));
+    logEvent(receiptEvent, receiptPayload, uacQidLink);
 
     Case caze = uacQidLink.getCaze();
 
@@ -81,10 +75,24 @@ public class ReceiptService {
       }
     }
 
+    saveAndEmitNonNullCase(receiptEvent, receiptPayload, caze);
+  }
+
+  private void logEvent(ResponseManagementEvent receiptEvent, ResponseDTO receiptPayload, UacQidLink uacQidLink) {
+    eventLogger.logUacQidEvent(
+            uacQidLink,
+            receiptEvent.getEvent().getDateTime(),
+            QID_RECEIPTED,
+            EventType.RESPONSE_RECEIVED,
+            receiptEvent.getEvent(),
+            convertObjectToJson(receiptPayload));
+  }
+
+  private void saveAndEmitNonNullCase(ResponseManagementEvent receiptEvent, ResponseDTO receiptPayload, Case caze) {
     if (caze != null) {
       if (caze.isCcsCase()) {
-        caseService.saveCase(caze);
         caze.setReceiptReceived(true);
+        caseService.saveCase(caze);
       } else {
         caseService.saveAndEmitCaseUpdatedEvent(caze);
       }
@@ -94,8 +102,8 @@ public class ReceiptService {
               .with("channel", receiptEvent.getEvent().getChannel())
               .warn("Receipt received for unaddressed UAC/QID pair not yet linked to a case");
     }
-
   }
+
 
   private boolean hasCaseAlreadyBeenReceiptedByAnotherQid(Case caze, UacQidLink receivedUacQidLink) {
     return caze.getUacQidLinks().stream().anyMatch(u -> u.isReceipted() && !u.getQid().equals(receivedUacQidLink.getQid()));
