@@ -39,30 +39,20 @@ public class ReceiptService {
 
     logEvent(receiptEvent, receiptPayload, uacQidLink);
 
-    Case caze = uacQidLink.getCaze();
+    // has this UacQidLink Already been linked as Blank
+    if (uacQidLink.isBlankQuestionnaireReceived()) return;
 
-    // An unreceipt doesn't un-un-active a uacQidPair
-    if (!receiptPayload.getUnreceipt()) {
-      // Has this uacQidLink Already been set to unreceipted, if so log it and leave.
-      if (uacQidLink.isBlankQuestionnaireReceived()) {
-        return;
-      }
-      uacQidLink.setActive(false);
-      uacQidLink.setReceipted(true);
-
-      if (caze != null) {
-        caze.setReceiptReceived(true);
-      }
-    } else {
+    if (receiptPayload.getUnreceipt()) {
       uacQidLink.setBlankQuestionnaireReceived(true);
       uacQidLink.setReceipted(false);
 
-      if (hasCaseAlreadyBeenReceiptedByAnotherQid(caze, uacQidLink)) {
+      if (hasCaseAlreadyBeenReceiptedByAnotherQidOrIsCaseNull(uacQidLink)) {
         uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
         return;
       }
-
-      caze.setReceiptReceived(false);
+    } else {
+      uacQidLink.setActive(false);
+      uacQidLink.setReceipted(true);
     }
 
     if (isCCSQuestionnaireType(uacQidLink.getQid())) {
@@ -71,11 +61,11 @@ public class ReceiptService {
       uacService.saveAndEmitUacUpdatedEvent(uacQidLink, receiptPayload.getUnreceipt());
 
       if (receiptEvent.getPayload().getResponse().getUnreceipt()) {
-        fieldworkFollowupService.buildAndSendFieldWorkFollowUp(caze);
+        fieldworkFollowupService.buildAndSendFieldWorkFollowUp(uacQidLink.getCaze());
       }
     }
 
-    saveAndEmitNonNullCase(receiptEvent, receiptPayload, caze);
+    saveAndEmitCaseOrLogIfCaseIsNull(receiptEvent, receiptPayload, uacQidLink.getCaze());
   }
 
   private void logEvent(
@@ -89,9 +79,11 @@ public class ReceiptService {
         convertObjectToJson(receiptPayload));
   }
 
-  private void saveAndEmitNonNullCase(
+  private void saveAndEmitCaseOrLogIfCaseIsNull(
       ResponseManagementEvent receiptEvent, ResponseDTO receiptPayload, Case caze) {
     if (caze != null) {
+      caze.setReceiptReceived(!receiptPayload.getUnreceipt());
+
       if (caze.isCcsCase()) {
         caze.setReceiptReceived(true);
         caseService.saveCase(caze);
@@ -106,8 +98,15 @@ public class ReceiptService {
     }
   }
 
-  private boolean hasCaseAlreadyBeenReceiptedByAnotherQid(
-      Case caze, UacQidLink receivedUacQidLink) {
+  private boolean hasCaseAlreadyBeenReceiptedByAnotherQidOrIsCaseNull(
+      UacQidLink receivedUacQidLink) {
+
+    Case caze = receivedUacQidLink.getCaze();
+
+    // If null then it's unlinked so we'll return true as we don't want to update the case, or lack
+    // thereof
+    if (caze == null) return true;
+
     return caze.getUacQidLinks().stream()
         .anyMatch(u -> u.isReceipted() && !u.getQid().equals(receivedUacQidLink.getQid()));
   }
