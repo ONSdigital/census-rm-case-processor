@@ -46,7 +46,7 @@ public class ReceiptServiceTest {
     Case expectedCase = getRandomCase();
     expectedCase.setReceiptReceived(false);
     expectedCase.setCcsCase(false);
-    UacQidLink expectedUacQidLink = generateUacQidLinkedToCase(expectedCase);
+    UacQidLink expectedUacQidLink = generateUacQidLinkedToCase(expectedCase, TEST_QID, TEST_UAC);
 
     managementEvent.getPayload().getResponse().setResponseDateTime(OffsetDateTime.now());
     managementEvent.getPayload().getResponse().setUnreceipt(false);
@@ -88,6 +88,7 @@ public class ReceiptServiceTest {
   public void testReceiptForCCSCase() {
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
     ResponseDTO expectedReceipt = managementEvent.getPayload().getResponse();
+    expectedReceipt.setUnreceipt(false);
 
     // Given
     Case expectedCase = getRandomCase();
@@ -139,7 +140,7 @@ public class ReceiptServiceTest {
     Case expectedCase = getRandomCase();
     expectedCase.setReceiptReceived(true);
     expectedCase.setCcsCase(false);
-    UacQidLink expectedUacQidLink = generateUacQidLinkedToCase(expectedCase);
+    UacQidLink expectedUacQidLink = generateUacQidLinkedToCase(expectedCase, TEST_QID, TEST_UAC);
 
     managementEvent.getPayload().getResponse().setResponseDateTime(OffsetDateTime.now());
     managementEvent.getPayload().getResponse().setUnreceipt(true);
@@ -190,7 +191,7 @@ public class ReceiptServiceTest {
     Case expectedCase = getRandomCase();
     expectedCase.setReceiptReceived(false);
     expectedCase.setCcsCase(false);
-    UacQidLink expectedUacQidLink = generateUacQidLinkedToCase(expectedCase);
+    UacQidLink expectedUacQidLink = generateUacQidLinkedToCase(expectedCase, TEST_QID, TEST_UAC);
 
     managementEvent.getPayload().getResponse().setResponseDateTime(OffsetDateTime.now());
     managementEvent.getPayload().getResponse().setUnreceipt(true);
@@ -254,7 +255,7 @@ public class ReceiptServiceTest {
     UacQidLink existingReceiptedQidUacLink =
         generateUacQidLinkedToCase(expectedCase, TEST_QID_2, TEST_UAC_2);
     existingReceiptedQidUacLink.setReceipted(true);
-    UacQidLink qidUacToReceiveBlankQuestionnaire = generateUacQidLinkedToCase(expectedCase);
+    UacQidLink qidUacToReceiveBlankQuestionnaire = generateUacQidLinkedToCase(expectedCase, TEST_QID, TEST_UAC);
 
     ResponseManagementEvent unreceiptingQuestionnaireEvent = createResponseReceivedEvent(true);
     ResponseDTO expectedReceipt = unreceiptingQuestionnaireEvent.getPayload().getResponse();
@@ -323,7 +324,7 @@ public class ReceiptServiceTest {
     UacQidLink existingReceiptedQidUacLink =
         generateUacQidLinkedToCase(expectedCase, TEST_QID_2, TEST_UAC_2);
     existingReceiptedQidUacLink.setReceipted(true);
-    UacQidLink qidUacToReceiveBlankQuestionnaire = generateUacQidLinkedToCase(expectedCase);
+    UacQidLink qidUacToReceiveBlankQuestionnaire = generateUacQidLinkedToCase(expectedCase, TEST_QID, TEST_UAC);
 
     ResponseManagementEvent receiptingQuestionnaireEventB = createResponseReceivedEvent(false);
     ResponseManagementEvent pqrsReceiptB = createResponseReceivedEvent(true);
@@ -389,19 +390,6 @@ public class ReceiptServiceTest {
     verifyZeroInteractions(caseService, fieldworkFollowupService);
   }
 
-  private UacQidLink generateUacQidLinkedToCase(Case expectedCase, String testQid, String testUac) {
-    UacQidLink uacQidLink = new UacQidLink();
-    uacQidLink.setQid(testQid);
-    uacQidLink.setUac(testUac);
-    uacQidLink.setCaze(expectedCase);
-    uacQidLink.setEvents(null);
-    uacQidLink.setBlankQuestionnaireReceived(false);
-    uacQidLink.setReceipted(false);
-    expectedCase.getUacQidLinks().add(uacQidLink);
-
-    return uacQidLink;
-  }
-
   //  @Test
   //  public void handleUnlinkedBlankQuestionnaireStuff() {
   //    assertFalse(true);
@@ -420,7 +408,7 @@ public class ReceiptServiceTest {
     blankUacQidPairLink.setBlankQuestionnaireReceived(true);
     blankUacQidPairLink.setReceipted(false);
 
-    UacQidLink newPQRSLink = generateUacQidLinkedToCase(expectedCase);
+    UacQidLink newPQRSLink = generateUacQidLinkedToCase(expectedCase, TEST_QID, TEST_UAC);
 
     ResponseManagementEvent newPQRSEvent = getTestResponseManagementEvent();
     ResponseDTO expectedReceipt = newPQRSEvent.getPayload().getResponse();
@@ -473,7 +461,7 @@ public class ReceiptServiceTest {
     existingBlankedQidUacLink.setBlankQuestionnaireReceived(true);
     existingBlankedQidUacLink.setActive(false);
 
-    UacQidLink qidUacToReceiveBlankQuestionnaire = generateUacQidLinkedToCase(expectedCase);
+    UacQidLink qidUacToReceiveBlankQuestionnaire = generateUacQidLinkedToCase(expectedCase, TEST_QID, TEST_UAC);
     qidUacToReceiveBlankQuestionnaire.setReceipted(true);
     qidUacToReceiveBlankQuestionnaire.setActive(false);
     qidUacToReceiveBlankQuestionnaire.setBlankQuestionnaireReceived(false);
@@ -523,8 +511,17 @@ public class ReceiptServiceTest {
     verifyNoMoreInteractions(eventLogger);
   }
 
-  private UacQidLink generateUacQidLinkedToCase(Case linkedCase) {
-    return generateUacQidLinkedToCase(linkedCase, TEST_QID, TEST_UAC);
+  private UacQidLink generateUacQidLinkedToCase(Case expectedCase, String testQid, String testUac) {
+    UacQidLink uacQidLink = new UacQidLink();
+    uacQidLink.setQid(testQid);
+    uacQidLink.setUac(testUac);
+    uacQidLink.setCaze(expectedCase);
+    uacQidLink.setEvents(null);
+    uacQidLink.setBlankQuestionnaireReceived(false);
+    uacQidLink.setReceipted(false);
+    expectedCase.getUacQidLinks().add(uacQidLink);
+
+    return uacQidLink;
   }
 
   private ResponseManagementEvent createResponseReceivedEvent(boolean unreceiped) {

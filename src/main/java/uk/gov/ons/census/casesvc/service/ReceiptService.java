@@ -39,7 +39,7 @@ public class ReceiptService {
 
     logEvent(receiptEvent, receiptPayload, uacQidLink);
 
-    // has this UacQidLink Already been linked as Blank
+    // has this UacQidLink Already been linked as Blank, in which case just return
     if (uacQidLink.isBlankQuestionnaireReceived()) return;
 
     if (receiptPayload.getUnreceipt()) {
@@ -85,7 +85,6 @@ public class ReceiptService {
       caze.setReceiptReceived(!receiptPayload.getUnreceipt());
 
       if (caze.isCcsCase()) {
-        caze.setReceiptReceived(true);
         caseService.saveCase(caze);
       } else {
         caseService.saveAndEmitCaseUpdatedEvent(caze);
