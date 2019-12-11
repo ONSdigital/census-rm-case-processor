@@ -176,6 +176,7 @@ public class ReceiptReceiverIT {
 
     ResponseManagementEvent managementEvent = getTestResponseManagementReceiptEvent();
     managementEvent.getPayload().getResponse().setQuestionnaireId(uacQidLink.getQid());
+    managementEvent.getPayload().getResponse().setUnreceipt(false);
     managementEvent.getEvent().setTransactionId(UUID.randomUUID());
 
     String json = convertObjectToJson(managementEvent);
