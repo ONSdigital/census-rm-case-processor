@@ -16,7 +16,7 @@ public class ResponseDTO {
 
   private String questionnaireId;
 
-  private Boolean unreceipt;
+  private boolean unreceipt;
 
   private String agentId;
 

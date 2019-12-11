@@ -64,6 +64,7 @@ public class DataUtils {
     randomCase.setUacQidLinks(new ArrayList<>());
     randomCase.setEvents(null);
     randomCase.setCaseId(TEST_CASE_ID);
+    randomCase.setCcsCase(false);
     return randomCase;
   }
 

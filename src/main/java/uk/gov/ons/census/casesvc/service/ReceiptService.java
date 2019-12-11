@@ -42,12 +42,12 @@ public class ReceiptService {
     // has this UacQidLink Already been linked as Blank, in which case just return
     if (uacQidLink.isBlankQuestionnaireReceived()) return;
 
-    if (receiptPayload.getUnreceipt()) {
+    if (receiptPayload.isUnreceipt()) {
       uacQidLink.setBlankQuestionnaireReceived(true);
       uacQidLink.setReceipted(false);
 
       if (hasCaseAlreadyBeenReceiptedByAnotherQidOrIsCaseNull(uacQidLink)) {
-        uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
+        uacService.saveAndEmitUacUpdatedEvent(uacQidLink, true);
         return;
       }
     } else {
@@ -58,9 +58,9 @@ public class ReceiptService {
     if (isCCSQuestionnaireType(uacQidLink.getQid())) {
       uacService.saveUacQidLink(uacQidLink);
     } else {
-      uacService.saveAndEmitUacUpdatedEvent(uacQidLink, receiptPayload.getUnreceipt());
+      uacService.saveAndEmitUacUpdatedEvent(uacQidLink, receiptPayload.isUnreceipt());
 
-      if (receiptEvent.getPayload().getResponse().getUnreceipt()) {
+      if (receiptEvent.getPayload().getResponse().isUnreceipt()) {
         fieldworkFollowupService.buildAndSendFieldWorkFollowUp(uacQidLink.getCaze());
       }
     }
@@ -82,7 +82,7 @@ public class ReceiptService {
   private void saveAndEmitCaseOrLogIfCaseIsNull(
       ResponseManagementEvent receiptEvent, ResponseDTO receiptPayload, Case caze) {
     if (caze != null) {
-      caze.setReceiptReceived(!receiptPayload.getUnreceipt());
+      caze.setReceiptReceived(!receiptPayload.isUnreceipt());
 
       if (caze.isCcsCase()) {
         caseService.saveCase(caze);
