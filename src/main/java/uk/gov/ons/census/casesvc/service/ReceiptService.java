@@ -39,33 +39,79 @@ public class ReceiptService {
 
     logEvent(receiptEvent, receiptPayload, uacQidLink);
 
-    // has this UacQidLink Already been linked as Blank, in which case just return
-    if (uacQidLink.isBlankQuestionnaireReceived()) return;
+    // If the uacQidLink is already marked as a blank questionnaire, the uacQidLink is inactive and can't be changed
+    if (uacQidLink.isBlankQuestionnaireReceived()) {
+      return;
+    }
 
     if (receiptPayload.isUnreceipt()) {
-      uacQidLink.setBlankQuestionnaireReceived(true);
-      uacQidLink.setReceipted(false);
-
-      if (hasCaseAlreadyBeenReceiptedByAnotherQidOrIsCaseNull(uacQidLink)) {
-        uacService.saveAndEmitUacUpdatedEvent(uacQidLink, true);
-        return;
-      }
-    } else {
-      uacQidLink.setActive(false);
-      uacQidLink.setReceipted(true);
+      processUnreceiptingEvent(uacQidLink, receiptEvent);
+      return;
     }
 
     if (isCCSQuestionnaireType(uacQidLink.getQid())) {
-      uacService.saveUacQidLink(uacQidLink);
-    } else {
-      uacService.saveAndEmitUacUpdatedEvent(uacQidLink, receiptPayload.isUnreceipt());
-
-      if (receiptEvent.getPayload().getResponse().isUnreceipt()) {
-        fieldworkFollowupService.buildAndSendFieldWorkFollowUp(uacQidLink.getCaze());
-      }
+      processCCSQid(uacQidLink, receiptEvent);
+      return;
     }
 
-    saveAndEmitCaseOrLogIfCaseIsNull(receiptEvent, receiptPayload, uacQidLink.getCaze());
+    processReceiptForStandardCase(uacQidLink, receiptEvent);
+  }
+
+  private void processReceiptForStandardCase(
+      UacQidLink uacQidLink, ResponseManagementEvent receiptEvent) {
+    uacQidLink.setActive(false);
+
+    uacService.saveAndEmitUacUpdatedEvent(uacQidLink, false);
+
+    Case caze = uacQidLink.getCaze();
+
+    if (caze != null) {
+      caze.setReceiptReceived(true);
+      caseService.saveAndEmitCaseUpdatedEvent(caze);
+    } else {
+      logUnlinkedUacQidLink(uacQidLink, receiptEvent);
+    }
+  }
+
+  private void processCCSQid(UacQidLink uacQidLink, ResponseManagementEvent receiptEvent) {
+    uacQidLink.setActive(false);
+
+    uacService.saveUacQidLink(uacQidLink);
+
+    Case caze = uacQidLink.getCaze();
+
+    if (caze != null) {
+      // Not currently testing for horror of unreceipted CCS? is this possible?
+
+      caze.setReceiptReceived(true);
+      caseService.saveCase(caze);
+    } else {
+      logUnlinkedUacQidLink(uacQidLink, receiptEvent);
+    }
+  }
+
+  private void processUnreceiptingEvent(
+      UacQidLink uacQidLink, ResponseManagementEvent receiptEvent) {
+
+    uacQidLink.setBlankQuestionnaireReceived(true);
+    uacService.saveAndEmitUacUpdatedEvent(uacQidLink, true);
+
+    Case caze = uacQidLink.getCaze();
+
+    if (caze != null) {
+      if (hasCaseAlreadyBeenReceiptedByAnotherQidOrIsCaseNull(uacQidLink)) {
+        return;
+      }
+
+      caze.setReceiptReceived(false);
+      fieldworkFollowupService.buildAndSendFieldWorkFollowUp(caze);
+      caseService.saveAndEmitCaseUpdatedEvent(caze);
+    } else {
+      log.with("qid", receiptEvent.getPayload().getResponse().getQuestionnaireId())
+          .with("tx_id", receiptEvent.getEvent().getTransactionId())
+          .with("channel", receiptEvent.getEvent().getChannel())
+          .warn("UnReceipt received for unaddressed UAC/QID pair not yet linked to a case, ");
+    }
   }
 
   private void logEvent(
@@ -79,23 +125,7 @@ public class ReceiptService {
         convertObjectToJson(receiptPayload));
   }
 
-  private void saveAndEmitCaseOrLogIfCaseIsNull(
-      ResponseManagementEvent receiptEvent, ResponseDTO receiptPayload, Case caze) {
-    if (caze != null) {
-      caze.setReceiptReceived(!receiptPayload.isUnreceipt());
-
-      if (caze.isCcsCase()) {
-        caseService.saveCase(caze);
-      } else {
-        caseService.saveAndEmitCaseUpdatedEvent(caze);
-      }
-    } else {
-      log.with("qid", receiptPayload.getQuestionnaireId())
-          .with("tx_id", receiptEvent.getEvent().getTransactionId())
-          .with("channel", receiptEvent.getEvent().getChannel())
-          .warn("Receipt received for unaddressed UAC/QID pair not yet linked to a case");
-    }
-  }
+  private void logUnlinkedUacQidLink(UacQidLink uacQidLink, ResponseManagementEvent receiptEvent) {}
 
   private boolean hasCaseAlreadyBeenReceiptedByAnotherQidOrIsCaseNull(
       UacQidLink receivedUacQidLink) {
@@ -106,7 +136,10 @@ public class ReceiptService {
     // thereof
     if (caze == null) return true;
 
+    // Check other qids linked to the case that might have receipted the case, in which case we don't want to unreceipt the case
+    // Ignore the same qid
+    // A valid receipting qid should be marked active = false, BlankQuestionnaireReceived = false
     return caze.getUacQidLinks().stream()
-        .anyMatch(u -> u.isReceipted() && !u.getQid().equals(receivedUacQidLink.getQid()));
+        .anyMatch(u -> !u.getQid().equals(receivedUacQidLink.getQid()) &&  !u.isActive() && !u.isBlankQuestionnaireReceived() );
   }
 }

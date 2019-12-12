@@ -34,7 +34,4 @@ public class UacQidLink {
 
   @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
   private boolean blankQuestionnaireReceived;
-
-  @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
-  private boolean receipted;
 }

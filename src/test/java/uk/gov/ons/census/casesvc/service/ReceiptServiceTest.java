@@ -63,8 +63,6 @@ public class ReceiptServiceTest {
     UacQidLink actualUacQidLink = checkUacQidLinkSavedAndEmitted(expectedUacQidLink, false);
     assertThat(actualUacQidLink.isActive()).isFalse();
 
-    assertThat(actualUacQidLink.isReceipted()).isTrue();
-
     verifiyEventLogged(expectedUacQidLink, managementEvent);
   }
 
@@ -142,7 +140,6 @@ public class ReceiptServiceTest {
     UacQidLink actualUacQidLink = checkUacQidLinkSavedAndEmitted(expectedUacQidLink, true);
     assertThat(actualUacQidLink.isBlankQuestionnaireReceived()).isTrue();
     assertThat(actualUacQidLink.isActive()).isFalse();
-    assertThat(actualUacQidLink.isReceipted()).isFalse();
 
     verifyCaseSentToFieldWorkFollowUpService(fieldworkFollowupService, expectedCase);
 
@@ -160,7 +157,6 @@ public class ReceiptServiceTest {
     UacQidLink uacQidLinkSetToBlank =
         generateUacQidLinkedToCase(expectedCase, TEST_QID_1, TEST_UAC_1);
     uacQidLinkSetToBlank.setBlankQuestionnaireReceived(true);
-    uacQidLinkSetToBlank.setReceipted(false);
     uacQidLinkSetToBlank.setActive(false);
     when(uacService.findByQid(anyString())).thenReturn(uacQidLinkSetToBlank);
 
@@ -183,7 +179,7 @@ public class ReceiptServiceTest {
 
   // Scenario 3 - QM Blank Q're (QID A) processed and then PQRS receipt (QID A).  Another QID B
   // exists which is inactive (has been receipted against)
-  // We've split this into 2 tests
+  // Only new bit is the 1st part of the scenario, 2nd part already covered.
 
   // Scenario 3 a - Blank Qid received for Case. Case already successfully receipted by another
   // QidLink
@@ -196,11 +192,11 @@ public class ReceiptServiceTest {
 
     UacQidLink existingReceiptedQidUacLink =
         generateUacQidLinkedToCase(expectedCase, TEST_QID_2, TEST_UAC_2);
-    existingReceiptedQidUacLink.setReceipted(true);
+    existingReceiptedQidUacLink.setActive(false);
 
     UacQidLink qidUacToReceiveBlankQuestionnaire =
         generateUacQidLinkedToCase(expectedCase, TEST_QID_1, TEST_UAC_1);
-    qidUacToReceiveBlankQuestionnaire.setReceipted(false);
+    existingReceiptedQidUacLink.setActive(false);
     when(uacService.findByQid(anyString())).thenReturn(qidUacToReceiveBlankQuestionnaire);
 
     ResponseManagementEvent unreceiptingQuestionnaireEvent = createReceiptReceivedEvent();
@@ -215,7 +211,7 @@ public class ReceiptServiceTest {
     UacQidLink actualUacQidLink =
         checkUacQidLinkSavedAndEmitted(qidUacToReceiveBlankQuestionnaire, true);
     assertThat(actualUacQidLink.isBlankQuestionnaireReceived()).isTrue();
-    assertThat(actualUacQidLink.isReceipted()).isFalse();
+    assertThat(actualUacQidLink.isActive()).isFalse();
 
     // Case shouldn't be updated, nothing should be sent to fieldwork
     verifyZeroInteractions(caseService, fieldworkFollowupService);
@@ -223,13 +219,13 @@ public class ReceiptServiceTest {
     verifiyEventLogged(qidUacToReceiveBlankQuestionnaire, unreceiptingQuestionnaireEvent);
   }
 
-
   //  @Test
   //  public void handleUnlinkedBlankQuestionnaireStuff() {
   //    assertFalse(true);
   //  }
 
-  //Scenario 4
+  // Scenario 4 -  Scenario 4: Blank Questionnaire event is received and processed and then a
+  // Response is received from PQRS for a different UAC/QID pair
   @Test
   public void blankQuestionnaireForAnotherUACQIDPair() {
     // Given
@@ -240,7 +236,6 @@ public class ReceiptServiceTest {
         generateUacQidLinkedToCase(expectedCase, TEST_QID_2, TEST_UAC_2);
     blankUacQidPairLink.setActive(false);
     blankUacQidPairLink.setBlankQuestionnaireReceived(true);
-    blankUacQidPairLink.setReceipted(false);
 
     UacQidLink newPQRSLink = generateUacQidLinkedToCase(expectedCase, TEST_QID_1, TEST_UAC_1);
 
@@ -259,24 +254,26 @@ public class ReceiptServiceTest {
     assertThat(actualCase.isReceiptReceived()).isTrue();
 
     UacQidLink actualUacQidLink = checkUacQidLinkSavedAndEmitted(newPQRSLink, false);
-    assertThat(actualUacQidLink.isReceipted()).isTrue();
+    assertThat(actualUacQidLink.isActive()).isFalse();
 
     verifiyEventLogged(newPQRSLink, newPQRSEvent);
-
   }
 
-  // scenario 5, A valid PQRS receipt A and then a Blank PQ B are received for the same case, but different QIDs
+  // scenario 5, A valid PQRS receipt A and then a Blank PQ B are received for the same case, but
+  // different QIDs
   @Test
   public void blankQuestionnaieBwhenAalreadyReceipedSuccessfullyMeansNoMoreActionCreateEvents() {
     // Given
     Case expectedCase = getRandomCase();
     expectedCase.setReceiptReceived(true);
 
-    UacQidLink existingReceiptedQidUacLink =  generateUacQidLinkedToCase(expectedCase, TEST_QID_2, TEST_UAC_2);
-    existingReceiptedQidUacLink.setReceipted(true);
+    UacQidLink existingReceiptedQidUacLink =
+        generateUacQidLinkedToCase(expectedCase, TEST_QID_2, TEST_UAC_2);
+    existingReceiptedQidUacLink.setActive(false);
 
-    UacQidLink qidUacToReceiveBlankQuestionnaire = generateUacQidLinkedToCase(expectedCase, TEST_QID_1, TEST_UAC_1);
-    qidUacToReceiveBlankQuestionnaire.setReceipted(true);
+    UacQidLink qidUacToReceiveBlankQuestionnaire =
+        generateUacQidLinkedToCase(expectedCase, TEST_QID_1, TEST_UAC_1);
+    qidUacToReceiveBlankQuestionnaire.setActive(false);
 
     ResponseManagementEvent unreceiptingQuestionnaireEvent = createReceiptReceivedEvent();
     unreceiptingQuestionnaireEvent.getPayload().getResponse().setUnreceipt(true);
@@ -289,15 +286,15 @@ public class ReceiptServiceTest {
     // then
     verify(uacService).findByQid(TEST_QID_1);
 
-    UacQidLink actualUacQidLink = checkUacQidLinkSavedAndEmitted(qidUacToReceiveBlankQuestionnaire, true);
+    UacQidLink actualUacQidLink =
+        checkUacQidLinkSavedAndEmitted(qidUacToReceiveBlankQuestionnaire, true);
     assertThat(actualUacQidLink.getQid()).isEqualTo(qidUacToReceiveBlankQuestionnaire.getQid());
     assertThat(actualUacQidLink.isBlankQuestionnaireReceived()).isTrue();
-    assertThat(actualUacQidLink.isReceipted()).isFalse();
+    assertThat(actualUacQidLink.isActive()).isFalse();
 
     // Do not update the case or send anything to field
     verifyZeroInteractions(caseService, fieldworkFollowupService);
   }
-
 
   // scenario 6, 2 Blank QIDs are returned at the same time (after they have been receipted by PQRS)
   @Test
@@ -306,14 +303,13 @@ public class ReceiptServiceTest {
     Case expectedCase = getRandomCase();
     expectedCase.setReceiptReceived(true);
 
-    UacQidLink existingBlankedQidUacLink = generateUacQidLinkedToCase(expectedCase, TEST_QID_2, TEST_UAC_2);
-    existingBlankedQidUacLink.setReceipted(false);
+    UacQidLink existingBlankedQidUacLink =
+        generateUacQidLinkedToCase(expectedCase, TEST_QID_2, TEST_UAC_2);
     existingBlankedQidUacLink.setBlankQuestionnaireReceived(true);
     existingBlankedQidUacLink.setActive(false);
 
-    UacQidLink qidUacToReceiveBlankQuestionnaire = generateUacQidLinkedToCase(expectedCase, TEST_QID_1, TEST_UAC_1);
-    qidUacToReceiveBlankQuestionnaire.setReceipted(true);
-    qidUacToReceiveBlankQuestionnaire.setBlankQuestionnaireReceived(false);
+    UacQidLink qidUacToReceiveBlankQuestionnaire =
+        generateUacQidLinkedToCase(expectedCase, TEST_QID_1, TEST_UAC_1);
     qidUacToReceiveBlankQuestionnaire.setActive(false);
     when(uacService.findByQid(anyString())).thenReturn(qidUacToReceiveBlankQuestionnaire);
 
@@ -331,9 +327,9 @@ public class ReceiptServiceTest {
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
     verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture(), eq(true));
-    UacQidLink actualUacQidLink = checkUacQidLinkSavedAndEmitted(qidUacToReceiveBlankQuestionnaire, true);
+    UacQidLink actualUacQidLink =
+        checkUacQidLinkSavedAndEmitted(qidUacToReceiveBlankQuestionnaire, true);
     assertThat(actualUacQidLink.isBlankQuestionnaireReceived()).isTrue();
-    assertThat(actualUacQidLink.isReceipted()).isFalse();
     assertThat(actualUacQidLink.isActive()).isFalse();
 
     verifyCaseSentToFieldWorkFollowUpService(fieldworkFollowupService, expectedCase);
@@ -348,7 +344,6 @@ public class ReceiptServiceTest {
     uacQidLink.setCaze(expectedCase);
     uacQidLink.setEvents(null);
     uacQidLink.setBlankQuestionnaireReceived(false);
-    uacQidLink.setReceipted(false);
     expectedCase.getUacQidLinks().add(uacQidLink);
 
     return uacQidLink;
