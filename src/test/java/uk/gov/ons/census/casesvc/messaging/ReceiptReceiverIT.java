@@ -52,9 +52,8 @@ import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 public class ReceiptReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final EasyRandom easyRandom = new EasyRandom();
-  private final String TEST_NON_CCS_QID_ID = "1234567890123456";
+  private final String TEST_QID = "1234567890123456";
   private final String TEST_CCS_QID_ID = "7134567890123456";
-  private final String TEST_QID_ID = "1234567890123456";
   private static final String TEST_UAC = easyRandom.nextObject(String.class);
 
   @Value("${queueconfig.receipt-response-inbound-queue}")
@@ -97,7 +96,6 @@ public class ReceiptReceiverIT {
     BlockingQueue<String> rhUacOutboundQueue = rabbitQueueHelper.listen(rhUacQueue);
     BlockingQueue<String> rhCaseOutboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
 
-    EasyRandom easyRandom = new EasyRandom();
     Case caze = easyRandom.nextObject(Case.class);
     caze.setCaseId(TEST_CASE_ID);
     caze.setReceiptReceived(false);
@@ -110,7 +108,7 @@ public class ReceiptReceiverIT {
     uacQidLink.setId(UUID.randomUUID());
     uacQidLink.setCaze(caze);
     uacQidLink.setCcsCase(false);
-    uacQidLink.setQid(TEST_NON_CCS_QID_ID);
+    uacQidLink.setQid(TEST_QID);
     uacQidLink.setUac(TEST_UAC);
     uacQidLinkRepository.saveAndFlush(uacQidLink);
 
@@ -135,7 +133,7 @@ public class ReceiptReceiverIT {
     assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
     UacDTO actualUacDTOObject = responseManagementEvent.getPayload().getUac();
     assertThat(actualUacDTOObject.getUac()).isEqualTo(TEST_UAC);
-    assertThat(actualUacDTOObject.getQuestionnaireId()).isEqualTo(TEST_NON_CCS_QID_ID);
+    assertThat(actualUacDTOObject.getQuestionnaireId()).isEqualTo(TEST_QID);
     assertThat(actualUacDTOObject.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
 
     Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
@@ -149,7 +147,7 @@ public class ReceiptReceiverIT {
     assertThat(event.getEventDescription()).isEqualTo(QID_RECEIPTED);
 
     UacQidLink actualUacQidLink = event.getUacQidLink();
-    assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_NON_CCS_QID_ID);
+    assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID);
     assertThat(actualUacQidLink.getUac()).isEqualTo(TEST_UAC);
     assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
     assertThat(actualUacQidLink.isActive()).isFalse();
@@ -166,7 +164,6 @@ public class ReceiptReceiverIT {
     BlockingQueue<String> rhUacOutboundQueue = rabbitQueueHelper.listen(rhUacQueue);
     BlockingQueue<String> rhCaseOutboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
 
-    EasyRandom easyRandom = new EasyRandom();
     Case caze = easyRandom.nextObject(Case.class);
     caze.setCaseId(TEST_CASE_ID);
     caze.setReceiptReceived(false);
@@ -224,6 +221,8 @@ public class ReceiptReceiverIT {
     assertThat(isStringFormattedAsUTCDate(utcDateAsString)).isTrue();
   }
 
+
+
   @Test
   public void testPQRSSendReciptForQidThenQMSendBlankEvent()
           throws InterruptedException, IOException {
@@ -279,7 +278,7 @@ public class ReceiptReceiverIT {
     assertThat(event.getEventDescription()).isEqualTo(QID_RECEIPTED);
 
     UacQidLink actualUacQidLink = event.getUacQidLink();
-    assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID_ID);
+    assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID);
     assertThat(actualUacQidLink.getUac()).isEqualTo(TEST_UAC);
     assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
     assertThat(actualUacQidLink.isActive()).isFalse();
@@ -290,7 +289,7 @@ public class ReceiptReceiverIT {
     uacQidLink.setId(UUID.randomUUID());
     uacQidLink.setCaze(caze);
     uacQidLink.setCcsCase(false);
-    uacQidLink.setQid(TEST_QID_ID);
+    uacQidLink.setQid(TEST_QID);
     uacQidLink.setUac(TEST_UAC);
     uacQidLinkRepository.saveAndFlush(uacQidLink);
   }
@@ -325,7 +324,7 @@ public class ReceiptReceiverIT {
     managementEvent.setEvent(event);
 
     ResponseDTO responseDTO = new ResponseDTO();
-    responseDTO.setQuestionnaireId(TEST_QID_ID);
+    responseDTO.setQuestionnaireId(TEST_QID);
     responseDTO.setUnreceipt(unreceiped);
 
     PayloadDTO payloadDTO = new PayloadDTO();
@@ -358,7 +357,7 @@ public class ReceiptReceiverIT {
     assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
     UacDTO actualUacDTOObject = responseManagementEvent.getPayload().getUac();
     assertThat(actualUacDTOObject.getUac()).isEqualTo(TEST_UAC);
-    assertThat(actualUacDTOObject.getQuestionnaireId()).isEqualTo(TEST_QID_ID);
+    assertThat(actualUacDTOObject.getQuestionnaireId()).isEqualTo(TEST_QID);
     assertThat(actualUacDTOObject.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
   }
 
