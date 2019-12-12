@@ -63,7 +63,7 @@ public class ReceiptServiceTest {
     UacQidLink actualUacQidLink = checkUacQidLinkSavedAndEmitted(expectedUacQidLink, false);
     assertThat(actualUacQidLink.isActive()).isFalse();
 
-    verifiyEventLogged(expectedUacQidLink, managementEvent);
+    verifyEventLogged(expectedUacQidLink, managementEvent);
   }
 
   @Test
@@ -105,7 +105,7 @@ public class ReceiptServiceTest {
     assertThat(actualUacQidLink.getUac()).isEqualTo(expectedUacQidLink.getUac());
     assertThat(actualUacQidLink.isActive()).isFalse();
 
-    verifiyEventLogged(expectedUacQidLink, managementEvent);
+    verifyEventLogged(expectedUacQidLink, managementEvent);
   }
 
   // Suggest that receipt testing for both CCS and normal cases call this function
@@ -143,7 +143,7 @@ public class ReceiptServiceTest {
 
     verifyCaseSentToFieldWorkFollowUpService(fieldworkFollowupService, expectedCase);
 
-    verifiyEventLogged(expectedUacQidLink, managementEvent);
+    verifyEventLogged(expectedUacQidLink, managementEvent);
   }
 
   // Scenario 2 - QM Blank Q're (QID A) processed before PQRS receipt (QID A).  No other UAC/QID
@@ -174,7 +174,7 @@ public class ReceiptServiceTest {
     verifyNoMoreInteractions(uacService);
     verifyZeroInteractions(caseService, fieldworkFollowupService);
 
-    verifiyEventLogged(uacQidLinkSetToBlank, PQRSReceiptmanagementEvent);
+    verifyEventLogged(uacQidLinkSetToBlank, PQRSReceiptmanagementEvent);
   }
 
   // Scenario 3 - QM Blank Q're (QID A) processed and then PQRS receipt (QID A).  Another QID B
@@ -216,7 +216,7 @@ public class ReceiptServiceTest {
     // Case shouldn't be updated, nothing should be sent to fieldwork
     verifyZeroInteractions(caseService, fieldworkFollowupService);
 
-    verifiyEventLogged(qidUacToReceiveBlankQuestionnaire, unreceiptingQuestionnaireEvent);
+    verifyEventLogged(qidUacToReceiveBlankQuestionnaire, unreceiptingQuestionnaireEvent);
   }
 
   //  @Test
@@ -256,7 +256,7 @@ public class ReceiptServiceTest {
     UacQidLink actualUacQidLink = checkUacQidLinkSavedAndEmitted(newPQRSLink, false);
     assertThat(actualUacQidLink.isActive()).isFalse();
 
-    verifiyEventLogged(newPQRSLink, newPQRSEvent);
+    verifyEventLogged(newPQRSLink, newPQRSEvent);
   }
 
   // scenario 5, A valid PQRS receipt A and then a Blank PQ B are received for the same case, but
@@ -334,7 +334,7 @@ public class ReceiptServiceTest {
 
     verifyCaseSentToFieldWorkFollowUpService(fieldworkFollowupService, expectedCase);
 
-    verifiyEventLogged(qidUacToReceiveBlankQuestionnaire, blankResponseEventFor2ndUacQidLink);
+    verifyEventLogged(qidUacToReceiveBlankQuestionnaire, blankResponseEventFor2ndUacQidLink);
   }
 
   private UacQidLink generateUacQidLinkedToCase(Case expectedCase, String testQid, String testUac) {
@@ -399,7 +399,7 @@ public class ReceiptServiceTest {
     assertThat(caseArgumentCaptor.getValue().getCaseId()).isEqualTo(expectedCase.getCaseId());
   }
 
-  private void verifiyEventLogged(
+  private void verifyEventLogged(
       UacQidLink expectedUacQidLink, ResponseManagementEvent managementEvent) {
     verify(eventLogger)
         .logUacQidEvent(
