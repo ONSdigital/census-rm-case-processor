@@ -1,11 +1,9 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
-import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.isCCSQuestionnaireType;
 import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.isIndividualQuestionnaireType;
 
 import java.util.UUID;
-
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
@@ -23,7 +21,7 @@ public class QuestionnaireLinkedService {
   private final EventLogger eventLogger;
 
   public QuestionnaireLinkedService(
-          UacService uacService, CaseService caseService, EventLogger eventLogger) {
+      UacService uacService, CaseService caseService, EventLogger eventLogger) {
     this.uacService = uacService;
     this.caseService = caseService;
     this.eventLogger = eventLogger;
@@ -33,15 +31,16 @@ public class QuestionnaireLinkedService {
     UacDTO uacDTO = questionnaireLinkedEvent.getPayload().getUac();
     UacQidLink uacQidLink = uacService.findByQid(uacDTO.getQuestionnaireId());
 
+    // if the uacqidLink is already linked to a dfiferent case this throws an Exception
     checkQidNotLinkedToAnotherCase(uacDTO, uacQidLink);
 
     logEvent(questionnaireLinkedEvent, uacQidLink);
 
-    Case caze = getaCase(uacDTO);
+    Case caze = getCase(uacDTO);
     uacQidLink.setCaze(caze);
 
     if (uacQidLink.isBlankQuestionnaireReceived()) {
-      processBlankQuestionnaireLinked(uacQidLink, caze);
+      processBlankQuestionnaireLinked(uacQidLink);
       return;
     }
 
@@ -54,65 +53,68 @@ public class QuestionnaireLinkedService {
   }
 
   private void processStandardLinking(UacQidLink uacQidLink, Case caze) {
-    // If UAC/QID has been receipted and the case hasn't, update the case
+    uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
+
+    // If UAC/QID has been receipted and the case hasn't, receipt the case, save and emit
     if (!uacQidLink.isActive() && !caze.isReceiptReceived()) {
       caze.setReceiptReceived(true);
       caseService.saveAndEmitCaseUpdatedEvent(caze);
     }
-
-    uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
   }
 
   private void processCCSCaseLinking(Case caze, UacQidLink uacQidLink) {
     uacService.saveUacQidLink(uacQidLink);
 
-    if (caze.isReceiptReceived() || uacQidLink.isActive()) {
-      return;
+    // If UAC/QID has been receipted and the case hasn't, update the case and save it
+    if (!uacQidLink.isActive() && !caze.isReceiptReceived()) {
+      caze.setReceiptReceived(true);
+      caseService.saveCase(caze);
     }
-
-    caze.setReceiptReceived(true);
-    caseService.saveCase(caze);
   }
 
-  private Case getaCase(UacDTO uac) {
-    Case caze;
-
-    if (isIndividualQuestionnaireType(uac.getQuestionnaireId())) {
-      Case householdCase = caseService.getCaseByCaseId(UUID.fromString(uac.getCaseId()));
-      caze = caseService.prepareIndividualResponseCaseFromParentCase(householdCase);
-
-      caseService.emitCaseCreatedEvent(caze);
-    } else {
-      caze = caseService.getCaseByCaseId(UUID.fromString(uac.getCaseId()));
-    }
-    return caze;
+  private void processBlankQuestionnaireLinked(UacQidLink uacQidLink) {
+    // When linking a UacQidLink that has been marked as BlankQuestionnaire to a case, the case's
+    // receipted flag
+    // will never be altered.
+    uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
   }
 
-  private void processBlankQuestionnaireLinked(UacQidLink uacQidLink, Case caze) {
-
-    if (isCCSQuestionnaireType(uacQidLink.getQid())) {
-      uacService.saveUacQidLink(uacQidLink);
-    } else {
-      uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
+  private Case getCase(UacDTO uacDto) {
+    if (!isIndividualQuestionnaireType(uacDto.getQuestionnaireId())) {
+      return caseService.getCaseByCaseId(UUID.fromString(uacDto.getCaseId()));
     }
 
+    return createAndEmitNewIndividualCase(uacDto);
+  }
+
+  private Case createAndEmitNewIndividualCase(UacDTO uacDto) {
+    // If the Qid is for a new Individual case then create a new IndividualCase linked to the
+    // household case,
+    // this new case will be used for the linking
+
+    Case householdCase = caseService.getCaseByCaseId(UUID.fromString(uacDto.getCaseId()));
+    Case newIndividualCase = caseService.prepareIndividualResponseCaseFromParentCase(householdCase);
+
+    caseService.emitCaseCreatedEvent(newIndividualCase);
+
+    return newIndividualCase;
   }
 
   public void logEvent(ResponseManagementEvent questionnaireLinkedEvent, UacQidLink uacQidLink) {
     eventLogger.logUacQidEvent(
-            uacQidLink,
-            questionnaireLinkedEvent.getEvent().getDateTime(),
-            QUESTIONNAIRE_LINKED,
-            EventType.QUESTIONNAIRE_LINKED,
-            questionnaireLinkedEvent.getEvent(),
-            convertObjectToJson(questionnaireLinkedEvent.getPayload().getUac()));
+        uacQidLink,
+        questionnaireLinkedEvent.getEvent().getDateTime(),
+        QUESTIONNAIRE_LINKED,
+        EventType.QUESTIONNAIRE_LINKED,
+        questionnaireLinkedEvent.getEvent(),
+        convertObjectToJson(questionnaireLinkedEvent.getPayload().getUac()));
   }
 
   private void checkQidNotLinkedToAnotherCase(UacDTO uac, UacQidLink uacQidLink) {
     if (uacQidLink.getCaze() != null
-            && !uacQidLink.getCaze().getCaseId().equals(UUID.fromString(uac.getCaseId()))) {
+        && !uacQidLink.getCaze().getCaseId().equals(UUID.fromString(uac.getCaseId()))) {
       throw new RuntimeException(
-              "UacQidLink already linked to case id: " + uacQidLink.getCaze().getCaseId());
+          "UacQidLink already linked to case id: " + uacQidLink.getCaze().getCaseId());
     }
   }
 }

@@ -39,7 +39,8 @@ public class ReceiptService {
 
     logEvent(receiptEvent, receiptPayload, uacQidLink);
 
-    // If the uacQidLink is already marked as a blank questionnaire, the uacQidLink is inactive and can't be changed
+    // If the uacQidLink is already marked as a blank questionnaire, the uacQidLink is inactive and
+    // can't be changed
     if (uacQidLink.isBlankQuestionnaireReceived()) {
       return;
     }
@@ -136,10 +137,15 @@ public class ReceiptService {
     // thereof
     if (caze == null) return true;
 
-    // Check other qids linked to the case that might have receipted the case, in which case we don't want to unreceipt the case
+    // Check other qids linked to the case that might have receipted the case, in which case we
+    // don't want to unreceipt the case
     // Ignore the same qid
     // A valid receipting qid should be marked active = false, BlankQuestionnaireReceived = false
     return caze.getUacQidLinks().stream()
-        .anyMatch(u -> !u.getQid().equals(receivedUacQidLink.getQid()) &&  !u.isActive() && !u.isBlankQuestionnaireReceived() );
+        .anyMatch(
+            u ->
+                !u.getQid().equals(receivedUacQidLink.getQid())
+                    && !u.isActive()
+                    && !u.isBlankQuestionnaireReceived());
   }
 }

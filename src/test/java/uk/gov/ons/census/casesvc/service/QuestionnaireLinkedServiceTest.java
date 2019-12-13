@@ -64,8 +64,8 @@ public class QuestionnaireLinkedServiceTest {
     testUacQidLink.setQid(TEST_NON_CCS_QID_ID);
     testUacQidLink.setCaze(null);
 
-    when(uacService.findByQid(TEST_HH_QID)).thenReturn(testUacQidLink);
-    when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testCase);
+    when(uacService.findByQid(anyString())).thenReturn(testUacQidLink);
+    when(caseService.getCaseByCaseId(any())).thenReturn(testCase);
 
     // WHEN
     underTest.processQuestionnaireLinked(managementEvent);
@@ -73,9 +73,9 @@ public class QuestionnaireLinkedServiceTest {
     // THEN
     InOrder inOrder = inOrder(uacService, caseService, eventLogger);
 
-    inOrder.verify(uacService).findByQid(anyString());
+    inOrder.verify(uacService).findByQid(TEST_HH_QID);
 
-    inOrder.verify(caseService).getCaseByCaseId(any(UUID.class));
+    inOrder.verify(caseService).getCaseByCaseId(TEST_CASE_ID_1);
     verifyNoMoreInteractions(caseService);
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
@@ -113,6 +113,7 @@ public class QuestionnaireLinkedServiceTest {
     testUacQidLink.setActive(true);
     testUacQidLink.setQid(TEST_CCS_QID_ID);
     testUacQidLink.setCaze(null);
+    testUacQidLink.setBlankQuestionnaireReceived(false);
 
     when(uacService.findByQid(TEST_HH_QID)).thenReturn(testUacQidLink);
     when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testCase);
@@ -164,8 +165,8 @@ public class QuestionnaireLinkedServiceTest {
     testUacQidLink.setCaze(null);
     testUacQidLink.setBlankQuestionnaireReceived(false);
 
-    when(uacService.findByQid(TEST_HH_QID)).thenReturn(testUacQidLink);
-    when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testCase);
+    when(uacService.findByQid(anyString())).thenReturn(testUacQidLink);
+    when(caseService.getCaseByCaseId(any())).thenReturn(testCase);
 
     // WHEN
     underTest.processQuestionnaireLinked(managementEvent);
@@ -231,7 +232,8 @@ public class QuestionnaireLinkedServiceTest {
     verify(uacService).findByQid(TEST_HH_QID);
     verify(caseService).getCaseByCaseId(TEST_CASE_ID_1);
     // whenever the UAC/QID link is blank questionnaire the case will not be updated
-    // If a case is already receipted it would be by a different UAC/QID link so this will not alter the case
+    // If a case is already receipted it would be by a different UAC/QID link so this will not alter
+    // the case
 
     verifyNoMoreInteractions(caseService);
 
@@ -242,7 +244,6 @@ public class QuestionnaireLinkedServiceTest {
     assertThat(actualUacQidLink.isActive()).isFalse();
     assertThat(actualUacQidLink.isBlankQuestionnaireReceived()).isTrue();
     verifyNoMoreInteractions(uacService);
-
   }
 
   @Test
@@ -265,9 +266,8 @@ public class QuestionnaireLinkedServiceTest {
     testUacQidLink.setCaze(null);
     testUacQidLink.setBlankQuestionnaireReceived(false);
 
-
-    when(uacService.findByQid(TEST_HH_QID)).thenReturn(testUacQidLink);
-    when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testCase);
+    when(uacService.findByQid(anyString())).thenReturn(testUacQidLink);
+    when(caseService.getCaseByCaseId(any())).thenReturn(testCase);
 
     // WHEN
     underTest.processQuestionnaireLinked(managementEvent);
@@ -326,8 +326,8 @@ public class QuestionnaireLinkedServiceTest {
     testHIUacQidLink.setActive(true);
     testHIUacQidLink.setCaze(null);
 
-    when(uacService.findByQid(TEST_HI_QID)).thenReturn(testHIUacQidLink);
-    when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testHHCase);
+    when(uacService.findByQid(anyString())).thenReturn(testHIUacQidLink);
+    when(caseService.getCaseByCaseId(any())).thenReturn(testHHCase);
     when(caseService.prepareIndividualResponseCaseFromParentCase(testHHCase))
         .thenReturn(testHICase);
 
@@ -380,7 +380,7 @@ public class QuestionnaireLinkedServiceTest {
     uacQidLink.setQid(TEST_HI_QID);
     uacQidLink.setCaze(caze);
 
-    when(uacService.findByQid(TEST_HI_QID)).thenReturn(uacQidLink);
+    when(uacService.findByQid(anyString())).thenReturn(uacQidLink);
 
     try {
       underTest.processQuestionnaireLinked(managementEvent);
@@ -413,8 +413,8 @@ public class QuestionnaireLinkedServiceTest {
     testHIUacQidLink.setActive(true);
     testHIUacQidLink.setCaze(testHHCase);
 
-    when(uacService.findByQid(TEST_HI_QID)).thenReturn(testHIUacQidLink);
-    when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testHHCase);
+    when(uacService.findByQid(anyString())).thenReturn(testHIUacQidLink);
+    when(caseService.getCaseByCaseId(any())).thenReturn(testHHCase);
     when(caseService.prepareIndividualResponseCaseFromParentCase(testHHCase))
         .thenReturn(testHICase);
 

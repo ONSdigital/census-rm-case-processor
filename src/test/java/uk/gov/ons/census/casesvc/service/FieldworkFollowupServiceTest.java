@@ -37,13 +37,13 @@ public class FieldworkFollowupServiceTest {
     underTest.buildAndSendFieldWorkFollowUp(expectedCase);
 
     // Then
-    ArgumentCaptor<FieldWorkFollowup> rmeArgumentCaptor =
+    ArgumentCaptor<FieldWorkFollowup> fieldWorkFollowupArgumentCaptor =
         ArgumentCaptor.forClass(FieldWorkFollowup.class);
     verify(rabbitTemplate)
-        .convertAndSend(eq(TEST_EXCHANGE), eq(TEST_BINDING), rmeArgumentCaptor.capture());
+        .convertAndSend(
+            eq(TEST_EXCHANGE), eq(TEST_BINDING), fieldWorkFollowupArgumentCaptor.capture());
 
-    FieldWorkFollowup fieldWorkFollowup = rmeArgumentCaptor.getValue();
-
-    assertThat(fieldWorkFollowup.getCaseId()).isEqualTo(expectedCase.getCaseId().toString());
+    FieldWorkFollowup actualFieldWorkFollowup = fieldWorkFollowupArgumentCaptor.getValue();
+    assertThat(actualFieldWorkFollowup.getCaseId()).isEqualTo(expectedCase.getCaseId().toString());
   }
 }

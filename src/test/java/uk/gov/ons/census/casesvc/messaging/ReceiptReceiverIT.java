@@ -96,20 +96,10 @@ public class ReceiptReceiverIT {
     BlockingQueue<String> rhUacOutboundQueue = rabbitQueueHelper.listen(rhUacQueue);
     BlockingQueue<String> rhCaseOutboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
 
-    Case caze = easyRandom.nextObject(Case.class);
-    caze.setCaseId(TEST_CASE_ID);
-    caze.setReceiptReceived(false);
-    caze.setCcsCase(false);
-    caze.setUacQidLinks(null);
-    caze.setEvents(null);
+    Case caze = createTestCase();
     caze = caseRepository.saveAndFlush(caze);
 
-    UacQidLink uacQidLink = new UacQidLink();
-    uacQidLink.setId(UUID.randomUUID());
-    uacQidLink.setCaze(caze);
-    uacQidLink.setCcsCase(false);
-    uacQidLink.setQid(TEST_QID);
-    uacQidLink.setUac(TEST_UAC);
+    UacQidLink uacQidLink = createUpUacQidLinkForCase(caze);
     uacQidLinkRepository.saveAndFlush(uacQidLink);
 
     ResponseManagementEvent managementEvent = getTestResponseManagementReceiptEvent();
@@ -164,20 +154,13 @@ public class ReceiptReceiverIT {
     BlockingQueue<String> rhUacOutboundQueue = rabbitQueueHelper.listen(rhUacQueue);
     BlockingQueue<String> rhCaseOutboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
 
-    Case caze = easyRandom.nextObject(Case.class);
-    caze.setCaseId(TEST_CASE_ID);
-    caze.setReceiptReceived(false);
+    Case caze = createTestCase();
     caze.setCcsCase(true);
-    caze.setUacQidLinks(null);
-    caze.setEvents(null);
     caze = caseRepository.saveAndFlush(caze);
 
-    UacQidLink uacQidLink = new UacQidLink();
-    uacQidLink.setId(UUID.randomUUID());
-    uacQidLink.setCaze(caze);
+    UacQidLink uacQidLink = createUpUacQidLinkForCase(caze);
     uacQidLink.setCcsCase(true);
     uacQidLink.setQid(TEST_CCS_QID_ID);
-    uacQidLink.setUac(TEST_UAC);
     uacQidLinkRepository.saveAndFlush(uacQidLink);
 
     ResponseManagementEvent managementEvent = getTestResponseManagementReceiptEvent();
@@ -221,20 +204,21 @@ public class ReceiptReceiverIT {
     assertThat(isStringFormattedAsUTCDate(utcDateAsString)).isTrue();
   }
 
-
-
   @Test
   public void testPQRSSendReciptForQidThenQMSendBlankEvent()
-          throws InterruptedException, IOException {
+      throws InterruptedException, IOException {
     // GIVEN
     BlockingQueue<String> rhUacOutboundQueue = rabbitQueueHelper.listen(rhUacQueue);
     BlockingQueue<String> rhCaseOutboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
     BlockingQueue<String> fieldworkFollowupQueue = rabbitQueueHelper.listen(fieldWorkFollowupQueue);
 
-    Case caze = setUpTestCase();
-    setUpUacQidLink(caze);
+    Case caze = createTestCase();
+    caze = caseRepository.saveAndFlush(caze);
 
-    ResponseManagementEvent managementEvent = createValidReceiptEvent();
+    UacQidLink uacQidLink = createUpUacQidLinkForCase(caze);
+    uacQidLinkRepository.saveAndFlush(uacQidLink);
+
+    ResponseManagementEvent managementEvent = createResponseReceivedEvent();
 
     // WHEN
     rabbitQueueHelper.sendMessage(inboundQueue, managementEvent);
@@ -242,28 +226,28 @@ public class ReceiptReceiverIT {
     // THEN
     // check messages sent out after 1st unreceipted msg
     boolean expectedReceipted = true;
-    checkMsgSentToRhCaseAndUac(
-            expectedReceipted, rhCaseOutboundQueue, rhUacOutboundQueue);
+    checkMsgSentToRhCaseAndUac(expectedReceipted, rhCaseOutboundQueue, rhUacOutboundQueue);
     checkDatabaseUpdatedCorrectly(expectedReceipted, 1);
 
-    // Now send out a unreceipted event
-    ResponseManagementEvent unreceiptedEvent = createBlankQuestionaireEvent();
+    /*
+     Now create and send an unreceipt Event for the previously receipted UacQidLink
+     This represents a BlankQuestionnaire received by QM
+    */
+    ResponseManagementEvent unreceiptedEvent = createResponseReceivedEvent();
+    unreceiptedEvent.getPayload().getResponse().setUnreceipt(true);
     rabbitQueueHelper.sendMessage(inboundQueue, unreceiptedEvent);
 
-    checkMsgSentToRhCaseAndUac(
-            false, rhCaseOutboundQueue, rhUacOutboundQueue);
+    expectedReceipted = false;
+    checkMsgSentToRhCaseAndUac(expectedReceipted, rhCaseOutboundQueue, rhUacOutboundQueue);
 
-    // Finally a new Event we're really interested in, a fieldworkFollowup should be sent out to
-    // fieldworkAdapter
     FieldWorkFollowup fieldWorkFollowup =
-            rabbitQueueHelper.checkExpectedMessageReceived(
-                    fieldworkFollowupQueue, FieldWorkFollowup.class);
+        rabbitQueueHelper.checkExpectedMessageReceived(
+            fieldworkFollowupQueue, FieldWorkFollowup.class);
 
     assertThat(fieldWorkFollowup.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
     assertThat(fieldWorkFollowup.getBlankQreReturned()).isTrue();
 
     // Also check all the database gubbins again
-    expectedReceipted = false;
     checkDatabaseUpdatedCorrectly(expectedReceipted, 2);
   }
 
@@ -284,48 +268,42 @@ public class ReceiptReceiverIT {
     assertThat(actualUacQidLink.isActive()).isFalse();
   }
 
-  private void setUpUacQidLink(Case caze) {
+  private UacQidLink createUpUacQidLinkForCase(Case caze) {
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setId(UUID.randomUUID());
     uacQidLink.setCaze(caze);
     uacQidLink.setCcsCase(false);
     uacQidLink.setQid(TEST_QID);
     uacQidLink.setUac(TEST_UAC);
-    uacQidLinkRepository.saveAndFlush(uacQidLink);
+    uacQidLink.setActive(true);
+    uacQidLink.setBlankQuestionnaireReceived(false);
+
+    return uacQidLink;
   }
 
-  private Case setUpTestCase() {
+  private Case createTestCase() {
     Case caze = easyRandom.nextObject(Case.class);
     caze.setCaseId(TEST_CASE_ID);
     caze.setReceiptReceived(false);
     caze.setCcsCase(false);
     caze.setUacQidLinks(null);
     caze.setEvents(null);
-    caze = caseRepository.saveAndFlush(caze);
 
     return caze;
   }
 
-  private ResponseManagementEvent createBlankQuestionaireEvent() {
-    return createResponseReceivedUnreceiptedEvent(true);
-  }
-
-  private ResponseManagementEvent createValidReceiptEvent() {
-    return createResponseReceivedUnreceiptedEvent(false);
-  }
-
-  private ResponseManagementEvent createResponseReceivedUnreceiptedEvent(boolean unreceiped) {
+  private ResponseManagementEvent createResponseReceivedEvent() {
     ResponseManagementEvent managementEvent = new ResponseManagementEvent();
 
     EventDTO event = new EventDTO();
     event.setType(EventTypeDTO.RESPONSE_RECEIVED);
     event.setSource("RECEIPT_SERVICE");
-    event.setChannel("PQRS");
+    event.setChannel("dummy");
     managementEvent.setEvent(event);
 
     ResponseDTO responseDTO = new ResponseDTO();
     responseDTO.setQuestionnaireId(TEST_QID);
-    responseDTO.setUnreceipt(unreceiped);
+    responseDTO.setUnreceipt(false);
 
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setResponse(responseDTO);
@@ -337,31 +315,29 @@ public class ReceiptReceiverIT {
   }
 
   private void checkMsgSentToRhCaseAndUac(
-          boolean receipted,
-          BlockingQueue<String> rhCaseOutboundQueue,
-          BlockingQueue<String> rhUacOutboundQueue)
-          throws IOException, InterruptedException {
+      boolean receipted,
+      BlockingQueue<String> rhCaseOutboundQueue,
+      BlockingQueue<String> rhUacOutboundQueue)
+      throws IOException, InterruptedException {
 
     // Check That Rh receives a case with corrected receipted value
     CollectionCase actualCollectionCase =
-            rabbitQueueHelper
-                    .checkExpectedMessageReceived(rhCaseOutboundQueue)
-                    .getPayload()
-                    .getCollectionCase();
+        rabbitQueueHelper
+            .checkExpectedMessageReceived(rhCaseOutboundQueue)
+            .getPayload()
+            .getCollectionCase();
     assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID.toString());
     assertThat(actualCollectionCase.getReceiptReceived()).isEqualTo(receipted);
 
     // Check that rh receive an uac_updated event
     ResponseManagementEvent responseManagementEvent =
-            rabbitQueueHelper.checkExpectedMessageReceived(rhUacOutboundQueue);
+        rabbitQueueHelper.checkExpectedMessageReceived(rhUacOutboundQueue);
     assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
     UacDTO actualUacDTOObject = responseManagementEvent.getPayload().getUac();
     assertThat(actualUacDTOObject.getUac()).isEqualTo(TEST_UAC);
     assertThat(actualUacDTOObject.getQuestionnaireId()).isEqualTo(TEST_QID);
     assertThat(actualUacDTOObject.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
   }
-
-
 
   private boolean isStringFormattedAsUTCDate(String dateAsString) {
     try {

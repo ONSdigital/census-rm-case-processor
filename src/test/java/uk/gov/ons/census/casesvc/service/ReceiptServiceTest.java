@@ -108,15 +108,14 @@ public class ReceiptServiceTest {
     verifyEventLogged(expectedUacQidLink, managementEvent);
   }
 
-  // Suggest that receipt testing for both CCS and normal cases call this function
-  //  private void testUnreceiptedCaseIsReceiptedByUacQid(boolean isCCScase) {
-  //
-  //  }
-
-  // scenario 1. PQRS receipt (QID A)processed and then Blank Q're (QID A). No other UAC/QID pair
-  // against the case. HAPPY PATH
+  // The case has been receipted by a qid.  Then for that qid a BlankQuestionnaire is received, the
+  // case
+  // should be updated to receipted = false. Normal case and uac updates should be emitted.  And a
+  // call to
+  // fieldworkFollupService should be made (this will eventually create an ActionRequest to Field to
+  // make the case live
   @Test
-  public void blankQuestionnaireHappyPath() {
+  public void blankQuestionnaireUnreceiptsCase() {
     // Given
     Case expectedCase = getRandomCase();
     expectedCase.setReceiptReceived(true);
@@ -146,7 +145,7 @@ public class ReceiptServiceTest {
     verifyEventLogged(expectedUacQidLink, managementEvent);
   }
 
-  // Scenario 2 - QM Blank Q're (QID A) processed before PQRS receipt (QID A).  No other UAC/QID
+  //  QM Blank Q're (QID A) processed before PQRS receipt (QID A).  No other UAC/QID
   // pair against the case.
   @Test
   public void blankQuestionnaireReceivedQMBeforePQRS() {
@@ -177,13 +176,7 @@ public class ReceiptServiceTest {
     verifyEventLogged(uacQidLinkSetToBlank, PQRSReceiptmanagementEvent);
   }
 
-  // Scenario 3 - QM Blank Q're (QID A) processed and then PQRS receipt (QID A).  Another QID B
-  // exists which is inactive (has been receipted against)
-  // Only new bit is the 1st part of the scenario, 2nd part already covered.
-
-  // Scenario 3 a - Blank Qid received for Case. Case already successfully receipted by another
-  // QidLink
-  // Scenario 3 b is covered in scenario 2
+  // Blank Qid received for Case. Case already successfully receipted by another qid
   @Test
   public void blankQidLinkForCaseAlreadyReceiptedByAnotherUacQidLink() {
     // Given
@@ -219,13 +212,9 @@ public class ReceiptServiceTest {
     verifyEventLogged(qidUacToReceiveBlankQuestionnaire, unreceiptingQuestionnaireEvent);
   }
 
-  //  @Test
-  //  public void handleUnlinkedBlankQuestionnaireStuff() {
-  //    assertFalse(true);
-  //  }
-
-  // Scenario 4 -  Scenario 4: Blank Questionnaire event is received and processed and then a
-  // Response is received from PQRS for a different UAC/QID pair
+  // Blank Questionnaire event has been received and processed and then a
+  // Response is received from PQRS for a different UAC/QID pair is received, should check that the
+  // case is receipted
   @Test
   public void blankQuestionnaireForAnotherUACQIDPair() {
     // Given
@@ -259,8 +248,7 @@ public class ReceiptServiceTest {
     verifyEventLogged(newPQRSLink, newPQRSEvent);
   }
 
-  // scenario 5, A valid PQRS receipt A and then a Blank PQ B are received for the same case, but
-  // different QIDs
+  // A valid PQRS receipt A and then a Blank PQ B are received for the same case, but different QIDs
   @Test
   public void blankQuestionnaieBwhenAalreadyReceipedSuccessfullyMeansNoMoreActionCreateEvents() {
     // Given
@@ -296,7 +284,7 @@ public class ReceiptServiceTest {
     verifyZeroInteractions(caseService, fieldworkFollowupService);
   }
 
-  // scenario 6, 2 Blank QIDs are returned at the same time (after they have been receipted by PQRS)
+  // 2 Blank QIDs are returned after they have been receipted by PQRS for the same case
   @Test
   public void twoPQRSReceiptsForCaseRecceivedThenBothReceiveQMBlanks() {
     // Given
