@@ -54,12 +54,8 @@ public class FieldworkFollowupService {
     followup.setCeExpectedCapacity(caze.getCeExpectedCapacity());
     followup.setUndeliveredAsAddress(caze.isUndeliveredAsAddressed());
 
-    // TODO: set surveyName, undeliveredAsAddress and blankQreReturned from caze
     followup.setSurveyName("CENSUS");
     followup.setBlankQreReturned(true);
-
-    // TODO: ccsQuestionnaireUrl, ceDeliveryReqd,
-    // ceCE1Complete, ceActualResponses
 
     return followup;
   }
