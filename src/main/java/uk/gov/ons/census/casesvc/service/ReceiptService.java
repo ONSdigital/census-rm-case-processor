@@ -128,19 +128,15 @@ public class ReceiptService {
 
   private void logUnlinkedUacQidLink(UacQidLink uacQidLink, ResponseManagementEvent receiptEvent) {
     log.with("qid", receiptEvent.getPayload().getResponse().getQuestionnaireId())
-            .with("tx_id", receiptEvent.getEvent().getTransactionId())
-            .with("channel", receiptEvent.getEvent().getChannel())
-            .warn("UnReceipt received for unaddressed UAC/QID pair not yet linked to a case, ");
+        .with("tx_id", receiptEvent.getEvent().getTransactionId())
+        .with("channel", receiptEvent.getEvent().getChannel())
+        .warn("UnReceipt received for unaddressed UAC/QID pair not yet linked to a case, ");
   }
 
   private boolean hasCaseAlreadyBeenReceiptedByAnotherQidOrIsCaseNull(
       UacQidLink receivedUacQidLink) {
 
     Case caze = receivedUacQidLink.getCaze();
-
-    // If null then it's unlinked so we'll return true as we don't want to update the case, or lack
-    // thereof
-    if (caze == null) return true;
 
     // Check other qids linked to the case that might have receipted the case, in which case we
     // don't want to unreceipt the case
