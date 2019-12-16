@@ -126,7 +126,12 @@ public class ReceiptService {
         convertObjectToJson(receiptPayload));
   }
 
-  private void logUnlinkedUacQidLink(UacQidLink uacQidLink, ResponseManagementEvent receiptEvent) {}
+  private void logUnlinkedUacQidLink(UacQidLink uacQidLink, ResponseManagementEvent receiptEvent) {
+    log.with("qid", receiptEvent.getPayload().getResponse().getQuestionnaireId())
+            .with("tx_id", receiptEvent.getEvent().getTransactionId())
+            .with("channel", receiptEvent.getEvent().getChannel())
+            .warn("UnReceipt received for unaddressed UAC/QID pair not yet linked to a case, ");
+  }
 
   private boolean hasCaseAlreadyBeenReceiptedByAnotherQidOrIsCaseNull(
       UacQidLink receivedUacQidLink) {
