@@ -100,7 +100,7 @@ public class ReceiptService {
     Case caze = uacQidLink.getCaze();
 
     if (caze != null) {
-      if (hasCaseAlreadyBeenReceiptedByAnotherQidOrIsCaseNull(uacQidLink)) {
+      if (hasCaseAlreadyBeenReceiptedByAnotherQid(uacQidLink)) {
         return;
       }
 
@@ -133,7 +133,7 @@ public class ReceiptService {
         .warn("UnReceipt received for unaddressed UAC/QID pair not yet linked to a case, ");
   }
 
-  private boolean hasCaseAlreadyBeenReceiptedByAnotherQidOrIsCaseNull(
+  private boolean hasCaseAlreadyBeenReceiptedByAnotherQid(
       UacQidLink receivedUacQidLink) {
 
     Case caze = receivedUacQidLink.getCaze();
