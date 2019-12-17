@@ -314,7 +314,7 @@ public class ReceiptServiceTest {
     assertThat(actualCase.isReceiptReceived()).isFalse();
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture(), eq(true));
+    verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
     UacQidLink actualUacQidLink =
         checkUacQidLinkSavedAndEmitted(qidUacToReceiveBlankQuestionnaire, true);
     assertThat(actualUacQidLink.isBlankQuestionnaireReceived()).isTrue();
@@ -362,7 +362,7 @@ public class ReceiptServiceTest {
   private UacQidLink checkUacQidLinkSavedAndEmitted(
       UacQidLink expectedUacQidLink, boolean unreceiptedCheck) {
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture(), eq(unreceiptedCheck));
+    verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
     assertThat(actualUacQidLink.getQid()).isEqualTo(expectedUacQidLink.getQid());
     assertThat(actualUacQidLink.getUac()).isEqualTo(expectedUacQidLink.getUac());

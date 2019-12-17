@@ -85,10 +85,10 @@ public class UacService {
   }
 
   public PayloadDTO saveAndEmitUacUpdatedEvent(UacQidLink uacQidLink) {
-    return saveAndEmitUacUpdatedEvent(uacQidLink, false);
+    return saveAndEmitUacUpdatedEventX(uacQidLink, false);
   }
 
-  public PayloadDTO saveAndEmitUacUpdatedEvent(UacQidLink uacQidLink, boolean unreceipted) {
+  private PayloadDTO saveAndEmitUacUpdatedEventX(UacQidLink uacQidLink, boolean unreceipted) {
     uacQidLinkRepository.save(uacQidLink);
 
     EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.UAC_UPDATED);
@@ -131,7 +131,7 @@ public class UacService {
             uacCreatedEvent.getPayload().getUacQidCreated().getUac(),
             uacCreatedEvent.getPayload().getUacQidCreated().getQid());
 
-    saveAndEmitUacUpdatedEvent(uacQidLink, false);
+    saveAndEmitUacUpdatedEvent(uacQidLink);
 
     eventLogger.logUacQidEvent(
         uacQidLink,

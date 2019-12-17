@@ -62,7 +62,7 @@ public class ReceiptService {
       UacQidLink uacQidLink, ResponseManagementEvent receiptEvent) {
     uacQidLink.setActive(false);
 
-    uacService.saveAndEmitUacUpdatedEvent(uacQidLink, false);
+    uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
 
     Case caze = uacQidLink.getCaze();
 
@@ -95,7 +95,7 @@ public class ReceiptService {
       UacQidLink uacQidLink, ResponseManagementEvent receiptEvent) {
 
     uacQidLink.setBlankQuestionnaireReceived(true);
-    uacService.saveAndEmitUacUpdatedEvent(uacQidLink, true);
+    uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
 
     Case caze = uacQidLink.getCaze();
 

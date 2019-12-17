@@ -31,7 +31,7 @@ public class QuestionnaireLinkedService {
     UacDTO uacDTO = questionnaireLinkedEvent.getPayload().getUac();
     UacQidLink uacQidLink = uacService.findByQid(uacDTO.getQuestionnaireId());
 
-    // if the uacqidLink is already linked to a dfiferent case this throws an Exception
+    // if the uacqidLink is already linked to a different case this throws an Exception
     checkQidNotLinkedToAnotherCase(uacDTO, uacQidLink);
 
     logEvent(questionnaireLinkedEvent, uacQidLink);
@@ -74,8 +74,7 @@ public class QuestionnaireLinkedService {
 
   private void processBlankQuestionnaireLinked(UacQidLink uacQidLink) {
     // When linking a UacQidLink that has been marked as BlankQuestionnaire to a case, the case's
-    // receipted flag
-    // will never be altered.
+    // receipted flag will never be altered.
     uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
   }
 
@@ -89,8 +88,7 @@ public class QuestionnaireLinkedService {
 
   private Case createAndEmitNewIndividualCase(UacDTO uacDto) {
     // If the Qid is for a new Individual case then create a new IndividualCase linked to the
-    // household case,
-    // this new case will be used for the linking
+    // household case, this new case will be used for the linking
 
     Case householdCase = caseService.getCaseByCaseId(UUID.fromString(uacDto.getCaseId()));
     Case newIndividualCase = caseService.prepareIndividualResponseCaseFromParentCase(householdCase);
