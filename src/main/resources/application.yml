@@ -77,3 +77,5 @@ messagelogging:
 logging:
   level:
     org.springframework.amqp.rabbit.listener.ConditionalRejectingErrorHandler: ERROR
+
+caserefgeneratorkey: lOpnY+IDq10Sts/D6kVRPFpZ+y7X+86H
