@@ -95,6 +95,7 @@ public class ReceiptService {
       UacQidLink uacQidLink, ResponseManagementEvent receiptEvent) {
 
     uacQidLink.setBlankQuestionnaireReceived(true);
+    uacQidLink.setActive(false);
     uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
 
     Case caze = uacQidLink.getCaze();

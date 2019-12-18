@@ -145,6 +145,38 @@ public class ReceiptServiceTest {
     verifyEventLogged(expectedUacQidLink, managementEvent);
   }
 
+  @Test
+  public void blankQuestionnaireQMUnreceiptsCase() {
+    // Given
+    Case expectedCase = getRandomCase();
+    expectedCase.setReceiptReceived(true);
+
+    UacQidLink expectedUacQidLink =
+            generateUacQidLinkedToCase(expectedCase, TEST_QID_1, TEST_UAC_1);
+    expectedUacQidLink.setActive(true);
+    when(uacService.findByQid(anyString())).thenReturn(expectedUacQidLink);
+
+    ResponseManagementEvent managementEvent = createReceiptReceivedEvent();
+    managementEvent.getPayload().getResponse().setUnreceipt(true);
+
+    // when
+    underTest.processReceipt(managementEvent);
+
+    // then
+    verify(uacService).findByQid(managementEvent.getPayload().getResponse().getQuestionnaireId());
+
+    Case actualCase = checkCaseSavedAndEmitted(expectedCase);
+    assertThat(actualCase.isReceiptReceived()).isFalse();
+
+    UacQidLink actualUacQidLink = checkUacQidLinkSavedAndEmitted(expectedUacQidLink, true);
+    assertThat(actualUacQidLink.isBlankQuestionnaireReceived()).isTrue();
+    assertThat(actualUacQidLink.isActive()).isFalse();
+
+    verifyCaseSentToFieldWorkFollowUpService(fieldworkFollowupService, expectedCase);
+
+    verifyEventLogged(expectedUacQidLink, managementEvent);
+  }
+
   //  QM Blank Q're (QID A) processed before PQRS receipt (QID A).  No other UAC/QID
   // pair against the case.
   @Test
