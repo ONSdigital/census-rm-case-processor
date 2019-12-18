@@ -20,10 +20,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.model.dto.CCSPropertyDTO;
-import uk.gov.ons.census.casesvc.model.dto.CcsToFwmt;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
+import uk.gov.ons.census.casesvc.model.dto.FieldWorkFollowup;
 import uk.gov.ons.census.casesvc.model.dto.InvalidAddress;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
@@ -79,8 +79,8 @@ public class CCSPropertyListedIT {
     rabbitQueueHelper.sendMessage(ccsPropertyListedQueue, responseManagementEvent);
 
     // Then
-    CcsToFwmt ccsToFwmt =
-        rabbitQueueHelper.checkExpectedMessageReceived(outboundQueue, CcsToFwmt.class);
+    FieldWorkFollowup ccsToFwmt =
+        rabbitQueueHelper.checkExpectedMessageReceived(outboundQueue, FieldWorkFollowup.class);
     assertThat(ccsToFwmt.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
 
     Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();

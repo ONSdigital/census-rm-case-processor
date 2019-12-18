@@ -21,12 +21,12 @@ public class FieldworkFollowupService {
     this.rabbitTemplate = rabbitTemplate;
   }
 
-  public void buildAndSendFieldWorkFollowUp(Case caze) {
-    FieldWorkFollowup followup = buildFieldworkFollowup(caze);
+  public void buildAndSendFieldWorkFollowUp(Case caze,String surveyName, boolean blankQuestionnaireReturned) {
+    FieldWorkFollowup followup = buildFieldworkFollowup(caze, surveyName, blankQuestionnaireReturned);
     rabbitTemplate.convertAndSend(outboundExchange, actionFieldBinding, followup);
   }
 
-  private FieldWorkFollowup buildFieldworkFollowup(Case caze) {
+  private FieldWorkFollowup buildFieldworkFollowup(Case caze, String surveyName, boolean blankQuestionnaireReturned) {
 
     FieldWorkFollowup followup = new FieldWorkFollowup();
     followup.setAddressLine1(caze.getAddressLine1());
@@ -54,8 +54,8 @@ public class FieldworkFollowupService {
     followup.setCeExpectedCapacity(caze.getCeExpectedCapacity());
     followup.setUndeliveredAsAddress(caze.isUndeliveredAsAddressed());
 
-    followup.setSurveyName("CENSUS");
-    followup.setBlankQreReturned(true);
+    followup.setSurveyName(surveyName);
+    followup.setBlankQreReturned(blankQuestionnaireReturned);
 
     return followup;
   }

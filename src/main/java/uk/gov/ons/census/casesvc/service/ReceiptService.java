@@ -105,7 +105,7 @@ public class ReceiptService {
       }
 
       caze.setReceiptReceived(false);
-      fieldworkFollowupService.buildAndSendFieldWorkFollowUp(caze);
+      fieldworkFollowupService.buildAndSendFieldWorkFollowUp(caze, "CENSUS", true);
       caseService.saveAndEmitCaseUpdatedEvent(caze);
     } else {
       log.with("qid", receiptEvent.getPayload().getResponse().getQuestionnaireId())
@@ -133,8 +133,7 @@ public class ReceiptService {
         .warn("UnReceipt received for unaddressed UAC/QID pair not yet linked to a case, ");
   }
 
-  private boolean hasCaseAlreadyBeenReceiptedByAnotherQid(
-      UacQidLink receivedUacQidLink) {
+  private boolean hasCaseAlreadyBeenReceiptedByAnotherQid(UacQidLink receivedUacQidLink) {
 
     Case caze = receivedUacQidLink.getCaze();
 

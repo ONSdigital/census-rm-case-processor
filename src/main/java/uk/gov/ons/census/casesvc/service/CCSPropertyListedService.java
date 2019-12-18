@@ -18,19 +18,19 @@ public class CCSPropertyListedService {
   private final UacService uacService;
   private final EventLogger eventLogger;
   private final CaseService caseService;
-  private final CcsToFieldService ccsToFieldService;
+  private final FieldworkFollowupService fieldworkFollowupService;
   private final UacQidLinkRepository uacQidLinkRepository;
 
   public CCSPropertyListedService(
       UacService uacService,
       EventLogger eventLogger,
       CaseService caseService,
-      CcsToFieldService ccsToFieldService,
+      FieldworkFollowupService fieldworkFollowupService,
       UacQidLinkRepository uacQidLinkRepository) {
     this.uacService = uacService;
     this.eventLogger = eventLogger;
     this.caseService = caseService;
-    this.ccsToFieldService = ccsToFieldService;
+    this.fieldworkFollowupService = fieldworkFollowupService;
     this.uacQidLinkRepository = uacQidLinkRepository;
   }
 
@@ -67,7 +67,7 @@ public class CCSPropertyListedService {
 
   private void sendActiveCCSCaseToField(Case caze) {
     if (!caze.isRefusalReceived() && !caze.isAddressInvalid()) {
-      ccsToFieldService.convertAndSendCCSToField(caze);
+      fieldworkFollowupService.buildAndSendFieldWorkFollowUp(caze, "CCS", false);
     }
   }
 

@@ -383,7 +383,7 @@ public class ReceiptServiceTest {
   private void verifyCaseSentToFieldWorkFollowUpService(
       FieldworkFollowupService fieldworkFollowupService, Case expectedCase) {
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(fieldworkFollowupService).buildAndSendFieldWorkFollowUp(caseArgumentCaptor.capture());
+    verify(fieldworkFollowupService).buildAndSendFieldWorkFollowUp(caseArgumentCaptor.capture(), eq("CENSUS"), eq(true));
     assertThat(caseArgumentCaptor.getValue().getCaseId()).isEqualTo(expectedCase.getCaseId());
   }
 

@@ -39,7 +39,7 @@ public class CCSPropertyListedServiceTest {
   @Mock EventLogger eventLogger;
   @Mock CaseService caseService;
   @Mock UacService uacService;
-  @Mock CcsToFieldService ccsToFieldService;
+  @Mock FieldworkFollowupService fieldworkFollowupService;
   @Mock UacQidLinkRepository uacQidLinkRepository;
 
   @InjectMocks CCSPropertyListedService underTest;
@@ -71,7 +71,7 @@ public class CCSPropertyListedServiceTest {
     checkCorrectEventLogging(inOrder, expectedCase, managementEvent);
 
     ArgumentCaptor<Case> caseCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(ccsToFieldService).convertAndSendCCSToField(caseCaptor.capture());
+    verify(fieldworkFollowupService).buildAndSendFieldWorkFollowUp(caseCaptor.capture(), eq("CCS"), eq(false));
     Case actualCaseToFieldService = caseCaptor.getValue();
     assertThat(actualCaseToFieldService.getCaseId())
         .isEqualTo(UUID.fromString(expectedCase.getCaseId().toString()));
@@ -115,7 +115,7 @@ public class CCSPropertyListedServiceTest {
     assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID);
     assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(expectedCase.getCaseId());
 
-    verifyZeroInteractions(ccsToFieldService);
+    verifyZeroInteractions(fieldworkFollowupService);
   }
 
   @Test
@@ -151,7 +151,7 @@ public class CCSPropertyListedServiceTest {
             false);
 
     checkCorrectEventLogging(inOrder, expectedCase, managementEvent);
-    verifyZeroInteractions(ccsToFieldService);
+    verifyZeroInteractions(fieldworkFollowupService);
   }
 
   @Test
@@ -178,7 +178,7 @@ public class CCSPropertyListedServiceTest {
     // Then
     InOrder inOrder = inOrder(caseService, eventLogger);
     checkCorrectEventLogging(inOrder, expectedCase, managementEvent);
-    verifyZeroInteractions(ccsToFieldService);
+    verifyZeroInteractions(fieldworkFollowupService);
   }
 
   private Case getExpectedCase(String id) {
