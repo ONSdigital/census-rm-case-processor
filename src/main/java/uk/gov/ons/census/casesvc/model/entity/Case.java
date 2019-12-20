@@ -82,6 +82,8 @@ public class Case {
 
   @Column private String ceExpectedCapacity;
 
+  @Column private Integer ceActualResponses;
+
   @Column private String collectionExerciseId;
 
   @Column private String actionPlanId;

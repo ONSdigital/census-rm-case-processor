@@ -72,6 +72,8 @@ public class CaseService {
     caze.setState(CaseState.ACTIONABLE);
     caze.setCreatedDateTime(OffsetDateTime.now());
     caze.setReceiptReceived(false);
+    caze.setCeActualResponses(0);
+
     return saveNewCaseAndStampCaseRef(caze);
   }
 
@@ -185,6 +187,7 @@ public class CaseService {
     collectionCase.setFieldCoordinatorId(caze.getFieldCoordinatorId());
     collectionCase.setFieldOfficerId(caze.getFieldOfficerId());
     collectionCase.setCeExpectedCapacity(caze.getCeExpectedCapacity());
+    collectionCase.setCeActualResponses(caze.getCeActualResponses());
     collectionCase.setReceiptReceived(caze.isReceiptReceived());
     collectionCase.setRefusalReceived(caze.isRefusalReceived());
     collectionCase.setAddressInvalid(caze.isAddressInvalid());
