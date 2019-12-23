@@ -36,7 +36,7 @@ public class CaseServiceTest {
 
   private static final String FIELD_CORD_ID = "FIELD_CORD_ID";
   private static final String FIELD_OFFICER_ID = "FIELD_OFFICER_ID";
-  private static final String CE_CAPACITY = "CE_CAPACITY";
+  private static final Integer CE_CAPACITY = 37;
   private static final String TEST_TREATMENT_CODE = "TEST_TREATMENT_CODE";
   private static final String TEST_POSTCODE = "TEST_POSTCODE";
   private static final String TEST_EXCHANGE = "TEST_EXCHANGE";
@@ -79,7 +79,7 @@ public class CaseServiceTest {
     createCaseSample.setTreatmentCode(TEST_TREATMENT_CODE);
     createCaseSample.setFieldCoordinatorId(FIELD_CORD_ID);
     createCaseSample.setFieldOfficerId(FIELD_OFFICER_ID);
-    createCaseSample.setCeExpectedCapacity(CE_CAPACITY);
+    createCaseSample.setCeExpectedCapacity(CE_CAPACITY.toString());
 
     ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
 

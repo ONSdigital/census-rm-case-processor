@@ -30,7 +30,7 @@ public class CollectionCase {
   private String htcDigital;
   private String fieldCoordinatorId;
   private String fieldOfficerId;
-  private String ceExpectedCapacity;
+  private Integer ceExpectedCapacity;
   private Integer ceActualResponses;
   private Boolean addressInvalid;
   private Boolean undeliveredAsAddressed;

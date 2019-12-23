@@ -80,7 +80,7 @@ public class Case {
 
   @Column private String treatmentCode;
 
-  @Column private String ceExpectedCapacity;
+  @Column private Integer ceExpectedCapacity;
 
   @Column private Integer ceActualResponses;
 
