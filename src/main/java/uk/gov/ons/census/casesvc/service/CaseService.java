@@ -27,7 +27,6 @@ public class CaseService {
   private static final String SURVEY = "CENSUS";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_CASE_TYPE = "HI";
   public static final String CASE_UPDATE_ROUTING_KEY = "event.case.update";
-  private static final String HOUSEHOLD_RESPONSE_ADDRESS_TYPE = "HH";
 
   private final CaseRepository caseRepository;
   private final MapperFacade mapperFacade;
@@ -67,7 +66,7 @@ public class CaseService {
 
   public Case saveCaseSample(CreateCaseSample createCaseSample) {
     Case caze = mapperFacade.map(createCaseSample, Case.class);
-    caze.setCaseType(HOUSEHOLD_RESPONSE_ADDRESS_TYPE);
+    caze.setCaseType(createCaseSample.getAddressType());
     caze.setCaseId(UUID.randomUUID());
     caze.setState(CaseState.ACTIONABLE);
     caze.setCreatedDateTime(OffsetDateTime.now());

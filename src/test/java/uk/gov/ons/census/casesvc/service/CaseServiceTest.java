@@ -40,6 +40,7 @@ public class CaseServiceTest {
   private static final String TEST_TREATMENT_CODE = "TEST_TREATMENT_CODE";
   private static final String TEST_POSTCODE = "TEST_POSTCODE";
   private static final String TEST_EXCHANGE = "TEST_EXCHANGE";
+  private static final String TEST_ADDRESS_TYPE = "testy_address_type";
   private static final UUID TEST_UUID = UUID.randomUUID();
   private static final UUID TEST_ACTION_PLAN_ID = UUID.randomUUID();
   private static final UUID TEST_COLLECTION_EXERCISE_ID = UUID.randomUUID();
@@ -80,6 +81,7 @@ public class CaseServiceTest {
     createCaseSample.setFieldCoordinatorId(FIELD_CORD_ID);
     createCaseSample.setFieldOfficerId(FIELD_OFFICER_ID);
     createCaseSample.setCeExpectedCapacity(CE_CAPACITY.toString());
+    createCaseSample.setAddressType(TEST_ADDRESS_TYPE);
 
     ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
 
@@ -100,6 +102,7 @@ public class CaseServiceTest {
     assertThat(savedCase.getFieldOfficerId()).isEqualTo(FIELD_OFFICER_ID);
     assertThat(savedCase.getCeExpectedCapacity()).isEqualTo(CE_CAPACITY);
     assertThat(savedCase.getCeActualResponses()).isEqualTo(0);
+    assertThat(savedCase.getCaseType()).isEqualTo(TEST_ADDRESS_TYPE);
   }
 
   @Test
