@@ -49,7 +49,7 @@ public class CCSPropertyListedServiceTest {
     // Given
     ResponseManagementEvent managementEvent = getTestResponseManagementCCSAddressListedEvent();
     Case expectedCase =
-        getExpectedCase(managementEvent.getPayload().getCcsProperty().getCollectionCase().getId());
+        getExpectedCCSCase(managementEvent.getPayload().getCcsProperty().getCollectionCase().getId());
 
     UacQidLink expectedUacQidLink = new UacQidLink();
     expectedUacQidLink.setId(TEST_UAC_QID_LINK_ID);
@@ -75,7 +75,7 @@ public class CCSPropertyListedServiceTest {
     Case actualCaseToFieldService = caseCaptor.getValue();
     assertThat(actualCaseToFieldService.getCaseId())
         .isEqualTo(UUID.fromString(expectedCase.getCaseId().toString()));
-    assertThat(actualCaseToFieldService.isCcsCase()).isTrue();
+    assertThat(actualCaseToFieldService.getSurvey()).isEqualTo("CCS");
   }
 
   @Test
@@ -92,7 +92,7 @@ public class CCSPropertyListedServiceTest {
     when(uacService.findByQid(TEST_QID)).thenReturn(uacQidLink);
 
     Case expectedCase =
-        getExpectedCase(managementEvent.getPayload().getCcsProperty().getCollectionCase().getId());
+        getExpectedCCSCase(managementEvent.getPayload().getCcsProperty().getCollectionCase().getId());
     expectedCase.setUacQidLinks(Collections.singletonList(uacQidLink));
 
     when(caseService.createCCSCase(
@@ -114,6 +114,8 @@ public class CCSPropertyListedServiceTest {
     UacQidLink actualUacQidLink = uacQidLinkArgumentCaptor.getValue();
     assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID);
     assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(expectedCase.getCaseId());
+    assertThat(actualUacQidLink.isCcsCase()).isTrue();
+    assertThat(actualUacQidLink.getCaze().getSurvey()).isEqualTo("CCS");
 
     verifyZeroInteractions(ccsToFieldService);
   }
@@ -126,7 +128,7 @@ public class CCSPropertyListedServiceTest {
     managementEvent.getPayload().getCcsProperty().setRefusal(refusalDto);
 
     Case expectedCase =
-        getExpectedCase(managementEvent.getPayload().getCcsProperty().getCollectionCase().getId());
+        getExpectedCCSCase(managementEvent.getPayload().getCcsProperty().getCollectionCase().getId());
     expectedCase.setRefusalReceived(true);
 
     when(caseService.createCCSCase(
@@ -162,7 +164,7 @@ public class CCSPropertyListedServiceTest {
     managementEvent.getPayload().getCcsProperty().setInvalidAddress(invalidAddress);
 
     Case expectedCase =
-        getExpectedCase(managementEvent.getPayload().getCcsProperty().getCollectionCase().getId());
+        getExpectedCCSCase(managementEvent.getPayload().getCcsProperty().getCollectionCase().getId());
     expectedCase.setAddressInvalid(true);
 
     when(caseService.createCCSCase(
@@ -181,10 +183,10 @@ public class CCSPropertyListedServiceTest {
     verifyZeroInteractions(ccsToFieldService);
   }
 
-  private Case getExpectedCase(String id) {
+  private Case getExpectedCCSCase(String id) {
     Case caze = new Case();
     caze.setCaseId(UUID.fromString(id));
-    caze.setCcsCase(true);
+    caze.setSurvey("CCS");
     caze.setRefusalReceived(false);
     caze.setAddressInvalid(false);
 

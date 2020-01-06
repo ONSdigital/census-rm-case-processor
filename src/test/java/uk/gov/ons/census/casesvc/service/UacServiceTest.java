@@ -198,7 +198,7 @@ public class UacServiceTest {
     // Given
     Case expectedCase = new Case();
     expectedCase.setCaseId(TEST_CASE_ID);
-    expectedCase.setCcsCase(true);
+    expectedCase.setSurvey("CCS");
 
     UacQidDTO expectedUacQidDTO = new UacQidDTO();
     when(uacQidServiceClient.generateUacQid(71)).thenReturn(expectedUacQidDTO);
@@ -207,12 +207,13 @@ public class UacServiceTest {
     UacQidLink actualUacQidLink = underTest.createUacQidLinkedToCCSCase(expectedCase);
 
     // Then
-    assertThat(actualUacQidLink.isCcsCase()).isTrue();
+    assertThat(actualUacQidLink.getCaze().getSurvey()).isEqualTo("CCS");
     assertThat(actualUacQidLink.getCaze()).isNotNull();
+    assertThat(actualUacQidLink.isCcsCase()).isTrue();
 
     Case actualCase = actualUacQidLink.getCaze();
     assertThat(actualCase.getCaseId()).isEqualTo(TEST_CASE_ID);
-    assertThat(actualCase.isCcsCase()).isTrue();
+    assertThat(actualCase.getSurvey()).isEqualTo("CCS");
   }
 
   @Test

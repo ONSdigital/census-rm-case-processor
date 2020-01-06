@@ -86,14 +86,14 @@ public class QuestionnaireLinkedReceiverIT {
   }
 
   @Test
-  public void testGoodQuestionnaireLinkedForUnreceiptedNonCCSCase() throws Exception {
+  public void testGoodQuestionnaireLinkedForUnreceiptedCase() throws Exception {
     // GIVEN
     BlockingQueue<String> outboundUacQueue = rabbitQueueHelper.listen(rhUacQueue);
 
     Case testCase = easyRandom.nextObject(Case.class);
     testCase.setCaseId(TEST_CASE_ID);
     testCase.setReceiptReceived(false);
-    testCase.setCcsCase(false);
+    testCase.setSurvey("CENSUS");
     testCase.setUacQidLinks(null);
     testCase.setEvents(null);
     caseRepository.saveAndFlush(testCase);
@@ -132,7 +132,7 @@ public class QuestionnaireLinkedReceiverIT {
     // Check database Case is still unreceipted and response received not set
     Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
     assertThat(actualCase.isReceiptReceived()).isFalse();
-    assertThat(actualCase.isCcsCase()).isFalse();
+    assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
 
     // Check database Case is now linked to questionnaire and still unreceipted
     List<UacQidLink> uacQidLinks = uacQidLinkRepository.findAll();
@@ -145,60 +145,7 @@ public class QuestionnaireLinkedReceiverIT {
   }
 
   @Test
-  public void testGoodQuestionnaireLinkedForUnreceiptedCCSCase() throws Exception {
-    // GIVEN
-    BlockingQueue<String> outboundUacQueue = rabbitQueueHelper.listen(rhUacQueue);
-
-    Case testCase = easyRandom.nextObject(Case.class);
-    testCase.setCaseId(TEST_CASE_ID);
-    testCase.setReceiptReceived(false);
-    testCase.setCcsCase(true);
-    testCase.setUacQidLinks(null);
-    testCase.setEvents(null);
-    caseRepository.saveAndFlush(testCase);
-
-    // Send unaddressed uac message to create uac/qid unaddressed pair
-    CreateUacQid createUacQid = new CreateUacQid();
-    createUacQid.setQuestionnaireType("71");
-    createUacQid.setBatchId(UUID.randomUUID());
-    sendMessageAndExpectInboundMessage(unaddressedQueue, createUacQid, outboundUacQueue);
-
-    // Get generated Questionnaire Id
-    String expectedQuestionnaireId = uacQidLinkRepository.findAll().get(0).getQid();
-
-    ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
-    managementEvent.getEvent().setTransactionId(UUID.randomUUID());
-    UacDTO uac = new UacDTO();
-    uac.setCaseId(TEST_CASE_ID.toString());
-    uac.setQuestionnaireId(expectedQuestionnaireId);
-    managementEvent.getPayload().setUac(uac);
-
-    // WHEN
-
-    // Send questionnaire linked message and wait for uac updated message
-    sendMessageAndDoNotExpectInboundMessage(
-        questionnaireLinkedQueue, managementEvent, outboundUacQueue);
-
-    // THEN
-
-    // Check database Case is still unreceipted and response received not set
-    Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
-    assertThat(actualCase.isReceiptReceived()).isFalse();
-    assertThat(actualCase.isCcsCase()).isTrue();
-
-    // Check database Case is now linked to questionnaire and still unreceipted
-    List<UacQidLink> uacQidLinks = uacQidLinkRepository.findAll();
-    assertThat(uacQidLinks.size()).isEqualTo(1);
-    UacQidLink actualUacQidLink = uacQidLinks.get(0);
-    assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
-    assertThat(actualUacQidLink.isActive()).isTrue();
-    assertThat(actualUacQidLink.getQid()).isEqualTo(expectedQuestionnaireId);
-
-    validateEvents(eventRepository.findAll(), expectedQuestionnaireId);
-  }
-
-  @Test
-  public void testGoodQuestionnaireLinkedAfterNonCCSCaseReceipted() throws Exception {
+  public void testGoodQuestionnaireLinkedAfterCaseReceipted() throws Exception {
     // GIVEN
     BlockingQueue<String> outboundUacQueue = rabbitQueueHelper.listen(rhUacQueue);
     BlockingQueue<String> outboundCaseQueue = rabbitQueueHelper.listen(rhCaseQueue);
@@ -206,7 +153,7 @@ public class QuestionnaireLinkedReceiverIT {
     Case testCase = easyRandom.nextObject(Case.class);
     testCase.setCaseId(TEST_CASE_ID);
     testCase.setReceiptReceived(true);
-    testCase.setCcsCase(false);
+    testCase.setSurvey("CENSUS");
     testCase.setUacQidLinks(null);
     testCase.setEvents(null);
     caseRepository.saveAndFlush(testCase);
@@ -247,7 +194,7 @@ public class QuestionnaireLinkedReceiverIT {
     // Check database that Case is still receipted and has response received set
     Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
     assertThat(actualCase.isReceiptReceived()).isTrue();
-    assertThat(actualCase.isCcsCase()).isFalse();
+    assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
 
     // Check database that Case is now linked to questionnaire and still receipted
     List<UacQidLink> uacQidLinks = uacQidLinkRepository.findAll();
@@ -259,62 +206,7 @@ public class QuestionnaireLinkedReceiverIT {
   }
 
   @Test
-  public void testGoodQuestionnaireLinkedAfterCCSCaseReceipted() throws Exception {
-    // GIVEN
-    BlockingQueue<String> outboundUacQueue = rabbitQueueHelper.listen(rhUacQueue);
-    BlockingQueue<String> outboundCaseQueue = rabbitQueueHelper.listen(rhCaseQueue);
-
-    Case testCase = easyRandom.nextObject(Case.class);
-    testCase.setCaseId(TEST_CASE_ID);
-    testCase.setReceiptReceived(true);
-    testCase.setCcsCase(true);
-    testCase.setUacQidLinks(null);
-    testCase.setEvents(null);
-    caseRepository.saveAndFlush(testCase);
-
-    // Send unaddressed uac message to create uac/qid unaddressed pair
-    CreateUacQid createUacQid = new CreateUacQid();
-    createUacQid.setQuestionnaireType("71");
-    createUacQid.setBatchId(UUID.randomUUID());
-    sendMessageAndExpectInboundMessage(unaddressedQueue, createUacQid, outboundUacQueue);
-
-    // Get generated Questionnaire Id
-    String expectedQuestionnaireId = uacQidLinkRepository.findAll().get(0).getQid();
-
-    ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
-    managementEvent.getEvent().setTransactionId(UUID.randomUUID());
-    UacDTO uac = new UacDTO();
-    uac.setCaseId(TEST_CASE_ID.toString());
-    uac.setQuestionnaireId(expectedQuestionnaireId);
-    managementEvent.getPayload().setUac(uac);
-
-    // WHEN
-
-    // Send questionnaire linked message and wait for uac updated message
-    sendMessageAndDoNotExpectInboundMessage(
-        questionnaireLinkedQueue, managementEvent, outboundUacQueue);
-
-    // THEN
-
-    // Check Case updated message not sent
-    rabbitQueueHelper.checkMessageIsNotReceived(outboundCaseQueue, 5);
-
-    // Check database that Case is still receipted and has response received set
-    Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
-    assertThat(actualCase.isReceiptReceived()).isTrue();
-    assertThat(actualCase.isCcsCase()).isTrue();
-
-    // Check database that Case is now linked to questionnaire and still receipted
-    List<UacQidLink> uacQidLinks = uacQidLinkRepository.findAll();
-    assertThat(uacQidLinks.size()).isEqualTo(1);
-    UacQidLink actualUacQidLink = uacQidLinks.get(0);
-    assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
-
-    validateEvents(eventRepository.findAll(), expectedQuestionnaireId);
-  }
-
-  @Test
-  public void testGoodQuestionnaireLinkedBeforeNonCCSCaseReceipted() throws Exception {
+  public void testGoodQuestionnaireLinkedBeforeCaseReceipted() throws Exception {
     // GIVEN
     BlockingQueue<String> outboundUacQueue = rabbitQueueHelper.listen(rhUacQueue);
     BlockingQueue<String> outboundCaseQueue = rabbitQueueHelper.listen(rhCaseQueue);
@@ -322,7 +214,7 @@ public class QuestionnaireLinkedReceiverIT {
     Case testCase = easyRandom.nextObject(Case.class);
     testCase.setCaseId(TEST_CASE_ID);
     testCase.setReceiptReceived(false);
-    testCase.setCcsCase(false);
+    testCase.setSurvey("CENSUS");
     testCase.setUacQidLinks(null);
     testCase.setEvents(null);
     caseRepository.saveAndFlush(testCase);
@@ -370,7 +262,7 @@ public class QuestionnaireLinkedReceiverIT {
     // Check database that Case is still receipted and has response received set
     Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
     assertThat(actualCase.isReceiptReceived()).isTrue();
-    assertThat(actualCase.isCcsCase()).isFalse();
+    assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
 
     // Check database that Case is now linked to questionnaire and still receipted
     List<UacQidLink> uacQidLinks = uacQidLinkRepository.findAll();
@@ -390,7 +282,7 @@ public class QuestionnaireLinkedReceiverIT {
     Case testCase = easyRandom.nextObject(Case.class);
     testCase.setCaseId(TEST_CASE_ID);
     testCase.setReceiptReceived(false);
-    testCase.setCcsCase(true);
+//    testCase.setCcsCase(true);
     testCase.setUacQidLinks(null);
     testCase.setEvents(null);
     caseRepository.saveAndFlush(testCase);
@@ -429,7 +321,7 @@ public class QuestionnaireLinkedReceiverIT {
     // Check database that Case is still receipted and has response received set
     Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
     assertThat(actualCase.isReceiptReceived()).isTrue();
-    assertThat(actualCase.isCcsCase()).isTrue();
+//    assertThat(actualCase.isCcsCase()).isTrue();
 
     // Check database that Case is now linked to questionnaire and still receipted
     List<UacQidLink> uacQidLinks = uacQidLinkRepository.findAll();
