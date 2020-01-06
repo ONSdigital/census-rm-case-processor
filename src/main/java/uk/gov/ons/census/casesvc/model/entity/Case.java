@@ -86,6 +86,9 @@ public class Case {
 
   @Column private String actionPlanId;
 
+  @Column(nullable = false)
+  private String survey;
+
   @Column(columnDefinition = "timestamp with time zone")
   private OffsetDateTime createdDateTime;
 
@@ -110,7 +113,4 @@ public class Case {
 
   @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
   private boolean undeliveredAsAddressed;
-
-  @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
-  private boolean ccsCase;
 }

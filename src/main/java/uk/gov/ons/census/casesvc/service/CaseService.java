@@ -24,7 +24,8 @@ import uk.gov.ons.census.casesvc.utility.EventHelper;
 
 @Service
 public class CaseService {
-  private static final String SURVEY = "CENSUS";
+  private static final String CENSUS_SURVEY = "CENSUS";
+  private static final String CCS_SURVEY = "CCS";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_CASE_TYPE = "HI";
   public static final String CASE_UPDATE_ROUTING_KEY = "event.case.update";
   private static final String HOUSEHOLD_RESPONSE_ADDRESS_TYPE = "HH";
@@ -72,6 +73,7 @@ public class CaseService {
     caze.setState(CaseState.ACTIONABLE);
     caze.setCreatedDateTime(OffsetDateTime.now());
     caze.setReceiptReceived(false);
+    caze.setSurvey(CENSUS_SURVEY);
     return saveNewCaseAndStampCaseRef(caze);
   }
 
@@ -86,7 +88,7 @@ public class CaseService {
     caze.setCreatedDateTime(OffsetDateTime.now());
     caze.setRefusalReceived(isRefused);
     caze.setAddressInvalid(isInvalidAddress);
-    caze.setCcsCase(true);
+    caze.setSurvey(CCS_SURVEY);
 
     return saveNewCaseAndStampCaseRef(caze);
   }
@@ -170,7 +172,7 @@ public class CaseService {
     collectionCase.setCollectionExerciseId(caze.getCollectionExerciseId());
     collectionCase.setId(caze.getCaseId().toString());
     collectionCase.setState(caze.getState().toString());
-    collectionCase.setSurvey(SURVEY);
+    collectionCase.setSurvey(caze.getSurvey());
     // Stop. No. Don't put anything else here unless it's in the event dictionary. Look down!
 
     // Below this line is extra data potentially needed by Action Scheduler - will be ignored by RH
@@ -222,6 +224,7 @@ public class CaseService {
     individualResponseCase.setMsoa(parentCase.getMsoa());
     individualResponseCase.setLad(parentCase.getLad());
     individualResponseCase.setRegion(parentCase.getRegion());
+    individualResponseCase.setSurvey(parentCase.getSurvey());   // Should only ever be "CENSUS" from the parent case
 
     return saveNewCaseAndStampCaseRef(individualResponseCase);
   }
