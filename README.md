@@ -14,10 +14,10 @@ Case processor listens to a number of queues and acts on the messages by creatin
 i.e. sample load, CCS case, Individual Response. 
 
 When creating or updating a case this application will emit msgs to be consumed by RH, Field & the 
-action-scheduler as appropriate.  Action-scheduler has a subset copy of the case data (CCS cases are excluded)
+action-scheduler as appropriate.  Action-scheduler has a subset copy of the case data (CCS cases are included)
 
-CCS cases are a special cases which are never passed to the action-scheduler or RH.  They are emitted 
-to field if Listed without being supplied with a qid, unaddressed or refusal.
+CCS cases are special cases which are also passed to the action-scheduler and RH.  They are also emitted 
+to field if Listed without being supplied with a QID, unaddressed or refusal.
 
 Case service has a dependency on the census-rm-uac-qid-service, when case processor needs to create a new
 UAC QID pair for a case it calls this service.
