@@ -11,6 +11,8 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
+import java.time.OffsetDateTime;
+
 @Service
 public class CCSPropertyListedService {
   private static final String CCS_ADDRESS_LISTED = "CCS Address Listed";
@@ -34,7 +36,7 @@ public class CCSPropertyListedService {
     this.uacQidLinkRepository = uacQidLinkRepository;
   }
 
-  public void processCCSPropertyListed(ResponseManagementEvent ccsPropertyListedEvent) {
+  public void processCCSPropertyListed(ResponseManagementEvent ccsPropertyListedEvent, OffsetDateTime messageTimestamp) {
     CCSPropertyDTO ccsProperty = ccsPropertyListedEvent.getPayload().getCcsProperty();
     boolean isRefused = ccsProperty.getRefusal() != null;
     boolean isInvalidAddress = ccsProperty.getInvalidAddress() != null;
@@ -62,7 +64,7 @@ public class CCSPropertyListedService {
         CCS_ADDRESS_LISTED,
         EventType.CCS_ADDRESS_LISTED,
         ccsPropertyListedEvent.getEvent(),
-        convertObjectToJson(ccsProperty));
+        convertObjectToJson(ccsProperty), messageTimestamp);
   }
 
   private void sendActiveCCSCaseToField(Case caze) {

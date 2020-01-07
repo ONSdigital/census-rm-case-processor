@@ -29,6 +29,7 @@ public class EventLoggerTest {
   public void testLogCaseEvent() {
     Case caze = new Case();
     OffsetDateTime eventTime = OffsetDateTime.now();
+    OffsetDateTime messageTime = OffsetDateTime.now().minusSeconds(30);
     EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_CREATED);
     eventDTO.setSource("Test source");
     eventDTO.setChannel("Test channel");
@@ -39,7 +40,8 @@ public class EventLoggerTest {
         "Test description",
         EventType.UAC_UPDATED,
         eventDTO,
-        "{\"test\":\"json\"}");
+        "{\"test\":\"json\"}",
+            messageTime);
 
     ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
     verify(eventRepository).save(eventArgumentCaptor.capture());
@@ -53,12 +55,14 @@ public class EventLoggerTest {
     assertThat("Test description").isEqualTo(actualEvent.getEventDescription());
     assertThat("{\"test\":\"json\"}").isEqualTo(actualEvent.getEventPayload());
     assertThat(eventDTO.getTransactionId()).isEqualTo(actualEvent.getEventTransactionId());
+    assertThat(messageTime).isEqualTo(actualEvent.getMessageTimestamp());
   }
 
   @Test
   public void testLogUacQidEvent() {
     UacQidLink uacQidLink = new UacQidLink();
     OffsetDateTime eventTime = OffsetDateTime.now();
+    OffsetDateTime messageTime = OffsetDateTime.now().minusSeconds(30);
     EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_CREATED);
     eventDTO.setSource("Test source");
     eventDTO.setChannel("Test channel");
@@ -69,7 +73,8 @@ public class EventLoggerTest {
         "Test description",
         EventType.UAC_UPDATED,
         eventDTO,
-        "{\"test\":\"json\"}");
+        "{\"test\":\"json\"}",
+            messageTime);
 
     ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
     verify(eventRepository).save(eventArgumentCaptor.capture());
@@ -83,5 +88,6 @@ public class EventLoggerTest {
     assertThat("Test description").isEqualTo(actualEvent.getEventDescription());
     assertThat("{\"test\":\"json\"}").isEqualTo(actualEvent.getEventPayload());
     assertThat(eventDTO.getTransactionId()).isEqualTo(actualEvent.getEventTransactionId());
+    assertThat(messageTime).isEqualTo(actualEvent.getMessageTimestamp());
   }
 }
