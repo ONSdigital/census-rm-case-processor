@@ -89,6 +89,7 @@ public class CCSPropertyListedServiceTest {
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setId(TEST_UAC_QID_LINK_ID);
     uacQidLink.setQid(TEST_QID);
+    uacQidLink.setCcsCase(true);
     when(uacService.findByQid(TEST_QID)).thenReturn(uacQidLink);
 
     Case expectedCase =
