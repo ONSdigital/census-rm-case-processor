@@ -162,16 +162,15 @@ public class ReceiptServiceTest {
     assertThat(actualUacQidLink.getUac()).isEqualTo(expectedUacQidLink.getUac());
 
     verify(eventLogger)
-            .logUacQidEvent(
-                    eq(expectedUacQidLink),
-                    any(OffsetDateTime.class),
-                    eq(QID_RECEIPTED),
-                    eq(EventType.RESPONSE_RECEIVED),
-                    eq(managementEvent.getEvent()),
-                    anyString());
+        .logUacQidEvent(
+            eq(expectedUacQidLink),
+            any(OffsetDateTime.class),
+            eq(QID_RECEIPTED),
+            eq(EventType.RESPONSE_RECEIVED),
+            eq(managementEvent.getEvent()),
+            anyString());
     verifyNoMoreInteractions(eventLogger);
 
     verifyZeroInteractions(caseService);
   }
-
 }

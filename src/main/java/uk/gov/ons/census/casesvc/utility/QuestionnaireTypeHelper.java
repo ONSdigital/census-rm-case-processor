@@ -43,6 +43,9 @@ public class QuestionnaireTypeHelper {
               CCS_INTERVIEWER_CE_MANAGER_FOR_WALES_WELSH));
 
   private static final String HOLDER11 = "11";
+  private static final String HOLDER12 = "12";
+  private static final String HOLDER13 = "13";
+  private static final String HOLDER14 = "14";
   private static final Set<String> continutationQuestionnaireTypes =
       new HashSet<>(
           Arrays.asList(

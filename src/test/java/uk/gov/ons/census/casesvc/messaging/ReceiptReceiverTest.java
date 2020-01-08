@@ -19,7 +19,4 @@ public class ReceiptReceiverTest {
 
     verify(receiptService, times(1)).processReceipt(managementEvent);
   }
-
-
-
 }
