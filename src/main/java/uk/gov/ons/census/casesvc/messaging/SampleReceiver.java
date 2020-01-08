@@ -2,9 +2,14 @@ package uk.gov.ons.census.casesvc.messaging;
 
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
+import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
 import uk.gov.ons.census.casesvc.service.EventService;
+
+import java.time.OffsetDateTime;
+
+import static uk.gov.ons.census.casesvc.utility.MsgDateHelper.getMsgTimeStamp;
 
 @MessageEndpoint
 public class SampleReceiver {
@@ -17,7 +22,9 @@ public class SampleReceiver {
 
   @Transactional
   @ServiceActivator(inputChannel = "caseSampleInputChannel")
-  public void receiveMessage(CreateCaseSample createCaseSample) {
-    eventService.processSampleReceivedMessage(createCaseSample);
+  public void receiveMessage(Message<CreateCaseSample> message) {
+    CreateCaseSample createCaseSample = message.getPayload();
+    OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
+    eventService.processSampleReceivedMessage(createCaseSample, messageTimestamp);
   }
 }

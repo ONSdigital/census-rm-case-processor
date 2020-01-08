@@ -47,8 +47,10 @@ public class EventServiceTest {
     when(uacService.saveAndEmitUacUpdatedEvent(any(UacQidLink.class))).thenReturn(new PayloadDTO());
     when(caseService.saveAndEmitCaseCreatedEvent(any(Case.class))).thenReturn(new PayloadDTO());
 
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+
     // When
-    underTest.processSampleReceivedMessage(createCaseSample);
+    underTest.processSampleReceivedMessage(createCaseSample, messageTimestamp);
 
     // Then
     verify(caseService).saveCaseSample(createCaseSample);
@@ -63,7 +65,7 @@ public class EventServiceTest {
             eq(CREATE_CASE_SAMPLE_RECEIVED),
             eq(EventType.SAMPLE_LOADED),
             any(EventDTO.class),
-            eq(convertObjectToJson(createCaseSample)));
+            eq(convertObjectToJson(createCaseSample)), eq(messageTimestamp));
   }
 
   @Test
@@ -80,8 +82,10 @@ public class EventServiceTest {
     when(uacService.saveAndEmitUacUpdatedEvent(any(UacQidLink.class))).thenReturn(new PayloadDTO());
     when(caseService.saveAndEmitCaseCreatedEvent(any(Case.class))).thenReturn(new PayloadDTO());
 
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+
     // When
-    underTest.processSampleReceivedMessage(createCaseSample);
+    underTest.processSampleReceivedMessage(createCaseSample, messageTimestamp);
 
     // Then
     verify(caseService).saveCaseSample(createCaseSample);
@@ -96,7 +100,7 @@ public class EventServiceTest {
             eq(CREATE_CASE_SAMPLE_RECEIVED),
             eq(EventType.SAMPLE_LOADED),
             any(EventDTO.class),
-            eq(convertObjectToJson(createCaseSample)));
+            eq(convertObjectToJson(createCaseSample)), eq(messageTimestamp));
   }
 
   @Test

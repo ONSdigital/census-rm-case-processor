@@ -8,10 +8,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.ons.census.casesvc.testutil.MessageConstructor.constructMessageWithValidTimeStamp;
 
 import java.time.OffsetDateTime;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.messaging.Message;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.FulfilmentInformation;
@@ -22,6 +24,7 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.service.CaseService;
 import uk.gov.ons.census.casesvc.service.UacService;
+import uk.gov.ons.census.casesvc.utility.MsgDateHelper;
 
 public class UndeliveredMailReceiverTest {
 
@@ -42,11 +45,14 @@ public class UndeliveredMailReceiverTest {
     UndeliveredMailReceiver underTest =
         new UndeliveredMailReceiver(uacService, caseService, eventLogger);
 
+    Message<ResponseManagementEvent> message = constructMessageWithValidTimeStamp(event);
+    OffsetDateTime expectedDate = MsgDateHelper.getMsgTimeStamp(message);
+
     // Given
     when(caseService.getCaseByCaseRef(eq(123))).thenReturn(caze);
 
     // When
-    underTest.receiveMessage(event);
+    underTest.receiveMessage(message);
 
     // Then
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
@@ -62,9 +68,9 @@ public class UndeliveredMailReceiverTest {
             eq("Undelivered mail reported"),
             eq(EventType.UNDELIVERED_MAIL_REPORTED),
             eq(event.getEvent()),
-            eq("{\"caseRef\":\"123\"}"));
+            eq("{\"caseRef\":\"123\"}"), eq(expectedDate));
 
-    verify(eventLogger, never()).logUacQidEvent(any(), any(), any(), any(), any(), any());
+    verify(eventLogger, never()).logUacQidEvent(any(), any(), any(), any(), any(), any(), any());
     verify(uacService, never()).findByQid(any());
   }
 
@@ -86,12 +92,14 @@ public class UndeliveredMailReceiverTest {
     EventLogger eventLogger = mock(EventLogger.class);
     UndeliveredMailReceiver underTest =
         new UndeliveredMailReceiver(uacService, caseService, eventLogger);
+    Message<ResponseManagementEvent> message = constructMessageWithValidTimeStamp(event);
+    OffsetDateTime expectedDate = MsgDateHelper.getMsgTimeStamp(message);
 
     // Given
     when(uacService.findByQid(eq("76543"))).thenReturn(uacQidLink);
 
     // When
-    underTest.receiveMessage(event);
+    underTest.receiveMessage(message);
 
     // Then
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
@@ -107,9 +115,9 @@ public class UndeliveredMailReceiverTest {
             eq("Undelivered mail reported"),
             eq(EventType.UNDELIVERED_MAIL_REPORTED),
             eq(event.getEvent()),
-            eq("{\"questionnaireId\":\"76543\"}"));
+            eq("{\"questionnaireId\":\"76543\"}"), eq(expectedDate));
 
-    verify(eventLogger, never()).logCaseEvent(any(), any(), any(), any(), any(), any());
+    verify(eventLogger, never()).logCaseEvent(any(), any(), any(), any(), any(), any(), any());
     verify(caseService, never()).getCaseByCaseRef(anyInt());
   }
 }

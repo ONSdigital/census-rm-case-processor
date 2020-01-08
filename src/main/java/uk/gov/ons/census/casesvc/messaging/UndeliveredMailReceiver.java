@@ -1,9 +1,11 @@
 package uk.gov.ons.census.casesvc.messaging;
 
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+import static uk.gov.ons.census.casesvc.utility.MsgDateHelper.getMsgTimeStamp;
 
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
+import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
@@ -13,6 +15,8 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.service.CaseService;
 import uk.gov.ons.census.casesvc.service.UacService;
+
+import java.time.OffsetDateTime;
 
 @MessageEndpoint
 public class UndeliveredMailReceiver {
@@ -30,7 +34,9 @@ public class UndeliveredMailReceiver {
 
   @Transactional
   @ServiceActivator(inputChannel = "undeliveredMailInputChannel")
-  public void receiveMessage(ResponseManagementEvent event) {
+  public void receiveMessage(Message<ResponseManagementEvent> message) {
+    ResponseManagementEvent event = message.getPayload();
+    OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
     String questionnaireId = event.getPayload().getFulfilmentInformation().getQuestionnaireId();
 
     Case caze;
@@ -55,7 +61,7 @@ public class UndeliveredMailReceiver {
           LOG_EVENT_DESCRIPTION,
           EventType.UNDELIVERED_MAIL_REPORTED,
           event.getEvent(),
-          convertObjectToJson(event.getPayload().getFulfilmentInformation()));
+          convertObjectToJson(event.getPayload().getFulfilmentInformation()), messageTimestamp);
     } else {
       eventLogger.logCaseEvent(
           caze,
@@ -63,7 +69,7 @@ public class UndeliveredMailReceiver {
           LOG_EVENT_DESCRIPTION,
           EventType.UNDELIVERED_MAIL_REPORTED,
           event.getEvent(),
-          convertObjectToJson(event.getPayload().getFulfilmentInformation()));
+          convertObjectToJson(event.getPayload().getFulfilmentInformation()), messageTimestamp);
     }
   }
 }

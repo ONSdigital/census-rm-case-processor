@@ -40,11 +40,13 @@ public class RefusalServiceTest {
     collectionCase.setRefusalReceived(false);
     Case testCase = getRandomCase();
     testCase.setCcsCase(false);
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+
 
     when(caseService.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);
 
     // WHEN
-    underTest.processRefusal(managementEvent);
+    underTest.processRefusal(managementEvent, messageTimestamp);
 
     // THEN
 
@@ -66,7 +68,7 @@ public class RefusalServiceTest {
             eq(REFUSAL_RECEIVED),
             eq(EventType.REFUSAL_RECEIVED),
             eq(managementEvent.getEvent()),
-            anyString());
+            anyString(), eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
   }
 
@@ -79,11 +81,13 @@ public class RefusalServiceTest {
     collectionCase.setRefusalReceived(false);
     Case testCase = getRandomCase();
     testCase.setCcsCase(true);
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+
 
     when(caseService.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);
 
     // WHEN
-    underTest.processRefusal(managementEvent);
+    underTest.processRefusal(managementEvent, messageTimestamp);
 
     // THEN
     InOrder inOrder = inOrder(caseService, eventLogger);
@@ -104,7 +108,7 @@ public class RefusalServiceTest {
             eq(REFUSAL_RECEIVED),
             eq(EventType.REFUSAL_RECEIVED),
             eq(managementEvent.getEvent()),
-            anyString());
+            anyString(), eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
   }
 }

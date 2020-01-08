@@ -29,7 +29,7 @@ public class EventService {
     this.eventLogger = eventLogger;
   }
 
-  public void processSampleReceivedMessage(CreateCaseSample createCaseSample) {
+  public void processSampleReceivedMessage(CreateCaseSample createCaseSample, OffsetDateTime messageTimestamp) {
     Case caze = caseService.saveCaseSample(createCaseSample);
     int questionnaireType =
         QuestionnaireTypeHelper.calculateQuestionnaireType(caze.getTreatmentCode());
@@ -43,7 +43,7 @@ public class EventService {
         CREATE_CASE_SAMPLE_RECEIVED,
         EventType.SAMPLE_LOADED,
         createEventDTO(EventTypeDTO.SAMPLE_LOADED),
-        convertObjectToJson(createCaseSample));
+        convertObjectToJson(createCaseSample), messageTimestamp);
 
     if (QuestionnaireTypeHelper.isQuestionnaireWelsh(caze.getTreatmentCode())) {
       uacQidLink = uacService.buildUacQidLink(caze, 3);

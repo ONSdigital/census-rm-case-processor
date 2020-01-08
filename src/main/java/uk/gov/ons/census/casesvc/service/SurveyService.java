@@ -10,6 +10,8 @@ import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
+import java.time.OffsetDateTime;
+
 @Component
 public class SurveyService {
   private final UacService uacService;
@@ -20,9 +22,9 @@ public class SurveyService {
     this.eventLogger = eventLogger;
   }
 
-  public void processMessage(ResponseManagementEvent surveyEvent) {
+  public void processMessage(ResponseManagementEvent surveyEvent, OffsetDateTime messageTimestamp) {
 
-    if (!processEvent(surveyEvent)) {
+    if (!processEvent(surveyEvent, messageTimestamp)) {
       return;
     }
 
@@ -35,10 +37,10 @@ public class SurveyService {
         "Survey launched",
         EventType.SURVEY_LAUNCHED,
         surveyEvent.getEvent(),
-        convertObjectToJson(surveyEvent.getPayload().getResponse()));
+        convertObjectToJson(surveyEvent.getPayload().getResponse()), messageTimestamp);
   }
 
-  private boolean processEvent(ResponseManagementEvent surveyEvent) {
+  private boolean processEvent(ResponseManagementEvent surveyEvent, OffsetDateTime messageTimestamp) {
     String logEventDescription;
     EventType logEventType;
     ResponseDTO logEventPayload;
@@ -69,7 +71,7 @@ public class SurveyService {
         logEventDescription,
         logEventType,
         surveyEvent.getEvent(),
-        convertObjectToJson(logEventPayload));
+        convertObjectToJson(logEventPayload), messageTimestamp);
 
     return false;
   }
