@@ -68,7 +68,8 @@ public class UndeliveredMailReceiverTest {
             eq("Undelivered mail reported"),
             eq(EventType.UNDELIVERED_MAIL_REPORTED),
             eq(event.getEvent()),
-            eq("{\"caseRef\":\"123\"}"), eq(expectedDate));
+            eq("{\"caseRef\":\"123\"}"),
+            eq(expectedDate));
 
     verify(eventLogger, never()).logUacQidEvent(any(), any(), any(), any(), any(), any(), any());
     verify(uacService, never()).findByQid(any());
@@ -115,7 +116,8 @@ public class UndeliveredMailReceiverTest {
             eq("Undelivered mail reported"),
             eq(EventType.UNDELIVERED_MAIL_REPORTED),
             eq(event.getEvent()),
-            eq("{\"questionnaireId\":\"76543\"}"), eq(expectedDate));
+            eq("{\"questionnaireId\":\"76543\"}"),
+            eq(expectedDate));
 
     verify(eventLogger, never()).logCaseEvent(any(), any(), any(), any(), any(), any(), any());
     verify(caseService, never()).getCaseByCaseRef(anyInt());

@@ -65,7 +65,8 @@ public class EventServiceTest {
             eq(CREATE_CASE_SAMPLE_RECEIVED),
             eq(EventType.SAMPLE_LOADED),
             any(EventDTO.class),
-            eq(convertObjectToJson(createCaseSample)), eq(messageTimestamp));
+            eq(convertObjectToJson(createCaseSample)),
+            eq(messageTimestamp));
   }
 
   @Test
@@ -100,7 +101,8 @@ public class EventServiceTest {
             eq(CREATE_CASE_SAMPLE_RECEIVED),
             eq(EventType.SAMPLE_LOADED),
             any(EventDTO.class),
-            eq(convertObjectToJson(createCaseSample)), eq(messageTimestamp));
+            eq(convertObjectToJson(createCaseSample)),
+            eq(messageTimestamp));
   }
 
   @Test
@@ -123,7 +125,6 @@ public class EventServiceTest {
     responseManagementEvent.setEvent(event);
 
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
-
 
     PrintCaseSelected printCaseSelected = new PrintCaseSelected();
     printCaseSelected.setActionRuleId("Test actionRuleId");
@@ -148,7 +149,7 @@ public class EventServiceTest {
             eq(
                 "{\"printCaseSelected\":{\"caseRef\":123,\"packCode\":\"Test packCode\","
                     + "\"actionRuleId\":\"Test actionRuleId\",\"batchId\":\"Test batchId\"}}"),
-                eq(messageTimestamp));
+            eq(messageTimestamp));
   }
 
   @Test
@@ -191,6 +192,6 @@ public class EventServiceTest {
             eq(EventType.FIELD_CASE_SELECTED),
             eq(event),
             eq("{\"fieldCaseSelected\":{\"caseRef\":123,\"actionRuleId\":\"Test actionRuleId\"}}"),
-                eq(messageTimestamp));
+            eq(messageTimestamp));
   }
 }

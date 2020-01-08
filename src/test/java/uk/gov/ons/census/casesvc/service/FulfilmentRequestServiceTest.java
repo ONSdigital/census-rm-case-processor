@@ -67,7 +67,7 @@ public class FulfilmentRequestServiceTest {
             eq(FULFILMENT_REQUESTED),
             eq(managementEvent.getEvent()),
             anyString(),
-                eq(messageTimestamp));
+            eq(messageTimestamp));
   }
 
   @Test
@@ -130,7 +130,6 @@ public class FulfilmentRequestServiceTest {
 
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
-
     when(caseService.getCaseByCaseId(UUID.fromString(expectedFulfilmentRequest.getCaseId())))
         .thenReturn(parentCase);
 
@@ -156,7 +155,7 @@ public class FulfilmentRequestServiceTest {
             eq(FULFILMENT_REQUESTED),
             eq(managementEvent.getEvent()),
             anyString(),
-                eq(messageTimestamp));
+            eq(messageTimestamp));
 
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
     ArgumentCaptor<FulfilmentRequestDTO> fulfilmentRequestArgumentCaptor =
@@ -189,7 +188,6 @@ public class FulfilmentRequestServiceTest {
     expectedFulfilmentRequest.setIndividualCaseId(UUID.randomUUID().toString());
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
-
     when(caseService.getCaseByCaseId(UUID.fromString(expectedFulfilmentRequest.getCaseId())))
         .thenReturn(parentCase);
 
@@ -215,7 +213,7 @@ public class FulfilmentRequestServiceTest {
             eq(FULFILMENT_REQUESTED),
             eq(managementEvent.getEvent()),
             anyString(),
-                eq(messageTimestamp));
+            eq(messageTimestamp));
 
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
     verify(caseService).emitCaseCreatedEvent(caseArgumentCaptor.capture());

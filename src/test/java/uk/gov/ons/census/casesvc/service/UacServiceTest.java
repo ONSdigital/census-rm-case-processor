@@ -184,7 +184,6 @@ public class UacServiceTest {
         .thenReturn(linkedCase);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
-
     // When
     underTest.ingestUacCreatedEvent(uacCreatedEvent, messageTimestamp);
 
@@ -196,7 +195,8 @@ public class UacServiceTest {
             eq("RM UAC QID pair created"),
             eq(EventType.RM_UAC_CREATED),
             eq(uacCreatedEvent.getEvent()),
-            anyString(), eq(messageTimestamp));
+            anyString(),
+            eq(messageTimestamp));
   }
 
   @Test

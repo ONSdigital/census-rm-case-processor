@@ -7,14 +7,13 @@ import static org.mockito.Mockito.verify;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementCCSAddressListedEvent;
 import static uk.gov.ons.census.casesvc.testutil.MessageConstructor.constructMessageWithValidTimeStamp;
 
+import java.time.OffsetDateTime;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.messaging.Message;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.service.CCSPropertyListedService;
 import uk.gov.ons.census.casesvc.utility.MsgDateHelper;
-
-import java.time.OffsetDateTime;
 
 public class CCSPropertyListedReceiverTest {
 
@@ -36,7 +35,8 @@ public class CCSPropertyListedReceiverTest {
 
     ArgumentCaptor<ResponseManagementEvent> eventArgumentCaptor =
         ArgumentCaptor.forClass(ResponseManagementEvent.class);
-    verify(ccsPropertyListedService).processCCSPropertyListed(eventArgumentCaptor.capture(), eq(messageTimestamp));
+    verify(ccsPropertyListedService)
+        .processCCSPropertyListed(eventArgumentCaptor.capture(), eq(messageTimestamp));
 
     String actualCaseId =
         eventArgumentCaptor.getValue().getPayload().getCcsProperty().getCollectionCase().getId();

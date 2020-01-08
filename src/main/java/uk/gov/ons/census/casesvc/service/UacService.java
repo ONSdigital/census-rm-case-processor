@@ -116,7 +116,8 @@ public class UacService {
     return payloadDTO;
   }
 
-  public void ingestUacCreatedEvent(ResponseManagementEvent uacCreatedEvent, OffsetDateTime messageTimestamp ) {
+  public void ingestUacCreatedEvent(
+      ResponseManagementEvent uacCreatedEvent, OffsetDateTime messageTimestamp) {
     Case linkedCase =
         caseService.getCaseByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId());
 
@@ -135,7 +136,8 @@ public class UacService {
         "RM UAC QID pair created",
         EventType.RM_UAC_CREATED,
         uacCreatedEvent.getEvent(),
-        convertObjectToJson(uacCreatedEvent.getPayload()), messageTimestamp);
+        convertObjectToJson(uacCreatedEvent.getPayload()),
+        messageTimestamp);
   }
 
   public UacQidLink findByQid(String questionnaireId) {

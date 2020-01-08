@@ -14,7 +14,6 @@ import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManage
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -66,7 +65,6 @@ public class QuestionnaireLinkedServiceTest {
     testUacQidLink.setCaze(null);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
-
     when(uacService.findByQid(TEST_HH_QID)).thenReturn(testUacQidLink);
     when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testCase);
 
@@ -89,13 +87,14 @@ public class QuestionnaireLinkedServiceTest {
     verifyNoMoreInteractions(uacService);
 
     verify(eventLogger)
-            .logUacQidEvent(
-                    eq(testUacQidLink),
-                    any(OffsetDateTime.class),
-                    eq("Questionnaire Linked"),
-                    eq(EventType.QUESTIONNAIRE_LINKED),
-                    eq(managementEvent.getEvent()),
-                    anyString(), eq(messageTimestamp));
+        .logUacQidEvent(
+            eq(testUacQidLink),
+            any(OffsetDateTime.class),
+            eq("Questionnaire Linked"),
+            eq(EventType.QUESTIONNAIRE_LINKED),
+            eq(managementEvent.getEvent()),
+            anyString(),
+            eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
   }
 
@@ -117,7 +116,6 @@ public class QuestionnaireLinkedServiceTest {
     testUacQidLink.setQid(TEST_CCS_QID_ID);
     testUacQidLink.setCaze(null);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
-
 
     when(uacService.findByQid(TEST_HH_QID)).thenReturn(testUacQidLink);
     when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testCase);
@@ -141,14 +139,15 @@ public class QuestionnaireLinkedServiceTest {
     verifyNoMoreInteractions(uacService);
 
     inOrder
-            .verify(eventLogger)
-            .logUacQidEvent(
-                    eq(testUacQidLink),
-                    any(OffsetDateTime.class),
-                    eq("Questionnaire Linked"),
-                    eq(EventType.QUESTIONNAIRE_LINKED),
-                    eq(managementEvent.getEvent()),
-                    anyString(), eq(messageTimestamp));
+        .verify(eventLogger)
+        .logUacQidEvent(
+            eq(testUacQidLink),
+            any(OffsetDateTime.class),
+            eq("Questionnaire Linked"),
+            eq(EventType.QUESTIONNAIRE_LINKED),
+            eq(managementEvent.getEvent()),
+            anyString(),
+            eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
   }
 
@@ -171,7 +170,6 @@ public class QuestionnaireLinkedServiceTest {
     testUacQidLink.setActive(false);
     testUacQidLink.setCaze(null);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
-
 
     when(uacService.findByQid(TEST_HH_QID)).thenReturn(testUacQidLink);
     when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testCase);
@@ -200,14 +198,14 @@ public class QuestionnaireLinkedServiceTest {
     verifyNoMoreInteractions(uacService);
 
     verify(eventLogger)
-            .logUacQidEvent(
-                    eq(testUacQidLink),
-                    any(OffsetDateTime.class),
-                    eq("Questionnaire Linked"),
-                    eq(EventType.QUESTIONNAIRE_LINKED),
-                    eq(managementEvent.getEvent()),
-                    anyString(),
-                    eq(messageTimestamp));
+        .logUacQidEvent(
+            eq(testUacQidLink),
+            any(OffsetDateTime.class),
+            eq("Questionnaire Linked"),
+            eq(EventType.QUESTIONNAIRE_LINKED),
+            eq(managementEvent.getEvent()),
+            anyString(),
+            eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
   }
 
@@ -230,7 +228,6 @@ public class QuestionnaireLinkedServiceTest {
     testUacQidLink.setActive(false);
     testUacQidLink.setCaze(null);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
-
 
     when(uacService.findByQid(TEST_HH_QID)).thenReturn(testUacQidLink);
     when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testCase);
@@ -259,13 +256,14 @@ public class QuestionnaireLinkedServiceTest {
     verifyNoMoreInteractions(uacService);
 
     verify(eventLogger)
-            .logUacQidEvent(
-                    eq(testUacQidLink),
-                    any(OffsetDateTime.class),
-                    eq("Questionnaire Linked"),
-                    eq(EventType.QUESTIONNAIRE_LINKED),
-                    eq(managementEvent.getEvent()),
-                    anyString(), eq(messageTimestamp));
+        .logUacQidEvent(
+            eq(testUacQidLink),
+            any(OffsetDateTime.class),
+            eq("Questionnaire Linked"),
+            eq(EventType.QUESTIONNAIRE_LINKED),
+            eq(managementEvent.getEvent()),
+            anyString(),
+            eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
   }
 
@@ -294,11 +292,10 @@ public class QuestionnaireLinkedServiceTest {
     testHIUacQidLink.setCaze(null);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
-
     when(uacService.findByQid(TEST_HI_QID)).thenReturn(testHIUacQidLink);
     when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testHHCase);
     when(caseService.prepareIndividualResponseCaseFromParentCase(testHHCase))
-            .thenReturn(testHICase);
+        .thenReturn(testHICase);
 
     // WHEN
     underTest.processQuestionnaireLinked(managementEvent, messageTimestamp);
@@ -324,13 +321,14 @@ public class QuestionnaireLinkedServiceTest {
     verifyNoMoreInteractions(uacService);
 
     verify(eventLogger)
-            .logUacQidEvent(
-                    eq(testHIUacQidLink),
-                    any(OffsetDateTime.class),
-                    eq("Questionnaire Linked"),
-                    eq(EventType.QUESTIONNAIRE_LINKED),
-                    eq(managementEvent.getEvent()),
-                    anyString(), eq(messageTimestamp));
+        .logUacQidEvent(
+            eq(testHIUacQidLink),
+            any(OffsetDateTime.class),
+            eq("Questionnaire Linked"),
+            eq(EventType.QUESTIONNAIRE_LINKED),
+            eq(managementEvent.getEvent()),
+            anyString(),
+            eq(messageTimestamp));
 
     verifyNoMoreInteractions(eventLogger);
   }
@@ -351,14 +349,13 @@ public class QuestionnaireLinkedServiceTest {
 
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
-
     when(uacService.findByQid(TEST_HI_QID)).thenReturn(uacQidLink);
 
     try {
       underTest.processQuestionnaireLinked(managementEvent, messageTimestamp);
     } catch (RuntimeException rte) {
       assertThat(rte.getMessage())
-              .isEqualTo("UacQidLink already linked to case id: " + caze.getCaseId());
+          .isEqualTo("UacQidLink already linked to case id: " + caze.getCaseId());
       throw rte;
     }
   }
@@ -386,11 +383,10 @@ public class QuestionnaireLinkedServiceTest {
     testHIUacQidLink.setCaze(testHHCase);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
-
     when(uacService.findByQid(TEST_HI_QID)).thenReturn(testHIUacQidLink);
     when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testHHCase);
     when(caseService.prepareIndividualResponseCaseFromParentCase(testHHCase))
-            .thenReturn(testHICase);
+        .thenReturn(testHICase);
 
     // WHEN
     underTest.processQuestionnaireLinked(managementEvent, messageTimestamp);
@@ -410,14 +406,14 @@ public class QuestionnaireLinkedServiceTest {
     assertThat(actualUacQidLink.isActive()).isTrue();
 
     verify(eventLogger)
-            .logUacQidEvent(
-                    eq(testHIUacQidLink),
-                    any(OffsetDateTime.class),
-                    eq("Questionnaire Linked"),
-                    eq(EventType.QUESTIONNAIRE_LINKED),
-                    eq(managementEvent.getEvent()),
-                    anyString(),
-                    eq(messageTimestamp));
+        .logUacQidEvent(
+            eq(testHIUacQidLink),
+            any(OffsetDateTime.class),
+            eq("Questionnaire Linked"),
+            eq(EventType.QUESTIONNAIRE_LINKED),
+            eq(managementEvent.getEvent()),
+            anyString(),
+            eq(messageTimestamp));
 
     verifyNoMoreInteractions(caseService);
     verifyNoMoreInteractions(uacService);

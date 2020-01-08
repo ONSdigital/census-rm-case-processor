@@ -200,7 +200,10 @@ public class CCSPropertyListedServiceTest {
   }
 
   private void checkCorrectEventLogging(
-      InOrder inOrder, Case expectedCase, ResponseManagementEvent managementEvent, OffsetDateTime messageTimestamp) {
+      InOrder inOrder,
+      Case expectedCase,
+      ResponseManagementEvent managementEvent,
+      OffsetDateTime messageTimestamp) {
     ArgumentCaptor<String> ccsPayload = ArgumentCaptor.forClass(String.class);
 
     inOrder
@@ -212,7 +215,7 @@ public class CCSPropertyListedServiceTest {
             eq(EventType.CCS_ADDRESS_LISTED),
             eq(managementEvent.getEvent()),
             ccsPayload.capture(),
-                eq(messageTimestamp));
+            eq(messageTimestamp));
 
     String actualLoggedPayload = ccsPayload.getValue();
     assertThat(actualLoggedPayload)

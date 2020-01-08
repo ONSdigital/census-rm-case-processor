@@ -43,6 +43,7 @@ public class UnaddressedReceiver {
         "Unaddressed UAC/QID pair created",
         EventType.UAC_UPDATED,
         createEventDTO(EventTypeDTO.UAC_UPDATED),
-        convertObjectToJson(uacPayloadDTO), messageTimestamp);
+        convertObjectToJson(uacPayloadDTO),
+        messageTimestamp);
   }
 }

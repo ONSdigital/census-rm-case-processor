@@ -22,7 +22,8 @@ public class RefusalService {
     this.eventLogger = eventLogger;
   }
 
-  public void processRefusal(ResponseManagementEvent refusalEvent, OffsetDateTime messageTimestamp) {
+  public void processRefusal(
+      ResponseManagementEvent refusalEvent, OffsetDateTime messageTimestamp) {
     RefusalDTO refusal = refusalEvent.getPayload().getRefusal();
     Case caze = caseService.getCaseByCaseId(UUID.fromString(refusal.getCollectionCase().getId()));
     caze.setRefusalReceived(true);
@@ -39,6 +40,7 @@ public class RefusalService {
         REFUSAL_RECEIVED,
         EventType.REFUSAL_RECEIVED,
         refusalEvent.getEvent(),
-        convertObjectToJson(refusalEvent.getPayload().getRefusal()), messageTimestamp);
+        convertObjectToJson(refusalEvent.getPayload().getRefusal()),
+        messageTimestamp);
   }
 }

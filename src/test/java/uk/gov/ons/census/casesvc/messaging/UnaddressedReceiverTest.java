@@ -17,7 +17,6 @@ import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.CreateUacQid;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
-import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.service.UacService;
@@ -55,6 +54,7 @@ public class UnaddressedReceiverTest {
             eq("Unaddressed UAC/QID pair created"),
             any(EventType.class),
             any(EventDTO.class),
-            anyString(), eq(expectedDate));
+            anyString(),
+            eq(expectedDate));
   }
 }

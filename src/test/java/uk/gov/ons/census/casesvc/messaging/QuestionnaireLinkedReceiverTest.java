@@ -32,7 +32,8 @@ public class QuestionnaireLinkedReceiverTest {
 
     ArgumentCaptor<ResponseManagementEvent> eventArgumentCaptor =
         ArgumentCaptor.forClass(ResponseManagementEvent.class);
-    verify(questionnaireLinkedService).processQuestionnaireLinked(eventArgumentCaptor.capture(), eq(expectedDate));
+    verify(questionnaireLinkedService)
+        .processQuestionnaireLinked(eventArgumentCaptor.capture(), eq(expectedDate));
 
     OffsetDateTime actualEventDateTime = eventArgumentCaptor.getValue().getEvent().getDateTime();
     assertThat(actualEventDateTime).isEqualTo(expectedEventDateTime);

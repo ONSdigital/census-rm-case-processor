@@ -29,7 +29,8 @@ public class QuestionnaireLinkedService {
     this.eventLogger = eventLogger;
   }
 
-  public void processQuestionnaireLinked(ResponseManagementEvent questionnaireLinkedEvent, OffsetDateTime messageTimestamp) {
+  public void processQuestionnaireLinked(
+      ResponseManagementEvent questionnaireLinkedEvent, OffsetDateTime messageTimestamp) {
     UacDTO uac = questionnaireLinkedEvent.getPayload().getUac();
     String questionnaireId = uac.getQuestionnaireId();
     UacQidLink uacQidLink = uacService.findByQid(questionnaireId);
@@ -72,7 +73,8 @@ public class QuestionnaireLinkedService {
         QUESTIONNAIRE_LINKED,
         EventType.QUESTIONNAIRE_LINKED,
         questionnaireLinkedEvent.getEvent(),
-        convertObjectToJson(uac), messageTimestamp);
+        convertObjectToJson(uac),
+        messageTimestamp);
   }
 
   private void checkQidNotLinkedToAnotherCase(UacDTO uac, UacQidLink uacQidLink) {

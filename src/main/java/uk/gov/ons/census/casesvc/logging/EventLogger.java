@@ -27,7 +27,8 @@ public class EventLogger {
       EventDTO event,
       String eventPayload,
       OffsetDateTime messageTimestamp) {
-    Event loggedEvent = buildEvent(eventDate, eventDescription, eventType, event, eventPayload, messageTimestamp);
+    Event loggedEvent =
+        buildEvent(eventDate, eventDescription, eventType, event, eventPayload, messageTimestamp);
     loggedEvent.setCaze(caze);
 
     eventRepository.save(loggedEvent);
@@ -41,7 +42,8 @@ public class EventLogger {
       EventDTO event,
       String eventPayload,
       OffsetDateTime messageTimestamp) {
-    Event loggedEvent = buildEvent(eventDate, eventDescription, eventType, event, eventPayload, messageTimestamp);
+    Event loggedEvent =
+        buildEvent(eventDate, eventDescription, eventType, event, eventPayload, messageTimestamp);
     loggedEvent.setUacQidLink(uacQidLink);
 
     eventRepository.save(loggedEvent);

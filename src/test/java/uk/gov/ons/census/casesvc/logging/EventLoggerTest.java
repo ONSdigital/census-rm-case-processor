@@ -41,7 +41,7 @@ public class EventLoggerTest {
         EventType.UAC_UPDATED,
         eventDTO,
         "{\"test\":\"json\"}",
-            messageTime);
+        messageTime);
 
     ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
     verify(eventRepository).save(eventArgumentCaptor.capture());
@@ -74,7 +74,7 @@ public class EventLoggerTest {
         EventType.UAC_UPDATED,
         eventDTO,
         "{\"test\":\"json\"}",
-            messageTime);
+        messageTime);
 
     ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
     verify(eventRepository).save(eventArgumentCaptor.capture());

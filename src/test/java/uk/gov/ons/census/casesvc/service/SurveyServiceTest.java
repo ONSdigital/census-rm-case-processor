@@ -65,7 +65,6 @@ public class SurveyServiceTest {
     expectedUacQidLink.setUac(TEST_QID_ID);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
-
     // Given
     when(uacService.findByQid(TEST_QID_ID)).thenReturn(expectedUacQidLink);
 
@@ -85,7 +84,8 @@ public class SurveyServiceTest {
             eq("Survey launched"),
             eq(EventType.SURVEY_LAUNCHED),
             eq(managementEvent.getEvent()),
-            anyString(), eq(messageTimestamp));
+            anyString(),
+            eq(messageTimestamp));
 
     verifyNoMoreInteractions(uacService);
     verifyNoMoreInteractions(eventLogger);
@@ -112,7 +112,6 @@ public class SurveyServiceTest {
     expectedUacQidLink.setBatchId(UUID.randomUUID());
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
-
     // Given
     when(uacService.findByQid(TEST_QID_ID)).thenReturn(expectedUacQidLink);
 
@@ -133,7 +132,8 @@ public class SurveyServiceTest {
             eq("Respondent authenticated"),
             eq(EventType.RESPONDENT_AUTHENTICATED),
             eq(managementEvent.getEvent()),
-            respondentAuthenticatedCaptor.capture(), eq(messageTimestamp));
+            respondentAuthenticatedCaptor.capture(),
+            eq(messageTimestamp));
 
     String expectedEventPayloadJson = convertObjectToJson(response);
     String actualEventPayloadJson = respondentAuthenticatedCaptor.getValue();
@@ -150,7 +150,6 @@ public class SurveyServiceTest {
     managementEvent.setEvent(new EventDTO());
     managementEvent.getEvent().setType(EventTypeDTO.CASE_CREATED);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
-
 
     String expectedErrorMessage =
         String.format("Event Type '%s' is invalid on this topic", EventTypeDTO.CASE_CREATED);

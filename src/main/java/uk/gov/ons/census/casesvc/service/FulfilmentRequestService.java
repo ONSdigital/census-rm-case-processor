@@ -52,7 +52,8 @@ public class FulfilmentRequestService {
     this.caseService = caseService;
   }
 
-  public void processFulfilmentRequest(ResponseManagementEvent fulfilmentRequest, OffsetDateTime messageTimestamp) {
+  public void processFulfilmentRequest(
+      ResponseManagementEvent fulfilmentRequest, OffsetDateTime messageTimestamp) {
     EventDTO fulfilmentRequestEvent = fulfilmentRequest.getEvent();
     FulfilmentRequestDTO fulfilmentRequestPayload =
         fulfilmentRequest.getPayload().getFulfilmentRequest();
@@ -70,7 +71,8 @@ public class FulfilmentRequestService {
         FULFILMENT_REQUEST_RECEIVED,
         FULFILMENT_REQUESTED,
         fulfilmentRequestEvent,
-        convertObjectToJson(fulfilmentRequestPayload), messageTimestamp);
+        convertObjectToJson(fulfilmentRequestPayload),
+        messageTimestamp);
   }
 
   private void handleIndividualFulfilment(

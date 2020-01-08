@@ -5,6 +5,7 @@ import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.isCCSQue
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import java.time.OffsetDateTime;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.ResponseDTO;
@@ -12,8 +13,6 @@ import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
-
-import java.time.OffsetDateTime;
 
 @Service
 public class ReceiptService {
@@ -29,7 +28,8 @@ public class ReceiptService {
     this.eventLogger = eventLogger;
   }
 
-  public void processReceipt(ResponseManagementEvent receiptEvent, OffsetDateTime messageTimestamp) {
+  public void processReceipt(
+      ResponseManagementEvent receiptEvent, OffsetDateTime messageTimestamp) {
     ResponseDTO receiptPayload = receiptEvent.getPayload().getResponse();
     UacQidLink uacQidLink = uacService.findByQid(receiptPayload.getQuestionnaireId());
     uacQidLink.setActive(false);
@@ -46,9 +46,9 @@ public class ReceiptService {
       }
     } else {
       log.with("qid", receiptPayload.getQuestionnaireId())
-              .with("tx_id", receiptEvent.getEvent().getTransactionId())
-              .with("channel", receiptEvent.getEvent().getChannel())
-              .warn("Receipt received for unaddressed UAC/QID pair not yet linked to a case");
+          .with("tx_id", receiptEvent.getEvent().getTransactionId())
+          .with("channel", receiptEvent.getEvent().getChannel())
+          .warn("Receipt received for unaddressed UAC/QID pair not yet linked to a case");
     }
 
     if (isCCSQuestionnaireType(uacQidLink.getQid())) {
@@ -58,12 +58,12 @@ public class ReceiptService {
     }
 
     eventLogger.logUacQidEvent(
-            uacQidLink,
-            receiptEvent.getEvent().getDateTime(),
-            QID_RECEIPTED,
-            EventType.RESPONSE_RECEIVED,
-            receiptEvent.getEvent(),
-            convertObjectToJson(receiptPayload),
-            messageTimestamp);
+        uacQidLink,
+        receiptEvent.getEvent().getDateTime(),
+        QID_RECEIPTED,
+        EventType.RESPONSE_RECEIVED,
+        receiptEvent.getEvent(),
+        convertObjectToJson(receiptPayload),
+        messageTimestamp);
   }
 }

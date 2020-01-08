@@ -4,13 +4,12 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static uk.gov.ons.census.casesvc.testutil.MessageConstructor.constructMessageWithValidTimeStamp;
 
+import java.time.OffsetDateTime;
 import org.junit.Test;
 import org.springframework.messaging.Message;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.service.InvalidAddressService;
 import uk.gov.ons.census.casesvc.utility.MsgDateHelper;
-
-import java.time.OffsetDateTime;
 
 public class InvalidAddressReceiverTest {
 

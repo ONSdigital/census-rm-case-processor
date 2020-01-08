@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementEvent;
 import static uk.gov.ons.census.casesvc.testutil.MessageConstructor.constructMessageWithValidTimeStamp;
 
+import java.time.OffsetDateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -16,8 +17,6 @@ import org.springframework.messaging.Message;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.service.RefusalService;
 import uk.gov.ons.census.casesvc.utility.MsgDateHelper;
-
-import java.time.OffsetDateTime;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RefusalReceiverTest {
@@ -41,7 +40,8 @@ public class RefusalReceiverTest {
     // THEN
     ArgumentCaptor<ResponseManagementEvent> managementEventArgumentCaptor =
         ArgumentCaptor.forClass(ResponseManagementEvent.class);
-    verify(refusalService).processRefusal(managementEventArgumentCaptor.capture(), eq(expectedDate));
+    verify(refusalService)
+        .processRefusal(managementEventArgumentCaptor.capture(), eq(expectedDate));
 
     String actualCaseId =
         managementEventArgumentCaptor.getValue().getPayload().getCollectionCase().getId();

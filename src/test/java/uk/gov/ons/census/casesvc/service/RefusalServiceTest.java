@@ -42,7 +42,6 @@ public class RefusalServiceTest {
     testCase.setCcsCase(false);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
-
     when(caseService.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);
 
     // WHEN
@@ -68,7 +67,8 @@ public class RefusalServiceTest {
             eq(REFUSAL_RECEIVED),
             eq(EventType.REFUSAL_RECEIVED),
             eq(managementEvent.getEvent()),
-            anyString(), eq(messageTimestamp));
+            anyString(),
+            eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
   }
 
@@ -82,7 +82,6 @@ public class RefusalServiceTest {
     Case testCase = getRandomCase();
     testCase.setCcsCase(true);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
-
 
     when(caseService.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);
 
@@ -108,7 +107,8 @@ public class RefusalServiceTest {
             eq(REFUSAL_RECEIVED),
             eq(EventType.REFUSAL_RECEIVED),
             eq(managementEvent.getEvent()),
-            anyString(), eq(messageTimestamp));
+            anyString(),
+            eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
   }
 }
