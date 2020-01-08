@@ -224,7 +224,8 @@ public class CaseService {
     individualResponseCase.setMsoa(parentCase.getMsoa());
     individualResponseCase.setLad(parentCase.getLad());
     individualResponseCase.setRegion(parentCase.getRegion());
-    individualResponseCase.setSurvey(parentCase.getSurvey());   // Should only ever be "CENSUS" from the parent case
+    individualResponseCase.setSurvey(
+        parentCase.getSurvey()); // Should only ever be "CENSUS" from the parent case
 
     return saveNewCaseAndStampCaseRef(individualResponseCase);
   }
