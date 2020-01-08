@@ -46,32 +46,6 @@ public class EventLogger {
 
     eventRepository.save(loggedEvent);
   }
-  public void logCaseEvent(
-          Case caze,
-          OffsetDateTime eventDate,
-          String eventDescription,
-          EventType eventType,
-          EventDTO event,
-          String eventPayload) {
-    Event loggedEvent = buildEvent(eventDate, eventDescription, eventType, event, eventPayload, OffsetDateTime.now().plusDays(1));
-    loggedEvent.setCaze(caze);
-
-    eventRepository.save(loggedEvent);
-  }
-
-  public void logUacQidEvent(
-          UacQidLink uacQidLink,
-          OffsetDateTime eventDate,
-          String eventDescription,
-          EventType eventType,
-          EventDTO event,
-          String eventPayload) {
-    Event loggedEvent = buildEvent(eventDate, eventDescription, eventType, event, eventPayload, OffsetDateTime.now().plusDays(1));
-    loggedEvent.setUacQidLink(uacQidLink);
-
-    eventRepository.save(loggedEvent);
-  }
-
 
   private Event buildEvent(
       OffsetDateTime eventDate,
