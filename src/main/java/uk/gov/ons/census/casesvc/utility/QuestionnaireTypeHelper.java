@@ -22,26 +22,6 @@ public class QuestionnaireTypeHelper {
               HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_WALES_WELSH,
               HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_NORTHERN_IRELAND));
 
-  private static final String CCS_POSTBACK_FOR_ENGLAND_AND_WALES_ENGLISH = "51";
-  private static final String CCS_POSTBACK_FOR_WALES_WELSH = "53";
-  private static final String CCS_POSTBACK_CONTINUATION_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES = "61";
-  private static final String CCS_POSTBACK_CONTINUATION_QUESTIONNAIRE_FOR_WALES_WELSH = "63";
-  private static final String CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES = "71";
-  private static final String CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_WALES_WELSH = "73";
-  private static final String CCS_INTERVIEWER_CE_MANAGER_FOR_ENGLAND_AND_WALES_ENGLISH = "81";
-  private static final String CCS_INTERVIEWER_CE_MANAGER_FOR_WALES_WELSH = "83";
-  private static final Set<String> ccsQuestionnaireTypes =
-      new HashSet<>(
-          Arrays.asList(
-              CCS_POSTBACK_FOR_ENGLAND_AND_WALES_ENGLISH,
-              CCS_POSTBACK_FOR_WALES_WELSH,
-              CCS_POSTBACK_CONTINUATION_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES,
-              CCS_POSTBACK_CONTINUATION_QUESTIONNAIRE_FOR_WALES_WELSH,
-              CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES,
-              CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_WALES_WELSH,
-              CCS_INTERVIEWER_CE_MANAGER_FOR_ENGLAND_AND_WALES_ENGLISH,
-              CCS_INTERVIEWER_CE_MANAGER_FOR_WALES_WELSH));
-
   public static int calculateQuestionnaireType(String treatmentCode) {
     String country = treatmentCode.substring(treatmentCode.length() - 1);
     if (!country.equals("E") && !country.equals("W") && !country.equals("N")) {
@@ -92,11 +72,5 @@ public class QuestionnaireTypeHelper {
     String questionnaireType = questionnaireId.substring(0, 2);
 
     return individualQuestionnaireTypes.contains(questionnaireType);
-  }
-
-  public static boolean isCCSQuestionnaireType(String questionnaireId) {
-    String questionnaireType = questionnaireId.substring(0, 2);
-
-    return ccsQuestionnaireTypes.contains(questionnaireType);
   }
 }
