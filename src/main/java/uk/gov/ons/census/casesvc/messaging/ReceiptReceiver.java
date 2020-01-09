@@ -21,8 +21,7 @@ public class ReceiptReceiver {
   @Transactional
   @ServiceActivator(inputChannel = "receiptInputChannel")
   public void receiveMessage(Message<ResponseManagementEvent> message) {
-    ResponseManagementEvent receiptEvent = message.getPayload();
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
-    receiptService.processReceipt(receiptEvent, messageTimestamp);
+    receiptService.processReceipt(message.getPayload(), messageTimestamp);
   }
 }

@@ -22,8 +22,7 @@ public class SurveyLaunchedReceiver {
   @Transactional
   @ServiceActivator(inputChannel = "surveyLaunchedInputChannel")
   public void receiveMessage(Message<ResponseManagementEvent> message) {
-    ResponseManagementEvent surveyEvent = message.getPayload();
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
-    surveyService.processMessage(surveyEvent, messageTimestamp);
+    surveyService.processMessage(message.getPayload(), messageTimestamp);
   }
 }

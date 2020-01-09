@@ -22,8 +22,7 @@ public class SampleReceiver {
   @Transactional
   @ServiceActivator(inputChannel = "caseSampleInputChannel")
   public void receiveMessage(Message<CreateCaseSample> message) {
-    CreateCaseSample createCaseSample = message.getPayload();
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
-    eventService.processSampleReceivedMessage(createCaseSample, messageTimestamp);
+    eventService.processSampleReceivedMessage(message.getPayload(), messageTimestamp);
   }
 }

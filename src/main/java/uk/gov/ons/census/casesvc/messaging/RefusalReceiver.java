@@ -21,8 +21,7 @@ public class RefusalReceiver {
   @Transactional
   @ServiceActivator(inputChannel = "refusalInputChannel")
   public void receiveMessage(Message<ResponseManagementEvent> message) {
-    ResponseManagementEvent refusalEvent = message.getPayload();
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
-    refusalService.processRefusal(refusalEvent, messageTimestamp);
+    refusalService.processRefusal(message.getPayload(), messageTimestamp);
   }
 }

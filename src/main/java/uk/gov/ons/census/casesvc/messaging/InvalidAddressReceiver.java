@@ -21,8 +21,7 @@ public class InvalidAddressReceiver {
   @Transactional
   @ServiceActivator(inputChannel = "invalidAddressInputChannel")
   public void receiveMessage(Message<ResponseManagementEvent> message) {
-    ResponseManagementEvent invalidAddressEvent = message.getPayload();
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
-    invalidAddressService.processMessage(invalidAddressEvent, messageTimestamp);
+    invalidAddressService.processMessage(message.getPayload(), messageTimestamp);
   }
 }

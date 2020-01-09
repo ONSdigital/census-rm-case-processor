@@ -21,9 +21,7 @@ public class QuestionnaireLinkedReceiver {
   @Transactional
   @ServiceActivator(inputChannel = "questionnaireLinkedInputChannel")
   public void receiveMessage(Message<ResponseManagementEvent> message) {
-    ResponseManagementEvent questionnaireLinkedEvent = message.getPayload();
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
-    questionnaireLinkedService.processQuestionnaireLinked(
-        questionnaireLinkedEvent, messageTimestamp);
+    questionnaireLinkedService.processQuestionnaireLinked(message.getPayload(), messageTimestamp);
   }
 }

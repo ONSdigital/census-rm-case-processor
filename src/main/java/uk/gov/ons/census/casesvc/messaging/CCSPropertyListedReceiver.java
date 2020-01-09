@@ -21,8 +21,7 @@ public class CCSPropertyListedReceiver {
   @Transactional
   @ServiceActivator(inputChannel = "ccsPropertyListedInputChannel")
   public void receiveMessage(Message<ResponseManagementEvent> message) {
-    ResponseManagementEvent ccsPropertyListedEvent = message.getPayload();
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
-    ccsPropertyListedService.processCCSPropertyListed(ccsPropertyListedEvent, messageTimestamp);
+    ccsPropertyListedService.processCCSPropertyListed(message.getPayload(), messageTimestamp);
   }
 }

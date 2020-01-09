@@ -21,8 +21,7 @@ public class FulfilmentRequestReceiver {
   @Transactional
   @ServiceActivator(inputChannel = "fulfilmentInputChannel")
   public void receiveMessage(Message<ResponseManagementEvent> message) {
-    ResponseManagementEvent fulfilmentEvent = message.getPayload();
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
-    fulfilmentRequestService.processFulfilmentRequest(fulfilmentEvent, messageTimestamp);
+    fulfilmentRequestService.processFulfilmentRequest(message.getPayload(), messageTimestamp);
   }
 }
