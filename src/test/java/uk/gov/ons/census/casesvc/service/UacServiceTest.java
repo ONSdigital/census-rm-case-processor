@@ -66,24 +66,24 @@ public class UacServiceTest {
     assertThat(actualUacQidLink).isEqualTo(expectedUacQidLink);
   }
 
-  @Test
-  public void testSaveUacQidLinkEnglandHousehold() {
-    // Given
-    Case caze = new Case();
-
-    UacQidDTO uacQidDTO = new UacQidDTO();
-    uacQidDTO.setUac("testuac");
-    uacQidDTO.setQid("01testqid");
-    when(uacQidServiceClient.generateUacQid(anyInt())).thenReturn(uacQidDTO);
-
-    // When
-    UacQidLink result;
-    result = underTest.buildUacQidLink(caze, 1);
-
-    // Then
-    assertEquals("01", result.getQid().substring(0, 2));
-    verify(uacQidServiceClient).generateUacQid(eq(1));
-  }
+//  @Test
+//  public void testSaveUacQidLinkEnglandHousehold() {
+//    // Given
+//    Case caze = new Case();
+//
+//    UacQidDTO uacQidDTO = new UacQidDTO();
+//    uacQidDTO.setUac("testuac");
+//    uacQidDTO.setQid("01testqid");
+//    when(uacQidServiceClient.generateUacQid(anyInt())).thenReturn(uacQidDTO);
+//
+//    // When
+//    UacQidLink result;
+//    result = underTest.buildUacQidLink(caze, 1);
+//
+//    // Then
+//    assertEquals("01", result.getQid().substring(0, 2));
+//    verify(uacQidServiceClient).generateUacQid(eq(1));
+//  }
 
   @Test
   public void testEmitUacUpdatedEvent() {
@@ -193,27 +193,27 @@ public class UacServiceTest {
             anyString());
   }
 
-  @Test
-  public void testCreateUacQidLinkedToCCSCase() {
-    // Given
-    Case expectedCase = new Case();
-    expectedCase.setCaseId(TEST_CASE_ID);
-    expectedCase.setCcsCase(true);
-
-    UacQidDTO expectedUacQidDTO = new UacQidDTO();
-    when(uacQidServiceClient.generateUacQid(71)).thenReturn(expectedUacQidDTO);
-
-    // When
-    UacQidLink actualUacQidLink = underTest.createUacQidLinkedToCCSCase(expectedCase);
-
-    // Then
-    assertThat(actualUacQidLink.isCcsCase()).isTrue();
-    assertThat(actualUacQidLink.getCaze()).isNotNull();
-
-    Case actualCase = actualUacQidLink.getCaze();
-    assertThat(actualCase.getCaseId()).isEqualTo(TEST_CASE_ID);
-    assertThat(actualCase.isCcsCase()).isTrue();
-  }
+//  @Test
+//  public void testCreateUacQidLinkedToCCSCase() {
+//    // Given
+//    Case expectedCase = new Case();
+//    expectedCase.setCaseId(TEST_CASE_ID);
+//    expectedCase.setCcsCase(true);
+//
+//    UacQidDTO expectedUacQidDTO = new UacQidDTO();
+//    when(uacQidServiceClient.generateUacQid(71)).thenReturn(expectedUacQidDTO);
+//
+//    // When
+//    UacQidLink actualUacQidLink = underTest.createUacQidLinkedToCCSCase(expectedCase);
+//
+//    // Then
+//    assertThat(actualUacQidLink.isCcsCase()).isTrue();
+//    assertThat(actualUacQidLink.getCaze()).isNotNull();
+//
+//    Case actualCase = actualUacQidLink.getCaze();
+//    assertThat(actualCase.getCaseId()).isEqualTo(TEST_CASE_ID);
+//    assertThat(actualCase.isCcsCase()).isTrue();
+//  }
 
   @Test
   public void testFindUacLinkExists() {

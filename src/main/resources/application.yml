@@ -65,6 +65,9 @@ uacservice:
     host: localhost
     port: 8164
 
+  uacqid-cache-min: 50
+  uacqid-fetch-count: 100
+
 exceptionmanager:
   connection:
     scheme: http
