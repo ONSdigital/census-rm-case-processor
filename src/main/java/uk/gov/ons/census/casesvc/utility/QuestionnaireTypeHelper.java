@@ -22,6 +22,22 @@ public class QuestionnaireTypeHelper {
               HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_WALES_WELSH,
               HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_NORTHERN_IRELAND));
 
+  private static final String ENGLAND_HOUSEHOLD_CONTINUATION = "11";
+  private static final String WALES_HOUSEHOLD_CONTINUATION = "12";
+  private static final String WALES_HOUSEHOLD_CONTINUATION_WELSH = "13";
+  private static final String NORTHERN_IRELAND_HOUSEHOLD_CONTINUATION = "14";
+  private static final String CCS_POSTBACK_CONTINUATION_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES = "61";
+  private static final String CCS_POSTBACK_CONTINUATION_QUESTIONNAIRE_FOR_WALES_WELSH = "63";
+  private static final Set<String> continutationQuestionnaireTypes =
+      new HashSet<>(
+          Arrays.asList(
+              ENGLAND_HOUSEHOLD_CONTINUATION,
+              WALES_HOUSEHOLD_CONTINUATION,
+              WALES_HOUSEHOLD_CONTINUATION_WELSH,
+              NORTHERN_IRELAND_HOUSEHOLD_CONTINUATION,
+              CCS_POSTBACK_CONTINUATION_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES,
+              CCS_POSTBACK_CONTINUATION_QUESTIONNAIRE_FOR_WALES_WELSH));
+
   public static int calculateQuestionnaireType(String treatmentCode) {
     String country = treatmentCode.substring(treatmentCode.length() - 1);
     if (!country.equals("E") && !country.equals("W") && !country.equals("N")) {
@@ -72,5 +88,11 @@ public class QuestionnaireTypeHelper {
     String questionnaireType = questionnaireId.substring(0, 2);
 
     return individualQuestionnaireTypes.contains(questionnaireType);
+  }
+
+  public static boolean iscontinuationQuestionnaireTypes(String questionnaireId) {
+    String questionnaireType = questionnaireId.substring(0, 2);
+
+    return continutationQuestionnaireTypes.contains(questionnaireType);
   }
 }

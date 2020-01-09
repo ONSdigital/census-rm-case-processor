@@ -1,6 +1,7 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.iscontinuationQuestionnaireTypes;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
@@ -35,8 +36,10 @@ public class ReceiptService {
     Case caze = uacQidLink.getCaze();
 
     if (caze != null) {
-      caze.setReceiptReceived(true);
-      caseService.saveAndEmitCaseUpdatedEvent(caze);
+      if (!iscontinuationQuestionnaireTypes(uacQidLink.getQid())) {
+        caze.setReceiptReceived(true);
+        caseService.saveAndEmitCaseUpdatedEvent(caze);
+      }
     } else {
       log.with("qid", receiptPayload.getQuestionnaireId())
           .with("tx_id", receiptEvent.getEvent().getTransactionId())
