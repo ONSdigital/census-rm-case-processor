@@ -42,6 +42,20 @@ public class QuestionnaireTypeHelper {
               CCS_INTERVIEWER_CE_MANAGER_FOR_ENGLAND_AND_WALES_ENGLISH,
               CCS_INTERVIEWER_CE_MANAGER_FOR_WALES_WELSH));
 
+  private static final String ENGLAND_HOUSEHOLD_CONTINUATION = "11";
+  private static final String WALES_HOUSEHOLD_CONTINUATION = "12";
+  private static final String WALES_HOUSEHOLD_CONTINUATION_WELSH = "13";
+  private static final String NORTHERN_IRELAND_HOUSEHOLD_CONTINUATION = "14";
+  private static final Set<String> continutationQuestionnaireTypes =
+      new HashSet<>(
+          Arrays.asList(
+              ENGLAND_HOUSEHOLD_CONTINUATION,
+              WALES_HOUSEHOLD_CONTINUATION,
+              WALES_HOUSEHOLD_CONTINUATION_WELSH,
+              NORTHERN_IRELAND_HOUSEHOLD_CONTINUATION,
+              CCS_POSTBACK_CONTINUATION_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES,
+              CCS_POSTBACK_CONTINUATION_QUESTIONNAIRE_FOR_WALES_WELSH));
+
   public static int calculateQuestionnaireType(String treatmentCode) {
     String country = treatmentCode.substring(treatmentCode.length() - 1);
     if (!country.equals("E") && !country.equals("W") && !country.equals("N")) {
@@ -98,5 +112,11 @@ public class QuestionnaireTypeHelper {
     String questionnaireType = questionnaireId.substring(0, 2);
 
     return ccsQuestionnaireTypes.contains(questionnaireType);
+  }
+
+  public static boolean iscontinuationQuestionnaireTypes(String questionnaireId) {
+    String questionnaireType = questionnaireId.substring(0, 2);
+
+    return continutationQuestionnaireTypes.contains(questionnaireType);
   }
 }

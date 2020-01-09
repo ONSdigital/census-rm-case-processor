@@ -48,7 +48,7 @@ import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 public class ReceiptReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final EasyRandom easyRandom = new EasyRandom();
-  private final String TEST_NON_CCS_QID_ID = "1234567890123456";
+  private final String TEST_NON_CCS_QID_ID = "0134567890123456";
   private final String TEST_CCS_QID_ID = "7134567890123456";
   private static final String TEST_UAC = easyRandom.nextObject(String.class);
 
