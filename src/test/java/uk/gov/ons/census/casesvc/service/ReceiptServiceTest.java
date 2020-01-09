@@ -148,7 +148,6 @@ public class ReceiptServiceTest {
     expectedUacQidLink.setQid(TEST_CONTINUATION_QID);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
-
     managementEvent.getPayload().getResponse().setResponseDateTime(OffsetDateTime.now());
 
     when(uacService.findByQid(expectedReceipt.getQuestionnaireId())).thenReturn(expectedUacQidLink);
@@ -175,7 +174,7 @@ public class ReceiptServiceTest {
             eq(EventType.RESPONSE_RECEIVED),
             eq(managementEvent.getEvent()),
             anyString(),
-                eq(messageTimestamp));
+            eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
 
     verifyZeroInteractions(caseService);
