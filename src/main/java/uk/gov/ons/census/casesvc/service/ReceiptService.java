@@ -2,6 +2,7 @@ package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.isCCSQuestionnaireType;
+import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.iscontinuationQuestionnaireTypes;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
@@ -35,12 +36,14 @@ public class ReceiptService {
     Case caze = uacQidLink.getCaze();
 
     if (caze != null) {
-      caze.setReceiptReceived(true);
+      if (!iscontinuationQuestionnaireTypes(uacQidLink.getQid())) {
+        caze.setReceiptReceived(true);
 
-      if (caze.isCcsCase()) {
-        caseService.saveCase(caze);
-      } else {
-        caseService.saveAndEmitCaseUpdatedEvent(caze);
+        if (caze.isCcsCase()) {
+          caseService.saveCase(caze);
+        } else {
+          caseService.saveAndEmitCaseUpdatedEvent(caze);
+        }
       }
     } else {
       log.with("qid", receiptPayload.getQuestionnaireId())
