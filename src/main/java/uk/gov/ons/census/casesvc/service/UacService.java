@@ -32,6 +32,7 @@ public class UacService {
   private final UacQidRetriever uacQidRetriever;
   private final EventLogger eventLogger;
   private final CaseService caseService;
+  private final UacQidServiceClient uacQidServiceClient;
 
   @Value("${queueconfig.case-event-exchange}")
   private String outboundExchange;
@@ -41,12 +42,14 @@ public class UacService {
       RabbitTemplate rabbitTemplate,
       UacQidRetriever uacQidRetriever,
       EventLogger eventLogger,
-      CaseService caseService) {
+      CaseService caseService,
+      UacQidServiceClient uacQidServiceClient) {
     this.rabbitTemplate = rabbitTemplate;
     this.uacQidLinkRepository = uacQidLinkRepository;
     this.uacQidRetriever = uacQidRetriever;
     this.eventLogger = eventLogger;
     this.caseService = caseService;
+    this.uacQidServiceClient = uacQidServiceClient;
   }
 
   public UacQidLink saveUacQidLink(UacQidLink uacQidLink) {
@@ -59,6 +62,8 @@ public class UacService {
 
   public UacQidLink buildUacQidLink(Case caze, int questionnaireType, UUID batchId) {
     UacQidDTO uacQid = uacQidRetriever.generateUacQid(questionnaireType);
+    // UacQidDTO uacQid = uacQidServiceClient.generateUacQid(questionnaireType);
+
     return buildUacQidLink(caze, batchId, uacQid.getUac(), uacQid.getQid());
   }
 

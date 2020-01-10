@@ -7,6 +7,7 @@ import static org.junit.Assert.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,7 +15,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -126,10 +126,6 @@ public class SampleReceiverIT {
     BlockingQueue<String> rhUacMessages = rabbitQueueHelper.listen(rhUacQueue);
     BlockingQueue<String> actionMessages = rabbitQueueHelper.listen(actionSchedulerQueue);
 
-    CreateCaseSample createCaseSample = new CreateCaseSample();
-    createCaseSample.setPostcode("ABC123");
-    createCaseSample.setRegion("E12000009");
-
     // WHEN
 
     int expectedSize = 10000;
@@ -149,19 +145,34 @@ public class SampleReceiverIT {
             "CE_LF3R2N");
     Random random = new Random();
 
+    long start_time = System.nanoTime();
+
+    List<CreateCaseSample> createCaseSamples = new ArrayList<>();
+
     for (int i = 0; i < expectedSize; i++) {
+      CreateCaseSample createCaseSample = new CreateCaseSample();
+      createCaseSample.setPostcode("ABC123");
+      createCaseSample.setRegion("E12000009");
       String treatmentCode = treatmentCodes.get(random.nextInt(treatmentCodes.size()));
       createCaseSample.setTreatmentCode(treatmentCode);
-
-      rabbitQueueHelper.sendMessage(inboundQueue, createCaseSample);
-
-      if (i % 10 == 0) {
-        System.out.println("Sent msgs: " + i);
-      }
+      createCaseSamples.add(createCaseSample);
     }
 
-    // stick in a retry
-    for (int i = 0; i < (expectedSize / 100); i++) {
+    createCaseSamples.stream()
+        .parallel()
+        .forEach(
+            c -> {
+              rabbitQueueHelper.sendMessage(inboundQueue, c);
+            });
+
+    long end_time = System.nanoTime();
+    double difference = (end_time - start_time) / 1e6;
+
+    System.out.println("Publishing all msgs took: " + difference / 1000 + " seconds");
+
+    start_time = System.nanoTime();
+
+    for (int i = 0; i < 1000; i++) {
       Thread.sleep(1000);
       List<Case> caseList = caseRepository.findAll();
 
@@ -172,9 +183,14 @@ public class SampleReceiverIT {
       break;
     }
 
+    end_time = System.nanoTime();
+    difference = (end_time - start_time) / 1e6;
+
+    System.out.println("Consuming all msgs took: " + difference / 1000 + " seconds");
+
     assertEquals(expectedSize, caseRepository.findAll().size());
 
-    //Check all used values are unique
+    // Check all used values are unique
 
     List<UacQidLink> uacQids = uacQidLinkRepository.findAll();
 

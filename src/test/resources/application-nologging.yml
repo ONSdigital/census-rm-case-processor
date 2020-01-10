@@ -5,6 +5,10 @@ spring:
   rabbitmq:
     port: 35672
 
+uacservice:
+  connection:
+    port: 18164
+
 logging:
   level:
     ROOT: OFF
