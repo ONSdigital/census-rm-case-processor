@@ -9,8 +9,7 @@ public class MsgDateHelper {
   public static OffsetDateTime getMsgTimeStamp(Message<?> msg) {
 
     if (msg.getHeaders().getTimestamp() == null) {
-      throw new RuntimeException(
-          "Message Headers missing Timestamp, is this important enough to reject message on?");
+      throw new RuntimeException("Message Headers missing Timestamp");
     }
 
     return OffsetDateTime.ofInstant(
