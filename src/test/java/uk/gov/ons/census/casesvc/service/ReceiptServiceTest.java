@@ -45,13 +45,14 @@ public class ReceiptServiceTest {
     expectedCase.setSurvey("CENSUS");
     UacQidLink expectedUacQidLink = generateRandomUacQidLinkedToCase(expectedCase);
     expectedUacQidLink.setQid(TEST_NON_CCS_QID_ID);
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     managementEvent.getPayload().getResponse().setResponseDateTime(OffsetDateTime.now());
 
     when(uacService.findByQid(expectedReceipt.getQuestionnaireId())).thenReturn(expectedUacQidLink);
 
     // when
-    underTest.processReceipt(managementEvent);
+    underTest.processReceipt(managementEvent, messageTimestamp);
 
     // then
     InOrder inOrder = inOrder(uacService, caseService, eventLogger);
@@ -78,7 +79,8 @@ public class ReceiptServiceTest {
             eq(QID_RECEIPTED),
             eq(EventType.RESPONSE_RECEIVED),
             eq(managementEvent.getEvent()),
-            anyString());
+            anyString(),
+            eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
   }
 
@@ -92,13 +94,14 @@ public class ReceiptServiceTest {
     expectedCase.setReceiptReceived(false);
     UacQidLink expectedUacQidLink = generateRandomUacQidLinkedToCase(expectedCase);
     expectedUacQidLink.setQid(TEST_CONTINUATION_QID);
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     managementEvent.getPayload().getResponse().setResponseDateTime(OffsetDateTime.now());
 
     when(uacService.findByQid(expectedReceipt.getQuestionnaireId())).thenReturn(expectedUacQidLink);
 
     // when
-    underTest.processReceipt(managementEvent);
+    underTest.processReceipt(managementEvent, messageTimestamp);
 
     // then
     InOrder inOrder = inOrder(uacService, eventLogger);
@@ -118,7 +121,8 @@ public class ReceiptServiceTest {
             eq(QID_RECEIPTED),
             eq(EventType.RESPONSE_RECEIVED),
             eq(managementEvent.getEvent()),
-            anyString());
+            anyString(),
+            eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
 
     verifyZeroInteractions(caseService);

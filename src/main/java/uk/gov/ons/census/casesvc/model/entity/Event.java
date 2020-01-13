@@ -43,4 +43,7 @@ public class Event {
   @Type(type = "jsonb")
   @Column(columnDefinition = "jsonb")
   private String eventPayload;
+
+  @Column(columnDefinition = "Timestamp with time zone")
+  private OffsetDateTime messageTimestamp;
 }

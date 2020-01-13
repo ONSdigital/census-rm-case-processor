@@ -3,6 +3,7 @@ package uk.gov.ons.census.casesvc.service;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.isIndividualQuestionnaireType;
 
+import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
@@ -28,7 +29,8 @@ public class QuestionnaireLinkedService {
     this.eventLogger = eventLogger;
   }
 
-  public void processQuestionnaireLinked(ResponseManagementEvent questionnaireLinkedEvent) {
+  public void processQuestionnaireLinked(
+      ResponseManagementEvent questionnaireLinkedEvent, OffsetDateTime messageTimestamp) {
     UacDTO uac = questionnaireLinkedEvent.getPayload().getUac();
     String questionnaireId = uac.getQuestionnaireId();
     UacQidLink uacQidLink = uacService.findByQid(questionnaireId);
@@ -62,7 +64,8 @@ public class QuestionnaireLinkedService {
         QUESTIONNAIRE_LINKED,
         EventType.QUESTIONNAIRE_LINKED,
         questionnaireLinkedEvent.getEvent(),
-        convertObjectToJson(uac));
+        convertObjectToJson(uac),
+        messageTimestamp);
   }
 
   private void checkQidNotLinkedToAnotherCase(UacDTO uac, UacQidLink uacQidLink) {

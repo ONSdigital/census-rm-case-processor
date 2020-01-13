@@ -47,6 +47,8 @@ public class FulfilmentRequestServiceTest {
     FulfilmentRequestDTO expectedFulfilmentRequest =
         managementEvent.getPayload().getFulfilmentRequest();
 
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+
     Case expectedCase = getRandomCase();
     expectedFulfilmentRequest.setCaseId(expectedCase.getCaseId().toString());
 
@@ -54,7 +56,7 @@ public class FulfilmentRequestServiceTest {
         .thenReturn(expectedCase);
 
     // when
-    underTest.processFulfilmentRequest(managementEvent);
+    underTest.processFulfilmentRequest(managementEvent, messageTimestamp);
 
     // then
     verify(eventLogger, times(1))
@@ -64,7 +66,8 @@ public class FulfilmentRequestServiceTest {
             eq("Fulfilment Request Received"),
             eq(FULFILMENT_REQUESTED),
             eq(managementEvent.getEvent()),
-            anyString());
+            anyString(),
+            eq(messageTimestamp));
   }
 
   @Test
@@ -125,6 +128,8 @@ public class FulfilmentRequestServiceTest {
     expectedFulfilmentRequest.setFulfilmentCode(individualResponseCode);
     expectedFulfilmentRequest.setIndividualCaseId(UUID.randomUUID().toString());
 
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+
     when(caseService.getCaseByCaseId(UUID.fromString(expectedFulfilmentRequest.getCaseId())))
         .thenReturn(parentCase);
 
@@ -139,7 +144,7 @@ public class FulfilmentRequestServiceTest {
             });
 
     // when
-    underTest.processFulfilmentRequest(managementEvent);
+    underTest.processFulfilmentRequest(managementEvent, messageTimestamp);
 
     // then
     verify(eventLogger, times(1))
@@ -149,7 +154,8 @@ public class FulfilmentRequestServiceTest {
             eq("Fulfilment Request Received"),
             eq(FULFILMENT_REQUESTED),
             eq(managementEvent.getEvent()),
-            anyString());
+            anyString(),
+            eq(messageTimestamp));
 
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
     ArgumentCaptor<FulfilmentRequestDTO> fulfilmentRequestArgumentCaptor =
@@ -180,6 +186,7 @@ public class FulfilmentRequestServiceTest {
     expectedFulfilmentRequest.setCaseId(parentCase.getCaseId().toString());
     expectedFulfilmentRequest.setFulfilmentCode(individualResponseCode);
     expectedFulfilmentRequest.setIndividualCaseId(UUID.randomUUID().toString());
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     when(caseService.getCaseByCaseId(UUID.fromString(expectedFulfilmentRequest.getCaseId())))
         .thenReturn(parentCase);
@@ -195,7 +202,7 @@ public class FulfilmentRequestServiceTest {
             });
 
     // when
-    underTest.processFulfilmentRequest(managementEvent);
+    underTest.processFulfilmentRequest(managementEvent, messageTimestamp);
 
     // then
     verify(eventLogger, times(1))
@@ -205,7 +212,8 @@ public class FulfilmentRequestServiceTest {
             eq("Fulfilment Request Received"),
             eq(FULFILMENT_REQUESTED),
             eq(managementEvent.getEvent()),
-            anyString());
+            anyString(),
+            eq(messageTimestamp));
 
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
     verify(caseService).emitCaseCreatedEvent(caseArgumentCaptor.capture());

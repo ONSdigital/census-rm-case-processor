@@ -2,6 +2,7 @@ package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -115,7 +116,8 @@ public class UacService {
     return payloadDTO;
   }
 
-  public void ingestUacCreatedEvent(ResponseManagementEvent uacCreatedEvent) {
+  public void ingestUacCreatedEvent(
+      ResponseManagementEvent uacCreatedEvent, OffsetDateTime messageTimestamp) {
     Case linkedCase =
         caseService.getCaseByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId());
 
@@ -134,7 +136,8 @@ public class UacService {
         "RM UAC QID pair created",
         EventType.RM_UAC_CREATED,
         uacCreatedEvent.getEvent(),
-        convertObjectToJson(uacCreatedEvent.getPayload()));
+        convertObjectToJson(uacCreatedEvent.getPayload()),
+        messageTimestamp);
   }
 
   public UacQidLink findByQid(String questionnaireId) {

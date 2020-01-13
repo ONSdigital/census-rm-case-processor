@@ -29,7 +29,8 @@ public class EventService {
     this.eventLogger = eventLogger;
   }
 
-  public void processSampleReceivedMessage(CreateCaseSample createCaseSample) {
+  public void processSampleReceivedMessage(
+      CreateCaseSample createCaseSample, OffsetDateTime messageTimestamp) {
     Case caze = caseService.saveCaseSample(createCaseSample);
     int questionnaireType =
         QuestionnaireTypeHelper.calculateQuestionnaireType(caze.getTreatmentCode());
@@ -43,7 +44,8 @@ public class EventService {
         CREATE_CASE_SAMPLE_RECEIVED,
         EventType.SAMPLE_LOADED,
         createEventDTO(EventTypeDTO.SAMPLE_LOADED),
-        convertObjectToJson(createCaseSample));
+        convertObjectToJson(createCaseSample),
+        messageTimestamp);
 
     if (QuestionnaireTypeHelper.isQuestionnaireWelsh(caze.getTreatmentCode())) {
       uacQidLink = uacService.buildUacQidLink(caze, 3);
@@ -51,29 +53,34 @@ public class EventService {
     }
   }
 
-  public void processPrintCaseSelected(ResponseManagementEvent responseManagementEvent) {
+  public void processPrintCaseSelected(
+      ResponseManagementEvent responseManagementEvent, OffsetDateTime messageTimestamp) {
     processEvent(
         responseManagementEvent.getPayload().getPrintCaseSelected().getCaseRef(),
         responseManagementEvent,
         String.format(
             "Case sent to printer with pack code %s",
             responseManagementEvent.getPayload().getPrintCaseSelected().getPackCode()),
-        EventType.PRINT_CASE_SELECTED);
+        EventType.PRINT_CASE_SELECTED,
+        messageTimestamp);
   }
 
-  public void processFieldCaseSelected(ResponseManagementEvent responseManagementEvent) {
+  public void processFieldCaseSelected(
+      ResponseManagementEvent responseManagementEvent, OffsetDateTime messageTimestamp) {
     processEvent(
         responseManagementEvent.getPayload().getFieldCaseSelected().getCaseRef(),
         responseManagementEvent,
         "Case sent for fieldwork followup",
-        EventType.FIELD_CASE_SELECTED);
+        EventType.FIELD_CASE_SELECTED,
+        messageTimestamp);
   }
 
   private void processEvent(
       int caseRef,
       ResponseManagementEvent responseManagementEvent,
       String eventDescription,
-      EventType eventType) {
+      EventType eventType,
+      OffsetDateTime messageTimestamp) {
     Case caze = caseService.getCaseByCaseRef(caseRef);
 
     eventLogger.logCaseEvent(
@@ -82,6 +89,7 @@ public class EventService {
         eventDescription,
         eventType,
         responseManagementEvent.getEvent(),
-        convertObjectToJson(responseManagementEvent.getPayload()));
+        convertObjectToJson(responseManagementEvent.getPayload()),
+        messageTimestamp);
   }
 }

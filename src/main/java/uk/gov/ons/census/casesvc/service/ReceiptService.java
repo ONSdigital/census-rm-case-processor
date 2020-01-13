@@ -5,6 +5,7 @@ import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.iscontin
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import java.time.OffsetDateTime;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.ResponseDTO;
@@ -28,7 +29,8 @@ public class ReceiptService {
     this.eventLogger = eventLogger;
   }
 
-  public void processReceipt(ResponseManagementEvent receiptEvent) {
+  public void processReceipt(
+      ResponseManagementEvent receiptEvent, OffsetDateTime messageTimestamp) {
     ResponseDTO receiptPayload = receiptEvent.getPayload().getResponse();
     UacQidLink uacQidLink = uacService.findByQid(receiptPayload.getQuestionnaireId());
     uacQidLink.setActive(false);
@@ -55,6 +57,7 @@ public class ReceiptService {
         QID_RECEIPTED,
         EventType.RESPONSE_RECEIVED,
         receiptEvent.getEvent(),
-        convertObjectToJson(receiptPayload));
+        convertObjectToJson(receiptPayload),
+        messageTimestamp);
   }
 }

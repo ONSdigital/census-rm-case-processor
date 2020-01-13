@@ -39,11 +39,12 @@ public class RefusalServiceTest {
     collectionCase.setId(TEST_CASE_ID.toString());
     collectionCase.setRefusalReceived(false);
     Case testCase = getRandomCase();
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     when(caseService.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);
 
     // WHEN
-    underTest.processRefusal(managementEvent);
+    underTest.processRefusal(managementEvent, messageTimestamp);
 
     // THEN
 
@@ -65,7 +66,8 @@ public class RefusalServiceTest {
             eq(REFUSAL_RECEIVED),
             eq(EventType.REFUSAL_RECEIVED),
             eq(managementEvent.getEvent()),
-            anyString());
+            anyString(),
+            eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
   }
 }

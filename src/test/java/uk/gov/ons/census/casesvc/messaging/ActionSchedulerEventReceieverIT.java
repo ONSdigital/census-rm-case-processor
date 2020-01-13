@@ -86,6 +86,8 @@ public class ActionSchedulerEventReceieverIT {
     payload.setPrintCaseSelected(printCaseSelected);
     responseManagementEvent.setPayload(payload);
 
+    OffsetDateTime earliestMsgTime = OffsetDateTime.now();
+
     // WHEN
     rabbitQueueHelper.sendMessage(actionCaseQueue, responseManagementEvent);
     Thread.sleep(1000);
@@ -112,5 +114,9 @@ public class ActionSchedulerEventReceieverIT {
     assertThat(actualEvent.getRmEventProcessed()).isNotNull();
     assertThat("Case sent to printer with pack code Test packCode")
         .isEqualTo(actualEvent.getEventDescription());
+
+    OffsetDateTime actualRabbitMsgTime = actualEvent.getMessageTimestamp();
+    assertThat(actualRabbitMsgTime).isAfterOrEqualTo(earliestMsgTime);
+    assertThat(actualRabbitMsgTime).isBefore(OffsetDateTime.now());
   }
 }

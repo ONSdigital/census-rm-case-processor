@@ -2,10 +2,12 @@ package uk.gov.ons.census.casesvc.messaging;
 
 import static uk.gov.ons.census.casesvc.utility.EventHelper.createEventDTO;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+import static uk.gov.ons.census.casesvc.utility.MsgDateHelper.getMsgTimeStamp;
 
 import java.time.OffsetDateTime;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
+import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.CreateUacQid;
@@ -28,7 +30,9 @@ public class UnaddressedReceiver {
 
   @Transactional
   @ServiceActivator(inputChannel = "unaddressedInputChannel")
-  public void receiveMessage(CreateUacQid createUacQid) {
+  public void receiveMessage(Message<CreateUacQid> message) {
+    CreateUacQid createUacQid = message.getPayload();
+    OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
     UacQidLink uacQidLink =
         uacService.buildUacQidLink(
             null, Integer.parseInt(createUacQid.getQuestionnaireType()), createUacQid.getBatchId());
@@ -39,6 +43,7 @@ public class UnaddressedReceiver {
         "Unaddressed UAC/QID pair created",
         EventType.UAC_UPDATED,
         createEventDTO(EventTypeDTO.UAC_UPDATED),
-        convertObjectToJson(uacPayloadDTO));
+        convertObjectToJson(uacPayloadDTO),
+        messageTimestamp);
   }
 }

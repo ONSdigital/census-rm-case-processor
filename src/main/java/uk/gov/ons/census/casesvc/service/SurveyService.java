@@ -2,6 +2,7 @@ package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
+import java.time.OffsetDateTime;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
@@ -20,9 +21,9 @@ public class SurveyService {
     this.eventLogger = eventLogger;
   }
 
-  public void processMessage(ResponseManagementEvent surveyEvent) {
+  public void processMessage(ResponseManagementEvent surveyEvent, OffsetDateTime messageTimestamp) {
 
-    if (!processEvent(surveyEvent)) {
+    if (!processEvent(surveyEvent, messageTimestamp)) {
       return;
     }
 
@@ -35,10 +36,12 @@ public class SurveyService {
         "Survey launched",
         EventType.SURVEY_LAUNCHED,
         surveyEvent.getEvent(),
-        convertObjectToJson(surveyEvent.getPayload().getResponse()));
+        convertObjectToJson(surveyEvent.getPayload().getResponse()),
+        messageTimestamp);
   }
 
-  private boolean processEvent(ResponseManagementEvent surveyEvent) {
+  private boolean processEvent(
+      ResponseManagementEvent surveyEvent, OffsetDateTime messageTimestamp) {
     String logEventDescription;
     EventType logEventType;
     ResponseDTO logEventPayload;
@@ -69,7 +72,8 @@ public class SurveyService {
         logEventDescription,
         logEventType,
         surveyEvent.getEvent(),
-        convertObjectToJson(logEventPayload));
+        convertObjectToJson(logEventPayload),
+        messageTimestamp);
 
     return false;
   }

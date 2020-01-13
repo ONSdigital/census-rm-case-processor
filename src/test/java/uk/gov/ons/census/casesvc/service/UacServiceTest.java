@@ -115,12 +115,14 @@ public class UacServiceTest {
     // Given
     Case linkedCase = getRandomCase();
     ResponseManagementEvent uacCreatedEvent = generateUacCreatedEvent(linkedCase);
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+
     when(caseService.getCaseByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId()))
         .thenReturn(linkedCase);
     ArgumentCaptor<UacQidLink> uacQidLinkArgumentCaptor = ArgumentCaptor.forClass(UacQidLink.class);
 
     // When
-    underTest.ingestUacCreatedEvent(uacCreatedEvent);
+    underTest.ingestUacCreatedEvent(uacCreatedEvent, messageTimestamp);
 
     // Then
     verify(uacQidLinkRepository).save(uacQidLinkArgumentCaptor.capture());
@@ -140,6 +142,8 @@ public class UacServiceTest {
     // Given
     Case linkedCase = getRandomCase();
     ResponseManagementEvent uacCreatedEvent = generateUacCreatedEvent(linkedCase);
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+
     when(caseService.getCaseByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId()))
         .thenReturn(linkedCase);
 
@@ -148,7 +152,7 @@ public class UacServiceTest {
     ReflectionTestUtils.setField(underTest, "outboundExchange", "TEST_EXCHANGE");
 
     // When
-    underTest.ingestUacCreatedEvent(uacCreatedEvent);
+    underTest.ingestUacCreatedEvent(uacCreatedEvent, messageTimestamp);
 
     // Then
     verify(rabbitTemplate)
@@ -178,9 +182,10 @@ public class UacServiceTest {
     ResponseManagementEvent uacCreatedEvent = generateUacCreatedEvent(linkedCase);
     when(caseService.getCaseByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId()))
         .thenReturn(linkedCase);
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     // When
-    underTest.ingestUacCreatedEvent(uacCreatedEvent);
+    underTest.ingestUacCreatedEvent(uacCreatedEvent, messageTimestamp);
 
     // Then
     verify(eventLogger)
@@ -190,7 +195,8 @@ public class UacServiceTest {
             eq("RM UAC QID pair created"),
             eq(EventType.RM_UAC_CREATED),
             eq(uacCreatedEvent.getEvent()),
-            anyString());
+            anyString(),
+            eq(messageTimestamp));
   }
 
   @Test
