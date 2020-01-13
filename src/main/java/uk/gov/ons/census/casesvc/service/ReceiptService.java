@@ -1,7 +1,6 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
-import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.isCCSQuestionnaireType;
 import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.iscontinuationQuestionnaireTypes;
 
 import com.godaddy.logging.Logger;
@@ -16,6 +15,7 @@ import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
 @Service
 public class ReceiptService {
+
   private static final Logger log = LoggerFactory.getLogger(ReceiptService.class);
   public static final String QID_RECEIPTED = "QID Receipted";
   private final CaseService caseService;
@@ -38,12 +38,7 @@ public class ReceiptService {
     if (caze != null) {
       if (!iscontinuationQuestionnaireTypes(uacQidLink.getQid())) {
         caze.setReceiptReceived(true);
-
-        if (caze.isCcsCase()) {
-          caseService.saveCase(caze);
-        } else {
-          caseService.saveAndEmitCaseUpdatedEvent(caze);
-        }
+        caseService.saveAndEmitCaseUpdatedEvent(caze);
       }
     } else {
       log.with("qid", receiptPayload.getQuestionnaireId())
@@ -52,11 +47,7 @@ public class ReceiptService {
           .warn("Receipt received for unaddressed UAC/QID pair not yet linked to a case");
     }
 
-    if (isCCSQuestionnaireType(uacQidLink.getQid())) {
-      uacService.saveUacQidLink(uacQidLink);
-    } else {
-      uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
-    }
+    uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
 
     eventLogger.logUacQidEvent(
         uacQidLink,

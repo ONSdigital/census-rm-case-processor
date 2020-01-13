@@ -130,7 +130,7 @@ public class CaseServiceTest {
 
     // Then
     verify(mapperFacade).map(sampleUnit, Case.class);
-    assertThat(actualCase.isCcsCase()).isTrue();
+    assertThat(actualCase.getSurvey()).isEqualTo("CCS");
     assertThat(actualCase.getCaseId()).isEqualTo(UUID.fromString(caseId));
     assertThat(actualCase.isRefusalReceived()).isFalse();
     assertThat(actualCase.getActionPlanId()).isEqualTo(TEST_ACTION_PLAN_ID.toString());
@@ -163,7 +163,7 @@ public class CaseServiceTest {
 
     // Then
     verify(mapperFacade).map(sampleUnit, Case.class);
-    assertThat(actualCase.isCcsCase()).isTrue();
+    assertThat(actualCase.getSurvey()).isEqualTo("CCS");
     assertThat(actualCase.getCaseId()).isEqualTo(UUID.fromString(caseId));
     assertThat(actualCase.isRefusalReceived()).isTrue();
     assertThat(actualCase.getActionPlanId()).isEqualTo(TEST_ACTION_PLAN_ID.toString());

@@ -52,7 +52,7 @@ public class InvalidAddressServiceTest {
   @InjectMocks InvalidAddressService underTest;
 
   @Test
-  public void testInvalidAddressForNonCCSCase() {
+  public void testInvalidAddress() {
     ResponseManagementEvent managementEvent = new ResponseManagementEvent();
     managementEvent.setEvent(new EventDTO());
     managementEvent.getEvent().setDateTime(OffsetDateTime.now());
@@ -69,7 +69,7 @@ public class InvalidAddressServiceTest {
     // Given
     Case expectedCase = getRandomCase();
     expectedCase.setAddressInvalid(false);
-    expectedCase.setCcsCase(false);
+    expectedCase.setSurvey("CENSUS");
     when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
 
     // when
@@ -84,55 +84,7 @@ public class InvalidAddressServiceTest {
     inOrder.verify(caseService).saveAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture());
     Case actualCase = caseArgumentCaptor.getValue();
     assertThat(actualCase.isAddressInvalid()).isTrue();
-    assertThat(actualCase.isCcsCase()).isFalse();
-    verifyNoMoreInteractions(caseService);
-
-    inOrder
-        .verify(eventLogger)
-        .logCaseEvent(
-            eq(expectedCase),
-            any(OffsetDateTime.class),
-            eq("Invalid address"),
-            eq(EventType.ADDRESS_NOT_VALID),
-            eq(managementEvent.getEvent()),
-            anyString());
-    verifyNoMoreInteractions(eventLogger);
-  }
-
-  @Test
-  public void testInvalidAddressForCCSCase() {
-    ResponseManagementEvent managementEvent = new ResponseManagementEvent();
-    managementEvent.setEvent(new EventDTO());
-    managementEvent.getEvent().setDateTime(OffsetDateTime.now());
-    managementEvent.getEvent().setType(ADDRESS_NOT_VALID);
-    managementEvent.setPayload(new PayloadDTO());
-    managementEvent.getPayload().setInvalidAddress(new InvalidAddress());
-    managementEvent.getPayload().getInvalidAddress().setCollectionCase(new CollectionCaseCaseId());
-    managementEvent
-        .getPayload()
-        .getInvalidAddress()
-        .getCollectionCase()
-        .setId(UUID.randomUUID().toString());
-
-    // Given
-    Case expectedCase = getRandomCase();
-    expectedCase.setAddressInvalid(false);
-    expectedCase.setCcsCase(true);
-    when(caseService.getCaseByCaseId(any(UUID.class))).thenReturn(expectedCase);
-
-    // when
-    underTest.processMessage(managementEvent);
-
-    // then
-    InOrder inOrder = inOrder(caseService, eventLogger);
-
-    inOrder.verify(caseService).getCaseByCaseId(any(UUID.class));
-
-    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    inOrder.verify(caseService).saveCase(caseArgumentCaptor.capture());
-    Case actualCase = caseArgumentCaptor.getValue();
-    assertThat(actualCase.isAddressInvalid()).isTrue();
-    assertThat(actualCase.isCcsCase()).isTrue();
+    assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
     verifyNoMoreInteractions(caseService);
 
     inOrder
