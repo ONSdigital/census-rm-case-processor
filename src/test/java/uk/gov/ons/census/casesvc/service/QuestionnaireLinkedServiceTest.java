@@ -101,6 +101,7 @@ public class QuestionnaireLinkedServiceTest {
     verifyNoMoreInteractions(eventLogger);
   }
 
+  @Test
   public void testQuestionnaireLinkedBeforeCaseReceipted() {
     // GIVEN
     ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
