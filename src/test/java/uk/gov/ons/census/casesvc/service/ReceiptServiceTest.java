@@ -24,7 +24,6 @@ import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 public class ReceiptServiceTest {
 
   private final String TEST_NON_CCS_QID_ID = "0134567890123456";
-  private final String TEST_CCS_QID_ID = "7134567890123456";
   private final String TEST_CONTINUATION_QID = "113456789023";
 
   @Mock private CaseService caseService;
@@ -36,14 +35,14 @@ public class ReceiptServiceTest {
   @InjectMocks ReceiptService underTest;
 
   @Test
-  public void testReceiptForNonCCSCase() {
+  public void testReceiptForCase() {
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
     ResponseDTO expectedReceipt = managementEvent.getPayload().getResponse();
 
     // Given
     Case expectedCase = getRandomCase();
     expectedCase.setReceiptReceived(false);
-    expectedCase.setCcsCase(false);
+    expectedCase.setSurvey("CENSUS");
     UacQidLink expectedUacQidLink = generateRandomUacQidLinkedToCase(expectedCase);
     expectedUacQidLink.setQid(TEST_NON_CCS_QID_ID);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
@@ -64,61 +63,11 @@ public class ReceiptServiceTest {
     inOrder.verify(caseService).saveAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture());
     Case actualCase = caseArgumentCaptor.getValue();
     assertThat(actualCase.isReceiptReceived()).isTrue();
-    assertThat(actualCase.isCcsCase()).isFalse();
+    assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
     verifyNoMoreInteractions(caseService);
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
     inOrder.verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
-    UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
-    assertThat(actualUacQidLink.getQid()).isEqualTo(expectedUacQidLink.getQid());
-    assertThat(actualUacQidLink.getUac()).isEqualTo(expectedUacQidLink.getUac());
-
-    verify(eventLogger)
-        .logUacQidEvent(
-            eq(expectedUacQidLink),
-            any(OffsetDateTime.class),
-            eq(QID_RECEIPTED),
-            eq(EventType.RESPONSE_RECEIVED),
-            eq(managementEvent.getEvent()),
-            anyString(),
-            eq(messageTimestamp));
-    verifyNoMoreInteractions(eventLogger);
-  }
-
-  @Test
-  public void testReceiptForCCSCase() {
-    ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
-    ResponseDTO expectedReceipt = managementEvent.getPayload().getResponse();
-
-    // Given
-    Case expectedCase = getRandomCase();
-    expectedCase.setReceiptReceived(false);
-    expectedCase.setCcsCase(true);
-    UacQidLink expectedUacQidLink = generateRandomUacQidLinkedToCase(expectedCase);
-    expectedUacQidLink.setQid(TEST_CCS_QID_ID);
-    OffsetDateTime messageTimestamp = OffsetDateTime.now();
-
-    managementEvent.getPayload().getResponse().setResponseDateTime(OffsetDateTime.now());
-
-    when(uacService.findByQid(expectedReceipt.getQuestionnaireId())).thenReturn(expectedUacQidLink);
-
-    // when
-    underTest.processReceipt(managementEvent, messageTimestamp);
-
-    // then
-    InOrder inOrder = inOrder(uacService, caseService, eventLogger);
-
-    inOrder.verify(uacService).findByQid(anyString());
-
-    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    inOrder.verify(caseService).saveCase(caseArgumentCaptor.capture());
-    Case actualCase = caseArgumentCaptor.getValue();
-    assertThat(actualCase.isReceiptReceived()).isTrue();
-    assertThat(actualCase.isCcsCase()).isTrue();
-    verifyNoMoreInteractions(caseService);
-
-    ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    inOrder.verify(uacService).saveUacQidLink(uacQidLinkCaptor.capture());
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
     assertThat(actualUacQidLink.getQid()).isEqualTo(expectedUacQidLink.getQid());
     assertThat(actualUacQidLink.getUac()).isEqualTo(expectedUacQidLink.getUac());
@@ -143,7 +92,6 @@ public class ReceiptServiceTest {
     // Given
     Case expectedCase = getRandomCase();
     expectedCase.setReceiptReceived(false);
-    expectedCase.setCcsCase(false);
     UacQidLink expectedUacQidLink = generateRandomUacQidLinkedToCase(expectedCase);
     expectedUacQidLink.setQid(TEST_CONTINUATION_QID);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();

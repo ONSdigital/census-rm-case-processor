@@ -47,7 +47,7 @@ public class QuestionnaireLinkedServiceTest {
   @InjectMocks QuestionnaireLinkedService underTest;
 
   @Test
-  public void testQuestionnaireLinkedForUnreceiptedNonCCSCase() {
+  public void testQuestionnaireLinkedForUnreceiptedCase() {
     // GIVEN
     ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
 
@@ -57,13 +57,14 @@ public class QuestionnaireLinkedServiceTest {
 
     Case testCase = getRandomCaseWithUacQidLinks(1);
     testCase.setCaseId(TEST_CASE_ID_1);
-    testCase.setCcsCase(false);
+    testCase.setSurvey("CENSUS");
 
     UacQidLink testUacQidLink = testCase.getUacQidLinks().get(0);
     testUacQidLink.setActive(true);
     testUacQidLink.setQid(TEST_NON_CCS_QID_ID);
     testUacQidLink.setCaze(null);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
+    testUacQidLink.setCcsCase(false);
 
     when(uacService.findByQid(TEST_HH_QID)).thenReturn(testUacQidLink);
     when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testCase);
@@ -84,6 +85,8 @@ public class QuestionnaireLinkedServiceTest {
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
     assertThat(actualUacQidLink.getQid()).isEqualTo(testUacQidLink.getQid());
     assertThat(actualUacQidLink.getUac()).isEqualTo(testUacQidLink.getUac());
+    assertThat(actualUacQidLink.isCcsCase()).isFalse();
+    assertThat(actualUacQidLink.getCaze().getSurvey()).isEqualTo("CENSUS");
     verifyNoMoreInteractions(uacService);
 
     verify(eventLogger)
@@ -98,61 +101,7 @@ public class QuestionnaireLinkedServiceTest {
     verifyNoMoreInteractions(eventLogger);
   }
 
-  @Test
-  public void testQuestionnaireLinkedForUnreceiptedCCSCase() {
-    // GIVEN
-    ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
-
-    UacDTO uac = managementEvent.getPayload().getUac();
-    uac.setCaseId(TEST_CASE_ID_1.toString());
-    uac.setQuestionnaireId(TEST_HH_QID);
-
-    Case testCase = getRandomCaseWithUacQidLinks(1);
-    testCase.setCaseId(TEST_CASE_ID_1);
-    testCase.setCcsCase(true);
-
-    UacQidLink testUacQidLink = testCase.getUacQidLinks().get(0);
-    testUacQidLink.setActive(true);
-    testUacQidLink.setQid(TEST_CCS_QID_ID);
-    testUacQidLink.setCaze(null);
-    OffsetDateTime messageTimestamp = OffsetDateTime.now();
-
-    when(uacService.findByQid(TEST_HH_QID)).thenReturn(testUacQidLink);
-    when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testCase);
-
-    // WHEN
-    underTest.processQuestionnaireLinked(managementEvent, messageTimestamp);
-
-    // THEN
-    InOrder inOrder = inOrder(uacService, caseService, eventLogger);
-
-    inOrder.verify(uacService).findByQid(anyString());
-
-    inOrder.verify(caseService).getCaseByCaseId(any(UUID.class));
-    verifyNoMoreInteractions(caseService);
-
-    ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    inOrder.verify(uacService).saveUacQidLink(uacQidLinkCaptor.capture());
-    UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
-    assertThat(actualUacQidLink.getQid()).isEqualTo(testUacQidLink.getQid());
-    assertThat(actualUacQidLink.getUac()).isEqualTo(testUacQidLink.getUac());
-    verifyNoMoreInteractions(uacService);
-
-    inOrder
-        .verify(eventLogger)
-        .logUacQidEvent(
-            eq(testUacQidLink),
-            any(OffsetDateTime.class),
-            eq("Questionnaire Linked"),
-            eq(EventType.QUESTIONNAIRE_LINKED),
-            eq(managementEvent.getEvent()),
-            anyString(),
-            eq(messageTimestamp));
-    verifyNoMoreInteractions(eventLogger);
-  }
-
-  @Test
-  public void testQuestionnaireLinkedBeforeNonCCSCaseReceipted() {
+  public void testQuestionnaireLinkedBeforeCaseReceipted() {
     // GIVEN
     ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
 
@@ -163,12 +112,13 @@ public class QuestionnaireLinkedServiceTest {
     Case testCase = getRandomCaseWithUacQidLinks(1);
     testCase.setCaseId(TEST_CASE_ID_1);
     testCase.setReceiptReceived(false);
-    testCase.setCcsCase(false);
+    testCase.setSurvey("CENSUS");
 
     UacQidLink testUacQidLink = testCase.getUacQidLinks().get(0);
     testUacQidLink.setQid(TEST_HI_QID);
     testUacQidLink.setActive(false);
     testUacQidLink.setCaze(null);
+    testUacQidLink.setCcsCase(false);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     when(uacService.findByQid(TEST_HH_QID)).thenReturn(testUacQidLink);
@@ -187,7 +137,7 @@ public class QuestionnaireLinkedServiceTest {
     Case actualCase = caseCaptor.getValue();
     assertThat(actualCase.getCaseId()).isEqualTo(TEST_CASE_ID_1);
     assertThat(actualCase.isReceiptReceived()).isTrue();
-    assertThat(actualCase.isCcsCase()).isFalse();
+    assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
     verifyNoMoreInteractions(caseService);
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
@@ -195,6 +145,7 @@ public class QuestionnaireLinkedServiceTest {
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
     assertThat(actualUacQidLink.getCaze()).isEqualTo(testCase);
     assertThat(actualUacQidLink.isActive()).isFalse();
+    assertThat(actualUacQidLink.isCcsCase()).isFalse();
     verifyNoMoreInteractions(uacService);
 
     verify(eventLogger)
@@ -210,65 +161,7 @@ public class QuestionnaireLinkedServiceTest {
   }
 
   @Test
-  public void testQuestionnaireLinkedBeforeCCSCaseReceipted() {
-    // GIVEN
-    ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
-
-    UacDTO uac = managementEvent.getPayload().getUac();
-    uac.setCaseId(TEST_CASE_ID_1.toString());
-    uac.setQuestionnaireId(TEST_HH_QID);
-
-    Case testCase = getRandomCaseWithUacQidLinks(1);
-    testCase.setCaseId(TEST_CASE_ID_1);
-    testCase.setReceiptReceived(false);
-    testCase.setCcsCase(true);
-
-    UacQidLink testUacQidLink = testCase.getUacQidLinks().get(0);
-    testUacQidLink.setQid(TEST_CCS_QID_ID);
-    testUacQidLink.setActive(false);
-    testUacQidLink.setCaze(null);
-    OffsetDateTime messageTimestamp = OffsetDateTime.now();
-
-    when(uacService.findByQid(TEST_HH_QID)).thenReturn(testUacQidLink);
-    when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testCase);
-
-    // WHEN
-    underTest.processQuestionnaireLinked(managementEvent, messageTimestamp);
-
-    // THEN
-    InOrder inOrder = inOrder(uacService, caseService, eventLogger);
-    inOrder.verify(uacService).findByQid(TEST_HH_QID);
-    inOrder.verify(caseService).getCaseByCaseId(TEST_CASE_ID_1);
-
-    ArgumentCaptor<Case> caseCaptor = ArgumentCaptor.forClass(Case.class);
-    inOrder.verify(caseService).saveCase(caseCaptor.capture());
-    Case actualCase = caseCaptor.getValue();
-    assertThat(actualCase.getCaseId()).isEqualTo(TEST_CASE_ID_1);
-    assertThat(actualCase.isReceiptReceived()).isTrue();
-    assertThat(actualCase.isCcsCase()).isTrue();
-    verifyNoMoreInteractions(caseService);
-
-    ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    inOrder.verify(uacService).saveUacQidLink(uacQidLinkCaptor.capture());
-    UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
-    assertThat(actualUacQidLink.getCaze()).isEqualTo(testCase);
-    assertThat(actualUacQidLink.isActive()).isFalse();
-    verifyNoMoreInteractions(uacService);
-
-    verify(eventLogger)
-        .logUacQidEvent(
-            eq(testUacQidLink),
-            any(OffsetDateTime.class),
-            eq("Questionnaire Linked"),
-            eq(EventType.QUESTIONNAIRE_LINKED),
-            eq(managementEvent.getEvent()),
-            anyString(),
-            eq(messageTimestamp));
-    verifyNoMoreInteractions(eventLogger);
-  }
-
-  @Test
-  public void testIndividualQuestionnaireLinkedForNonCCSCase() {
+  public void testIndividualQuestionnaireLinkedForCase() {
     // GIVEN
     ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
 
@@ -279,17 +172,18 @@ public class QuestionnaireLinkedServiceTest {
     Case testHHCase = getRandomCase();
     testHHCase.setCaseId(TEST_CASE_ID_1);
     testHHCase.setReceiptReceived(false);
-    testHHCase.setCcsCase(false);
+    testHHCase.setSurvey("CENSUS");
 
     Case testHICase = getRandomCaseWithUacQidLinks(1);
     testHICase.setCaseId(TEST_CASE_ID_2);
     testHHCase.setReceiptReceived(false);
-    testHICase.setCcsCase(false);
+    testHICase.setSurvey("CENSUS");
 
     UacQidLink testHIUacQidLink = testHICase.getUacQidLinks().get(0);
     testHIUacQidLink.setQid(TEST_HI_QID);
     testHIUacQidLink.setActive(true);
     testHIUacQidLink.setCaze(null);
+    testHIUacQidLink.setCcsCase(false);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     when(uacService.findByQid(TEST_HI_QID)).thenReturn(testHIUacQidLink);
@@ -311,13 +205,15 @@ public class QuestionnaireLinkedServiceTest {
     inOrder.verify(caseService).emitCaseCreatedEvent(caseCaptor.capture());
     Case actualCase = caseCaptor.getValue();
     assertThat(actualCase.getCaseId()).isEqualTo(TEST_CASE_ID_2);
-    assertThat(actualCase.isCcsCase()).isFalse();
+    assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
     verifyNoMoreInteractions(caseService);
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
     inOrder.verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
     assertThat(actualUacQidLink.getCaze()).isEqualTo(testHICase);
+    assertThat(actualUacQidLink.isCcsCase()).isFalse();
+    assertThat(actualUacQidLink.getCaze().getSurvey()).isEqualTo("CENSUS");
     verifyNoMoreInteractions(uacService);
 
     verify(eventLogger)

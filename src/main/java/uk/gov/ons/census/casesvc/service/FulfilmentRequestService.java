@@ -120,6 +120,7 @@ public class FulfilmentRequestService {
     individualResponseCase.setMsoa(parentCase.getMsoa());
     individualResponseCase.setLad(parentCase.getLad());
     individualResponseCase.setRegion(parentCase.getRegion());
+    individualResponseCase.setSurvey(parentCase.getSurvey());
 
     return caseService.saveNewCaseAndStampCaseRef(individualResponseCase);
   }

@@ -13,6 +13,7 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 
 @Service
 public class RefusalService {
+
   private static final String REFUSAL_RECEIVED = "Refusal Received";
   private final CaseService caseService;
   private final EventLogger eventLogger;
@@ -27,12 +28,7 @@ public class RefusalService {
     RefusalDTO refusal = refusalEvent.getPayload().getRefusal();
     Case caze = caseService.getCaseByCaseId(UUID.fromString(refusal.getCollectionCase().getId()));
     caze.setRefusalReceived(true);
-
-    if (caze.isCcsCase()) {
-      caseService.saveCase(caze);
-    } else {
-      caseService.saveAndEmitCaseUpdatedEvent(caze);
-    }
+    caseService.saveAndEmitCaseUpdatedEvent(caze);
 
     eventLogger.logCaseEvent(
         caze,
