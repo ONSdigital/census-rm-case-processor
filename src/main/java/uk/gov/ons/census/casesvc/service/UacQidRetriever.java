@@ -16,10 +16,10 @@ public class UacQidRetriever {
   private final UacQidServiceClient uacQidServiceClient;
 
   @Value("${uacservice.uacqid-cache-min}")
-  private int cacheMin = 50;
+  private int cacheMin;
 
   @Value("${uacservice.uacqid-fetch-count}")
-  private int cacheFetch = 100;
+  private int cacheMax;
 
   public UacQidRetriever(UacQidServiceClient uacQidServiceClient) {
     this.uacQidServiceClient = uacQidServiceClient;
@@ -48,14 +48,13 @@ public class UacQidRetriever {
   public void populateCache() {
     int[] questionnaireTypes = {1, 2, 4, 21, 22, 23, 24, 31, 32, 34};
 
-    // could make QuestionnaireTypes a List and parallel it.  Should maybe do this for the topping
-    // up?
+    // could make QuestionnaireTypes a List and parallel it.
 
     long start_time = System.nanoTime();
 
     for (int questionnaireType : questionnaireTypes) {
       BlockingQueue<UacQidDTO> newUacQidTypeQueue = new LinkedBlockingDeque<>();
-      newUacQidTypeQueue.addAll(uacQidServiceClient.getUacQids(questionnaireType, cacheFetch));
+      newUacQidTypeQueue.addAll(uacQidServiceClient.getUacQids(questionnaireType, cacheMax));
       uacQidLinkQueueMap.put(questionnaireType, newUacQidTypeQueue);
     }
 
@@ -67,17 +66,18 @@ public class UacQidRetriever {
   }
 
   @Scheduled(fixedRate = 500, initialDelay = 0)
-  public void startCacheTopperUp() {
-    // Check every n milliseconds that each Queue has minimum values in it.
+  public void checkEachUacQidPairQueueIsToppedUp() {
+    // is it faster for this to filter for us, probably not, but will try anyway;
 
     uacQidLinkQueueMap
         .entrySet()
         .parallelStream()
+        .filter(e -> e.getValue().size() < cacheMin)
         .forEach(
             entry -> {
-              if (entry.getValue().size() < cacheMin) {
-                entry.getValue().addAll(uacQidServiceClient.getUacQids(entry.getKey(), cacheFetch));
-              }
+              int cacheFetch = cacheMax - entry.getValue().size();
+              System.out.println("Topping up " + entry.getKey() + " by " + cacheFetch);
+              entry.getValue().addAll(uacQidServiceClient.getUacQids(entry.getKey(), cacheFetch));
             });
   }
 }

@@ -128,7 +128,7 @@ public class SampleReceiverIT {
 
     // WHEN
 
-    int expectedSize = 10000;
+    int expectedSize = 1000;
 
     // E") && !country.equals("W") && !country.equals("N"
 
