@@ -21,13 +21,11 @@ public class UacQidRetriever {
   @Value("${uacservice.uacqid-fetch-count}")
   private int cacheMax;
 
+  private Map<Integer, BlockingQueue<UacQidDTO>> uacQidLinkQueueMap = new ConcurrentHashMap<>();
+
   public UacQidRetriever(UacQidServiceClient uacQidServiceClient) {
     this.uacQidServiceClient = uacQidServiceClient;
   }
-
-  // Does this need to be concurrent to stop 2 threads adding at the same time? slower but safer
-
-  private Map<Integer, BlockingQueue<UacQidDTO>> uacQidLinkQueueMap = new ConcurrentHashMap<>();
 
   public UacQidDTO generateUacQid(int questionnaireType) {
 
@@ -37,7 +35,6 @@ public class UacQidRetriever {
     }
 
     try {
-      // Take will wait until one is available
       return uacQidLinkQueueMap.get(questionnaireType).take();
     } catch (InterruptedException e) {
       throw new RuntimeException(e.getMessage());

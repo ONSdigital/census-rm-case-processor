@@ -62,7 +62,7 @@ public class UacService {
 
   public UacQidLink buildUacQidLink(Case caze, int questionnaireType, UUID batchId) {
     UacQidDTO uacQid = uacQidRetriever.generateUacQid(questionnaireType);
-    // UacQidDTO uacQid = uacQidServiceClient.generateUacQid(questionnaireType);
+    //    UacQidDTO uacQid = uacQidServiceClient.generateUacQid(questionnaireType);
 
     return buildUacQidLink(caze, batchId, uacQid.getUac(), uacQid.getQid());
   }
