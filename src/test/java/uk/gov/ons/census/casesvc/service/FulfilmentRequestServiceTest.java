@@ -128,14 +128,19 @@ public class FulfilmentRequestServiceTest {
     parentCase.setAddressType("HH");
 
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
-    managementEvent.getPayload().getFulfilmentRequest().setCaseId(parentCase.getCaseId().toString());
+    managementEvent
+        .getPayload()
+        .getFulfilmentRequest()
+        .setCaseId(parentCase.getCaseId().toString());
     managementEvent.getPayload().getFulfilmentRequest().setFulfilmentCode(individualResponseCode);
-    managementEvent.getPayload().getFulfilmentRequest().setIndividualCaseId(UUID.randomUUID().toString());
+    managementEvent
+        .getPayload()
+        .getFulfilmentRequest()
+        .setIndividualCaseId(UUID.randomUUID().toString());
 
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
-    when(caseService.getCaseByCaseId(eq(parentCase.getCaseId())))
-        .thenReturn(parentCase);
+    when(caseService.getCaseByCaseId(eq(parentCase.getCaseId()))).thenReturn(parentCase);
 
     // This simulates the DB creating the ID, which it does when the case is persisted
     when(caseService.saveNewCaseAndStampCaseRef(any(Case.class)))
