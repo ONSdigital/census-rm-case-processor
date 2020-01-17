@@ -3,6 +3,7 @@ package uk.gov.ons.census.casesvc.messaging;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -78,7 +79,7 @@ public class SampleReceiverIT {
     createCaseSample.setPostcode("ABC123");
     createCaseSample.setRegion("E12000009");
     createCaseSample.setTreatmentCode("HH_LF3R2E");
-
+    createCaseSample.setCeExpectedCapacity(null);
     // WHEN
     rabbitQueueHelper.sendMessage(inboundQueue, createCaseSample);
 
@@ -102,6 +103,7 @@ public class SampleReceiverIT {
     List<Case> caseList = caseRepository.findAll();
     assertEquals(1, caseList.size());
     assertEquals("ABC123", caseList.get(0).getPostcode());
+    assertNull(caseList.get(0).getCeExpectedCapacity());
 
     List<Event> eventList = eventRepository.findAll();
     assertThat(eventList.size()).isEqualTo(1);

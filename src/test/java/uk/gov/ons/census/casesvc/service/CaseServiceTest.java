@@ -80,7 +80,7 @@ public class CaseServiceTest {
     createCaseSample.setTreatmentCode(TEST_TREATMENT_CODE);
     createCaseSample.setFieldCoordinatorId(FIELD_CORD_ID);
     createCaseSample.setFieldOfficerId(FIELD_OFFICER_ID);
-    createCaseSample.setCeExpectedCapacity(CE_CAPACITY.toString());
+    createCaseSample.setCeExpectedCapacity(CE_CAPACITY);
     createCaseSample.setAddressType(TEST_ADDRESS_TYPE);
 
     ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
