@@ -40,6 +40,28 @@ public class QuestionnaireTypeHelperTest {
   }
 
   @Test
+  public void testValidQuestionnaireTypeEnglandSPG() {
+    // Given
+
+    // When
+    int actualQuestionnaireType = QuestionnaireTypeHelper.calculateQuestionnaireType("SPG_QDHSE");
+
+    // Then
+    assertEquals(1, actualQuestionnaireType);
+  }
+
+  @Test
+  public void testValidQuestionnaireTypeWalesSPG() {
+    // Given
+
+    // When
+    int actualQuestionnaireType = QuestionnaireTypeHelper.calculateQuestionnaireType("SPG_QDHSW");
+
+    // Then
+    assertEquals(2, actualQuestionnaireType);
+  }
+
+  @Test
   public void testValidQuestionnaireTypeEnglandIndividual() {
     // Given
 

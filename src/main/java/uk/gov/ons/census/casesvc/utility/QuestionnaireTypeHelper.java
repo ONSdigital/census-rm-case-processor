@@ -45,7 +45,7 @@ public class QuestionnaireTypeHelper {
           String.format("Unknown Country for treatment code %s", treatmentCode));
     }
 
-    if (treatmentCode.startsWith("HH")) {
+    if (treatmentCode.startsWith("HH") || treatmentCode.startsWith("SPG")) {
       switch (country) {
         case "E":
           return 1;
