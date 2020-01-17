@@ -122,15 +122,7 @@ public class SampleReceiverIT {
   @Test
   public void test1000ExercisingUacQidCaching() throws InterruptedException, IOException {
     // GIVEN
-    BlockingQueue<String> rhCaseMessages = rabbitQueueHelper.listen(rhCaseQueue);
-    BlockingQueue<String> rhUacMessages = rabbitQueueHelper.listen(rhUacQueue);
-    BlockingQueue<String> actionMessages = rabbitQueueHelper.listen(actionSchedulerQueue);
-
-    // WHEN
-
     int expectedSize = 1000;
-
-    // E") && !country.equals("W") && !country.equals("N"
 
     List<String> treatmentCodes =
         Arrays.asList(
@@ -145,8 +137,6 @@ public class SampleReceiverIT {
             "CE_LF3R2N");
     Random random = new Random();
 
-    long start_time = System.nanoTime();
-
     List<CreateCaseSample> createCaseSamples = new ArrayList<>();
 
     for (int i = 0; i < expectedSize; i++) {
@@ -158,19 +148,13 @@ public class SampleReceiverIT {
       createCaseSamples.add(createCaseSample);
     }
 
+    // WHEN
     createCaseSamples.stream()
         .parallel()
         .forEach(
             c -> {
               rabbitQueueHelper.sendMessage(inboundQueue, c);
             });
-
-    long end_time = System.nanoTime();
-    double difference = (end_time - start_time) / 1e6;
-
-    System.out.println("Publishing all msgs took: " + difference / 1000 + " seconds");
-
-    start_time = System.nanoTime();
 
     for (int i = 0; i < 1000; i++) {
       Thread.sleep(1000);
@@ -183,15 +167,9 @@ public class SampleReceiverIT {
       break;
     }
 
-    end_time = System.nanoTime();
-    difference = (end_time - start_time) / 1e6;
-
-    System.out.println("Consuming all msgs took: " + difference / 1000 + " seconds");
-
     assertEquals(expectedSize, caseRepository.findAll().size());
 
     // Check all used values are unique
-
     List<UacQidLink> uacQids = uacQidLinkRepository.findAll();
 
     Set<String> uniqueQids = uacQids.stream().map(UacQidLink::getQid).collect(Collectors.toSet());

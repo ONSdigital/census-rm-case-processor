@@ -45,36 +45,26 @@ public class UacQidRetriever {
   public void populateCache() {
     int[] questionnaireTypes = {1, 2, 4, 21, 22, 23, 24, 31, 32, 34};
 
-    // could make QuestionnaireTypes a List and parallel it.
-
-    long start_time = System.nanoTime();
-
     for (int questionnaireType : questionnaireTypes) {
       BlockingQueue<UacQidDTO> newUacQidTypeQueue = new LinkedBlockingDeque<>();
       newUacQidTypeQueue.addAll(uacQidServiceClient.getUacQids(questionnaireType, cacheMax));
       uacQidLinkQueueMap.put(questionnaireType, newUacQidTypeQueue);
     }
-
-    long end_time = System.nanoTime();
-    double difference = (end_time - start_time) / 1e6;
-
-    System.out.println(
-        "Initial population of UacQid Cache took: " + difference / 1000 + " seconds");
   }
 
   @Scheduled(fixedRate = 500, initialDelay = 0)
   public void checkEachUacQidPairQueueIsToppedUp() {
-    // is it faster for this to filter for us, probably not, but will try anyway;
-
     uacQidLinkQueueMap
         .entrySet()
         .parallelStream()
         .filter(e -> e.getValue().size() < cacheMin)
         .forEach(
             entry -> {
-              int cacheFetch = cacheMax - entry.getValue().size();
-              System.out.println("Topping up " + entry.getKey() + " by " + cacheFetch);
-              entry.getValue().addAll(uacQidServiceClient.getUacQids(entry.getKey(), cacheFetch));
+              entry
+                  .getValue()
+                  .addAll(
+                      uacQidServiceClient.getUacQids(
+                          entry.getKey(), cacheMax - entry.getValue().size()));
             });
   }
 }
