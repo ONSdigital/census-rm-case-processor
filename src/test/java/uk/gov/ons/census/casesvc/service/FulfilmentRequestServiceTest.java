@@ -25,6 +25,7 @@ import uk.gov.ons.census.casesvc.model.entity.CaseState;
 public class FulfilmentRequestServiceTest {
   private static final String HOUSEHOLD_RESPONSE_ADDRESS_TYPE = "HH";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_ADDRESS_TYPE = "HI";
+  private static final String RM_HOUSEHOLD_INDIVIDUAL_TELEPHONE_CAPTURE = "RM_TC_HI";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_SMS = "UACIT1";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH_SMS = "UACIT2";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH_SMS = "UACIT2W";
@@ -72,45 +73,50 @@ public class FulfilmentRequestServiceTest {
 
   @Test
   public void testGoodIndividualResponseFulfilmentRequestForUACIT1() {
-    testIndividualResponseCodeSMS(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_SMS);
+    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_SMS);
   }
 
   @Test
   public void testGoodIndividualResponseFulfilmentRequestForUACIT2() {
-    testIndividualResponseCodeSMS(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH_SMS);
+    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH_SMS);
   }
 
   @Test
   public void testGoodIndividualResponseFulfilmentRequestForUACIT2W() {
-    testIndividualResponseCodeSMS(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH_SMS);
+    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH_SMS);
   }
 
   @Test
   public void testGoodIndividualResponseFulfilmentRequestForUACIT4() {
-    testIndividualResponseCodeSMS(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NI_SMS);
+    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NI_SMS);
   }
 
   @Test
   public void testGoodIndividualResponseFulfilmentRequestForP_OR_I1() {
-    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_PRINT);
+    testIndividualResponseCodePrinter(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_PRINT);
   }
 
   @Test
   public void testGoodIndividualResponseFulfilmentRequestForP_OR_I2() {
-    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH_PRINT);
+    testIndividualResponseCodePrinter(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH_PRINT);
   }
 
   @Test
   public void testGoodIndividualResponseFulfilmentRequestForP_OR_I2W() {
-    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH_PRINT);
+    testIndividualResponseCodePrinter(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH_PRINT);
   }
 
   @Test
   public void testGoodIndividualResponseFulfilmentRequestForP_OR_I4() {
-    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NI_PRINT);
+    testIndividualResponseCodePrinter(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NI_PRINT);
   }
 
-  private void testIndividualResponseCode(String individualResponseCode) {
+  @Test
+  public void testGoodIndividualResponseFulfilmentRequestForRM_TC_HI() {
+    testIndividualResponseCode(RM_HOUSEHOLD_INDIVIDUAL_TELEPHONE_CAPTURE);
+  }
+
+  private void testIndividualResponseCodePrinter(String individualResponseCode) {
     // Given
     Case parentCase = getRandomCase();
     parentCase.setUacQidLinks(new ArrayList<>());
@@ -122,16 +128,19 @@ public class FulfilmentRequestServiceTest {
     parentCase.setAddressType("HH");
 
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
-    FulfilmentRequestDTO expectedFulfilmentRequest =
-        managementEvent.getPayload().getFulfilmentRequest();
-    expectedFulfilmentRequest.setCaseId(parentCase.getCaseId().toString());
-    expectedFulfilmentRequest.setFulfilmentCode(individualResponseCode);
-    expectedFulfilmentRequest.setIndividualCaseId(UUID.randomUUID().toString());
+    managementEvent
+        .getPayload()
+        .getFulfilmentRequest()
+        .setCaseId(parentCase.getCaseId().toString());
+    managementEvent.getPayload().getFulfilmentRequest().setFulfilmentCode(individualResponseCode);
+    managementEvent
+        .getPayload()
+        .getFulfilmentRequest()
+        .setIndividualCaseId(UUID.randomUUID().toString());
 
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
-    when(caseService.getCaseByCaseId(UUID.fromString(expectedFulfilmentRequest.getCaseId())))
-        .thenReturn(parentCase);
+    when(caseService.getCaseByCaseId(eq(parentCase.getCaseId()))).thenReturn(parentCase);
 
     // This simulates the DB creating the ID, which it does when the case is persisted
     when(caseService.saveNewCaseAndStampCaseRef(any(Case.class)))
@@ -169,7 +178,7 @@ public class FulfilmentRequestServiceTest {
     checkIndivdualFulfilmentRequestCase(parentCase, actualChildCase, managementEvent);
   }
 
-  private void testIndividualResponseCodeSMS(String individualResponseCode) {
+  private void testIndividualResponseCode(String individualResponseCode) {
     // Given
     Case parentCase = getRandomCase();
     parentCase.setUacQidLinks(new ArrayList<>());
