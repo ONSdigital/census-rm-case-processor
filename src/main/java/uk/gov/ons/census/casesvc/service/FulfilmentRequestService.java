@@ -36,6 +36,7 @@ public class FulfilmentRequestService {
     individualResponseRequestCodes =
         new HashSet<>(
             Arrays.asList(
+                "RM_TC_HI", // RM_HOUSEHOLD_INDIVIDUAL_TELEPHONE_CAPTURE
                 "UACIT1", // HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_SMS,
                 "UACIT2", // HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH_SMS,
                 "UACIT2W", // HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH_SMS,
