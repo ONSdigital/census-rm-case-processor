@@ -7,6 +7,7 @@ import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManage
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
@@ -41,6 +42,7 @@ import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @RunWith(SpringJUnit4ClassRunner.class)
 public class RefusalReceiverIT {
+
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
 
   @Value("${queueconfig.refusal-response-inbound-queue}")
@@ -82,6 +84,9 @@ public class RefusalReceiverIT {
     caze.setEvents(null);
     caseRepository.saveAndFlush(caze);
 
+    OffsetDateTime cazeCreatedTime =
+        caseRepository.findByCaseId(TEST_CASE_ID).get().getCreatedDateTime();
+
     ResponseManagementEvent managementEvent = getTestResponseManagementRefusalEvent();
     managementEvent.getEvent().setTransactionId(UUID.randomUUID());
     RefusalDTO expectedRefusal = managementEvent.getPayload().getRefusal();
@@ -108,6 +113,7 @@ public class RefusalReceiverIT {
     Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
     assertThat(actualCase.isRefusalReceived()).isTrue();
+    assertThat(actualCase.getLastUpdated()).isNotEqualTo(cazeCreatedTime);
 
     List<Event> events = eventRepository.findAll();
     assertThat(events.size()).isEqualTo(1);

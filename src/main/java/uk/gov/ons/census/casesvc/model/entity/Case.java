@@ -13,6 +13,7 @@ import javax.persistence.Table;
 import lombok.Data;
 import org.hibernate.annotations.Generated;
 import org.hibernate.annotations.GenerationTime;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Data
 @Entity
@@ -115,4 +116,6 @@ public class Case {
 
   @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
   private boolean undeliveredAsAddressed;
+
+  @Column @UpdateTimestamp private OffsetDateTime lastUpdated;
 }
