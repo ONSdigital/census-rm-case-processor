@@ -45,23 +45,4 @@ public class UacQidServiceClient {
         .build()
         .encode();
   }
-
-  //  public UacQidDTO generateUacQid(int questionnaireType) {
-  //
-  //    RestTemplate restTemplate = new RestTemplate();
-  //    UriComponents uriComponents = createUriComponents(questionnaireType);
-  //    ResponseEntity<UacQidDTO> responseEntity =
-  //        restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, null, UacQidDTO.class);
-  //    return responseEntity.getBody();
-  //  }
-  //
-  //  private UriComponents createUriComponents(int questionnaireType) {
-  //    return UriComponentsBuilder.newInstance()
-  //        .scheme(scheme)
-  //        .host(host)
-  //        .port(port)
-  //        .queryParam("questionnaireType", questionnaireType)
-  //        .build()
-  //        .encode();
-  //  }
 }

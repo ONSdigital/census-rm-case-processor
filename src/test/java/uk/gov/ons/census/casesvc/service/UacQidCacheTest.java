@@ -52,7 +52,8 @@ public class UacQidCacheTest {
               actualUacQidDtos2.add(underTest.getUacQidPair(2));
             });
 
-    // As we're dealing with different Threads and it can be called  20-21 times
+    // As we're dealing with different Threads and it can be called a slightly different number of
+    // times
     verify(uacQidServiceClient, atLeast(2000)).getUacQids(1, CACHE_FETCH);
     verify(uacQidServiceClient, atLeast(2000)).getUacQids(1, CACHE_FETCH);
     assertThat(actualUacQidDtos1.get(0)).isEqualTo(uacQids1.get(0));
@@ -61,27 +62,19 @@ public class UacQidCacheTest {
 
   @Test
   public void testToppingUpRecoversFromFailure() {
-    // given
-    final int throwRunTimeExceptionFetchCount = 4;
-    ReflectionTestUtils.setField(underTest, "cacheFetch", throwRunTimeExceptionFetchCount);
+    ReflectionTestUtils.setField(underTest, "cacheFetch", CACHE_FETCH);
     ReflectionTestUtils.setField(underTest, "cacheMin", CACHE_MIN);
     ReflectionTestUtils.setField(underTest, "uacQidGetTimout", 2);
 
     List<UacQidDTO> uacQids1 = populateUacQidList(1, CACHE_FETCH);
 
-    // This mimics the uacServiceClient not working, and the cache not topping up This mimics a
-    // failure to top up the cache
-    when(uacQidServiceClient.getUacQids(1, throwRunTimeExceptionFetchCount))
-        .thenThrow(new RuntimeException("api failed"));
+    when(uacQidServiceClient.getUacQids(1, CACHE_FETCH))
+        .thenThrow(new RuntimeException("api failed"))
+        .thenReturn(uacQids1);
 
     try {
       underTest.getUacQidPair(1);
     } catch (RuntimeException e) {
-
-      ReflectionTestUtils.setField(underTest, "cacheFetch", CACHE_FETCH);
-
-      // This mimics the uacServiceClient now working
-      when(uacQidServiceClient.getUacQids(1, CACHE_FETCH)).thenReturn(uacQids1);
       UacQidDTO actualUacQidDTO = underTest.getUacQidPair(1);
       assertThat(actualUacQidDTO).isEqualTo(uacQids1.get(0));
 
