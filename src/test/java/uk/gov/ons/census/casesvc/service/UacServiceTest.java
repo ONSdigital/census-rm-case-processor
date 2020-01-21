@@ -23,9 +23,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
-import uk.gov.ons.census.casesvc.client.UacQidServiceClient;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
+import uk.gov.ons.census.casesvc.model.dto.UacQidDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
@@ -42,7 +42,7 @@ public class UacServiceTest {
 
   @Mock RabbitTemplate rabbitTemplate;
 
-  @Mock UacQidServiceClient uacQidServiceClient;
+  @Mock UacQidCache uacCache;
 
   @Mock EventLogger eventLogger;
 
@@ -73,7 +73,7 @@ public class UacServiceTest {
     UacQidDTO uacQidDTO = new UacQidDTO();
     uacQidDTO.setUac("testuac");
     uacQidDTO.setQid("01testqid");
-    when(uacQidServiceClient.generateUacQid(anyInt())).thenReturn(uacQidDTO);
+    when(uacCache.getUacQidPair(anyInt())).thenReturn(uacQidDTO);
 
     // When
     UacQidLink result;
@@ -81,7 +81,7 @@ public class UacServiceTest {
 
     // Then
     assertEquals("01", result.getQid().substring(0, 2));
-    verify(uacQidServiceClient).generateUacQid(eq(1));
+    verify(uacCache).getUacQidPair(eq(1));
   }
 
   @Test
@@ -206,7 +206,7 @@ public class UacServiceTest {
     expectedCase.setSurvey("CCS");
 
     UacQidDTO expectedUacQidDTO = new UacQidDTO();
-    when(uacQidServiceClient.generateUacQid(71)).thenReturn(expectedUacQidDTO);
+    when(uacCache.getUacQidPair(71)).thenReturn(expectedUacQidDTO);
 
     // When
     UacQidLink actualUacQidLink = underTest.createUacQidLinkedToCCSCase(expectedCase);
