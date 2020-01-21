@@ -25,8 +25,10 @@ public class EventLogger {
       String eventDescription,
       EventType eventType,
       EventDTO event,
-      String eventPayload) {
-    Event loggedEvent = buildEvent(eventDate, eventDescription, eventType, event, eventPayload);
+      String eventPayload,
+      OffsetDateTime messageTimestamp) {
+    Event loggedEvent =
+        buildEvent(eventDate, eventDescription, eventType, event, eventPayload, messageTimestamp);
     loggedEvent.setCaze(caze);
 
     eventRepository.save(loggedEvent);
@@ -38,8 +40,10 @@ public class EventLogger {
       String eventDescription,
       EventType eventType,
       EventDTO event,
-      String eventPayload) {
-    Event loggedEvent = buildEvent(eventDate, eventDescription, eventType, event, eventPayload);
+      String eventPayload,
+      OffsetDateTime messageTimestamp) {
+    Event loggedEvent =
+        buildEvent(eventDate, eventDescription, eventType, event, eventPayload, messageTimestamp);
     loggedEvent.setUacQidLink(uacQidLink);
 
     eventRepository.save(loggedEvent);
@@ -50,7 +54,8 @@ public class EventLogger {
       String eventDescription,
       EventType eventType,
       EventDTO event,
-      String eventPayload) {
+      String eventPayload,
+      OffsetDateTime messageTimestamp) {
     Event loggedEvent = new Event();
 
     loggedEvent.setId(UUID.randomUUID());
@@ -62,6 +67,7 @@ public class EventLogger {
     loggedEvent.setEventSource(event.getSource());
     loggedEvent.setEventTransactionId(event.getTransactionId());
     loggedEvent.setEventPayload(eventPayload);
+    loggedEvent.setMessageTimestamp(messageTimestamp);
     return loggedEvent;
   }
 }

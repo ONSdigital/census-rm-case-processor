@@ -32,19 +32,19 @@ public class RefusalServiceTest {
   @InjectMocks RefusalService underTest;
 
   @Test
-  public void testRefusalForNonCCSCase() {
+  public void testRefusalForCase() {
     // GIVEN
     ResponseManagementEvent managementEvent = getTestResponseManagementRefusalEvent();
     CollectionCase collectionCase = managementEvent.getPayload().getRefusal().getCollectionCase();
     collectionCase.setId(TEST_CASE_ID.toString());
     collectionCase.setRefusalReceived(false);
     Case testCase = getRandomCase();
-    testCase.setCcsCase(false);
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     when(caseService.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);
 
     // WHEN
-    underTest.processRefusal(managementEvent);
+    underTest.processRefusal(managementEvent, messageTimestamp);
 
     // THEN
 
@@ -66,45 +66,8 @@ public class RefusalServiceTest {
             eq(REFUSAL_RECEIVED),
             eq(EventType.REFUSAL_RECEIVED),
             eq(managementEvent.getEvent()),
-            anyString());
-    verifyNoMoreInteractions(eventLogger);
-  }
-
-  @Test
-  public void testRefusalForCCSCase() {
-    // GIVEN
-    ResponseManagementEvent managementEvent = getTestResponseManagementRefusalEvent();
-    CollectionCase collectionCase = managementEvent.getPayload().getRefusal().getCollectionCase();
-    collectionCase.setId(TEST_CASE_ID.toString());
-    collectionCase.setRefusalReceived(false);
-    Case testCase = getRandomCase();
-    testCase.setCcsCase(true);
-
-    when(caseService.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);
-
-    // WHEN
-    underTest.processRefusal(managementEvent);
-
-    // THEN
-    InOrder inOrder = inOrder(caseService, eventLogger);
-
-    inOrder.verify(caseService).getCaseByCaseId(any(UUID.class));
-
-    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    inOrder.verify(caseService).saveCase(caseArgumentCaptor.capture());
-    Case actualCase = caseArgumentCaptor.getValue();
-    assertThat(actualCase.isRefusalReceived()).isTrue();
-    assertThat(actualCase.isCcsCase()).isTrue();
-    verifyNoMoreInteractions(caseService);
-
-    verify(eventLogger, times(1))
-        .logCaseEvent(
-            eq(testCase),
-            any(OffsetDateTime.class),
-            eq(REFUSAL_RECEIVED),
-            eq(EventType.REFUSAL_RECEIVED),
-            eq(managementEvent.getEvent()),
-            anyString());
+            anyString(),
+            eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
   }
 }

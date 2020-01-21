@@ -25,6 +25,7 @@ import uk.gov.ons.census.casesvc.model.entity.CaseState;
 public class FulfilmentRequestServiceTest {
   private static final String HOUSEHOLD_RESPONSE_ADDRESS_TYPE = "HH";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_ADDRESS_TYPE = "HI";
+  private static final String RM_HOUSEHOLD_INDIVIDUAL_TELEPHONE_CAPTURE = "RM_TC_HI";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_SMS = "UACIT1";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH_SMS = "UACIT2";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH_SMS = "UACIT2W";
@@ -47,6 +48,8 @@ public class FulfilmentRequestServiceTest {
     FulfilmentRequestDTO expectedFulfilmentRequest =
         managementEvent.getPayload().getFulfilmentRequest();
 
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+
     Case expectedCase = getRandomCase();
     expectedFulfilmentRequest.setCaseId(expectedCase.getCaseId().toString());
 
@@ -54,7 +57,7 @@ public class FulfilmentRequestServiceTest {
         .thenReturn(expectedCase);
 
     // when
-    underTest.processFulfilmentRequest(managementEvent);
+    underTest.processFulfilmentRequest(managementEvent, messageTimestamp);
 
     // then
     verify(eventLogger, times(1))
@@ -64,47 +67,115 @@ public class FulfilmentRequestServiceTest {
             eq("Fulfilment Request Received"),
             eq(FULFILMENT_REQUESTED),
             eq(managementEvent.getEvent()),
-            anyString());
+            anyString(),
+            eq(messageTimestamp));
   }
 
   @Test
   public void testGoodIndividualResponseFulfilmentRequestForUACIT1() {
-    testIndividualResponseCodeSMS(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_SMS);
+    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_SMS);
   }
 
   @Test
   public void testGoodIndividualResponseFulfilmentRequestForUACIT2() {
-    testIndividualResponseCodeSMS(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH_SMS);
+    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH_SMS);
   }
 
   @Test
   public void testGoodIndividualResponseFulfilmentRequestForUACIT2W() {
-    testIndividualResponseCodeSMS(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH_SMS);
+    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH_SMS);
   }
 
   @Test
   public void testGoodIndividualResponseFulfilmentRequestForUACIT4() {
-    testIndividualResponseCodeSMS(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NI_SMS);
+    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NI_SMS);
   }
 
   @Test
   public void testGoodIndividualResponseFulfilmentRequestForP_OR_I1() {
-    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_PRINT);
+    testIndividualResponseCodePrinter(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_PRINT);
   }
 
   @Test
   public void testGoodIndividualResponseFulfilmentRequestForP_OR_I2() {
-    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH_PRINT);
+    testIndividualResponseCodePrinter(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH_PRINT);
   }
 
   @Test
   public void testGoodIndividualResponseFulfilmentRequestForP_OR_I2W() {
-    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH_PRINT);
+    testIndividualResponseCodePrinter(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH_PRINT);
   }
 
   @Test
   public void testGoodIndividualResponseFulfilmentRequestForP_OR_I4() {
-    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NI_PRINT);
+    testIndividualResponseCodePrinter(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NI_PRINT);
+  }
+
+  @Test
+  public void testGoodIndividualResponseFulfilmentRequestForRM_TC_HI() {
+    testIndividualResponseCode(RM_HOUSEHOLD_INDIVIDUAL_TELEPHONE_CAPTURE);
+  }
+
+  private void testIndividualResponseCodePrinter(String individualResponseCode) {
+    // Given
+    Case parentCase = getRandomCase();
+    parentCase.setUacQidLinks(new ArrayList<>());
+    parentCase.setEvents(new ArrayList<>());
+    parentCase.setCreatedDateTime(OffsetDateTime.now().minusDays(1));
+    parentCase.setState(null);
+    parentCase.setReceiptReceived(true);
+    parentCase.setRefusalReceived(true);
+    parentCase.setAddressType("HH");
+
+    ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
+    managementEvent
+        .getPayload()
+        .getFulfilmentRequest()
+        .setCaseId(parentCase.getCaseId().toString());
+    managementEvent.getPayload().getFulfilmentRequest().setFulfilmentCode(individualResponseCode);
+    managementEvent
+        .getPayload()
+        .getFulfilmentRequest()
+        .setIndividualCaseId(UUID.randomUUID().toString());
+
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+
+    when(caseService.getCaseByCaseId(eq(parentCase.getCaseId()))).thenReturn(parentCase);
+
+    // This simulates the DB creating the ID, which it does when the case is persisted
+    when(caseService.saveNewCaseAndStampCaseRef(any(Case.class)))
+        .then(
+            invocation -> {
+              Case caze = invocation.getArgument(0);
+              caze.setSecretSequenceNumber(123);
+              caze.setCaseRef(666);
+              return caze;
+            });
+
+    // when
+    underTest.processFulfilmentRequest(managementEvent, messageTimestamp);
+
+    // then
+    verify(eventLogger, times(1))
+        .logCaseEvent(
+            eq(parentCase),
+            eq(managementEvent.getEvent().getDateTime()),
+            eq("Fulfilment Request Received"),
+            eq(FULFILMENT_REQUESTED),
+            eq(managementEvent.getEvent()),
+            anyString(),
+            eq(messageTimestamp));
+
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    ArgumentCaptor<FulfilmentRequestDTO> fulfilmentRequestArgumentCaptor =
+        ArgumentCaptor.forClass(FulfilmentRequestDTO.class);
+    verify(caseService)
+        .emitCaseCreatedEvent(
+            caseArgumentCaptor.capture(), fulfilmentRequestArgumentCaptor.capture());
+    assertThat(fulfilmentRequestArgumentCaptor.getValue().getFulfilmentCode())
+        .isEqualTo(individualResponseCode);
+    Case actualChildCase = caseArgumentCaptor.getValue();
+    checkIndivdualFulfilmentRequestCase(parentCase, actualChildCase, managementEvent);
   }
 
   private void testIndividualResponseCode(String individualResponseCode) {
@@ -124,6 +195,7 @@ public class FulfilmentRequestServiceTest {
     expectedFulfilmentRequest.setCaseId(parentCase.getCaseId().toString());
     expectedFulfilmentRequest.setFulfilmentCode(individualResponseCode);
     expectedFulfilmentRequest.setIndividualCaseId(UUID.randomUUID().toString());
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     when(caseService.getCaseByCaseId(UUID.fromString(expectedFulfilmentRequest.getCaseId())))
         .thenReturn(parentCase);
@@ -139,7 +211,7 @@ public class FulfilmentRequestServiceTest {
             });
 
     // when
-    underTest.processFulfilmentRequest(managementEvent);
+    underTest.processFulfilmentRequest(managementEvent, messageTimestamp);
 
     // then
     verify(eventLogger, times(1))
@@ -149,63 +221,8 @@ public class FulfilmentRequestServiceTest {
             eq("Fulfilment Request Received"),
             eq(FULFILMENT_REQUESTED),
             eq(managementEvent.getEvent()),
-            anyString());
-
-    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    ArgumentCaptor<FulfilmentRequestDTO> fulfilmentRequestArgumentCaptor =
-        ArgumentCaptor.forClass(FulfilmentRequestDTO.class);
-    verify(caseService)
-        .emitCaseCreatedEvent(
-            caseArgumentCaptor.capture(), fulfilmentRequestArgumentCaptor.capture());
-    assertThat(fulfilmentRequestArgumentCaptor.getValue().getFulfilmentCode())
-        .isEqualTo(individualResponseCode);
-    Case actualChildCase = caseArgumentCaptor.getValue();
-    checkIndivdualFulfilmentRequestCase(parentCase, actualChildCase, managementEvent);
-  }
-
-  private void testIndividualResponseCodeSMS(String individualResponseCode) {
-    // Given
-    Case parentCase = getRandomCase();
-    parentCase.setUacQidLinks(new ArrayList<>());
-    parentCase.setEvents(new ArrayList<>());
-    parentCase.setCreatedDateTime(OffsetDateTime.now().minusDays(1));
-    parentCase.setState(null);
-    parentCase.setReceiptReceived(true);
-    parentCase.setRefusalReceived(true);
-    parentCase.setAddressType("HH");
-
-    ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
-    FulfilmentRequestDTO expectedFulfilmentRequest =
-        managementEvent.getPayload().getFulfilmentRequest();
-    expectedFulfilmentRequest.setCaseId(parentCase.getCaseId().toString());
-    expectedFulfilmentRequest.setFulfilmentCode(individualResponseCode);
-    expectedFulfilmentRequest.setIndividualCaseId(UUID.randomUUID().toString());
-
-    when(caseService.getCaseByCaseId(UUID.fromString(expectedFulfilmentRequest.getCaseId())))
-        .thenReturn(parentCase);
-
-    // This simulates the DB creating the ID, which it does when the case is persisted
-    when(caseService.saveNewCaseAndStampCaseRef(any(Case.class)))
-        .then(
-            invocation -> {
-              Case caze = invocation.getArgument(0);
-              caze.setSecretSequenceNumber(123);
-              caze.setCaseRef(666);
-              return caze;
-            });
-
-    // when
-    underTest.processFulfilmentRequest(managementEvent);
-
-    // then
-    verify(eventLogger, times(1))
-        .logCaseEvent(
-            eq(parentCase),
-            eq(managementEvent.getEvent().getDateTime()),
-            eq("Fulfilment Request Received"),
-            eq(FULFILMENT_REQUESTED),
-            eq(managementEvent.getEvent()),
-            anyString());
+            anyString(),
+            eq(messageTimestamp));
 
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
     verify(caseService).emitCaseCreatedEvent(caseArgumentCaptor.capture());

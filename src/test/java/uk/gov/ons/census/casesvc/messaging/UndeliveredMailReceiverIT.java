@@ -81,7 +81,7 @@ public class UndeliveredMailReceiverIT {
     caze.setUacQidLinks(null);
     caze.setEvents(null);
     caze.setUndeliveredAsAddressed(false);
-    caze.setCcsCase(false);
+    caze.setSurvey("CENSUS");
     caze = caseRepository.saveAndFlush(caze);
 
     UacQidLink uacQidLink = new UacQidLink();
@@ -113,6 +113,7 @@ public class UndeliveredMailReceiverIT {
     assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_UPDATED);
     CollectionCase actualCase = responseManagementEvent.getPayload().getCollectionCase();
     assertThat(actualCase.getId()).isEqualTo(TEST_CASE_ID.toString());
+    assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
     assertThat(actualCase.getUndeliveredAsAddressed()).isTrue();
 
     // check database for log eventDTO
@@ -138,7 +139,7 @@ public class UndeliveredMailReceiverIT {
     caze.setUacQidLinks(null);
     caze.setEvents(null);
     caze.setUndeliveredAsAddressed(false);
-    caze.setCcsCase(false);
+    caze.setSurvey("CENSUS");
     caseRepository.saveAndFlush(caze);
 
     ResponseManagementEvent event = new ResponseManagementEvent();
@@ -164,6 +165,7 @@ public class UndeliveredMailReceiverIT {
     CollectionCase actualCase = responseManagementEvent.getPayload().getCollectionCase();
     assertThat(actualCase.getId()).isEqualTo(TEST_CASE_ID.toString());
     assertThat(actualCase.getCaseRef()).isEqualTo(Integer.toString(TEST_CASE_REF));
+    assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
     assertThat(actualCase.getUndeliveredAsAddressed()).isTrue();
 
     // check database for log eventDTO

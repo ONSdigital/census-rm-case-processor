@@ -36,6 +36,7 @@ public class FulfilmentRequestService {
     individualResponseRequestCodes =
         new HashSet<>(
             Arrays.asList(
+                "RM_TC_HI", // RM_HOUSEHOLD_INDIVIDUAL_TELEPHONE_CAPTURE
                 "UACIT1", // HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_SMS,
                 "UACIT2", // HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH_SMS,
                 "UACIT2W", // HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH_SMS,
@@ -52,7 +53,8 @@ public class FulfilmentRequestService {
     this.caseService = caseService;
   }
 
-  public void processFulfilmentRequest(ResponseManagementEvent fulfilmentRequest) {
+  public void processFulfilmentRequest(
+      ResponseManagementEvent fulfilmentRequest, OffsetDateTime messageTimestamp) {
     EventDTO fulfilmentRequestEvent = fulfilmentRequest.getEvent();
     FulfilmentRequestDTO fulfilmentRequestPayload =
         fulfilmentRequest.getPayload().getFulfilmentRequest();
@@ -70,7 +72,8 @@ public class FulfilmentRequestService {
         FULFILMENT_REQUEST_RECEIVED,
         FULFILMENT_REQUESTED,
         fulfilmentRequestEvent,
-        convertObjectToJson(fulfilmentRequestPayload));
+        convertObjectToJson(fulfilmentRequestPayload),
+        messageTimestamp);
   }
 
   private void handleIndividualFulfilment(
@@ -118,6 +121,7 @@ public class FulfilmentRequestService {
     individualResponseCase.setMsoa(parentCase.getMsoa());
     individualResponseCase.setLad(parentCase.getLad());
     individualResponseCase.setRegion(parentCase.getRegion());
+    individualResponseCase.setSurvey(parentCase.getSurvey());
 
     return caseService.saveNewCaseAndStampCaseRef(individualResponseCase);
   }

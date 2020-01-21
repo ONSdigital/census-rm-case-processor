@@ -3,6 +3,7 @@ package uk.gov.ons.census.casesvc.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -64,24 +65,24 @@ public class UacServiceTest {
     assertThat(actualUacQidLink).isEqualTo(expectedUacQidLink);
   }
 
-  //  @Test
-  //  public void testSaveUacQidLinkEnglandHousehold() {
-  //    // Given
-  //    Case caze = new Case();
-  //
-  //    UacQidDTO uacQidDTO = new UacQidDTO();
-  //    uacQidDTO.setUac("testuac");
-  //    uacQidDTO.setQid("01testqid");
-  //    when(uacQidServiceClient.generateUacQid(anyInt())).thenReturn(uacQidDTO);
-  //
-  //    // When
-  //    UacQidLink result;
-  //    result = underTest.buildUacQidLink(caze, 1);
-  //
-  //    // Then
-  //    assertEquals("01", result.getQid().substring(0, 2));
-  //    verify(uacQidServiceClient).generateUacQid(eq(1));
-  //  }
+  @Test
+  public void testSaveUacQidLinkEnglandHousehold() {
+    // Given
+    Case caze = new Case();
+
+    UacQidDTO uacQidDTO = new UacQidDTO();
+    uacQidDTO.setUac("testuac");
+    uacQidDTO.setQid("01testqid");
+    when(uacQidServiceClient.generateUacQid(anyInt())).thenReturn(uacQidDTO);
+
+    // When
+    UacQidLink result;
+    result = underTest.buildUacQidLink(caze, 1);
+
+    // Then
+    assertEquals("01", result.getQid().substring(0, 2));
+    verify(uacQidServiceClient).generateUacQid(eq(1));
+  }
 
   @Test
   public void testEmitUacUpdatedEvent() {
@@ -113,12 +114,14 @@ public class UacServiceTest {
     // Given
     Case linkedCase = getRandomCase();
     ResponseManagementEvent uacCreatedEvent = generateUacCreatedEvent(linkedCase);
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+
     when(caseService.getCaseByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId()))
         .thenReturn(linkedCase);
     ArgumentCaptor<UacQidLink> uacQidLinkArgumentCaptor = ArgumentCaptor.forClass(UacQidLink.class);
 
     // When
-    underTest.ingestUacCreatedEvent(uacCreatedEvent);
+    underTest.ingestUacCreatedEvent(uacCreatedEvent, messageTimestamp);
 
     // Then
     verify(uacQidLinkRepository).save(uacQidLinkArgumentCaptor.capture());
@@ -138,6 +141,8 @@ public class UacServiceTest {
     // Given
     Case linkedCase = getRandomCase();
     ResponseManagementEvent uacCreatedEvent = generateUacCreatedEvent(linkedCase);
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+
     when(caseService.getCaseByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId()))
         .thenReturn(linkedCase);
 
@@ -146,7 +151,7 @@ public class UacServiceTest {
     ReflectionTestUtils.setField(underTest, "outboundExchange", "TEST_EXCHANGE");
 
     // When
-    underTest.ingestUacCreatedEvent(uacCreatedEvent);
+    underTest.ingestUacCreatedEvent(uacCreatedEvent, messageTimestamp);
 
     // Then
     verify(rabbitTemplate)
@@ -176,9 +181,10 @@ public class UacServiceTest {
     ResponseManagementEvent uacCreatedEvent = generateUacCreatedEvent(linkedCase);
     when(caseService.getCaseByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId()))
         .thenReturn(linkedCase);
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     // When
-    underTest.ingestUacCreatedEvent(uacCreatedEvent);
+    underTest.ingestUacCreatedEvent(uacCreatedEvent, messageTimestamp);
 
     // Then
     verify(eventLogger)
@@ -188,7 +194,31 @@ public class UacServiceTest {
             eq("RM UAC QID pair created"),
             eq(EventType.RM_UAC_CREATED),
             eq(uacCreatedEvent.getEvent()),
-            anyString());
+            anyString(),
+            eq(messageTimestamp));
+  }
+
+  @Test
+  public void testCreateUacQidLinkedToCCSCase() {
+    // Given
+    Case expectedCase = new Case();
+    expectedCase.setCaseId(TEST_CASE_ID);
+    expectedCase.setSurvey("CCS");
+
+    UacQidDTO expectedUacQidDTO = new UacQidDTO();
+    when(uacQidServiceClient.generateUacQid(71)).thenReturn(expectedUacQidDTO);
+
+    // When
+    UacQidLink actualUacQidLink = underTest.createUacQidLinkedToCCSCase(expectedCase);
+
+    // Then
+    assertThat(actualUacQidLink.getCaze().getSurvey()).isEqualTo("CCS");
+    assertThat(actualUacQidLink.getCaze()).isNotNull();
+    assertThat(actualUacQidLink.isCcsCase()).isTrue();
+
+    Case actualCase = actualUacQidLink.getCaze();
+    assertThat(actualCase.getCaseId()).isEqualTo(TEST_CASE_ID);
+    assertThat(actualCase.getSurvey()).isEqualTo("CCS");
   }
 
   @Test

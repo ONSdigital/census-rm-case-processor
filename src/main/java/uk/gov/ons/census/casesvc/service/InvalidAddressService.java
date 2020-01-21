@@ -3,6 +3,7 @@ package uk.gov.ons.census.casesvc.service;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
@@ -23,8 +24,9 @@ public class InvalidAddressService {
     this.eventLogger = eventLogger;
   }
 
-  public void processMessage(ResponseManagementEvent invalidAddressEvent) {
-    if (!processEvent(invalidAddressEvent)) {
+  public void processMessage(
+      ResponseManagementEvent invalidAddressEvent, OffsetDateTime messageTimestamp) {
+    if (!processEvent(invalidAddressEvent, messageTimestamp)) {
       return;
     }
 
@@ -35,11 +37,7 @@ public class InvalidAddressService {
 
     caze.setAddressInvalid(true);
 
-    if (caze.isCcsCase()) {
-      caseService.saveCase(caze);
-    } else {
-      caseService.saveAndEmitCaseUpdatedEvent(caze);
-    }
+    caseService.saveAndEmitCaseUpdatedEvent(caze);
 
     eventLogger.logCaseEvent(
         caze,
@@ -47,10 +45,12 @@ public class InvalidAddressService {
         "Invalid address",
         EventType.ADDRESS_NOT_VALID,
         invalidAddressEvent.getEvent(),
-        convertObjectToJson(invalidAddress));
+        convertObjectToJson(invalidAddress),
+        messageTimestamp);
   }
 
-  private boolean processEvent(ResponseManagementEvent addressEvent) {
+  private boolean processEvent(
+      ResponseManagementEvent addressEvent, OffsetDateTime messageTimestamp) {
     String logEventDescription;
     EventType logEventType;
     JsonNode logEventPayload;
@@ -92,7 +92,8 @@ public class InvalidAddressService {
         logEventDescription,
         logEventType,
         event,
-        JsonHelper.convertObjectToJson(logEventPayload));
+        JsonHelper.convertObjectToJson(logEventPayload),
+        messageTimestamp);
 
     return false;
   }

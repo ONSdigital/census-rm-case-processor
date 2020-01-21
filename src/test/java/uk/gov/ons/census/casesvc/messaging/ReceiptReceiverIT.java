@@ -48,7 +48,7 @@ import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 public class ReceiptReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final EasyRandom easyRandom = new EasyRandom();
-  private final String TEST_NON_CCS_QID_ID = "1234567890123456";
+  private final String TEST_NON_CCS_QID_ID = "0134567890123456";
   private final String TEST_CCS_QID_ID = "7134567890123456";
   private static final String TEST_UAC = easyRandom.nextObject(String.class);
 
@@ -82,7 +82,7 @@ public class ReceiptReceiverIT {
   }
 
   @Test
-  public void testReceiptEmitsMessageAndEventIsLoggedForNonCCSCase()
+  public void testReceiptEmitsMessageAndEventIsLoggedForCase()
       throws InterruptedException, IOException, JSONException {
     // GIVEN
     BlockingQueue<String> rhUacOutboundQueue = rabbitQueueHelper.listen(rhUacQueue);
@@ -92,7 +92,7 @@ public class ReceiptReceiverIT {
     Case caze = easyRandom.nextObject(Case.class);
     caze.setCaseId(TEST_CASE_ID);
     caze.setReceiptReceived(false);
-    caze.setCcsCase(false);
+    caze.setSurvey("CENSUS");
     caze.setUacQidLinks(null);
     caze.setEvents(null);
     caze = caseRepository.saveAndFlush(caze);
@@ -135,7 +135,7 @@ public class ReceiptReceiverIT {
     assertThat(actualUacDTOObject.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
 
     Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
-    assertThat(actualCase.isCcsCase()).isFalse();
+    assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
     assertThat(actualCase.isReceiptReceived()).isTrue();
 
     // check database for log eventDTO
@@ -146,70 +146,6 @@ public class ReceiptReceiverIT {
 
     UacQidLink actualUacQidLink = event.getUacQidLink();
     assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_NON_CCS_QID_ID);
-    assertThat(actualUacQidLink.getUac()).isEqualTo(TEST_UAC);
-    assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
-    assertThat(actualUacQidLink.isActive()).isFalse();
-
-    // Test date saved format here
-    String utcDateAsString = new JSONObject(event.getEventPayload()).getString("dateTime");
-    assertThat(isStringFormattedAsUTCDate(utcDateAsString)).isTrue();
-  }
-
-  @Test
-  public void testReceiptDoesNotEmitMessagesButEventIsLoggedForCCSCase()
-      throws InterruptedException, JSONException {
-    // GIVEN
-    BlockingQueue<String> rhUacOutboundQueue = rabbitQueueHelper.listen(rhUacQueue);
-    BlockingQueue<String> rhCaseOutboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
-
-    EasyRandom easyRandom = new EasyRandom();
-    Case caze = easyRandom.nextObject(Case.class);
-    caze.setCaseId(TEST_CASE_ID);
-    caze.setReceiptReceived(false);
-    caze.setCcsCase(true);
-    caze.setUacQidLinks(null);
-    caze.setEvents(null);
-    caze = caseRepository.saveAndFlush(caze);
-
-    UacQidLink uacQidLink = new UacQidLink();
-    uacQidLink.setId(UUID.randomUUID());
-    uacQidLink.setCaze(caze);
-    uacQidLink.setCcsCase(true);
-    uacQidLink.setQid(TEST_CCS_QID_ID);
-    uacQidLink.setUac(TEST_UAC);
-    uacQidLinkRepository.saveAndFlush(uacQidLink);
-
-    ResponseManagementEvent managementEvent = getTestResponseManagementReceiptEvent();
-    managementEvent.getPayload().getResponse().setQuestionnaireId(uacQidLink.getQid());
-    managementEvent.getEvent().setTransactionId(UUID.randomUUID());
-
-    String json = convertObjectToJson(managementEvent);
-    Message message =
-        MessageBuilder.withBody(json.getBytes())
-            .setContentType(MessageProperties.CONTENT_TYPE_JSON)
-            .build();
-
-    // WHEN
-    rabbitQueueHelper.sendMessage(inboundQueue, message);
-
-    // THEN
-
-    // check no messages sent
-    rabbitQueueHelper.checkMessageIsNotReceived(rhUacOutboundQueue, 5);
-    rabbitQueueHelper.checkMessageIsNotReceived(rhCaseOutboundQueue, 2);
-
-    Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
-    assertThat(actualCase.isCcsCase()).isTrue();
-    assertThat(actualCase.isReceiptReceived()).isTrue();
-
-    // check database for log eventDTO
-    List<Event> events = eventRepository.findAll();
-    assertThat(events.size()).isEqualTo(1);
-    Event event = events.get(0);
-    assertThat(event.getEventDescription()).isEqualTo(QID_RECEIPTED);
-
-    UacQidLink actualUacQidLink = event.getUacQidLink();
-    assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_CCS_QID_ID);
     assertThat(actualUacQidLink.getUac()).isEqualTo(TEST_UAC);
     assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
     assertThat(actualUacQidLink.isActive()).isFalse();

@@ -42,7 +42,7 @@ public class CcsToFieldService {
     ccsToField.setAddressType(caze.getAddressType());
     ccsToField.setFieldCoordinatorId(caze.getFieldCoordinatorId());
     ccsToField.setUndeliveredAsAddress(false);
-    ccsToField.setSurveyName("CCS");
+    ccsToField.setSurveyName(caze.getSurvey());
     ccsToField.setBlankQreReturned(false);
 
     return ccsToField;

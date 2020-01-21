@@ -1,10 +1,11 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
-import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.isCCSQuestionnaireType;
+import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.iscontinuationQuestionnaireTypes;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import java.time.OffsetDateTime;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.ResponseDTO;
@@ -15,6 +16,7 @@ import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
 @Service
 public class ReceiptService {
+
   private static final Logger log = LoggerFactory.getLogger(ReceiptService.class);
   public static final String QID_RECEIPTED = "QID Receipted";
   private final CaseService caseService;
@@ -27,7 +29,8 @@ public class ReceiptService {
     this.eventLogger = eventLogger;
   }
 
-  public void processReceipt(ResponseManagementEvent receiptEvent) {
+  public void processReceipt(
+      ResponseManagementEvent receiptEvent, OffsetDateTime messageTimestamp) {
     ResponseDTO receiptPayload = receiptEvent.getPayload().getResponse();
     UacQidLink uacQidLink = uacService.findByQid(receiptPayload.getQuestionnaireId());
     uacQidLink.setActive(false);
@@ -35,11 +38,8 @@ public class ReceiptService {
     Case caze = uacQidLink.getCaze();
 
     if (caze != null) {
-      caze.setReceiptReceived(true);
-
-      if (caze.isCcsCase()) {
-        caseService.saveCase(caze);
-      } else {
+      if (!iscontinuationQuestionnaireTypes(uacQidLink.getQid())) {
+        caze.setReceiptReceived(true);
         caseService.saveAndEmitCaseUpdatedEvent(caze);
       }
     } else {
@@ -49,11 +49,7 @@ public class ReceiptService {
           .warn("Receipt received for unaddressed UAC/QID pair not yet linked to a case");
     }
 
-    if (isCCSQuestionnaireType(uacQidLink.getQid())) {
-      uacService.saveUacQidLink(uacQidLink);
-    } else {
-      uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
-    }
+    uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
 
     eventLogger.logUacQidEvent(
         uacQidLink,
@@ -61,6 +57,7 @@ public class ReceiptService {
         QID_RECEIPTED,
         EventType.RESPONSE_RECEIVED,
         receiptEvent.getEvent(),
-        convertObjectToJson(receiptPayload));
+        convertObjectToJson(receiptPayload),
+        messageTimestamp);
   }
 }

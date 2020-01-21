@@ -29,7 +29,7 @@ public class CreateCaseSample {
   private String fieldCoordinatorId;
   private String fieldOfficerId;
   private String treatmentCode;
-  private String ceExpectedCapacity;
+  private Integer ceExpectedCapacity;
   private String collectionExerciseId;
   private String actionPlanId;
 }
