@@ -26,7 +26,7 @@ public class UacQidCache {
   @Value("${uacservice.uacqid-get-timeout}")
   private long uacQidGetTimout;
 
-  private static Executor executor = Executors.newFixedThreadPool(8);
+  private static final Executor executor = Executors.newFixedThreadPool(8);
 
   private Map<Integer, BlockingQueue<UacQidDTO>> uacQidLinkQueueMap = new ConcurrentHashMap<>();
   private Set<Integer> isToppingUpQueue = ConcurrentHashMap.newKeySet();
@@ -57,21 +57,25 @@ public class UacQidCache {
     }
   }
 
-  private synchronized void topUpQueue(int questionnaireType) {
-    if (!isToppingUpQueue.contains(questionnaireType)
-        && uacQidLinkQueueMap.get(questionnaireType).size() < cacheMin) {
-      isToppingUpQueue.add(questionnaireType);
-
-      executor.execute(
-          () -> {
-            try {
-              uacQidLinkQueueMap
-                  .get(questionnaireType)
-                  .addAll(uacQidServiceClient.getUacQids(questionnaireType, cacheFetch));
-            } finally {
-              isToppingUpQueue.remove(questionnaireType);
-            }
-          });
+  private void topUpQueue(int questionnaireType) {
+    synchronized (isToppingUpQueue) {
+      if (!isToppingUpQueue.contains(questionnaireType)
+          && uacQidLinkQueueMap.get(questionnaireType).size() < cacheMin) {
+        isToppingUpQueue.add(questionnaireType);
+      } else {
+        return;
+      }
     }
+
+    executor.execute(
+        () -> {
+          try {
+            uacQidLinkQueueMap
+                .get(questionnaireType)
+                .addAll(uacQidServiceClient.getUacQids(questionnaireType, cacheFetch));
+          } finally {
+            isToppingUpQueue.remove(questionnaireType);
+          }
+        });
   }
 }
