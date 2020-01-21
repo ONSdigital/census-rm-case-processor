@@ -29,7 +29,7 @@ public class UacService {
 
   private final UacQidLinkRepository uacQidLinkRepository;
   private final RabbitTemplate rabbitTemplate;
-  private final UacQidRetriever uacQidRetriever;
+  private final UacQidCache uacQidCache;
   private final EventLogger eventLogger;
   private final CaseService caseService;
   private final UacQidServiceClient uacQidServiceClient;
@@ -40,13 +40,13 @@ public class UacService {
   public UacService(
       UacQidLinkRepository uacQidLinkRepository,
       RabbitTemplate rabbitTemplate,
-      UacQidRetriever uacQidRetriever,
+      UacQidCache uacQidCache,
       EventLogger eventLogger,
       CaseService caseService,
       UacQidServiceClient uacQidServiceClient) {
     this.rabbitTemplate = rabbitTemplate;
     this.uacQidLinkRepository = uacQidLinkRepository;
-    this.uacQidRetriever = uacQidRetriever;
+    this.uacQidCache = uacQidCache;
     this.eventLogger = eventLogger;
     this.caseService = caseService;
     this.uacQidServiceClient = uacQidServiceClient;
@@ -61,9 +61,7 @@ public class UacService {
   }
 
   public UacQidLink buildUacQidLink(Case caze, int questionnaireType, UUID batchId) {
-    UacQidDTO uacQid = uacQidRetriever.generateUacQid(questionnaireType);
-    //    UacQidDTO uacQid = uacQidServiceClient.generateUacQid(questionnaireType);
-
+    UacQidDTO uacQid = uacQidCache.getUacQidPair(questionnaireType);
     return buildUacQidLink(caze, batchId, uacQid.getUac(), uacQid.getQid());
   }
 

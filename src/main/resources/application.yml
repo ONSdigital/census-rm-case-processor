@@ -67,6 +67,7 @@ uacservice:
 
   uacqid-cache-min: 500
   uacqid-fetch-count: 1000
+  uacqid-get-timeout: 5   #seconds
 
 exceptionmanager:
   connection:

@@ -120,7 +120,7 @@ public class SampleReceiverIT {
   }
 
   @Test
-  public void test1000ExercisingUacQidCaching() throws InterruptedException, IOException {
+  public void test1000SamplesExercisingUacQidCaching() throws InterruptedException, IOException {
     // GIVEN
     int expectedSize = 1000;
 
@@ -156,7 +156,7 @@ public class SampleReceiverIT {
               rabbitQueueHelper.sendMessage(inboundQueue, c);
             });
 
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 10; i++) {
       Thread.sleep(1000);
       List<Case> caseList = caseRepository.findAll();
 
