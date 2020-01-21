@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,6 +21,7 @@ import uk.gov.ons.census.casesvc.model.dto.UacQidDTO;
 public class UacQidCacheTest {
   private static final int CACHE_FETCH = 5;
   private static final int CACHE_MIN = 2;
+  private static final int NUMBER_PER_TYPE = 10000;
 
   @Mock UacQidServiceClient uacQidServiceClient;
 
@@ -39,13 +41,20 @@ public class UacQidCacheTest {
 
     List<UacQidDTO> actualUacQidDtos1 = new ArrayList<>();
     List<UacQidDTO> actualUacQidDtos2 = new ArrayList<>();
-    for (int i = 0; i < 100; i++) {
-      actualUacQidDtos1.add(underTest.getUacQidPair(1));
-      actualUacQidDtos2.add(underTest.getUacQidPair(2));
-    }
+
+    IntStream stream = IntStream.range(0, NUMBER_PER_TYPE);
+
+    stream
+        .parallel()
+        .forEach(
+            i -> {
+              actualUacQidDtos1.add(underTest.getUacQidPair(1));
+              actualUacQidDtos2.add(underTest.getUacQidPair(2));
+            });
 
     // As we're dealing with different Threads and it can be called  20-21 times
-    verify(uacQidServiceClient, atLeast(20)).getUacQids(1, 5);
+    verify(uacQidServiceClient, atLeast(2000)).getUacQids(1, CACHE_FETCH);
+    verify(uacQidServiceClient, atLeast(2000)).getUacQids(1, CACHE_FETCH);
     assertThat(actualUacQidDtos1.get(0)).isEqualTo(uacQids1.get(0));
     assertThat(actualUacQidDtos2.get(0)).isEqualTo(uacQids2.get(0));
   }
