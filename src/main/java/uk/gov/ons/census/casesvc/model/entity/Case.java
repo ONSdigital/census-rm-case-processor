@@ -117,5 +117,7 @@ public class Case {
   @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
   private boolean undeliveredAsAddressed;
 
-  @Column @UpdateTimestamp private OffsetDateTime lastUpdated;
+  @Column(columnDefinition = "timestamp with time zone")
+  @UpdateTimestamp
+  private OffsetDateTime lastUpdated;
 }
