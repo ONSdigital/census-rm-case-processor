@@ -1,4 +1,4 @@
-package uk.gov.ons.census.casesvc.service;
+package uk.gov.ons.census.casesvc.cache;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
@@ -44,7 +44,7 @@ public class UacQidCacheTest {
 
     IntStream stream = IntStream.range(0, NUMBER_PER_TYPE);
 
-    //when
+    // when
     stream
         .parallel()
         .forEach(
@@ -53,7 +53,7 @@ public class UacQidCacheTest {
               actualUacQidDtos2.add(underTest.getUacQidPair(2));
             });
 
-    //Then
+    // Then
     // As we're dealing with different Threads and it can be called a slightly different number of
     // times
     verify(uacQidServiceClient, atLeast(2000)).getUacQids(1, CACHE_FETCH);
@@ -64,7 +64,7 @@ public class UacQidCacheTest {
 
   @Test
   public void testToppingUpRecoversFromFailure() {
-    //given
+    // given
     ReflectionTestUtils.setField(underTest, "cacheFetch", CACHE_FETCH);
     ReflectionTestUtils.setField(underTest, "cacheMin", CACHE_MIN);
     ReflectionTestUtils.setField(underTest, "uacQidGetTimout", 2);
@@ -75,11 +75,11 @@ public class UacQidCacheTest {
         .thenThrow(new RuntimeException("api failed"))
         .thenReturn(uacQids1);
 
-    //when
+    // when
     try {
       underTest.getUacQidPair(1);
     } catch (RuntimeException e) {
-      //then
+      // then
       UacQidDTO actualUacQidDTO = underTest.getUacQidPair(1);
       assertThat(actualUacQidDTO).isEqualTo(uacQids1.get(0));
 

@@ -1,4 +1,4 @@
-package uk.gov.ons.census.casesvc.service;
+package uk.gov.ons.census.casesvc.cache;
 
 import java.util.Map;
 import java.util.Set;
