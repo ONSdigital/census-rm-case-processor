@@ -32,7 +32,7 @@ public class UacQidCacheTest {
     // given
     ReflectionTestUtils.setField(underTest, "cacheFetch", CACHE_FETCH);
     ReflectionTestUtils.setField(underTest, "cacheMin", CACHE_MIN);
-    ReflectionTestUtils.setField(underTest, "uacQidGetTimout", 5);
+    ReflectionTestUtils.setField(underTest, "uacQidGetTimout", 100);
 
     List<UacQidDTO> uacQids1 = populateUacQidList(1, CACHE_FETCH);
     when(uacQidServiceClient.getUacQids(1, CACHE_FETCH)).thenReturn(uacQids1);
