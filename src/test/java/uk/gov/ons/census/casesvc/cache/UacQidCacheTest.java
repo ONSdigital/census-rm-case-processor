@@ -21,7 +21,7 @@ import uk.gov.ons.census.casesvc.model.dto.UacQidDTO;
 public class UacQidCacheTest {
   private static final int CACHE_FETCH = 5;
   private static final int CACHE_MIN = 2;
-  private static final int NUMBER_PER_TYPE = 2;
+  private static final int NUMBER_PER_TYPE = 10;
 
   @Mock UacQidServiceClient uacQidServiceClient;
 
@@ -36,30 +36,14 @@ public class UacQidCacheTest {
 
     List<UacQidDTO> uacQids1 = populateUacQidList(1, CACHE_FETCH);
     when(uacQidServiceClient.getUacQids(1, CACHE_FETCH)).thenReturn(uacQids1);
-    List<UacQidDTO> uacQids2 = populateUacQidList(2, CACHE_FETCH);
-    when(uacQidServiceClient.getUacQids(2, CACHE_FETCH)).thenReturn(uacQids2);
-
     List<UacQidDTO> actualUacQidDtos1 = new ArrayList<>();
-    List<UacQidDTO> actualUacQidDtos2 = new ArrayList<>();
 
-    IntStream stream = IntStream.range(0, NUMBER_PER_TYPE);
+    for (int i = 0; i < NUMBER_PER_TYPE; i++) {
+      actualUacQidDtos1.add(underTest.getUacQidPair(1));
+    }
 
-    // when
-    stream
-        .parallel()
-        .forEach(
-            i -> {
-              actualUacQidDtos1.add(underTest.getUacQidPair(1));
-              actualUacQidDtos2.add(underTest.getUacQidPair(2));
-            });
-
-    // Then
-    // As we're dealing with different Threads and it can be called a slightly different number of
-    // times
-    verify(uacQidServiceClient, atLeast(200)).getUacQids(1, CACHE_FETCH);
-    verify(uacQidServiceClient, atLeast(200)).getUacQids(1, CACHE_FETCH);
+    verify(uacQidServiceClient, atLeast(3)).getUacQids(1, CACHE_FETCH);
     assertThat(actualUacQidDtos1.get(0)).isEqualTo(uacQids1.get(0));
-    assertThat(actualUacQidDtos2.get(0)).isEqualTo(uacQids2.get(0));
   }
 
   @Test
