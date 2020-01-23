@@ -9,4 +9,8 @@ uacservice:
   connection:
     port: 18164
 
+  uacqid-cache-min: 5
+  uacqid-fetch-count: 10
+  uacqid-get-timeout: 1   #seconds
+
 caserefgeneratorkey: rPr3qsjlU42hsDX5npfuCzlyF4UYfDTO

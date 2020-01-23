@@ -11,7 +11,7 @@ The separate case-api service provides a read-only api for this schema, it is a 
 that api-calls do not block event processing or vice versa.
 
 Case processor listens to a number of queues and acts on the messages by creating and updating cases as required
-i.e. sample load, CCS case, Individual Response. 
+i.e. sample load, CCS case, Individual Response.  
 
 When creating or updating a case this application will emit msgs to be consumed by RH, Field & the 
 action-scheduler as appropriate.  Action-scheduler has a subset copy of the case data (CCS cases are excluded)

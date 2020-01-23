@@ -8,6 +8,7 @@ import java.util.UUID;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.ons.census.casesvc.cache.UacQidCache;
 import uk.gov.ons.census.casesvc.client.UacQidServiceClient;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
@@ -30,9 +31,10 @@ public class UacService {
 
   private final UacQidLinkRepository uacQidLinkRepository;
   private final RabbitTemplate rabbitTemplate;
-  private final UacQidServiceClient uacQidServiceClient;
+  private final UacQidCache uacQidCache;
   private final EventLogger eventLogger;
   private final CaseService caseService;
+  private final UacQidServiceClient uacQidServiceClient;
 
   @Value("${queueconfig.case-event-exchange}")
   private String outboundExchange;
@@ -40,14 +42,16 @@ public class UacService {
   public UacService(
       UacQidLinkRepository uacQidLinkRepository,
       RabbitTemplate rabbitTemplate,
-      UacQidServiceClient uacQidServiceClient,
+      UacQidCache uacQidCache,
       EventLogger eventLogger,
-      CaseService caseService) {
+      CaseService caseService,
+      UacQidServiceClient uacQidServiceClient) {
     this.rabbitTemplate = rabbitTemplate;
-    this.uacQidServiceClient = uacQidServiceClient;
     this.uacQidLinkRepository = uacQidLinkRepository;
+    this.uacQidCache = uacQidCache;
     this.eventLogger = eventLogger;
     this.caseService = caseService;
+    this.uacQidServiceClient = uacQidServiceClient;
   }
 
   public UacQidLink saveUacQidLink(UacQidLink uacQidLink) {
@@ -59,7 +63,7 @@ public class UacService {
   }
 
   public UacQidLink buildUacQidLink(Case caze, int questionnaireType, UUID batchId) {
-    UacQidDTO uacQid = uacQidServiceClient.generateUacQid(questionnaireType);
+    UacQidDTO uacQid = uacQidCache.getUacQidPair(questionnaireType);
     return buildUacQidLink(caze, batchId, uacQid.getUac(), uacQid.getQid());
   }
 

@@ -8,9 +8,14 @@ import static org.junit.Assert.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,6 +32,7 @@ import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
+import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
@@ -113,5 +119,65 @@ public class SampleReceiverIT {
         new ObjectMapper().readValue(actualEvent.getEventPayload(), CreateCaseSample.class);
 
     assertThat(actualcreateCaseSample).isEqualTo(createCaseSample);
+  }
+
+  @Test
+  public void test1000SamplesExercisingUacQidCaching() throws InterruptedException, IOException {
+    // GIVEN
+    int expectedSize = 1000;
+
+    List<String> treatmentCodes =
+        Arrays.asList(
+            "HH_LF3R2E",
+            "HH_LF3R2W",
+            "HH_LF3R2N",
+            "CI_LF3R2E",
+            "CI_LF3R2W",
+            "CI_LF3R2N",
+            "CE_LF3R2E",
+            "CE_LF3R2W",
+            "CE_LF3R2N");
+    Random random = new Random();
+
+    List<CreateCaseSample> createCaseSamples = new ArrayList<>();
+
+    for (int i = 0; i < expectedSize; i++) {
+      CreateCaseSample createCaseSample = new CreateCaseSample();
+      createCaseSample.setPostcode("ABC123");
+      createCaseSample.setRegion("E12000009");
+      String treatmentCode = treatmentCodes.get(random.nextInt(treatmentCodes.size()));
+      createCaseSample.setTreatmentCode(treatmentCode);
+      createCaseSamples.add(createCaseSample);
+    }
+
+    // WHEN
+    createCaseSamples.stream()
+        .parallel()
+        .forEach(
+            c -> {
+              rabbitQueueHelper.sendMessage(inboundQueue, c);
+            });
+
+    for (int i = 0; i < 10; i++) {
+      Thread.sleep(1000);
+      List<Case> caseList = caseRepository.findAll();
+
+      if (caseList.size() < expectedSize) {
+        continue;
+      }
+
+      break;
+    }
+
+    assertEquals(expectedSize, caseRepository.findAll().size());
+
+    // Check all used values are unique
+    List<UacQidLink> uacQids = uacQidLinkRepository.findAll();
+
+    Set<String> uniqueQids = uacQids.stream().map(UacQidLink::getQid).collect(Collectors.toSet());
+    assertThat(uniqueQids.size()).isEqualTo(uacQids.size());
+
+    Set<String> uniqueUacs = uacQids.stream().map(UacQidLink::getUac).collect(Collectors.toSet());
+    assertThat(uniqueUacs.size()).isEqualTo(uacQids.size());
   }
 }
