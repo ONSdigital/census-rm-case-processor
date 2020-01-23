@@ -18,8 +18,8 @@ import uk.gov.ons.census.casesvc.model.dto.UacQidDTO;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UacQidCacheTest {
-  private static final int CACHE_FETCH = 5;
-  private static final int CACHE_MIN = 2;
+  private static final int CACHE_FETCH = 2;
+  private static final int CACHE_MIN = 1;
   private static final int NUMBER_PER_TYPE = 2;
 
   @Mock UacQidServiceClient uacQidServiceClient;
@@ -27,7 +27,7 @@ public class UacQidCacheTest {
   @InjectMocks UacQidCache underTest;
 
   @Test
-  public void testCachingTopUp() {
+  public void testCachingTopUp() throws InterruptedException {
     // given
     ReflectionTestUtils.setField(underTest, "cacheFetch", CACHE_FETCH);
     ReflectionTestUtils.setField(underTest, "cacheMin", CACHE_MIN);
@@ -38,14 +38,19 @@ public class UacQidCacheTest {
 
     List<UacQidDTO> actualUacQidDtos1 = new ArrayList<>();
 
-    for (int i = 0; i < NUMBER_PER_TYPE; i++) {
-      actualUacQidDtos1.add(underTest.getUacQidPair(1));
-    }
+    // when  - 1st call as cache is empty
+    actualUacQidDtos1.add(underTest.getUacQidPair(1));
+    verify(uacQidServiceClient, times(1)).getUacQids(eq(1), eq(CACHE_FETCH));
 
-    verify(uacQidServiceClient, atLeast(1)).getUacQids(eq(1), eq(CACHE_FETCH));
+    // when - some more are called this should top it up
+    actualUacQidDtos1.add(underTest.getUacQidPair(1));
+    actualUacQidDtos1.add(underTest.getUacQidPair(1));
+    actualUacQidDtos1.add(underTest.getUacQidPair(1));
+
+    verify(uacQidServiceClient, atLeast(2)).getUacQids(eq(1), eq(CACHE_FETCH));
     assertThat(actualUacQidDtos1.get(0)).isEqualTo(uacQids1.get(0));
   }
-  
+
   @Test
   public void testToppingUpRecoversFromFailure() {
     // given
