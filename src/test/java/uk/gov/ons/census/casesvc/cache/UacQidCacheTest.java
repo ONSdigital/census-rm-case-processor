@@ -20,7 +20,7 @@ import uk.gov.ons.census.casesvc.model.dto.UacQidDTO;
 public class UacQidCacheTest {
   private static final int CACHE_FETCH = 5;
   private static final int CACHE_MIN = 2;
-  private static final int NUMBER_PER_TYPE = 10;
+  private static final int NUMBER_PER_TYPE = 2;
 
   @Mock UacQidServiceClient uacQidServiceClient;
 
