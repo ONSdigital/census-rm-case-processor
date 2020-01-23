@@ -27,21 +27,6 @@ public class UacQidCacheTest {
   @InjectMocks UacQidCache underTest;
 
   @Test
-  public void reallySimpleTestForCoverage() {
-    ReflectionTestUtils.setField(underTest, "cacheFetch", CACHE_FETCH);
-    ReflectionTestUtils.setField(underTest, "cacheMin", CACHE_MIN);
-    ReflectionTestUtils.setField(underTest, "uacQidGetTimout", 10);
-
-    List<UacQidDTO> uacQids1 = populateUacQidList(1, CACHE_FETCH);
-    when(uacQidServiceClient.getUacQids(1, CACHE_FETCH)).thenReturn(uacQids1);
-
-    UacQidDTO actualPair = underTest.getUacQidPair(1);
-    assertThat(actualPair).isEqualTo(uacQids1.get(0));
-  }
-
-  // This test exercise the code well, however Travis fails as the production code spawns another
-  // thread that doesn't get run in travis
-  @Test
   public void testCachingTopUp() {
     // given
     ReflectionTestUtils.setField(underTest, "cacheFetch", CACHE_FETCH);
@@ -60,9 +45,7 @@ public class UacQidCacheTest {
     verify(uacQidServiceClient, atLeast(1)).getUacQids(eq(1), eq(CACHE_FETCH));
     assertThat(actualUacQidDtos1.get(0)).isEqualTo(uacQids1.get(0));
   }
-
-  // This test exercise the code well, however Travis fails as the production code spawns another
-  // thread that doesn't get run in travis
+  
   @Test
   public void testToppingUpRecoversFromFailure() {
     // given
