@@ -41,8 +41,9 @@ public class UacQidCacheTest {
     assertThat(actualPair).isEqualTo(uacQids1.get(0));
   }
 
-
-//  These tests exercise the code well, however Travis fails as the production code spawns another thread that
+  //  These tests exercise the code well, however Travis fails as the production code spawns another
+  // thread that
+  // doesn't get run in travis
   @Ignore
   @Test
   public void testCachingTopUp() {
