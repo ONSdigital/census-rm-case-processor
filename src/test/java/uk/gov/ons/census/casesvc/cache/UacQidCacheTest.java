@@ -57,7 +57,7 @@ public class UacQidCacheTest {
       actualUacQidDtos1.add(underTest.getUacQidPair(1));
     }
 
-    verify(uacQidServiceClient, atLeast(2)).getUacQids(eq(1), eq(CACHE_FETCH));
+    verify(uacQidServiceClient, atLeast(1)).getUacQids(eq(1), eq(CACHE_FETCH));
     assertThat(actualUacQidDtos1.get(0)).isEqualTo(uacQids1.get(0));
   }
 
