@@ -22,6 +22,9 @@ public class UacCreatedEventReceiver {
   @ServiceActivator(inputChannel = "uacCreatedInputChannel")
   public void receiveMessage(Message<ResponseManagementEvent> message) {
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
-    uacService.ingestUacCreatedEvent(message.getPayload(), messageTimestamp);
+    uacService.ingestUacCreatedEvent(
+        message.getPayload(),
+        messageTimestamp,
+        message.getPayload().getPayload().getUacQidCreated());
   }
 }

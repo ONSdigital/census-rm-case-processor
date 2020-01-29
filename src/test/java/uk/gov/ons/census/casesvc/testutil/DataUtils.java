@@ -185,6 +185,7 @@ public class DataUtils {
     FulfilmentRequestDTO fulfilmentRequest = payload.getFulfilmentRequest();
     fulfilmentRequest.setCaseId(null);
     fulfilmentRequest.setFulfilmentCode(null);
+    fulfilmentRequest.setUacQidCreated(null);
 
     return managementEvent;
   }
