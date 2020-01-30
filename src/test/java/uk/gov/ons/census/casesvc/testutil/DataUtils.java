@@ -181,6 +181,7 @@ public class DataUtils {
     payload.setResponse(null);
     payload.setPrintCaseSelected(null);
     payload.setRefusal(null);
+    payload.setCcsProperty(null);
 
     FulfilmentRequestDTO fulfilmentRequest = payload.getFulfilmentRequest();
     fulfilmentRequest.setCaseId(null);
@@ -222,17 +223,9 @@ public class DataUtils {
     return managementEvent;
   }
 
-  public static RefusalDTO convertJsonToRefusalDTO(String json) {
+  public static <T> T convertJsonToObject(String json, Class<T> clazz) {
     try {
-      return objectMapper.readValue(json, RefusalDTO.class);
-    } catch (IOException e) {
-      throw new RuntimeException("Failed converting Json To RefusalDTO", e);
-    }
-  }
-
-  public static FulfilmentRequestDTO convertJsonToFulfilmentRequestDTO(String json) {
-    try {
-      return objectMapper.readValue(json, FulfilmentRequestDTO.class);
+      return objectMapper.readValue(json, clazz);
     } catch (IOException e) {
       throw new RuntimeException("Failed converting Json To FulfilmentRequestDTO", e);
     }
