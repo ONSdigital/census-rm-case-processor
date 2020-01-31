@@ -14,7 +14,6 @@ import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
-import uk.gov.ons.census.casesvc.model.entity.CaseState;
 
 @Service
 public class FulfilmentRequestService {
@@ -97,7 +96,6 @@ public class FulfilmentRequestService {
     Case individualResponseCase = new Case();
 
     individualResponseCase.setCaseId(newCaseId);
-    individualResponseCase.setState(CaseState.ACTIONABLE);
     individualResponseCase.setCreatedDateTime(OffsetDateTime.now());
     individualResponseCase.setAddressType(parentCase.getAddressType());
     individualResponseCase.setCaseType(HOUSEHOLD_INDIVIDUAL_RESPONSE_CASE_TYPE);

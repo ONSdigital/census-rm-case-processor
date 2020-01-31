@@ -19,7 +19,6 @@ import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
-import uk.gov.ons.census.casesvc.model.entity.CaseState;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FulfilmentRequestServiceTest {
@@ -122,7 +121,6 @@ public class FulfilmentRequestServiceTest {
     parentCase.setUacQidLinks(new ArrayList<>());
     parentCase.setEvents(new ArrayList<>());
     parentCase.setCreatedDateTime(OffsetDateTime.now().minusDays(1));
-    parentCase.setState(null);
     parentCase.setReceiptReceived(true);
     parentCase.setRefusalReceived(true);
     parentCase.setAddressType("HH");
@@ -184,7 +182,6 @@ public class FulfilmentRequestServiceTest {
     parentCase.setUacQidLinks(new ArrayList<>());
     parentCase.setEvents(new ArrayList<>());
     parentCase.setCreatedDateTime(OffsetDateTime.now().minusDays(1));
-    parentCase.setState(null);
     parentCase.setReceiptReceived(true);
     parentCase.setRefusalReceived(true);
     parentCase.setAddressType("HH");
@@ -244,7 +241,6 @@ public class FulfilmentRequestServiceTest {
     assertThat(actualChildCase.getCollectionExerciseId())
         .isEqualTo(parentCase.getCollectionExerciseId());
     assertThat(actualChildCase.getActionPlanId()).isEqualTo(parentCase.getActionPlanId());
-    assertThat(actualChildCase.getState()).isEqualTo(CaseState.ACTIONABLE);
     assertThat(actualChildCase.isReceiptReceived()).isFalse();
     assertThat(actualChildCase.isRefusalReceived()).isFalse();
     assertThat(actualChildCase.getArid()).isEqualTo(parentCase.getArid());
