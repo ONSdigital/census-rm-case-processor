@@ -174,6 +174,7 @@ public class QuestionnaireLinkedServiceTest {
     testHHCase.setCaseId(TEST_CASE_ID_1);
     testHHCase.setReceiptReceived(false);
     testHHCase.setSurvey("CENSUS");
+    testHHCase.setCaseType("HH");
 
     Case testHICase = getRandomCaseWithUacQidLinks(1);
     testHICase.setCaseId(TEST_CASE_ID_2);
@@ -230,6 +231,66 @@ public class QuestionnaireLinkedServiceTest {
     verifyNoMoreInteractions(eventLogger);
   }
 
+  @Test
+  public void testQuestionnaireLinkedForCEWithNoHICaseCreated() {
+    // GIVEN
+    ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
+
+    UacDTO uac = managementEvent.getPayload().getUac();
+    uac.setCaseId(TEST_CASE_ID_1.toString());
+    uac.setQuestionnaireId(TEST_HI_QID);
+
+    Case testHHCase = getRandomCase();
+    testHHCase.setCaseId(TEST_CASE_ID_1);
+    testHHCase.setReceiptReceived(false);
+    testHHCase.setSurvey("CENSUS");
+    testHHCase.setCaseType("CE");
+
+    Case testHICase = getRandomCaseWithUacQidLinks(1);
+    testHICase.setCaseId(TEST_CASE_ID_2);
+    testHHCase.setReceiptReceived(false);
+    testHICase.setSurvey("CENSUS");
+
+    UacQidLink testHIUacQidLink = testHICase.getUacQidLinks().get(0);
+    testHIUacQidLink.setQid(TEST_HI_QID);
+    testHIUacQidLink.setActive(true);
+    testHIUacQidLink.setCaze(null);
+    testHIUacQidLink.setCcsCase(false);
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+
+    when(uacService.findByQid(TEST_HI_QID)).thenReturn(testHIUacQidLink);
+    when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testHHCase);
+
+    // WHEN
+    underTest.processQuestionnaireLinked(managementEvent, messageTimestamp);
+
+    // THEN
+    InOrder inOrder = inOrder(uacService, caseService, eventLogger);
+    inOrder.verify(uacService).findByQid(TEST_HI_QID);
+    inOrder.verify(caseService).getCaseByCaseId(TEST_CASE_ID_1);
+    verifyNoMoreInteractions(caseService);
+
+    ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
+    inOrder.verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
+    UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
+    assertThat(actualUacQidLink.getCaze()).isEqualTo(testHHCase);
+    assertThat(actualUacQidLink.isCcsCase()).isFalse();
+    assertThat(actualUacQidLink.getCaze().getSurvey()).isEqualTo("CENSUS");
+    verifyNoMoreInteractions(uacService);
+
+    verify(eventLogger)
+        .logUacQidEvent(
+            eq(testHIUacQidLink),
+            any(OffsetDateTime.class),
+            eq("Questionnaire Linked"),
+            eq(EventType.QUESTIONNAIRE_LINKED),
+            eq(managementEvent.getEvent()),
+            anyString(),
+            eq(messageTimestamp));
+
+    verifyNoMoreInteractions(eventLogger);
+  }
+
   @Test(expected = RuntimeException.class)
   public void testAlreadyLinkedToDifferentCaseUacQidThrowsException() {
     ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
@@ -269,6 +330,7 @@ public class QuestionnaireLinkedServiceTest {
     Case testHHCase = getRandomCase();
     testHHCase.setCaseId(TEST_CASE_ID_1);
     testHHCase.setReceiptReceived(false);
+    testHHCase.setCaseType("HH");
 
     Case testHICase = getRandomCaseWithUacQidLinks(1);
     testHICase.setCaseId(TEST_CASE_ID_2);
