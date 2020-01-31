@@ -18,4 +18,6 @@ public class FulfilmentRequestDTO {
   private String individualCaseId;
 
   private Contact contact;
+
+  private UacCreatedDTO uacQidCreated;
 }

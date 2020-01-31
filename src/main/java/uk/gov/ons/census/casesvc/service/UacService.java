@@ -15,6 +15,7 @@ import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
+import uk.gov.ons.census.casesvc.model.dto.UacCreatedDTO;
 import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.dto.UacQidDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -121,26 +122,23 @@ public class UacService {
   }
 
   public void ingestUacCreatedEvent(
-      ResponseManagementEvent uacCreatedEvent, OffsetDateTime messageTimestamp) {
-    Case linkedCase =
-        caseService.getCaseByCaseId(uacCreatedEvent.getPayload().getUacQidCreated().getCaseId());
+      ResponseManagementEvent responseManagementEvent,
+      OffsetDateTime messageTimestamp,
+      UacCreatedDTO uacCreated) {
+    Case linkedCase = caseService.getCaseByCaseId(uacCreated.getCaseId());
 
     UacQidLink uacQidLink =
-        buildUacQidLink(
-            linkedCase,
-            null,
-            uacCreatedEvent.getPayload().getUacQidCreated().getUac(),
-            uacCreatedEvent.getPayload().getUacQidCreated().getQid());
+        buildUacQidLink(linkedCase, null, uacCreated.getUac(), uacCreated.getQid());
 
     saveAndEmitUacUpdatedEvent(uacQidLink);
 
     eventLogger.logUacQidEvent(
         uacQidLink,
-        uacCreatedEvent.getEvent().getDateTime(),
+        responseManagementEvent.getEvent().getDateTime(),
         "RM UAC QID pair created",
         EventType.RM_UAC_CREATED,
-        uacCreatedEvent.getEvent(),
-        convertObjectToJson(uacCreatedEvent.getPayload()),
+        responseManagementEvent.getEvent(),
+        convertObjectToJson(responseManagementEvent.getPayload()),
         messageTimestamp);
   }
 

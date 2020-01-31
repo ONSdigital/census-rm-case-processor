@@ -1,7 +1,7 @@
 package uk.gov.ons.census.casesvc.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToRefusalDTO;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToObject;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementRefusalEvent;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
@@ -118,7 +118,8 @@ public class RefusalReceiverIT {
     List<Event> events = eventRepository.findAll();
     assertThat(events.size()).isEqualTo(1);
 
-    RefusalDTO actualRefusal = convertJsonToRefusalDTO(events.get(0).getEventPayload());
+    RefusalDTO actualRefusal =
+        convertJsonToObject(events.get(0).getEventPayload(), RefusalDTO.class);
     assertThat(actualRefusal.getType()).isEqualTo(expectedRefusal.getType());
     assertThat(actualRefusal.getReport()).isEqualTo(expectedRefusal.getReport());
     assertThat(actualRefusal.getAgentId()).isEqualTo(expectedRefusal.getAgentId());
