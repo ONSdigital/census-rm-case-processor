@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -94,10 +92,6 @@ public class Case {
 
   @Column(columnDefinition = "timestamp with time zone")
   private OffsetDateTime createdDateTime;
-
-  @Column
-  @Enumerated(EnumType.STRING)
-  private CaseState state;
 
   @OneToMany(mappedBy = "caze")
   List<UacQidLink> uacQidLinks;
