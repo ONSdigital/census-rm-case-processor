@@ -28,7 +28,6 @@ import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.SampleUnitDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
-import uk.gov.ons.census.casesvc.model.entity.CaseState;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -178,7 +177,6 @@ public class CaseServiceTest {
     caze.setRegion("E");
     caze.setCaseRef(123);
     caze.setCaseId(UUID.randomUUID());
-    caze.setState(CaseState.ACTIONABLE);
     caze.setPostcode(TEST_POSTCODE);
     caze.setFieldCoordinatorId(FIELD_CORD_ID);
     caze.setFieldOfficerId(FIELD_OFFICER_ID);

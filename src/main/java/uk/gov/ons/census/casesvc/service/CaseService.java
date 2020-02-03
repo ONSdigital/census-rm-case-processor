@@ -17,7 +17,6 @@ import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.SampleUnitDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
-import uk.gov.ons.census.casesvc.model.entity.CaseState;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.utility.CaseRefGenerator;
 import uk.gov.ons.census.casesvc.utility.EventHelper;
@@ -69,7 +68,6 @@ public class CaseService {
     Case caze = mapperFacade.map(createCaseSample, Case.class);
     caze.setCaseType(createCaseSample.getAddressType());
     caze.setCaseId(UUID.randomUUID());
-    caze.setState(CaseState.ACTIONABLE);
     caze.setCreatedDateTime(OffsetDateTime.now());
     caze.setReceiptReceived(false);
     caze.setSurvey(CENSUS_SURVEY);
@@ -85,7 +83,6 @@ public class CaseService {
     caze.setCaseId(UUID.fromString(caseId));
     caze.setActionPlanId(actionPlanId);
     caze.setCollectionExerciseId(collectionExerciseId);
-    caze.setState(CaseState.ACTIONABLE);
     caze.setCreatedDateTime(OffsetDateTime.now());
     caze.setRefusalReceived(isRefused);
     caze.setAddressInvalid(isInvalidAddress);
@@ -172,7 +169,6 @@ public class CaseService {
     collectionCase.setCaseType(caze.getCaseType());
     collectionCase.setCollectionExerciseId(caze.getCollectionExerciseId());
     collectionCase.setId(caze.getCaseId().toString());
-    collectionCase.setState(caze.getState().toString());
     collectionCase.setSurvey(caze.getSurvey());
     // Stop. No. Don't put anything else here unless it's in the event dictionary. Look down!
 
@@ -202,7 +198,6 @@ public class CaseService {
     Case individualResponseCase = new Case();
 
     individualResponseCase.setCaseId(UUID.randomUUID());
-    individualResponseCase.setState(CaseState.ACTIONABLE);
     individualResponseCase.setCreatedDateTime(OffsetDateTime.now());
     individualResponseCase.setAddressType(parentCase.getAddressType());
     individualResponseCase.setCaseType(HOUSEHOLD_INDIVIDUAL_RESPONSE_CASE_TYPE);

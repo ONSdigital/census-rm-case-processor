@@ -14,7 +14,6 @@ public class CollectionCase {
   private String survey;
   private String collectionExerciseId;
   private Address address;
-  private String state;
   private OffsetDateTime actionableFrom;
   private Boolean receiptReceived;
   private Boolean refusalReceived;
