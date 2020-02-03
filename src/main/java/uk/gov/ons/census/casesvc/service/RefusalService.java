@@ -30,8 +30,8 @@ public class RefusalService {
 
     String channel = refusalEvent.getEvent().getChannel();
     if (isEstabLevelAddressAndChannelIsNotField(caze.getAddressLevel(), channel)) {
-      throw new RuntimeException(String
-          .format(
+      throw new RuntimeException(
+          String.format(
               "Refusal received for Estab level case ID '%s' from channel '%s'. "
                   + "This type of refusal should ONLY come from Field",
               caze.getCaseId(), channel));

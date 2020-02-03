@@ -6,7 +6,6 @@ import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementRefusalEvent;
 
 import java.time.OffsetDateTime;
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,14 +26,11 @@ public class RefusalServiceTest {
   private static final String REFUSAL_RECEIVED = "Refusal Received";
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
 
-  @Mock
-  private CaseService caseService;
+  @Mock private CaseService caseService;
 
-  @Mock
-  private EventLogger eventLogger;
+  @Mock private EventLogger eventLogger;
 
-  @InjectMocks
-  RefusalService underTest;
+  @InjectMocks RefusalService underTest;
 
   @Test
   public void testRefusalForCase() {
@@ -88,10 +84,11 @@ public class RefusalServiceTest {
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     when(caseService.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);
-    String expectedErrorMessage = String.format(
-        "Refusal received for Estab level case ID '%s' from channel '%s'. "
-            + "This type of refusal should ONLY come from Field",
-        testCase.getCaseId(), managementEvent.getEvent().getChannel());
+    String expectedErrorMessage =
+        String.format(
+            "Refusal received for Estab level case ID '%s' from channel '%s'. "
+                + "This type of refusal should ONLY come from Field",
+            testCase.getCaseId(), managementEvent.getEvent().getChannel());
 
     // WHEN
     try {
