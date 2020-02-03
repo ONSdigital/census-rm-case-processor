@@ -38,6 +38,8 @@ public class FulfilmentRequestServiceTest {
 
   @Mock private CaseService caseService;
 
+  @Mock private UacService uacService;
+
   @InjectMocks FulfilmentRequestService underTest;
 
   @Test

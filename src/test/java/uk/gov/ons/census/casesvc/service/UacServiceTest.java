@@ -122,7 +122,8 @@ public class UacServiceTest {
     ArgumentCaptor<UacQidLink> uacQidLinkArgumentCaptor = ArgumentCaptor.forClass(UacQidLink.class);
 
     // When
-    underTest.ingestUacCreatedEvent(uacCreatedEvent, messageTimestamp);
+    underTest.ingestUacCreatedEvent(
+        uacCreatedEvent, messageTimestamp, uacCreatedEvent.getPayload().getUacQidCreated());
 
     // Then
     verify(uacQidLinkRepository).save(uacQidLinkArgumentCaptor.capture());
@@ -152,7 +153,8 @@ public class UacServiceTest {
     ReflectionTestUtils.setField(underTest, "outboundExchange", "TEST_EXCHANGE");
 
     // When
-    underTest.ingestUacCreatedEvent(uacCreatedEvent, messageTimestamp);
+    underTest.ingestUacCreatedEvent(
+        uacCreatedEvent, messageTimestamp, uacCreatedEvent.getPayload().getUacQidCreated());
 
     // Then
     verify(rabbitTemplate)
@@ -185,7 +187,8 @@ public class UacServiceTest {
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     // When
-    underTest.ingestUacCreatedEvent(uacCreatedEvent, messageTimestamp);
+    underTest.ingestUacCreatedEvent(
+        uacCreatedEvent, messageTimestamp, uacCreatedEvent.getPayload().getUacQidCreated());
 
     // Then
     verify(eventLogger)

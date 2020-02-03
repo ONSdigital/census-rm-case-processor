@@ -37,6 +37,10 @@ public class UacCreatedEventReceiverTest {
     underTest.receiveMessage(message);
 
     // Then
-    verify(uacService).ingestUacCreatedEvent(eq(uacCreatedEvent), eq(expectedDate));
+    verify(uacService)
+        .ingestUacCreatedEvent(
+            eq(uacCreatedEvent),
+            eq(expectedDate),
+            eq(uacCreatedEvent.getPayload().getUacQidCreated()));
   }
 }

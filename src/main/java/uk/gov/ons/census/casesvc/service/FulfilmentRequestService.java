@@ -13,6 +13,7 @@ import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
+import uk.gov.ons.census.casesvc.model.dto.UacCreatedDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 
 @Service
@@ -46,10 +47,13 @@ public class FulfilmentRequestService {
 
   private final EventLogger eventLogger;
   private final CaseService caseService;
+  private final UacService uacService;
 
-  public FulfilmentRequestService(EventLogger eventLogger, CaseService caseService) {
+  public FulfilmentRequestService(
+      EventLogger eventLogger, CaseService caseService, UacService uacService) {
     this.eventLogger = eventLogger;
     this.caseService = caseService;
+    this.uacService = uacService;
   }
 
   public void processFulfilmentRequest(
@@ -60,7 +64,12 @@ public class FulfilmentRequestService {
 
     Case caze = caseService.getCaseByCaseId(UUID.fromString(fulfilmentRequestPayload.getCaseId()));
 
+    // As part of a fulfilment, we might need to create a 'child' case (an individual)
     handleIndividualFulfilment(fulfilmentRequestPayload, caze);
+
+    // As part of a fulfilment, we might have created a new UAC-QID pair, which needs to be linked
+    // to the case it belongs to
+    handleUacQidCreated(fulfilmentRequest, messageTimestamp);
 
     // we do not want to log contact details for fulfillment requests
     fulfilmentRequestPayload.setContact(null);
@@ -73,6 +82,17 @@ public class FulfilmentRequestService {
         fulfilmentRequestEvent,
         convertObjectToJson(fulfilmentRequestPayload),
         messageTimestamp);
+  }
+
+  private void handleUacQidCreated(
+      ResponseManagementEvent responseManagementEvent, OffsetDateTime messageTimestamp) {
+    UacCreatedDTO uacQidCreated =
+        responseManagementEvent.getPayload().getFulfilmentRequest().getUacQidCreated();
+
+    // There might not always be a new UAC-QID as part of a fulfilment
+    if (uacQidCreated != null) {
+      uacService.ingestUacCreatedEvent(responseManagementEvent, messageTimestamp, uacQidCreated);
+    }
   }
 
   private void handleIndividualFulfilment(
