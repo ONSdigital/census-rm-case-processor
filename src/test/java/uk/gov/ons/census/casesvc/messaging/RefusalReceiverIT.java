@@ -82,6 +82,7 @@ public class RefusalReceiverIT {
     caze.setSurvey("CENSUS");
     caze.setUacQidLinks(null);
     caze.setEvents(null);
+    caze.setAddressLevel("U");
     caseRepository.saveAndFlush(caze);
 
     OffsetDateTime cazeCreatedTime =

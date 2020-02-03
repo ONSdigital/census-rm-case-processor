@@ -27,6 +27,16 @@ public class RefusalService {
       ResponseManagementEvent refusalEvent, OffsetDateTime messageTimestamp) {
     RefusalDTO refusal = refusalEvent.getPayload().getRefusal();
     Case caze = caseService.getCaseByCaseId(UUID.fromString(refusal.getCollectionCase().getId()));
+
+    String channel = refusalEvent.getEvent().getChannel();
+    if (isEstabLevelAddressAndChannelIsNotField(caze.getAddressLevel(), channel)) {
+      throw new RuntimeException(String
+          .format(
+              "Refusal received for Estab level case ID '%s' from channel '%s'. "
+                  + "This type of refusal should ONLY come from Field",
+              caze.getCaseId(), channel));
+    }
+
     caze.setRefusalReceived(true);
     caseService.saveAndEmitCaseUpdatedEvent(caze);
 
@@ -38,5 +48,9 @@ public class RefusalService {
         refusalEvent.getEvent(),
         convertObjectToJson(refusalEvent.getPayload().getRefusal()),
         messageTimestamp);
+  }
+
+  private boolean isEstabLevelAddressAndChannelIsNotField(String addressLevel, String channel) {
+    return addressLevel.equals("E") && !"FIELD".equalsIgnoreCase(channel);
   }
 }
