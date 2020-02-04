@@ -16,6 +16,7 @@ public class RefusalService {
 
   private static final String REFUSAL_RECEIVED = "Refusal Received";
   private static final String ESTAB_ADDRESS_LEVEL = "E";
+  private static final String FIELD_CHANNEL = "FIELD";
 
   private final CaseService caseService;
   private final EventLogger eventLogger;
@@ -53,6 +54,6 @@ public class RefusalService {
   }
 
   private boolean isEstabLevelAddressAndChannelIsNotField(String addressLevel, String channel) {
-    return addressLevel.equals(ESTAB_ADDRESS_LEVEL) && !"FIELD".equalsIgnoreCase(channel);
+    return addressLevel.equals(ESTAB_ADDRESS_LEVEL) && !FIELD_CHANNEL.equalsIgnoreCase(channel);
   }
 }
