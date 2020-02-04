@@ -24,6 +24,7 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 public class RefusalServiceTest {
 
   private static final String REFUSAL_RECEIVED = "Refusal Received";
+  private static final String ESTAB_ADDRESS_LEVEL = "E";
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
 
   @Mock private CaseService caseService;
@@ -80,7 +81,7 @@ public class RefusalServiceTest {
     managementEvent.getPayload().getRefusal().getCollectionCase().setId(TEST_CASE_ID.toString());
 
     Case testCase = getRandomCase();
-    testCase.setAddressLevel("E");
+    testCase.setAddressLevel(ESTAB_ADDRESS_LEVEL);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     when(caseService.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);
