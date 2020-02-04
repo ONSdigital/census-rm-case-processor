@@ -37,17 +37,18 @@ public class QuestionnaireLinkedService {
 
     checkQidNotLinkedToAnotherCase(uac, uacQidLink);
 
-    Case caze;
+    Case caze = caseService.getCaseByCaseId(UUID.fromString(uac.getCaseId()));
 
     if (isIndividualQuestionnaireType(questionnaireId)) {
-      Case householdCase = caseService.getCaseByCaseId(UUID.fromString(uac.getCaseId()));
-      caze = caseService.prepareIndividualResponseCaseFromParentCase(householdCase);
+      // We only want to create an HI case if the parent is an HH case
+      if (caze.getCaseType().equals("HH")) {
+        caze = caseService.prepareIndividualResponseCaseFromParentCase(caze);
 
-      caseService.emitCaseCreatedEvent(caze);
-    } else {
-      caze = caseService.getCaseByCaseId(UUID.fromString(uac.getCaseId()));
+        caseService.emitCaseCreatedEvent(caze);
+      }
     }
 
+    // TODO: This is wrong for CEs and SPGs but there is another ticket which deals with fixing this
     // If UAC/QID has been receipted before case, update case
     if (!uacQidLink.isActive() && !caze.isReceiptReceived()) {
       caze.setReceiptReceived(true);
