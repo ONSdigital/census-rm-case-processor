@@ -385,7 +385,7 @@ public class QuestionnaireLinkedReceiverIT {
     // THEN
     Case actualHHCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
 
-    // Check database that HH Case is linked to UacQidLink
+    // Check database that CE Case is linked to UacQidLink
     List<UacQidLink> uacQidLinks = uacQidLinkRepository.findAll();
     assertThat(uacQidLinks.size()).isEqualTo(1);
     UacQidLink actualUacQidLink = uacQidLinks.get(0);
@@ -436,7 +436,7 @@ public class QuestionnaireLinkedReceiverIT {
     // THEN
     Case actualHHCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
 
-    // Check database that HH Case is linked to UacQidLink
+    // Check database that SPG Case is linked to UacQidLink
     List<UacQidLink> uacQidLinks = uacQidLinkRepository.findAll();
     assertThat(uacQidLinks.size()).isEqualTo(1);
     UacQidLink actualUacQidLink = uacQidLinks.get(0);
