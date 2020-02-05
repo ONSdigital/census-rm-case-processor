@@ -73,8 +73,8 @@ public class RefusalServiceTest {
     verifyNoMoreInteractions(eventLogger);
   }
 
-  @Test(expected = RuntimeException.class)
-  public void testRefusalNotFromFieldForEstabAddressLevelCaseThrowsException() {
+  @Test
+  public void testRefusalNotFromFieldForEstabAddressLevelCaseThrowsIllegalArgException() {
     // GIVEN
     ResponseManagementEvent managementEvent = getTestResponseManagementRefusalEvent();
     managementEvent.getEvent().setChannel("NOT FROM FIELD");
@@ -92,17 +92,17 @@ public class RefusalServiceTest {
             testCase.getCaseId(), managementEvent.getEvent().getChannel());
 
     // WHEN
+    boolean actualExceptionThrown = false;
     try {
       underTest.processRefusal(managementEvent, messageTimestamp);
-    } catch (RuntimeException expectedException) {
+    } catch (IllegalArgumentException expectedException) {
       // THEN
+      actualExceptionThrown = true;
       assertThat(expectedException.getMessage()).isEqualTo(expectedErrorMessage);
-
-      verify(caseService, times(1)).getCaseByCaseId(any(UUID.class));
-      verifyNoMoreInteractions(caseService);
-      verifyZeroInteractions(eventLogger);
-
-      throw expectedException;
     }
+    assertThat(actualExceptionThrown).isTrue();
+    verify(caseService, times(1)).getCaseByCaseId(any(UUID.class));
+    verifyNoMoreInteractions(caseService);
+    verifyZeroInteractions(eventLogger);
   }
 }
