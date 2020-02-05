@@ -22,7 +22,9 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RefusalServiceTest {
+
   private static final String REFUSAL_RECEIVED = "Refusal Received";
+  private static final String ESTAB_ADDRESS_LEVEL = "E";
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
 
   @Mock private CaseService caseService;
@@ -69,5 +71,38 @@ public class RefusalServiceTest {
             anyString(),
             eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
+  }
+
+  @Test
+  public void testRefusalNotFromFieldForEstabAddressLevelCaseThrowsIllegalArgException() {
+    // GIVEN
+    ResponseManagementEvent managementEvent = getTestResponseManagementRefusalEvent();
+    managementEvent.getEvent().setChannel("NOT FROM FIELD");
+    managementEvent.getPayload().getRefusal().getCollectionCase().setId(TEST_CASE_ID.toString());
+
+    Case testCase = getRandomCase();
+    testCase.setAddressLevel(ESTAB_ADDRESS_LEVEL);
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+
+    when(caseService.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);
+    String expectedErrorMessage =
+        String.format(
+            "Refusal received for Estab level case ID '%s' from channel '%s'. "
+                + "This type of refusal should ONLY come from Field",
+            testCase.getCaseId(), managementEvent.getEvent().getChannel());
+
+    // WHEN
+    boolean actualExceptionThrown = false;
+    try {
+      underTest.processRefusal(managementEvent, messageTimestamp);
+    } catch (IllegalArgumentException expectedException) {
+      // THEN
+      actualExceptionThrown = true;
+      assertThat(expectedException.getMessage()).isEqualTo(expectedErrorMessage);
+    }
+    assertThat(actualExceptionThrown).isTrue();
+    verify(caseService, times(1)).getCaseByCaseId(any(UUID.class));
+    verifyNoMoreInteractions(caseService);
+    verifyZeroInteractions(eventLogger);
   }
 }
