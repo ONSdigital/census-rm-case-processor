@@ -1,10 +1,5 @@
 package uk.gov.ons.census.casesvc.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-
-import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -14,9 +9,16 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+
 @RunWith(MockitoJUnitRunner.class)
 public class CaseReceipterTest {
   private static final String HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_ENGLAND = "21";
+  private static final String ENGLAND_HOUSEHOLD_CONTINUATION = "11";
 
   @Mock CaseService caseService;
 
@@ -67,6 +69,21 @@ public class CaseReceipterTest {
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setActive(true);
     uacQidLink.setQid(HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_ENGLAND);
+
+    underTest.handleReceipting(caze, uacQidLink);
+    verifyZeroInteractions(caseService);
+  }
+
+  @Test
+  public void testContinuationQidResultInNoReceipting() {
+    // when
+    Case caze = new Case();
+    caze.setCaseId(UUID.randomUUID());
+    caze.setReceiptReceived(false);
+
+    UacQidLink uacQidLink = new UacQidLink();
+    uacQidLink.setActive(true);
+    uacQidLink.setQid(ENGLAND_HOUSEHOLD_CONTINUATION);
 
     underTest.handleReceipting(caze, uacQidLink);
     verifyZeroInteractions(caseService);

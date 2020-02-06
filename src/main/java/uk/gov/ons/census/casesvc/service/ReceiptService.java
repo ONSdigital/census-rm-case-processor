@@ -39,16 +39,14 @@ public class ReceiptService {
 
     Case caze = uacQidLink.getCaze();
 
-    if (caze == null) {
+    if (caze != null) {
+      caseReceipter.handleReceipting(caze, uacQidLink);
+    } else {
       log.with("qid", receiptPayload.getQuestionnaireId())
           .with("tx_id", receiptEvent.getEvent().getTransactionId())
           .with("channel", receiptEvent.getEvent().getChannel())
           .warn("Receipt received for unaddressed UAC/QID pair not yet linked to a case");
-
-      return;
     }
-
-    caseReceipter.handleReceipting(caze, uacQidLink);
 
     eventLogger.logUacQidEvent(
         uacQidLink,
