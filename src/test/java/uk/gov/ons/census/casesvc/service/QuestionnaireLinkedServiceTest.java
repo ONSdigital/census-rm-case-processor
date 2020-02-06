@@ -36,13 +36,14 @@ public class QuestionnaireLinkedServiceTest {
   private final String TEST_HH_QID = "0112345678901234";
   private final String TEST_HI_QID = "2112345678901234";
   private final String TEST_NON_CCS_QID_ID = "1234567890123456";
-  private final String TEST_CCS_QID_ID = "7134567890123456";
 
   @Mock UacService uacService;
 
   @Mock CaseService caseService;
 
   @Mock EventLogger eventLogger;
+
+  @Mock CaseReceipter caseReceipter;
 
   @InjectMocks QuestionnaireLinkedService underTest;
 
@@ -129,17 +130,19 @@ public class QuestionnaireLinkedServiceTest {
     underTest.processQuestionnaireLinked(managementEvent, messageTimestamp);
 
     // THEN
-    InOrder inOrder = inOrder(uacService, caseService, eventLogger);
+    InOrder inOrder = inOrder(uacService, caseService, caseReceipter, eventLogger);
     inOrder.verify(uacService).findByQid(TEST_HH_QID);
     inOrder.verify(caseService).getCaseByCaseId(TEST_CASE_ID_1);
+    verifyNoMoreInteractions(caseService);
 
     ArgumentCaptor<Case> caseCaptor = ArgumentCaptor.forClass(Case.class);
-    inOrder.verify(caseService).saveAndEmitCaseUpdatedEvent(caseCaptor.capture());
-    Case actualCase = caseCaptor.getValue();
-    assertThat(actualCase.getCaseId()).isEqualTo(TEST_CASE_ID_1);
-    assertThat(actualCase.isReceiptReceived()).isTrue();
-    assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
-    verifyNoMoreInteractions(caseService);
+    ArgumentCaptor<UacQidLink> uacQidLinkArgumentCaptor = ArgumentCaptor.forClass(UacQidLink.class);
+    inOrder
+        .verify(caseReceipter)
+        .handleReceipting(caseCaptor.capture(), uacQidLinkArgumentCaptor.capture());
+    assertThat(caseCaptor.getValue().getCaseId()).isEqualTo(TEST_CASE_ID_1);
+    assertThat(uacQidLinkArgumentCaptor.getValue().getQid()).isEqualTo(TEST_HI_QID);
+    verifyNoMoreInteractions(caseReceipter);
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
     inOrder.verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
@@ -376,6 +379,72 @@ public class QuestionnaireLinkedServiceTest {
 
     verifyNoMoreInteractions(caseService);
     verifyNoMoreInteractions(uacService);
+    verifyNoMoreInteractions(eventLogger);
+  }
+
+  @Test
+  public void testQuestionnaireLinkedForUnreceiptedCaseReceiptedUacQid() {
+    // GIVEN
+    Case testCase = getRandomCaseWithUacQidLinks(1);
+    testCase.setCaseId(TEST_CASE_ID_1);
+    testCase.setSurvey("CENSUS");
+    testCase.setReceiptReceived(false);
+
+    UacQidLink testUacQidLink = testCase.getUacQidLinks().get(0);
+    testUacQidLink.setActive(false);
+    testUacQidLink.setQid(TEST_NON_CCS_QID_ID);
+    testUacQidLink.setCaze(null);
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+    testUacQidLink.setCcsCase(false);
+
+    ResponseManagementEvent linkingEvent = getTestResponseManagementQuestionnaireLinkedEvent();
+    UacDTO uac = linkingEvent.getPayload().getUac();
+    uac.setCaseId(TEST_CASE_ID_1.toString());
+    uac.setQuestionnaireId(TEST_HH_QID);
+
+    when(uacService.findByQid(TEST_HH_QID)).thenReturn(testUacQidLink);
+    when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testCase);
+
+    // WHEN
+    underTest.processQuestionnaireLinked(linkingEvent, messageTimestamp);
+
+    // THEN
+    InOrder inOrder = inOrder(uacService, caseService, caseReceipter, eventLogger);
+
+    inOrder.verify(uacService).findByQid(anyString());
+
+    inOrder.verify(caseService).getCaseByCaseId(any(UUID.class));
+    verifyNoMoreInteractions(caseService);
+
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    ArgumentCaptor<UacQidLink> uacQidLinkArgumentCaptor = ArgumentCaptor.forClass(UacQidLink.class);
+    verify(caseReceipter)
+        .handleReceipting(caseArgumentCaptor.capture(), uacQidLinkArgumentCaptor.capture());
+    assertThat(caseArgumentCaptor.getValue().getCaseId())
+        .as("CaseReceipter receiptHandler Case Id")
+        .isEqualTo(TEST_CASE_ID_1);
+    assertThat(uacQidLinkArgumentCaptor.getValue().getId())
+        .as("CaseReceipter uacQidLink Qid Id")
+        .isEqualTo(testUacQidLink.getId());
+
+    ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
+    inOrder.verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
+    UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
+    assertThat(actualUacQidLink.getQid()).isEqualTo(testUacQidLink.getQid());
+    assertThat(actualUacQidLink.getUac()).isEqualTo(testUacQidLink.getUac());
+    assertThat(actualUacQidLink.isCcsCase()).isFalse();
+    assertThat(actualUacQidLink.getCaze().getSurvey()).isEqualTo("CENSUS");
+    verifyNoMoreInteractions(uacService);
+
+    verify(eventLogger)
+        .logUacQidEvent(
+            eq(testUacQidLink),
+            any(OffsetDateTime.class),
+            eq("Questionnaire Linked"),
+            eq(EventType.QUESTIONNAIRE_LINKED),
+            eq(linkingEvent.getEvent()),
+            anyString(),
+            eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
   }
 }

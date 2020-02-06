@@ -9,7 +9,6 @@ import java.time.OffsetDateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -26,7 +25,7 @@ public class ReceiptServiceTest {
   private final String TEST_NON_CCS_QID_ID = "0134567890123456";
   private final String TEST_CONTINUATION_QID = "113456789023";
 
-  @Mock private CaseService caseService;
+  @Mock private CaseReceipter caseReceipter;
 
   @Mock private UacService uacService;
 
@@ -55,19 +54,21 @@ public class ReceiptServiceTest {
     underTest.processReceipt(managementEvent, messageTimestamp);
 
     // then
-    InOrder inOrder = inOrder(uacService, caseService, eventLogger);
-
-    inOrder.verify(uacService).findByQid(anyString());
+    verify(uacService).findByQid(anyString());
 
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    inOrder.verify(caseService).saveAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture());
+    ArgumentCaptor<UacQidLink> uacQidLinkArgumentCaptor = ArgumentCaptor.forClass(UacQidLink.class);
+    verify(caseReceipter)
+        .handleReceipting(caseArgumentCaptor.capture(), uacQidLinkArgumentCaptor.capture());
     Case actualCase = caseArgumentCaptor.getValue();
-    assertThat(actualCase.isReceiptReceived()).isTrue();
+    assertThat(actualCase.isReceiptReceived()).isFalse();
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
-    verifyNoMoreInteractions(caseService);
+    assertThat(uacQidLinkArgumentCaptor.getValue().getQid()).isEqualTo(TEST_NON_CCS_QID_ID);
+
+    verifyNoMoreInteractions(caseReceipter);
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    inOrder.verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
+    verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
     UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
     assertThat(actualUacQidLink.getQid()).isEqualTo(expectedUacQidLink.getQid());
     assertThat(actualUacQidLink.getUac()).isEqualTo(expectedUacQidLink.getUac());
@@ -82,49 +83,5 @@ public class ReceiptServiceTest {
             anyString(),
             eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
-  }
-
-  @Test
-  public void testReceiptForContinuationQID() {
-    ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
-    ResponseDTO expectedReceipt = managementEvent.getPayload().getResponse();
-
-    // Given
-    Case expectedCase = getRandomCase();
-    expectedCase.setReceiptReceived(false);
-    UacQidLink expectedUacQidLink = generateRandomUacQidLinkedToCase(expectedCase);
-    expectedUacQidLink.setQid(TEST_CONTINUATION_QID);
-    OffsetDateTime messageTimestamp = OffsetDateTime.now();
-
-    managementEvent.getPayload().getResponse().setResponseDateTime(OffsetDateTime.now());
-
-    when(uacService.findByQid(expectedReceipt.getQuestionnaireId())).thenReturn(expectedUacQidLink);
-
-    // when
-    underTest.processReceipt(managementEvent, messageTimestamp);
-
-    // then
-    InOrder inOrder = inOrder(uacService, eventLogger);
-
-    inOrder.verify(uacService).findByQid(anyString());
-
-    ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    inOrder.verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
-    UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
-    assertThat(actualUacQidLink.getQid()).isEqualTo(expectedUacQidLink.getQid());
-    assertThat(actualUacQidLink.getUac()).isEqualTo(expectedUacQidLink.getUac());
-
-    verify(eventLogger)
-        .logUacQidEvent(
-            eq(expectedUacQidLink),
-            any(OffsetDateTime.class),
-            eq(QID_RECEIPTED),
-            eq(EventType.RESPONSE_RECEIVED),
-            eq(managementEvent.getEvent()),
-            anyString(),
-            eq(messageTimestamp));
-    verifyNoMoreInteractions(eventLogger);
-
-    verifyZeroInteractions(caseService);
   }
 }
