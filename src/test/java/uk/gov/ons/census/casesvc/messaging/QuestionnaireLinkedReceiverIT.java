@@ -460,6 +460,8 @@ public class QuestionnaireLinkedReceiverIT {
     testCase.setCaseId(TEST_CASE_ID);
     testCase.setReceiptReceived(false);
     testCase.setSurvey("CENSUS");
+    testCase.setUacQidLinks(null);
+    testCase.setEvents(null);
     caseRepository.saveAndFlush(testCase);
 
     UacQidLink receiptedContinuationUacQidLink = new UacQidLink();
@@ -514,6 +516,8 @@ public class QuestionnaireLinkedReceiverIT {
     testCase.setCaseId(TEST_CASE_ID);
     testCase.setReceiptReceived(false);
     testCase.setSurvey("CENSUS");
+    testCase.setUacQidLinks(null);
+    testCase.setEvents(null);
     caseRepository.saveAndFlush(testCase);
 
     UacQidLink receiptedContinuationUacQidLink = new UacQidLink();
