@@ -460,8 +460,6 @@ public class QuestionnaireLinkedReceiverIT {
     testCase.setCaseId(TEST_CASE_ID);
     testCase.setReceiptReceived(false);
     testCase.setSurvey("CENSUS");
-    testCase.setUacQidLinks(null);
-    testCase.setEvents(null);
     caseRepository.saveAndFlush(testCase);
 
     UacQidLink receiptedContinuationUacQidLink = new UacQidLink();
@@ -495,12 +493,9 @@ public class QuestionnaireLinkedReceiverIT {
     assertThat(actualUac.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
     assertThat(actualUac.getActive()).isFalse();
 
-    // Check database Case is still unreceipted and response received not set
     Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
     assertThat(actualCase.isReceiptReceived()).isFalse();
-    assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
 
-    // Check database Case is now linked to questionnaire and still unreceipted
     List<UacQidLink> uacQidLinks = uacQidLinkRepository.findAll();
     assertThat(uacQidLinks.size()).isEqualTo(1);
     UacQidLink actualUacQidLink = uacQidLinks.get(0);
@@ -519,8 +514,6 @@ public class QuestionnaireLinkedReceiverIT {
     testCase.setCaseId(TEST_CASE_ID);
     testCase.setReceiptReceived(false);
     testCase.setSurvey("CENSUS");
-    testCase.setUacQidLinks(null);
-    testCase.setEvents(null);
     caseRepository.saveAndFlush(testCase);
 
     UacQidLink receiptedContinuationUacQidLink = new UacQidLink();
@@ -554,12 +547,9 @@ public class QuestionnaireLinkedReceiverIT {
     assertThat(actualUac.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
     assertThat(actualUac.getActive()).isFalse();
 
-    // Check database Case is still unreceipted and response received not set
     Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
     assertThat(actualCase.isReceiptReceived()).isTrue();
-    assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
 
-    // Check database Case is now linked to questionnaire and still unreceipted
     List<UacQidLink> uacQidLinks = uacQidLinkRepository.findAll();
     assertThat(uacQidLinks.size()).isEqualTo(1);
     UacQidLink actualUacQidLink = uacQidLinks.get(0);
