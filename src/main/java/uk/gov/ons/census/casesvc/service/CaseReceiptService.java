@@ -14,7 +14,7 @@ public class CaseReceiptService {
     this.caseService = caseService;
   }
 
-  public void handleReceipting(UacQidLink uacQidLink) {
+  public void receiptCase(UacQidLink uacQidLink) {
     Case caze = uacQidLink.getCaze();
 
     if (caze.isReceiptReceived()) return;

@@ -57,7 +57,7 @@ public class QidReceiptServiceTest {
     verify(uacService).findByQid(anyString());
 
     ArgumentCaptor<UacQidLink> uacQidLinkArgumentCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    verify(caseReceiptService).handleReceipting(uacQidLinkArgumentCaptor.capture());
+    verify(caseReceiptService).receiptCase(uacQidLinkArgumentCaptor.capture());
     Case actualCase = uacQidLinkArgumentCaptor.getValue().getCaze();
     assertThat(actualCase.isReceiptReceived()).isFalse();
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");

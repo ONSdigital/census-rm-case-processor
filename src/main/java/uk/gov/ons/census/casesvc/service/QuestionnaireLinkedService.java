@@ -52,7 +52,7 @@ public class QuestionnaireLinkedService {
     uacQidLink.setCaze(caze);
 
     if (!uacQidLink.isActive()) {
-      caseReceiptService.handleReceipting(uacQidLink);
+      caseReceiptService.receiptCase(uacQidLink);
     }
 
     uacService.saveAndEmitUacUpdatedEvent(uacQidLink);

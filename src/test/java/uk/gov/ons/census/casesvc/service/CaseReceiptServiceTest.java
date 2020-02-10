@@ -35,7 +35,7 @@ public class CaseReceiptServiceTest {
     uacQidLink.setQid(HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_ENGLAND);
     uacQidLink.setCaze(caze);
 
-    underTest.handleReceipting(uacQidLink);
+    underTest.receiptCase(uacQidLink);
 
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
     verify(caseService).saveAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture());
@@ -56,7 +56,7 @@ public class CaseReceiptServiceTest {
     uacQidLink.setQid(HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_ENGLAND);
     uacQidLink.setCaze(caze);
 
-    underTest.handleReceipting(uacQidLink);
+    underTest.receiptCase(uacQidLink);
     verifyZeroInteractions(caseService);
   }
 
@@ -72,7 +72,7 @@ public class CaseReceiptServiceTest {
     uacQidLink.setQid(ENGLAND_HOUSEHOLD_CONTINUATION);
     uacQidLink.setCaze(caze);
 
-    underTest.handleReceipting(uacQidLink);
+    underTest.receiptCase(uacQidLink);
     verifyZeroInteractions(caseService);
   }
 }
