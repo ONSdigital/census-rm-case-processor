@@ -8,20 +8,20 @@ import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
-import uk.gov.ons.census.casesvc.service.ReceiptService;
+import uk.gov.ons.census.casesvc.service.QidReceiptService;
 
 @MessageEndpoint
 public class ReceiptReceiver {
-  private final ReceiptService receiptService;
+  private final QidReceiptService qidReceiptService;
 
-  public ReceiptReceiver(ReceiptService receiptService) {
-    this.receiptService = receiptService;
+  public ReceiptReceiver(QidReceiptService qidReceiptService) {
+    this.qidReceiptService = qidReceiptService;
   }
 
   @Transactional
   @ServiceActivator(inputChannel = "receiptInputChannel")
   public void receiveMessage(Message<ResponseManagementEvent> message) {
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
-    receiptService.processReceipt(message.getPayload(), messageTimestamp);
+    qidReceiptService.processReceipt(message.getPayload(), messageTimestamp);
   }
 }

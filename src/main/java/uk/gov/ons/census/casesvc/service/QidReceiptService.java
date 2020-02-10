@@ -1,7 +1,6 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
-import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.iscontinuationQuestionnaireTypes;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
@@ -15,18 +14,19 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
 @Service
-public class ReceiptService {
+public class QidReceiptService {
 
-  private static final Logger log = LoggerFactory.getLogger(ReceiptService.class);
+  private static final Logger log = LoggerFactory.getLogger(QidReceiptService.class);
   public static final String QID_RECEIPTED = "QID Receipted";
-  private final CaseService caseService;
   private final UacService uacService;
   private final EventLogger eventLogger;
+  private final CaseReceiptService caseReceiptService;
 
-  public ReceiptService(CaseService caseService, UacService uacService, EventLogger eventLogger) {
-    this.caseService = caseService;
+  public QidReceiptService(
+      UacService uacService, EventLogger eventLogger, CaseReceiptService caseReceiptService) {
     this.uacService = uacService;
     this.eventLogger = eventLogger;
+    this.caseReceiptService = caseReceiptService;
   }
 
   public void processReceipt(
@@ -35,21 +35,18 @@ public class ReceiptService {
     UacQidLink uacQidLink = uacService.findByQid(receiptPayload.getQuestionnaireId());
     uacQidLink.setActive(false);
 
+    uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
+
     Case caze = uacQidLink.getCaze();
 
     if (caze != null) {
-      if (!iscontinuationQuestionnaireTypes(uacQidLink.getQid())) {
-        caze.setReceiptReceived(true);
-        caseService.saveAndEmitCaseUpdatedEvent(caze);
-      }
+      caseReceiptService.receiptCase(uacQidLink);
     } else {
       log.with("qid", receiptPayload.getQuestionnaireId())
           .with("tx_id", receiptEvent.getEvent().getTransactionId())
           .with("channel", receiptEvent.getEvent().getChannel())
           .warn("Receipt received for unaddressed UAC/QID pair not yet linked to a case");
     }
-
-    uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
 
     eventLogger.logUacQidEvent(
         uacQidLink,

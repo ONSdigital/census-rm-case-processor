@@ -21,12 +21,17 @@ public class QuestionnaireLinkedService {
   private final UacService uacService;
   private final CaseService caseService;
   private final EventLogger eventLogger;
+  private final CaseReceiptService caseReceiptService;
 
   public QuestionnaireLinkedService(
-      UacService uacService, CaseService caseService, EventLogger eventLogger) {
+      UacService uacService,
+      CaseService caseService,
+      EventLogger eventLogger,
+      CaseReceiptService caseReceiptService) {
     this.uacService = uacService;
     this.caseService = caseService;
     this.eventLogger = eventLogger;
+    this.caseReceiptService = caseReceiptService;
   }
 
   public void processQuestionnaireLinked(
@@ -39,23 +44,16 @@ public class QuestionnaireLinkedService {
 
     Case caze = caseService.getCaseByCaseId(UUID.fromString(uac.getCaseId()));
 
-    if (isIndividualQuestionnaireType(questionnaireId)) {
-      // We only want to create an HI case if the parent is an HH case
-      if (caze.getCaseType().equals("HH")) {
-        caze = caseService.prepareIndividualResponseCaseFromParentCase(caze);
-
-        caseService.emitCaseCreatedEvent(caze);
-      }
-    }
-
-    // TODO: This is wrong for CEs and SPGs but there is another ticket which deals with fixing this
-    // If UAC/QID has been receipted before case, update case
-    if (!uacQidLink.isActive() && !caze.isReceiptReceived()) {
-      caze.setReceiptReceived(true);
-      caseService.saveAndEmitCaseUpdatedEvent(caze);
+    if (isIndividualQuestionnaireType(questionnaireId) && caze.getCaseType().equals("HH")) {
+      caze = caseService.prepareIndividualResponseCaseFromParentCase(caze);
+      caseService.emitCaseCreatedEvent(caze);
     }
 
     uacQidLink.setCaze(caze);
+
+    if (!uacQidLink.isActive()) {
+      caseReceiptService.receiptCase(uacQidLink);
+    }
 
     uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
 
