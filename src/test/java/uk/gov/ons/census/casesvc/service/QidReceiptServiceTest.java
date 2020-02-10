@@ -2,7 +2,7 @@ package uk.gov.ons.census.casesvc.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
-import static uk.gov.ons.census.casesvc.service.ReceiptService.QID_RECEIPTED;
+import static uk.gov.ons.census.casesvc.service.QidReceiptService.QID_RECEIPTED;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.*;
 
 import java.time.OffsetDateTime;
@@ -20,18 +20,18 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ReceiptServiceTest {
+public class QidReceiptServiceTest {
 
   private final String TEST_NON_CCS_QID_ID = "0134567890123456";
   private final String TEST_CONTINUATION_QID = "113456789023";
 
-  @Mock private CaseReceipter caseReceipter;
+  @Mock private CaseReceiptService caseReceiptService;
 
   @Mock private UacService uacService;
 
   @Mock private EventLogger eventLogger;
 
-  @InjectMocks ReceiptService underTest;
+  @InjectMocks QidReceiptService underTest;
 
   @Test
   public void testReceiptForCase() {
@@ -56,16 +56,14 @@ public class ReceiptServiceTest {
     // then
     verify(uacService).findByQid(anyString());
 
-    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
     ArgumentCaptor<UacQidLink> uacQidLinkArgumentCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    verify(caseReceipter)
-        .handleReceipting(caseArgumentCaptor.capture(), uacQidLinkArgumentCaptor.capture());
-    Case actualCase = caseArgumentCaptor.getValue();
+    verify(caseReceiptService).handleReceipting(uacQidLinkArgumentCaptor.capture());
+    Case actualCase = uacQidLinkArgumentCaptor.getValue().getCaze();
     assertThat(actualCase.isReceiptReceived()).isFalse();
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
     assertThat(uacQidLinkArgumentCaptor.getValue().getQid()).isEqualTo(TEST_NON_CCS_QID_ID);
 
-    verifyNoMoreInteractions(caseReceipter);
+    verifyNoMoreInteractions(caseReceiptService);
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
     verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());

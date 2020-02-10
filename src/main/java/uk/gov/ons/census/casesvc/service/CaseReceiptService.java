@@ -7,14 +7,16 @@ import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
 @Component
-public class CaseReceipter {
+public class CaseReceiptService {
   private final CaseService caseService;
 
-  public CaseReceipter(CaseService caseService) {
+  public CaseReceiptService(CaseService caseService) {
     this.caseService = caseService;
   }
 
-  public void handleReceipting(Case caze, UacQidLink uacQidLink) {
+  public void handleReceipting(UacQidLink uacQidLink) {
+    Case caze = uacQidLink.getCaze();
+
     if (caze.isReceiptReceived()) return;
 
     if (!iscontinuationQuestionnaireTypes(uacQidLink.getQid())) {

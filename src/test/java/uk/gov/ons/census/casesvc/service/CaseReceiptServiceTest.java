@@ -15,13 +15,13 @@ import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CaseReceipterTest {
+public class CaseReceiptServiceTest {
   private static final String HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_ENGLAND = "21";
   private static final String ENGLAND_HOUSEHOLD_CONTINUATION = "11";
 
   @Mock CaseService caseService;
 
-  @InjectMocks CaseReceipter underTest;
+  @InjectMocks CaseReceiptService underTest;
 
   @Test
   public void testLinkingUnactiveQidReceiptsCase() {
@@ -33,8 +33,9 @@ public class CaseReceipterTest {
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setActive(false);
     uacQidLink.setQid(HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_ENGLAND);
+    uacQidLink.setCaze(caze);
 
-    underTest.handleReceipting(caze, uacQidLink);
+    underTest.handleReceipting(uacQidLink);
 
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
     verify(caseService).saveAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture());
@@ -53,8 +54,9 @@ public class CaseReceipterTest {
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setActive(false);
     uacQidLink.setQid(HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_ENGLAND);
+    uacQidLink.setCaze(caze);
 
-    underTest.handleReceipting(caze, uacQidLink);
+    underTest.handleReceipting(uacQidLink);
     verifyZeroInteractions(caseService);
   }
 
@@ -68,8 +70,9 @@ public class CaseReceipterTest {
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setActive(true);
     uacQidLink.setQid(ENGLAND_HOUSEHOLD_CONTINUATION);
+    uacQidLink.setCaze(caze);
 
-    underTest.handleReceipting(caze, uacQidLink);
+    underTest.handleReceipting(uacQidLink);
     verifyZeroInteractions(caseService);
   }
 }

@@ -21,17 +21,17 @@ public class QuestionnaireLinkedService {
   private final UacService uacService;
   private final CaseService caseService;
   private final EventLogger eventLogger;
-  private final CaseReceipter caseReceipter;
+  private final CaseReceiptService caseReceiptService;
 
   public QuestionnaireLinkedService(
       UacService uacService,
       CaseService caseService,
       EventLogger eventLogger,
-      CaseReceipter caseReceipter) {
+      CaseReceiptService caseReceiptService) {
     this.uacService = uacService;
     this.caseService = caseService;
     this.eventLogger = eventLogger;
-    this.caseReceipter = caseReceipter;
+    this.caseReceiptService = caseReceiptService;
   }
 
   public void processQuestionnaireLinked(
@@ -49,11 +49,12 @@ public class QuestionnaireLinkedService {
       caseService.emitCaseCreatedEvent(caze);
     }
 
+    uacQidLink.setCaze(caze);
+
     if (!uacQidLink.isActive()) {
-      caseReceipter.handleReceipting(caze, uacQidLink);
+      caseReceiptService.handleReceipting(uacQidLink);
     }
 
-    uacQidLink.setCaze(caze);
     uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
 
     eventLogger.logUacQidEvent(

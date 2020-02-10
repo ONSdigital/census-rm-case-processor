@@ -14,19 +14,19 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
 @Service
-public class ReceiptService {
+public class QidReceiptService {
 
-  private static final Logger log = LoggerFactory.getLogger(ReceiptService.class);
+  private static final Logger log = LoggerFactory.getLogger(QidReceiptService.class);
   public static final String QID_RECEIPTED = "QID Receipted";
   private final UacService uacService;
   private final EventLogger eventLogger;
-  private final CaseReceipter caseReceipter;
+  private final CaseReceiptService caseReceiptService;
 
-  public ReceiptService(
-      UacService uacService, EventLogger eventLogger, CaseReceipter caseReceipter) {
+  public QidReceiptService(
+      UacService uacService, EventLogger eventLogger, CaseReceiptService caseReceiptService) {
     this.uacService = uacService;
     this.eventLogger = eventLogger;
-    this.caseReceipter = caseReceipter;
+    this.caseReceiptService = caseReceiptService;
   }
 
   public void processReceipt(
@@ -40,7 +40,7 @@ public class ReceiptService {
     Case caze = uacQidLink.getCaze();
 
     if (caze != null) {
-      caseReceipter.handleReceipting(caze, uacQidLink);
+      caseReceiptService.handleReceipting(uacQidLink);
     } else {
       log.with("qid", receiptPayload.getQuestionnaireId())
           .with("tx_id", receiptEvent.getEvent().getTransactionId())

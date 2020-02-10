@@ -1,7 +1,7 @@
 package uk.gov.ons.census.casesvc.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.ons.census.casesvc.service.ReceiptService.QID_RECEIPTED;
+import static uk.gov.ons.census.casesvc.service.QidReceiptService.QID_RECEIPTED;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementReceiptEvent;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
