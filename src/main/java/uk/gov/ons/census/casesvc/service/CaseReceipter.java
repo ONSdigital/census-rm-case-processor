@@ -15,8 +15,6 @@ public class CaseReceipter {
   }
 
   public void handleReceipting(Case caze, UacQidLink uacQidLink) {
-    if (uacQidLink.isActive()) return;
-
     if (caze.isReceiptReceived()) return;
 
     if (!iscontinuationQuestionnaireTypes(uacQidLink.getQid())) {

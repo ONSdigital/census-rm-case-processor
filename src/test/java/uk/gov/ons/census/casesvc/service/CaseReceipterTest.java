@@ -59,21 +59,6 @@ public class CaseReceipterTest {
   }
 
   @Test
-  public void testLinkingaActiveQidtoUnreceiptCaseDoesntReceipt() {
-    // when
-    Case caze = new Case();
-    caze.setCaseId(UUID.randomUUID());
-    caze.setReceiptReceived(false);
-
-    UacQidLink uacQidLink = new UacQidLink();
-    uacQidLink.setActive(true);
-    uacQidLink.setQid(HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_ENGLAND);
-
-    underTest.handleReceipting(caze, uacQidLink);
-    verifyZeroInteractions(caseService);
-  }
-
-  @Test
   public void testContinuationQidResultInNoReceipting() {
     // when
     Case caze = new Case();
