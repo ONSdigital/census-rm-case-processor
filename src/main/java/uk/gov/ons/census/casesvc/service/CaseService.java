@@ -126,7 +126,7 @@ public class CaseService {
         outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
   }
 
-  private ResponseManagementEvent prepareCaseEvent(Case caze, EventDTO eventDTO) {
+  public ResponseManagementEvent prepareCaseEvent(Case caze, EventDTO eventDTO) {
     Address address = createAddress(caze);
     CollectionCase collectionCase = createCollectionCase(caze, address);
     PayloadDTO payloadDTO = new PayloadDTO();

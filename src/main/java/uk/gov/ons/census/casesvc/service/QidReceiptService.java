@@ -57,4 +57,8 @@ public class QidReceiptService {
         convertObjectToJson(receiptPayload),
         messageTimestamp);
   }
+
+  //  private void getCaseAndLockIt(UUID caseId) {
+  //
+  //  }
 }
