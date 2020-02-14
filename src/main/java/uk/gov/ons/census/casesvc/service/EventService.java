@@ -36,7 +36,7 @@ public class EventService {
         QuestionnaireTypeHelper.calculateQuestionnaireType(caze.getTreatmentCode());
     UacQidLink uacQidLink = uacService.buildUacQidLink(caze, questionnaireType);
     uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
-    caseService.saveAndEmitCaseCreatedEvent(caze);
+    caseService.saveCaseAndEmitCaseCreatedEvent(caze);
 
     eventLogger.logCaseEvent(
         caze,

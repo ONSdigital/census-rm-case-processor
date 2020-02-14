@@ -56,7 +56,7 @@ public class UndeliveredMailReceiverTest {
 
     // Then
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(caseService).saveAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture());
+    verify(caseService).saveCaseAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture());
     Case actualCase = caseArgumentCaptor.getValue();
     assertThat(actualCase).isEqualTo(caze);
     assertThat(caseArgumentCaptor.getValue().isUndeliveredAsAddressed()).isTrue();
@@ -104,7 +104,7 @@ public class UndeliveredMailReceiverTest {
 
     // Then
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(caseService).saveAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture());
+    verify(caseService).saveCaseAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture());
     Case actualCase = caseArgumentCaptor.getValue();
     assertThat(actualCase).isEqualTo(caze);
     assertThat(caseArgumentCaptor.getValue().isUndeliveredAsAddressed()).isTrue();
