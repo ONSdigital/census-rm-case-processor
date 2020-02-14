@@ -19,9 +19,11 @@ public class CaseService {
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_CASE_TYPE = "HI";
   public static final String CASE_UPDATE_ROUTING_KEY = "event.case.update";
 
-  // At the moment the treatment codes aren't finalised so at the moment there's an example one
-  // that tests it. Once the direct delivery treatment codes have been finalised then we can add them to this list.
-  private static final Set<String> DirectDeliveryTreatmentCodes = new HashSet<>(Arrays.asList("CE_LDIEE"));
+  // At the moment the treatment codes aren't finalised so there's an example one
+  // that tests it. Once the direct delivery treatment codes have been finalised then we can add
+  // them to the list.
+  private static final Set<String> DirectDeliveryTreatmentCodes =
+      new HashSet<>(Arrays.asList("CE_LDIEE"));
 
   private final CaseRepository caseRepository;
   private final MapperFacade mapperFacade;
