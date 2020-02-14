@@ -114,4 +114,7 @@ public class Case {
   @Column(columnDefinition = "timestamp with time zone")
   @UpdateTimestamp
   private OffsetDateTime lastUpdated;
+
+  @Column(columnDefinition = "BOOLEAN")
+  private boolean handDelivery;
 }

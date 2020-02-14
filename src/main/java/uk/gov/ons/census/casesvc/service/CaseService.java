@@ -1,21 +1,12 @@
 package uk.gov.ons.census.casesvc.service;
 
 import java.time.OffsetDateTime;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uk.gov.ons.census.casesvc.model.dto.Address;
-import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
-import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
-import uk.gov.ons.census.casesvc.model.dto.EventDTO;
-import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
-import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
-import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
-import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
-import uk.gov.ons.census.casesvc.model.dto.SampleUnitDTO;
+import uk.gov.ons.census.casesvc.model.dto.*;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.utility.CaseRefGenerator;
@@ -27,6 +18,10 @@ public class CaseService {
   private static final String CCS_SURVEY = "CCS";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_CASE_TYPE = "HI";
   public static final String CASE_UPDATE_ROUTING_KEY = "event.case.update";
+
+  // At the moment the treatment codes aren't finalised so at the moment there's an example one
+  // that tests it. Once the direct delivery treatment codes have been finalised then we can add them to this list.
+  private static final Set<String> DirectDeliveryTreatmentCodes = new HashSet<>(Arrays.asList("CE_LDIEE"));
 
   private final CaseRepository caseRepository;
   private final MapperFacade mapperFacade;
@@ -72,8 +67,13 @@ public class CaseService {
     caze.setReceiptReceived(false);
     caze.setSurvey(CENSUS_SURVEY);
     caze.setCeActualResponses(0);
+    caze.setHandDelivery(isTreatmentCodeDirectDelivered(createCaseSample.getTreatmentCode()));
 
     return saveNewCaseAndStampCaseRef(caze);
+  }
+
+  public boolean isTreatmentCodeDirectDelivered(String treatmentCode) {
+    return DirectDeliveryTreatmentCodes.contains(treatmentCode);
   }
 
   public Case createCCSCase(
@@ -189,6 +189,7 @@ public class CaseService {
     collectionCase.setRefusalReceived(caze.isRefusalReceived());
     collectionCase.setAddressInvalid(caze.isAddressInvalid());
     collectionCase.setUndeliveredAsAddressed(caze.isUndeliveredAsAddressed());
+    collectionCase.setHandDelivery(caze.isHandDelivery());
     // Yes. You can add stuff to the bottom of this list if you like.
 
     return collectionCase;

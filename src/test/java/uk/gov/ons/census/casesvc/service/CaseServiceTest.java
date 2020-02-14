@@ -102,6 +102,7 @@ public class CaseServiceTest {
     assertThat(savedCase.getCeExpectedCapacity()).isEqualTo(CE_CAPACITY);
     assertThat(savedCase.getCeActualResponses()).isEqualTo(0);
     assertThat(savedCase.getCaseType()).isEqualTo(TEST_ADDRESS_TYPE);
+    assertThat(savedCase.isHandDelivery()).isFalse();
   }
 
   @Test
@@ -219,5 +220,27 @@ public class CaseServiceTest {
       assertThat(re.getMessage()).isEqualTo(expectedErrorMessage);
       throw re;
     }
+  }
+
+  @Test
+  public void testisTreatmentCodeDirectDeliveredIsTrue() {
+    // Given
+
+    // When
+    boolean treatmentCodeResult = underTest.isTreatmentCodeDirectDelivered("CE_LDIEE");
+
+    // Then
+    assertThat(treatmentCodeResult).isTrue();
+  }
+
+  @Test
+  public void testisTreatmentCodeDirectDeliveredIsFalse() {
+    // Given
+
+    // When
+    boolean treatmentCodeResult = underTest.isTreatmentCodeDirectDelivered("CE_LQIEE");
+
+    // Then
+    assertThat(treatmentCodeResult).isFalse();
   }
 }
