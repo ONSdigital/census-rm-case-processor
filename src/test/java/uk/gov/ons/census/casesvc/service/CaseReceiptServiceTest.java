@@ -28,7 +28,7 @@ public class CaseReceiptServiceTest {
   @InjectMocks CaseReceiptService underTest;
 
   @Test
-  public void testUnactiveQidReceiptsCase() {
+  public void testHHIndReceiptsCase() {
     // when
     Case caze = new Case();
     caze.setCaseType("HH");

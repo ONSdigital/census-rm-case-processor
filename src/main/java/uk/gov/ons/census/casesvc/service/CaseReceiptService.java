@@ -55,8 +55,7 @@ public class CaseReceiptService {
         },
         () -> {
           throw new RuntimeException(
-              "Failed to get row to increment ceActualResponses, row is cccccckbbdbdccedgnbnuveiejurhedrdjlnfhjfjrkk"
-                  + "probably locked and this should resolve: "
+              "Failed to get row to increment responses, row is probably locked and this should resolve itself: "
                   + caze.getCaseId());
         });
   }
