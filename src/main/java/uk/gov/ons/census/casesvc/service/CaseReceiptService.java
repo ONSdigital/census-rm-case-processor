@@ -26,6 +26,9 @@ public class CaseReceiptService {
 
     if (iscontinuationQuestionnaireTypes(uacQidLink.getQid())) return;
 
+    System.out.println("Case type: " + caze.getCaseType());
+    System.out.println("Questionnaire ID: " + uacQidLink.getQid());
+
     if (caze.getCaseType().equals("CE") && isIndividualQuestionnaireType(uacQidLink.getQid())) {
       incrementActualResponseAndSetReceiptedIfAppropriate(caze);
       return;
@@ -41,22 +44,20 @@ public class CaseReceiptService {
     */
     Optional<Case> oCase = caseRepository.getCaseAndLockByCaseId(caze.getCaseId());
 
-    oCase.ifPresentOrElse(
-        lockedCase -> {
-          lockedCase.setCeActualResponses(lockedCase.getCeActualResponses() + 1);
+    if (!oCase.isPresent()) {
+      throw new RuntimeException(
+          "Failed to get row to increment responses, row is probably locked and this should resolve itself: "
+              + caze.getCaseId());
+    }
 
-          if (lockedCase.getAddressLevel().equals("U")
-              && lockedCase.getCeActualResponses().compareTo(lockedCase.getCeExpectedCapacity())
-                  >= 0) {
-            lockedCase.setReceiptReceived(true);
-          }
+    Case lockedCase = oCase.get();
+    lockedCase.setCeActualResponses(lockedCase.getCeActualResponses() + 1);
 
-          caseService.saveAndEmitCaseUpdatedEvent(lockedCase);
-        },
-        () -> {
-          throw new RuntimeException(
-              "Failed to get row to increment responses, row is probably locked and this should resolve itself: "
-                  + caze.getCaseId());
-        });
+    if (lockedCase.getAddressLevel().equals("U")
+        && lockedCase.getCeActualResponses().compareTo(lockedCase.getCeExpectedCapacity()) >= 0) {
+      lockedCase.setReceiptReceived(true);
+    }
+
+    caseService.saveAndEmitCaseUpdatedEvent(lockedCase);
   }
 }

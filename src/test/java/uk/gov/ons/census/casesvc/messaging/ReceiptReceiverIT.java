@@ -1,6 +1,5 @@
 package uk.gov.ons.census.casesvc.messaging;
 
-import static org.aspectj.bridge.MessageUtil.fail;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ons.census.casesvc.service.QidReceiptService.QID_RECEIPTED;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementQuestionnaireLinkedEvent;
@@ -296,11 +295,6 @@ public class ReceiptReceiverIT {
     }
 
     return qidLinkingMsgs;
-  }
-
-  @Test
-  public void testLargeNumberWithReceiptsAndLinkingEventsJustInCase() {
-    fail("Not implemented yet");
   }
 
   private boolean isStringFormattedAsUTCDate(String dateAsString) {
