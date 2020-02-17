@@ -26,9 +26,6 @@ public class CaseReceiptService {
 
     if (iscontinuationQuestionnaireTypes(uacQidLink.getQid())) return;
 
-    System.out.println("Case type: " + caze.getCaseType());
-    System.out.println("Questionnaire ID: " + uacQidLink.getQid());
-
     if (caze.getCaseType().equals("CE") && isIndividualQuestionnaireType(uacQidLink.getQid())) {
       incrementActualResponseAndSetReceiptedIfAppropriate(caze);
       return;
