@@ -10,8 +10,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.service.CaseService.CASE_UPDATE_ROUTING_KEY;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.junit.Test;
@@ -22,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
@@ -31,6 +31,7 @@ import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 
 @RunWith(MockitoJUnitRunner.class)
+@ActiveProfiles("test")
 public class CaseServiceTest {
 
   private static final String FIELD_CORD_ID = "FIELD_CORD_ID";
@@ -46,6 +47,8 @@ public class CaseServiceTest {
   private static final byte[] caserefgeneratorkey =
       new byte[] {0x10, 0x20, 0x10, 0x20, 0x10, 0x20, 0x10, 0x20};
   private static final Integer CE_ACTUAL_CAPACITY = 0;
+  private List<String> directDeliveryTreatmentCodes =
+      new ArrayList<>(Arrays.asList("CE_LDIEE", "test"));
 
   @Mock CaseRepository caseRepository;
 
@@ -83,6 +86,8 @@ public class CaseServiceTest {
     createCaseSample.setAddressType(TEST_ADDRESS_TYPE);
 
     ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
+    ReflectionTestUtils.setField(
+        underTest, "directDeliveryTreatmentCodes", directDeliveryTreatmentCodes);
 
     // Given
     when(caseRepository.saveAndFlush(any(Case.class))).then(obj -> obj.getArgument(0));
@@ -225,6 +230,8 @@ public class CaseServiceTest {
   @Test
   public void testisTreatmentCodeDirectDeliveredIsTrue() {
     // Given
+    ReflectionTestUtils.setField(
+        underTest, "directDeliveryTreatmentCodes", directDeliveryTreatmentCodes);
 
     // When
     boolean treatmentCodeResult = underTest.isTreatmentCodeDirectDelivered("CE_LDIEE");
@@ -236,6 +243,8 @@ public class CaseServiceTest {
   @Test
   public void testisTreatmentCodeDirectDeliveredIsFalse() {
     // Given
+    ReflectionTestUtils.setField(
+        underTest, "directDeliveryTreatmentCodes", directDeliveryTreatmentCodes);
 
     // When
     boolean treatmentCodeResult = underTest.isTreatmentCodeDirectDelivered("CE_LQIEE");

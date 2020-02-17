@@ -14,3 +14,5 @@ uacservice:
   uacqid-get-timeout: 1   #seconds
 
 caserefgeneratorkey: rPr3qsjlU42hsDX5npfuCzlyF4UYfDTO
+
+directdeliverytreatmentcodes: CE_LDIEE

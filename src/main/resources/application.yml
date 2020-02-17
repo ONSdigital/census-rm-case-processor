@@ -81,3 +81,8 @@ messagelogging:
 logging:
   level:
     org.springframework.amqp.rabbit.listener.ConditionalRejectingErrorHandler: ERROR
+
+# At the moment the treatment codes aren't finalised so there's an example one
+# that tests it. Once the direct delivery treatment codes have been finalised then we can add
+# them to the list.
+directdeliverytreatmentcodes: CE_LDIEE
