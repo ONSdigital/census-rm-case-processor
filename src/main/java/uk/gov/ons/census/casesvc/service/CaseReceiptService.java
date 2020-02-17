@@ -51,7 +51,8 @@ public class CaseReceiptService {
     lockedCase.setCeActualResponses(lockedCase.getCeActualResponses() + 1);
 
     if (lockedCase.getAddressLevel().equals("U")
-        && lockedCase.getCeActualResponses().compareTo(lockedCase.getCeExpectedCapacity()) >= 0) {
+        && lockedCase.getCeActualResponses().intValue()
+            >= lockedCase.getCeExpectedCapacity().intValue()) {
       lockedCase.setReceiptReceived(true);
     }
 
