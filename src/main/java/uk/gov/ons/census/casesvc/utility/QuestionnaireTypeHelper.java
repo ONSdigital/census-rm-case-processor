@@ -86,13 +86,11 @@ public class QuestionnaireTypeHelper {
 
   public static boolean isIndividualQuestionnaireType(String questionnaireId) {
     String questionnaireType = questionnaireId.substring(0, 2);
-
     return individualQuestionnaireTypes.contains(questionnaireType);
   }
 
   public static boolean iscontinuationQuestionnaireTypes(String questionnaireId) {
     String questionnaireType = questionnaireId.substring(0, 2);
-
     return continutationQuestionnaireTypes.contains(questionnaireType);
   }
 }
