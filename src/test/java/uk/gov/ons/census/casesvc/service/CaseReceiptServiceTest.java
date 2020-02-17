@@ -112,7 +112,7 @@ public class CaseReceiptServiceTest {
     verify(caseRepository).getCaseAndLockByCaseId(caze.getCaseId());
 
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(caseService).saveCaseAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture());
+    verify(caseService).saveCaseAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture(), any());
     Case actualCase = caseArgumentCaptor.getValue();
     assertThat(actualCase.getCaseId()).isEqualTo(caze.getCaseId());
     assertThat(actualCase.getCeActualResponses()).isEqualTo(2);
@@ -143,7 +143,7 @@ public class CaseReceiptServiceTest {
     verify(caseRepository).getCaseAndLockByCaseId(caze.getCaseId());
 
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(caseService).saveCaseAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture());
+    verify(caseService).saveCaseAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture(), any());
     Case actualCase = caseArgumentCaptor.getValue();
     assertThat(actualCase.getCaseId()).isEqualTo(caze.getCaseId());
     assertThat(actualCase.getCeActualResponses()).isEqualTo(2);

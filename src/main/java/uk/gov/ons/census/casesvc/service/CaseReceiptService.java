@@ -1,17 +1,16 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
+import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.isIndividualQuestionnaireType;
+import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.iscontinuationQuestionnaireTypes;
+
+import java.util.Optional;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
-
-import java.util.Optional;
-
-import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
-import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.isIndividualQuestionnaireType;
-import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.iscontinuationQuestionnaireTypes;
 
 @Component
 public class CaseReceiptService {
