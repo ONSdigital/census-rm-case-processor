@@ -25,6 +25,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
@@ -115,6 +116,12 @@ public class RefusalReceiverIT {
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
     assertThat(actualCase.isRefusalReceived()).isTrue();
     assertThat(actualCase.getLastUpdated()).isNotEqualTo(cazeCreatedTime);
+
+    // check the metadata is included with field close decision
+    assertThat(responseManagementEvent.getPayload().getMetadata().getFieldDecision())
+        .isEqualTo(ActionInstructionType.CLOSE);
+    assertThat(responseManagementEvent.getPayload().getMetadata().getCauseEventType())
+        .isEqualTo(EventTypeDTO.REFUSAL_RECEIVED);
 
     List<Event> events = eventRepository.findAll();
     assertThat(events.size()).isEqualTo(1);

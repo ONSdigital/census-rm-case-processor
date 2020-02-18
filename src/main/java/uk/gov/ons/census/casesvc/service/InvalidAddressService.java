@@ -1,14 +1,18 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static uk.gov.ons.census.casesvc.utility.EventHelper.isEventChannelField;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
+import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.InvalidAddress;
+import uk.gov.ons.census.casesvc.model.dto.Metadata;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
@@ -37,7 +41,8 @@ public class InvalidAddressService {
 
     caze.setAddressInvalid(true);
 
-    caseService.saveAndEmitCaseUpdatedEvent(caze);
+    caseService.saveCaseAndEmitCaseUpdatedEvent(
+        caze, buildMetadataForInvalidAddress(invalidAddressEvent));
 
     eventLogger.logCaseEvent(
         caze,
@@ -96,6 +101,13 @@ public class InvalidAddressService {
         messageTimestamp);
 
     return false;
+  }
+
+  private Metadata buildMetadataForInvalidAddress(ResponseManagementEvent event) {
+    if (!isEventChannelField(event)) {
+      return buildMetadata(event.getEvent().getType(), ActionInstructionType.CLOSE);
+    }
+    return buildMetadata(event.getEvent().getType(), null);
   }
 
   private UUID getCaseId(JsonNode json) {

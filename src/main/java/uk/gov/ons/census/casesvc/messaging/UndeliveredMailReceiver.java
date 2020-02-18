@@ -51,7 +51,7 @@ public class UndeliveredMailReceiver {
     }
 
     caze.setUndeliveredAsAddressed(true);
-    caseService.saveAndEmitCaseUpdatedEvent(caze);
+    caseService.saveCaseAndEmitCaseUpdatedEvent(caze);
 
     if (uacQidLink != null) {
       eventLogger.logUacQidEvent(

@@ -32,6 +32,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
@@ -135,6 +136,12 @@ public class ReceiptReceiverIT {
     CollectionCase actualCollectionCase = responseManagementEvent.getPayload().getCollectionCase();
     assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID.toString());
     assertThat(actualCollectionCase.getReceiptReceived()).isTrue();
+
+    // check the metadata is included with field close decision
+    assertThat(responseManagementEvent.getPayload().getMetadata().getFieldDecision())
+        .isEqualTo(ActionInstructionType.CLOSE);
+    assertThat(responseManagementEvent.getPayload().getMetadata().getCauseEventType())
+        .isEqualTo(EventTypeDTO.RESPONSE_RECEIVED);
 
     responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(rhUacOutboundQueue);
     assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);

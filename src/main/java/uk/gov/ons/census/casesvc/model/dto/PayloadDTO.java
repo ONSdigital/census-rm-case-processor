@@ -19,6 +19,7 @@ public class PayloadDTO {
   private InvalidAddress invalidAddress;
   private FieldCaseSelected fieldCaseSelected;
   private FulfilmentInformation fulfilmentInformation;
+  private Metadata metadata;
 
   @JsonProperty("CCSProperty")
   private CCSPropertyDTO ccsProperty;

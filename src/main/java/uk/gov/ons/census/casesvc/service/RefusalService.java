@@ -1,11 +1,15 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static uk.gov.ons.census.casesvc.utility.EventHelper.isEventChannelField;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
+import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
+import uk.gov.ons.census.casesvc.model.dto.Metadata;
 import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -16,7 +20,6 @@ public class RefusalService {
 
   private static final String REFUSAL_RECEIVED = "Refusal Received";
   private static final String ESTAB_ADDRESS_LEVEL = "E";
-  private static final String FIELD_CHANNEL = "FIELD";
 
   private final CaseService caseService;
   private final EventLogger eventLogger;
@@ -31,17 +34,16 @@ public class RefusalService {
     RefusalDTO refusal = refusalEvent.getPayload().getRefusal();
     Case caze = caseService.getCaseByCaseId(UUID.fromString(refusal.getCollectionCase().getId()));
 
-    String channel = refusalEvent.getEvent().getChannel();
-    if (isEstabLevelAddressAndChannelIsNotField(caze.getAddressLevel(), channel)) {
+    if (isEstabLevelAddressAndChannelIsNotField(caze.getAddressLevel(), refusalEvent)) {
       throw new IllegalArgumentException(
           String.format(
               "Refusal received for Estab level case ID '%s' from channel '%s'. "
                   + "This type of refusal should ONLY come from Field",
-              caze.getCaseId(), channel));
+              caze.getCaseId(), refusalEvent.getEvent().getChannel()));
     }
 
     caze.setRefusalReceived(true);
-    caseService.saveAndEmitCaseUpdatedEvent(caze);
+    caseService.saveCaseAndEmitCaseUpdatedEvent(caze, buildMetadataForRefusal(refusalEvent));
 
     eventLogger.logCaseEvent(
         caze,
@@ -53,7 +55,15 @@ public class RefusalService {
         messageTimestamp);
   }
 
-  private boolean isEstabLevelAddressAndChannelIsNotField(String addressLevel, String channel) {
-    return addressLevel.equals(ESTAB_ADDRESS_LEVEL) && !FIELD_CHANNEL.equalsIgnoreCase(channel);
+  private Metadata buildMetadataForRefusal(ResponseManagementEvent event) {
+    if (!isEventChannelField(event)) {
+      return buildMetadata(event.getEvent().getType(), ActionInstructionType.CLOSE);
+    }
+    return buildMetadata(event.getEvent().getType(), null);
+  }
+
+  private boolean isEstabLevelAddressAndChannelIsNotField(
+      String addressLevel, ResponseManagementEvent event) {
+    return addressLevel.equals(ESTAB_ADDRESS_LEVEL) && !isEventChannelField(event);
   }
 }
