@@ -99,6 +99,11 @@ public class CaseReceiptServiceTest {
     testContinuationQidResultInNoChangesOrEmitting("SPG", "U", HOUSEHOLD_INDIVIDUAL);
   }
 
+  @Test
+  public void SPG_U_Cont() {
+    testContinuationQidResultInNoChangesOrEmitting("SPG", "U", ENGLAND_HOUSEHOLD_CONTINUATION);
+  }
+
   //  @Test
   //  public void x() {
   //    fail("Test for all possible not Mapped exceptions?");

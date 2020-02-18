@@ -1,15 +1,5 @@
 package uk.gov.ons.census.casesvc.service;
 
-import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
-import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.isIndividualQuestionnaireType;
-import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.iscontinuationQuestionnaireTypes;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.function.Function;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
@@ -17,26 +7,37 @@ import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Function;
+
+import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
+import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.isIndividualQuestionnaireType;
+import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.iscontinuationQuestionnaireTypes;
+
 @Component
 public class CaseReceiptService {
   private final CaseService caseService;
   private final CaseRepository caseRepository;
 
-  private Map<String, Function<Case, Case>> processingRules = new HashMap<>();
+  private Map<String, ProcessingRule> processingRules = new HashMap<>();
 
-  //  We could in theory put everything in here and have Function throwing Exception invalid etc,
-  // but seems OTT
   private void setUpRules() {
-    processingRules.put("HH_U_HH", receiptCase);
-    processingRules.put("HI_U_I", receiptCase);
-    processingRules.put("CE_E_CE1", receiptCase);
-    processingRules.put("CE_U_I", incrementAndReceiptIfGreaterEqualExpected);
-    processingRules.put("CE_E_I", incrementWithNoReceipting);
-    processingRules.put("SPG_U_HH", receiptCase);
+    processingRules.put("HH_U_HH", new ProcessingRule(receiptCase, true));
+    processingRules.put("HH_U_Cont", new ProcessingRule(noActionRequired, false));
+    processingRules.put("HI_U_I", new ProcessingRule(receiptCase, true));
+    processingRules.put("CE_E_CE1", new ProcessingRule(receiptCase, true));
+    processingRules.put("CE_U_I", new ProcessingRule(incrementAndReceiptIfExceedsCapacity, true));
+    processingRules.put("SPG_E_HH", new ProcessingRule(noActionRequired, false));
+    processingRules.put("SPG_E_I", new ProcessingRule(noActionRequired, false));
+    processingRules.put("CE_E_I", new ProcessingRule(incrementWithNoReceipting, true));
+    processingRules.put("SPG_U_HH", new ProcessingRule(receiptCase, true));
+    processingRules.put("SPG_U_I", new ProcessingRule(noActionRequired, false));
+    processingRules.put("SPG_U_Cont", new ProcessingRule(noActionRequired, false));
   }
-
-  private List<String> continuationsToIgnore =
-      List.of("HH_U_Cont", "SPG_E_HH", "SPG_E_I", "SPG_U_I");
 
   public CaseReceiptService(CaseService caseService, CaseRepository caseRepository) {
     this.caseService = caseService;
@@ -51,13 +52,17 @@ public class CaseReceiptService {
 
     String compositeKey = makeRulesKey(caze, uacQidLink);
 
-    if (continuationsToIgnore.contains(compositeKey)) return;
+    //    if (continuationsToIgnore.contains(compositeKey)) return;
 
     if (processingRules.containsKey(compositeKey)) {
-      Case lockedCase = processingRules.get(compositeKey).apply(caze);
+      ProcessingRule processingRule = processingRules.get(compositeKey);
 
-      caseService.saveCaseAndEmitCaseUpdatedEvent(
-          lockedCase, buildMetadata(causeEventType, ActionInstructionType.CLOSE));
+      Case lockedCase = processingRule.run(caze);
+
+      if (processingRule.saveAndEmitCase) {
+        caseService.saveCaseAndEmitCaseUpdatedEvent(
+            lockedCase, buildMetadata(causeEventType, ActionInstructionType.CLOSE));
+      }
 
       return;
     }
@@ -87,7 +92,7 @@ public class CaseReceiptService {
         return lockedCase;
       };
 
-  Function<Case, Case> incrementAndReceiptIfGreaterEqualExpected =
+  Function<Case, Case> incrementAndReceiptIfExceedsCapacity =
       (caze) -> {
         Case lockedCase = incrementWithNoReceipting.apply(caze);
 
@@ -104,6 +109,8 @@ public class CaseReceiptService {
         return caze;
       };
 
+  Function<Case, Case> noActionRequired = (caze) -> null;
+
   private Case getCaseAndLockIt(UUID caseId) {
     /*
       This stops the actualResponses being updated by another thread for another receipt or linking event
@@ -117,5 +124,20 @@ public class CaseReceiptService {
     }
 
     return oCase.get();
+  }
+
+  // This is easily extendable for things like ActionInstruction Types
+  private class ProcessingRule {
+    private Function<Case, Case> functionToExecute;
+    public final boolean saveAndEmitCase;
+
+    public ProcessingRule(Function<Case, Case> functionToExecute, boolean saveAndEmitCase) {
+      this.functionToExecute = functionToExecute;
+      this.saveAndEmitCase = saveAndEmitCase;
+    }
+
+    public Case run(Case caze) {
+      return functionToExecute.apply(caze);
+    }
   }
 }
