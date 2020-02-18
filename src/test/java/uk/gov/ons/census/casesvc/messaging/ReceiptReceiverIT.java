@@ -105,6 +105,8 @@ public class ReceiptReceiverIT {
     caze.setSurvey("CENSUS");
     caze.setUacQidLinks(null);
     caze.setEvents(null);
+    caze.setCaseType("HH");
+    caze.setAddressLevel("U");
     caze = caseRepository.saveAndFlush(caze);
 
     UacQidLink uacQidLink = new UacQidLink();
