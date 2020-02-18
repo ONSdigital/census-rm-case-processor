@@ -33,4 +33,5 @@ public class CollectionCase {
   private Integer ceActualResponses;
   private Boolean addressInvalid;
   private Boolean undeliveredAsAddressed;
+  private boolean handDelivery;
 }

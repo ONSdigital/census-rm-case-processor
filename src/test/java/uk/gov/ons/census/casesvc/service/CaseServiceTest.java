@@ -10,8 +10,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.service.CaseService.CASE_UPDATE_ROUTING_KEY;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.junit.Test;
@@ -46,6 +45,8 @@ public class CaseServiceTest {
   private static final byte[] caserefgeneratorkey =
       new byte[] {0x10, 0x20, 0x10, 0x20, 0x10, 0x20, 0x10, 0x20};
   private static final Integer CE_ACTUAL_CAPACITY = 0;
+  private List<String> directDeliveryTreatmentCodes =
+      new ArrayList<>(Arrays.asList("CE_LDIEE", "test"));
 
   @Mock CaseRepository caseRepository;
 
@@ -83,6 +84,8 @@ public class CaseServiceTest {
     createCaseSample.setAddressType(TEST_ADDRESS_TYPE);
 
     ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
+    ReflectionTestUtils.setField(
+        underTest, "directDeliveryTreatmentCodes", directDeliveryTreatmentCodes);
 
     // Given
     when(caseRepository.saveAndFlush(any(Case.class))).then(obj -> obj.getArgument(0));
@@ -102,6 +105,7 @@ public class CaseServiceTest {
     assertThat(savedCase.getCeExpectedCapacity()).isEqualTo(CE_CAPACITY);
     assertThat(savedCase.getCeActualResponses()).isEqualTo(0);
     assertThat(savedCase.getCaseType()).isEqualTo(TEST_ADDRESS_TYPE);
+    assertThat(savedCase.isHandDelivery()).isFalse();
   }
 
   @Test
@@ -219,5 +223,31 @@ public class CaseServiceTest {
       assertThat(re.getMessage()).isEqualTo(expectedErrorMessage);
       throw re;
     }
+  }
+
+  @Test
+  public void testisTreatmentCodeDirectDeliveredIsTrue() {
+    // Given
+    ReflectionTestUtils.setField(
+        underTest, "directDeliveryTreatmentCodes", directDeliveryTreatmentCodes);
+
+    // When
+    boolean treatmentCodeResult = underTest.isTreatmentCodeDirectDelivered("CE_LDIEE");
+
+    // Then
+    assertThat(treatmentCodeResult).isTrue();
+  }
+
+  @Test
+  public void testisTreatmentCodeDirectDeliveredIsFalse() {
+    // Given
+    ReflectionTestUtils.setField(
+        underTest, "directDeliveryTreatmentCodes", directDeliveryTreatmentCodes);
+
+    // When
+    boolean treatmentCodeResult = underTest.isTreatmentCodeDirectDelivered("CE_LQIEE");
+
+    // Then
+    assertThat(treatmentCodeResult).isFalse();
   }
 }

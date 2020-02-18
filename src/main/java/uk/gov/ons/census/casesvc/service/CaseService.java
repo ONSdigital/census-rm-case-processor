@@ -1,6 +1,7 @@
 package uk.gov.ons.census.casesvc.service;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import ma.glasnost.orika.MapperFacade;
@@ -28,6 +29,9 @@ public class CaseService {
   private static final String CCS_SURVEY = "CCS";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_CASE_TYPE = "HI";
   public static final String CASE_UPDATE_ROUTING_KEY = "event.case.update";
+
+  @Value("${directdeliverytreatmentcodes}")
+  private List<String> directDeliveryTreatmentCodes;
 
   private final CaseRepository caseRepository;
   private final MapperFacade mapperFacade;
@@ -73,8 +77,13 @@ public class CaseService {
     caze.setReceiptReceived(false);
     caze.setSurvey(CENSUS_SURVEY);
     caze.setCeActualResponses(0);
+    caze.setHandDelivery(isTreatmentCodeDirectDelivered(createCaseSample.getTreatmentCode()));
 
     return saveNewCaseAndStampCaseRef(caze);
+  }
+
+  public boolean isTreatmentCodeDirectDelivered(String treatmentCode) {
+    return directDeliveryTreatmentCodes.contains(treatmentCode);
   }
 
   public Case createCCSCase(
@@ -201,6 +210,7 @@ public class CaseService {
     collectionCase.setRefusalReceived(caze.isRefusalReceived());
     collectionCase.setAddressInvalid(caze.isAddressInvalid());
     collectionCase.setUndeliveredAsAddressed(caze.isUndeliveredAsAddressed());
+    collectionCase.setHandDelivery(caze.isHandDelivery());
     // Yes. You can add stuff to the bottom of this list if you like.
 
     return collectionCase;
