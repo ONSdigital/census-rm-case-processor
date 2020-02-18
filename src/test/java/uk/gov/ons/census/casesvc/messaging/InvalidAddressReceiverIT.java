@@ -35,6 +35,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCaseCaseId;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
@@ -132,6 +133,12 @@ public class InvalidAddressReceiverIT {
     Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
     assertThat(actualCase.isAddressInvalid()).isTrue();
+
+    // check the metadata is included with field close decision
+    assertThat(responseManagementEvent.getPayload().getMetadata().getFieldDecision())
+        .isEqualTo(ActionInstructionType.CLOSE);
+    assertThat(responseManagementEvent.getPayload().getMetadata().getCauseEventType())
+        .isEqualTo(EventTypeDTO.ADDRESS_NOT_VALID);
 
     // check database for log eventDTO
     List<Event> events = eventRepository.findAll();

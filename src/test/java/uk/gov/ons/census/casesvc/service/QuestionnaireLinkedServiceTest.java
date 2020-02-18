@@ -130,7 +130,9 @@ public class QuestionnaireLinkedServiceTest {
     verifyNoMoreInteractions(caseService);
 
     ArgumentCaptor<UacQidLink> uacQidLinkArgumentCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    inOrder.verify(caseReceiptService).receiptCase(uacQidLinkArgumentCaptor.capture());
+    inOrder
+        .verify(caseReceiptService)
+        .receiptCase(uacQidLinkArgumentCaptor.capture(), eq(managementEvent.getEvent().getType()));
     assertThat(uacQidLinkArgumentCaptor.getValue().getCaze().getCaseId()).isEqualTo(TEST_CASE_ID_1);
     assertThat(uacQidLinkArgumentCaptor.getValue().getQid()).isEqualTo(TEST_HI_QID);
     verifyNoMoreInteractions(caseReceiptService);
@@ -408,7 +410,8 @@ public class QuestionnaireLinkedServiceTest {
     verifyNoMoreInteractions(caseService);
 
     ArgumentCaptor<UacQidLink> uacQidLinkArgumentCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    verify(caseReceiptService).receiptCase(uacQidLinkArgumentCaptor.capture());
+    verify(caseReceiptService)
+        .receiptCase(uacQidLinkArgumentCaptor.capture(), eq(linkingEvent.getEvent().getType()));
     assertThat(uacQidLinkArgumentCaptor.getValue().getCaze().getCaseId())
         .as("CaseReceipter receiptHandler Case Id")
         .isEqualTo(TEST_CASE_ID_1);

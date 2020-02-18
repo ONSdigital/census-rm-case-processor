@@ -1,10 +1,13 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.isIndividualQuestionnaireType;
 import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.iscontinuationQuestionnaireTypes;
 
 import java.util.Optional;
 import org.springframework.stereotype.Component;
+import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
+import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
@@ -19,7 +22,7 @@ public class CaseReceiptService {
     this.caseRepository = caseRepository;
   }
 
-  public void receiptCase(UacQidLink uacQidLink) {
+  public void receiptCase(UacQidLink uacQidLink, EventTypeDTO causeEventType) {
     Case caze = uacQidLink.getCaze();
 
     if (caze.isReceiptReceived()) return;
@@ -27,15 +30,17 @@ public class CaseReceiptService {
     if (iscontinuationQuestionnaireTypes(uacQidLink.getQid())) return;
 
     if (caze.getCaseType().equals("CE") && isIndividualQuestionnaireType(uacQidLink.getQid())) {
-      incrementActualResponseAndSetReceiptedIfAppropriate(caze);
+      incrementActualResponseAndSetReceiptedIfAppropriate(caze, causeEventType);
       return;
     }
 
     caze.setReceiptReceived(true);
-    caseService.saveAndEmitCaseUpdatedEvent(caze);
+    caseService.saveCaseAndEmitCaseUpdatedEvent(
+        caze, buildMetadata(causeEventType, ActionInstructionType.CLOSE));
   }
 
-  private void incrementActualResponseAndSetReceiptedIfAppropriate(Case caze) {
+  private void incrementActualResponseAndSetReceiptedIfAppropriate(
+      Case caze, EventTypeDTO causeEventType) {
     /*
       This stops the actualResponses being updated by another thread for another receipt or linking event
     */
@@ -56,6 +61,7 @@ public class CaseReceiptService {
       lockedCase.setReceiptReceived(true);
     }
 
-    caseService.saveAndEmitCaseUpdatedEvent(lockedCase);
+    caseService.saveCaseAndEmitCaseUpdatedEvent(
+        lockedCase, buildMetadata(causeEventType, ActionInstructionType.CLOSE));
   }
 }

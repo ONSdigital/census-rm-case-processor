@@ -45,7 +45,7 @@ public class EventServiceTest {
     UacQidLink uacQidLink = new UacQidLink();
     when(uacService.buildUacQidLink(caze, 1)).thenReturn(uacQidLink);
     when(uacService.saveAndEmitUacUpdatedEvent(any(UacQidLink.class))).thenReturn(new PayloadDTO());
-    when(caseService.saveAndEmitCaseCreatedEvent(any(Case.class))).thenReturn(new PayloadDTO());
+    when(caseService.saveCaseAndEmitCaseCreatedEvent(any(Case.class))).thenReturn(new PayloadDTO());
 
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
@@ -56,7 +56,7 @@ public class EventServiceTest {
     verify(caseService).saveCaseSample(createCaseSample);
     verify(uacService).buildUacQidLink(eq(caze), eq(1));
     verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLink);
-    verify(caseService).saveAndEmitCaseCreatedEvent(caze);
+    verify(caseService).saveCaseAndEmitCaseCreatedEvent(caze);
 
     verify(eventLogger, times(1))
         .logCaseEvent(
@@ -81,7 +81,7 @@ public class EventServiceTest {
     when(uacService.buildUacQidLink(caze, 2)).thenReturn(uacQidLink);
     when(uacService.buildUacQidLink(caze, 3)).thenReturn(secondUacQidLink);
     when(uacService.saveAndEmitUacUpdatedEvent(any(UacQidLink.class))).thenReturn(new PayloadDTO());
-    when(caseService.saveAndEmitCaseCreatedEvent(any(Case.class))).thenReturn(new PayloadDTO());
+    when(caseService.saveCaseAndEmitCaseCreatedEvent(any(Case.class))).thenReturn(new PayloadDTO());
 
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
@@ -92,7 +92,7 @@ public class EventServiceTest {
     verify(caseService).saveCaseSample(createCaseSample);
     verify(uacService, times(1)).buildUacQidLink(eq(caze), eq(2));
     verify(uacService, times(2)).saveAndEmitUacUpdatedEvent(uacQidLink);
-    verify(caseService).saveAndEmitCaseCreatedEvent(caze);
+    verify(caseService).saveCaseAndEmitCaseCreatedEvent(caze);
 
     verify(eventLogger, times(1))
         .logCaseEvent(

@@ -191,7 +191,7 @@ public class CaseServiceTest {
     ReflectionTestUtils.setField(underTest, "outboundExchange", TEST_EXCHANGE);
 
     // When
-    underTest.saveAndEmitCaseCreatedEvent(caze);
+    underTest.saveCaseAndEmitCaseCreatedEvent(caze);
 
     // Then
     verify(caseRepository).saveAndFlush(eq(caze));

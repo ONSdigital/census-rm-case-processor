@@ -2,6 +2,7 @@ package uk.gov.ons.census.casesvc.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
+import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.RESPONSE_RECEIVED;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -12,6 +13,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
+import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
+import uk.gov.ons.census.casesvc.model.dto.Metadata;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
@@ -40,13 +44,19 @@ public class CaseReceiptServiceTest {
     uacQidLink.setQid(HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_ENGLAND);
     uacQidLink.setCaze(caze);
 
-    underTest.receiptCase(uacQidLink);
+    underTest.receiptCase(uacQidLink, EventTypeDTO.RESPONSE_RECEIVED);
 
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(caseService).saveAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture());
+    ArgumentCaptor<Metadata> metadataArgumentCaptor = ArgumentCaptor.forClass(Metadata.class);
+    verify(caseService)
+        .saveCaseAndEmitCaseUpdatedEvent(
+            caseArgumentCaptor.capture(), metadataArgumentCaptor.capture());
     Case actualCase = caseArgumentCaptor.getValue();
     assertThat(actualCase.getCaseId()).as("Case Id saved").isEqualTo(caze.getCaseId());
     assertThat(actualCase.isReceiptReceived()).as("Case Reecipted").isEqualTo(true);
+    Metadata metadata = metadataArgumentCaptor.getValue();
+    assertThat(metadata.getCauseEventType()).isEqualTo(RESPONSE_RECEIVED);
+    assertThat(metadata.getFieldDecision()).isEqualTo(ActionInstructionType.CLOSE);
   }
 
   @Test
@@ -60,7 +70,7 @@ public class CaseReceiptServiceTest {
     uacQidLink.setQid(HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_ENGLAND);
     uacQidLink.setCaze(caze);
 
-    underTest.receiptCase(uacQidLink);
+    underTest.receiptCase(uacQidLink, EventTypeDTO.RESPONSE_RECEIVED);
     verifyZeroInteractions(caseService);
   }
 
@@ -75,7 +85,7 @@ public class CaseReceiptServiceTest {
     uacQidLink.setQid(ENGLAND_HOUSEHOLD_CONTINUATION);
     uacQidLink.setCaze(caze);
 
-    underTest.receiptCase(uacQidLink);
+    underTest.receiptCase(uacQidLink, EventTypeDTO.RESPONSE_RECEIVED);
     verifyZeroInteractions(caseService);
   }
 
@@ -97,12 +107,12 @@ public class CaseReceiptServiceTest {
     when(caseRepository.getCaseAndLockByCaseId(any())).thenReturn(Optional.of(caze));
 
     // When
-    underTest.receiptCase(uacQidLink);
+    underTest.receiptCase(uacQidLink, EventTypeDTO.RESPONSE_RECEIVED);
 
     verify(caseRepository).getCaseAndLockByCaseId(caze.getCaseId());
 
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(caseService).saveAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture());
+    verify(caseService).saveCaseAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture(), any());
     Case actualCase = caseArgumentCaptor.getValue();
     assertThat(actualCase.getCaseId()).isEqualTo(caze.getCaseId());
     assertThat(actualCase.getCeActualResponses()).isEqualTo(2);
@@ -128,12 +138,12 @@ public class CaseReceiptServiceTest {
     when(caseRepository.getCaseAndLockByCaseId(any())).thenReturn(Optional.of(caze));
 
     // When
-    underTest.receiptCase(uacQidLink);
+    underTest.receiptCase(uacQidLink, EventTypeDTO.RESPONSE_RECEIVED);
 
     verify(caseRepository).getCaseAndLockByCaseId(caze.getCaseId());
 
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(caseService).saveAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture());
+    verify(caseService).saveCaseAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture(), any());
     Case actualCase = caseArgumentCaptor.getValue();
     assertThat(actualCase.getCaseId()).isEqualTo(caze.getCaseId());
     assertThat(actualCase.getCeActualResponses()).isEqualTo(2);

@@ -30,10 +30,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.skyscreamer.jsonassert.JSONAssert;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
+import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCaseCaseId;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.InvalidAddress;
+import uk.gov.ons.census.casesvc.model.dto.Metadata;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -57,6 +59,7 @@ public class InvalidAddressServiceTest {
     managementEvent.setEvent(new EventDTO());
     managementEvent.getEvent().setDateTime(OffsetDateTime.now());
     managementEvent.getEvent().setType(ADDRESS_NOT_VALID);
+    managementEvent.getEvent().setChannel("CC");
     managementEvent.setPayload(new PayloadDTO());
     managementEvent.getPayload().setInvalidAddress(new InvalidAddress());
     managementEvent.getPayload().getInvalidAddress().setCollectionCase(new CollectionCaseCaseId());
@@ -83,10 +86,17 @@ public class InvalidAddressServiceTest {
     inOrder.verify(caseService).getCaseByCaseId(any(UUID.class));
 
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    inOrder.verify(caseService).saveAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture());
+    ArgumentCaptor<Metadata> metadataArgumentCaptor = ArgumentCaptor.forClass(Metadata.class);
+    inOrder
+        .verify(caseService)
+        .saveCaseAndEmitCaseUpdatedEvent(
+            caseArgumentCaptor.capture(), metadataArgumentCaptor.capture());
     Case actualCase = caseArgumentCaptor.getValue();
     assertThat(actualCase.isAddressInvalid()).isTrue();
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
+    Metadata metadata = metadataArgumentCaptor.getValue();
+    assertThat(metadata.getCauseEventType()).isEqualTo(ADDRESS_NOT_VALID);
+    assertThat(metadata.getFieldDecision()).isEqualTo(ActionInstructionType.CLOSE);
     verifyNoMoreInteractions(caseService);
 
     inOrder

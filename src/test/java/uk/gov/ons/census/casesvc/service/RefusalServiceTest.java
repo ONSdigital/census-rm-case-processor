@@ -15,7 +15,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
+import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
+import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
+import uk.gov.ons.census.casesvc.model.dto.Metadata;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
@@ -55,11 +58,18 @@ public class RefusalServiceTest {
     inOrder.verify(caseService).getCaseByCaseId(any(UUID.class));
 
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    inOrder.verify(caseService).saveAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture());
+    ArgumentCaptor<Metadata> metadataArgumentCaptor = ArgumentCaptor.forClass(Metadata.class);
+    inOrder
+        .verify(caseService)
+        .saveCaseAndEmitCaseUpdatedEvent(
+            caseArgumentCaptor.capture(), metadataArgumentCaptor.capture());
     Case actualCase = caseArgumentCaptor.getValue();
+    Metadata metadata = metadataArgumentCaptor.getValue();
     verifyNoMoreInteractions(caseService);
 
     assertThat(actualCase.isRefusalReceived()).isTrue();
+    assertThat(metadata.getCauseEventType()).isEqualTo(EventTypeDTO.REFUSAL_RECEIVED);
+    assertThat(metadata.getFieldDecision()).isEqualTo(ActionInstructionType.CLOSE);
     inOrder
         .verify(eventLogger, times(1))
         .logCaseEvent(

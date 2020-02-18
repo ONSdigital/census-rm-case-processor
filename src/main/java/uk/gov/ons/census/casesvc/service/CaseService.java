@@ -1,12 +1,23 @@
 package uk.gov.ons.census.casesvc.service;
 
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uk.gov.ons.census.casesvc.model.dto.*;
+import uk.gov.ons.census.casesvc.model.dto.Address;
+import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
+import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
+import uk.gov.ons.census.casesvc.model.dto.EventDTO;
+import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
+import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
+import uk.gov.ons.census.casesvc.model.dto.Metadata;
+import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
+import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
+import uk.gov.ons.census.casesvc.model.dto.SampleUnitDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.utility.CaseRefGenerator;
@@ -90,11 +101,12 @@ public class CaseService {
     return saveNewCaseAndStampCaseRef(caze);
   }
 
-  public PayloadDTO saveAndEmitCaseCreatedEvent(Case caze) {
-    return saveAndEmitCaseCreatedEvent(caze, null);
+  public PayloadDTO saveCaseAndEmitCaseCreatedEvent(Case caze) {
+    return saveCaseAndEmitCaseCreatedEvent(caze, null);
   }
 
-  public PayloadDTO saveAndEmitCaseCreatedEvent(Case caze, FulfilmentRequestDTO fulfilmentRequest) {
+  public PayloadDTO saveCaseAndEmitCaseCreatedEvent(
+      Case caze, FulfilmentRequestDTO fulfilmentRequest) {
     caseRepository.saveAndFlush(caze);
 
     return emitCaseCreatedEvent(caze, fulfilmentRequest);
@@ -116,24 +128,34 @@ public class CaseService {
     return responseManagementEvent.getPayload();
   }
 
-  public void saveAndEmitCaseUpdatedEvent(Case caze) {
+  public void saveCaseAndEmitCaseUpdatedEvent(Case caze) {
+    saveCaseAndEmitCaseUpdatedEvent(caze, null);
+  }
+
+  public void saveCaseAndEmitCaseUpdatedEvent(Case caze, Metadata metadata) {
     caseRepository.saveAndFlush(caze);
 
     EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_UPDATED);
-    ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
+    ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO, metadata);
     rabbitTemplate.convertAndSend(
         outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
   }
 
-  private ResponseManagementEvent prepareCaseEvent(Case caze, EventDTO eventDTO) {
+  private ResponseManagementEvent prepareCaseEvent(
+      Case caze, EventDTO eventDTO, Metadata metadata) {
     Address address = createAddress(caze);
     CollectionCase collectionCase = createCollectionCase(caze, address);
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setCollectionCase(collectionCase);
+    payloadDTO.setMetadata(metadata);
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
     responseManagementEvent.setEvent(eventDTO);
     responseManagementEvent.setPayload(payloadDTO);
     return responseManagementEvent;
+  }
+
+  private ResponseManagementEvent prepareCaseEvent(Case caze, EventDTO eventDTO) {
+    return prepareCaseEvent(caze, eventDTO, null);
   }
 
   private Address createAddress(Case caze) {
