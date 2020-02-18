@@ -15,6 +15,7 @@ uacservice:
 
 caserefgeneratorkey: rPr3qsjlU42hsDX5npfuCzlyF4UYfDTO
 
+directdeliverytreatmentcodes: CE_LDIEE
 
 queueconfig:
   retry-delay: 10  #this is for the tests around multiple receipts for the same case locking
