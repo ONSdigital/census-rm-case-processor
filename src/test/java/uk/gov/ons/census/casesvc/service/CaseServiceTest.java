@@ -24,6 +24,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
+import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.SampleUnitDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -249,5 +250,18 @@ public class CaseServiceTest {
 
     // Then
     assertThat(treatmentCodeResult).isFalse();
+  }
+
+  @Test
+  public void testSaveAndEmitCaseEventWithNullRegion() {
+    // Given
+    Case caze = getRandomCase();
+    caze.setRegion(null);
+
+    // When
+    PayloadDTO payload = underTest.saveCaseAndEmitCaseCreatedEvent(caze);
+
+    // Then
+    assertThat(payload.getCollectionCase().getAddress().getRegion()).isNull();
   }
 }
