@@ -115,6 +115,6 @@ public class Case {
   @UpdateTimestamp
   private OffsetDateTime lastUpdated;
 
-  @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+  @Column(columnDefinition = "BOOLEAN DEFAULT false")
   private boolean handDelivery;
 }

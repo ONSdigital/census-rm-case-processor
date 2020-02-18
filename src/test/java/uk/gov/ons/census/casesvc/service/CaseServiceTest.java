@@ -21,7 +21,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
@@ -31,7 +30,6 @@ import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 
 @RunWith(MockitoJUnitRunner.class)
-@ActiveProfiles("test")
 public class CaseServiceTest {
 
   private static final String FIELD_CORD_ID = "FIELD_CORD_ID";
