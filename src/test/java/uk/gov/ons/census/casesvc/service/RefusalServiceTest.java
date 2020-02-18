@@ -84,7 +84,7 @@ public class RefusalServiceTest {
   }
 
   @Test
-  public void testRefusalNotFromFieldForEstabAddressLevelCaseThrowsIllegalArgException() {
+  public void testRefusalNotFromFieldForEstabAddressLevelCaseIsLoggedWithoutRefusingTheCase() {
     // GIVEN
     ResponseManagementEvent managementEvent = getTestResponseManagementRefusalEvent();
     managementEvent.getEvent().setChannel("NOT FROM FIELD");
@@ -95,24 +95,25 @@ public class RefusalServiceTest {
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     when(caseService.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);
-    String expectedErrorMessage =
-        String.format(
-            "Refusal received for Estab level case ID '%s' from channel '%s'. "
-                + "This type of refusal should ONLY come from Field",
-            testCase.getCaseId(), managementEvent.getEvent().getChannel());
 
     // WHEN
-    boolean actualExceptionThrown = false;
-    try {
-      underTest.processRefusal(managementEvent, messageTimestamp);
-    } catch (IllegalArgumentException expectedException) {
-      // THEN
-      actualExceptionThrown = true;
-      assertThat(expectedException.getMessage()).isEqualTo(expectedErrorMessage);
-    }
-    assertThat(actualExceptionThrown).isTrue();
+    underTest.processRefusal(managementEvent, messageTimestamp);
+
+    // THEN
+    // verify the event is logged
+    verify(eventLogger)
+        .logCaseEvent(
+            eq(testCase),
+            any(OffsetDateTime.class),
+            eq("Refusal received for individual on Estab"),
+            eq(EventType.REFUSAL_RECEIVED),
+            eq(managementEvent.getEvent()),
+            anyString(),
+            eq(messageTimestamp));
+    verifyNoMoreInteractions(eventLogger);
+
+    // verify we do not try to update the case in any way
     verify(caseService, times(1)).getCaseByCaseId(any(UUID.class));
     verifyNoMoreInteractions(caseService);
-    verifyZeroInteractions(eventLogger);
   }
 }

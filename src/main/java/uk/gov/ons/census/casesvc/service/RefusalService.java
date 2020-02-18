@@ -19,6 +19,8 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 public class RefusalService {
 
   private static final String REFUSAL_RECEIVED = "Refusal Received";
+  private static final String ESTAB_INDIVIDUAL_REFUSAL_RECEIVED =
+      "Refusal received for individual on Estab";
   private static final String ESTAB_ADDRESS_LEVEL = "E";
 
   private final CaseService caseService;
@@ -32,27 +34,19 @@ public class RefusalService {
   public void processRefusal(
       ResponseManagementEvent refusalEvent, OffsetDateTime messageTimestamp) {
     RefusalDTO refusal = refusalEvent.getPayload().getRefusal();
-    Case caze = caseService.getCaseByCaseId(UUID.fromString(refusal.getCollectionCase().getId()));
+    Case refusedCase =
+        caseService.getCaseByCaseId(UUID.fromString(refusal.getCollectionCase().getId()));
 
-    if (isEstabLevelAddressAndChannelIsNotField(caze.getAddressLevel(), refusalEvent)) {
-      throw new IllegalArgumentException(
-          String.format(
-              "Refusal received for Estab level case ID '%s' from channel '%s'. "
-                  + "This type of refusal should ONLY come from Field",
-              caze.getCaseId(), refusalEvent.getEvent().getChannel()));
+    if (isEstabLevelAddressAndChannelIsNotField(refusedCase.getAddressLevel(), refusalEvent)) {
+      logRefusalCaseEvent(
+          refusalEvent, refusedCase, messageTimestamp, ESTAB_INDIVIDUAL_REFUSAL_RECEIVED);
+      return;
     }
 
-    caze.setRefusalReceived(true);
-    caseService.saveCaseAndEmitCaseUpdatedEvent(caze, buildMetadataForRefusal(refusalEvent));
+    refusedCase.setRefusalReceived(true);
+    caseService.saveCaseAndEmitCaseUpdatedEvent(refusedCase, buildMetadataForRefusal(refusalEvent));
 
-    eventLogger.logCaseEvent(
-        caze,
-        refusalEvent.getEvent().getDateTime(),
-        REFUSAL_RECEIVED,
-        EventType.REFUSAL_RECEIVED,
-        refusalEvent.getEvent(),
-        convertObjectToJson(refusalEvent.getPayload().getRefusal()),
-        messageTimestamp);
+    logRefusalCaseEvent(refusalEvent, refusedCase, messageTimestamp, REFUSAL_RECEIVED);
   }
 
   private Metadata buildMetadataForRefusal(ResponseManagementEvent event) {
@@ -65,5 +59,20 @@ public class RefusalService {
   private boolean isEstabLevelAddressAndChannelIsNotField(
       String addressLevel, ResponseManagementEvent event) {
     return addressLevel.equals(ESTAB_ADDRESS_LEVEL) && !isEventChannelField(event);
+  }
+
+  private void logRefusalCaseEvent(
+      ResponseManagementEvent refusalEvent,
+      Case refusedCase,
+      OffsetDateTime messageTimestamp,
+      String description) {
+    eventLogger.logCaseEvent(
+        refusedCase,
+        refusalEvent.getEvent().getDateTime(),
+        description,
+        EventType.REFUSAL_RECEIVED,
+        refusalEvent.getEvent(),
+        convertObjectToJson(refusalEvent.getPayload().getRefusal()),
+        messageTimestamp);
   }
 }
