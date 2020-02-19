@@ -41,7 +41,6 @@ public class CaseReceiptServiceTest {
   @Test
   public void testHH_U_Cont() {
     // HH	U	Cont	N	N	None
-    // hmm might be better served with other tests that check 'nothing happens'
     testContinuationQidResultInNoChangesOrEmitting("HH", "U", ENGLAND_HOUSEHOLD_CONTINUATION);
   }
 

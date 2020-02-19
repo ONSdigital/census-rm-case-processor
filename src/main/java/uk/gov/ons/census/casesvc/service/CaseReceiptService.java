@@ -1,5 +1,17 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
+import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.isIndividualQuestionnaireType;
+import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.iscontinuationQuestionnaireTypes;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Function;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
@@ -7,37 +19,12 @@ import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.function.Function;
-
-import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
-import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.isIndividualQuestionnaireType;
-import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.iscontinuationQuestionnaireTypes;
-
 @Component
 public class CaseReceiptService {
   private final CaseService caseService;
   private final CaseRepository caseRepository;
 
-  private Map<String, ProcessingRule> processingRules = new HashMap<>();
-
-  private void setUpRules() {
-    processingRules.put("HH_U_HH", new ProcessingRule(receiptCase, true));
-    processingRules.put("HH_U_Cont", new ProcessingRule(noActionRequired, false));
-    processingRules.put("HI_U_I", new ProcessingRule(receiptCase, true));
-    processingRules.put("CE_E_CE1", new ProcessingRule(receiptCase, true));
-    processingRules.put("CE_U_I", new ProcessingRule(incrementAndReceiptIfExceedsCapacity, true));
-    processingRules.put("SPG_E_HH", new ProcessingRule(noActionRequired, false));
-    processingRules.put("SPG_E_I", new ProcessingRule(noActionRequired, false));
-    processingRules.put("CE_E_I", new ProcessingRule(incrementWithNoReceipting, true));
-    processingRules.put("SPG_U_HH", new ProcessingRule(receiptCase, true));
-    processingRules.put("SPG_U_I", new ProcessingRule(noActionRequired, false));
-    processingRules.put("SPG_U_Cont", new ProcessingRule(noActionRequired, false));
-  }
+  private Map<Key, Rule> rules = new HashMap<>();
 
   public CaseReceiptService(CaseService caseService, CaseRepository caseRepository) {
     this.caseService = caseService;
@@ -45,21 +32,37 @@ public class CaseReceiptService {
     setUpRules();
   }
 
+  private void setUpRules() {
+    /*
+     This table is based on: https://collaborate2.ons.gov.uk/confluence/pages/viewpage.action?spaceKey=SDC&title=Receipting
+     The invalid rows are missing from here and are handled collectively by throwing a " does not map to any valid processing rule" RunTimeException
+    */
+    rules.put(new Key("HH", "U", "HH"), new Rule(receiptCase, true));
+    rules.put(new Key("HH", "U", "Cont"), new Rule(noActionRequired, false));
+    rules.put(new Key("HI", "U", "Ind"), new Rule(receiptCase, true));
+    rules.put(new Key("CE", "E", "CE1"), new Rule(receiptCase, true));
+    rules.put(new Key("CE", "U", "Ind"), new Rule(incrementAndReceipt, true));
+    rules.put(new Key("SPG", "E", "HH"), new Rule(noActionRequired, false));
+    rules.put(new Key("SPG", "E", "Ind"), new Rule(noActionRequired, false));
+    rules.put(new Key("CE", "E", "Ind"), new Rule(incremenNoReceipt, true));
+    rules.put(new Key("SPG", "U", "HH"), new Rule(receiptCase, true));
+    rules.put(new Key("SPG", "U", "Ind"), new Rule(noActionRequired, false));
+    rules.put(new Key("SPG", "U", "Cont"), new Rule(noActionRequired, false));
+  }
+
   public void receiptCase(UacQidLink uacQidLink, EventTypeDTO causeEventType) {
     Case caze = uacQidLink.getCaze();
 
     if (caze.isReceiptReceived()) return;
 
-    String compositeKey = makeRulesKey(caze, uacQidLink);
+    Key compositeKey = makeRulesKey(caze, uacQidLink);
 
-    //    if (continuationsToIgnore.contains(compositeKey)) return;
+    if (rules.containsKey(compositeKey)) {
+      Rule rule = rules.get(compositeKey);
 
-    if (processingRules.containsKey(compositeKey)) {
-      ProcessingRule processingRule = processingRules.get(compositeKey);
+      Case lockedCase = rule.run(caze);
 
-      Case lockedCase = processingRule.run(caze);
-
-      if (processingRule.saveAndEmitCase) {
+      if (rule.saveAndEmitCase) {
         caseService.saveCaseAndEmitCaseUpdatedEvent(
             lockedCase, buildMetadata(causeEventType, ActionInstructionType.CLOSE));
       }
@@ -67,24 +70,25 @@ public class CaseReceiptService {
       return;
     }
 
-    throw new RuntimeException(compositeKey + " does not map to any processing rule");
+    throw new RuntimeException(
+        compositeKey.toString() + " does not map to any valid processing rule");
   }
 
-  private String makeRulesKey(Case caze, UacQidLink uacQidLink) {
-    String qidtype = "HH";
+  private Key makeRulesKey(Case caze, UacQidLink uacQidLink) {
+    String formType = "HH";
 
     if (isIndividualQuestionnaireType(uacQidLink.getQid())) {
-      qidtype = "I";
+      formType = "Ind";
     } else if (caze.getTreatmentCode().startsWith("CE")) {
-      qidtype = "CE1";
+      formType = "CE1";
     } else if (iscontinuationQuestionnaireTypes(uacQidLink.getQid())) {
-      qidtype = "Cont";
+      formType = "Cont";
     }
 
-    return caze.getCaseType() + "_" + caze.getAddressLevel() + "_" + qidtype;
+    return new Key(caze.getCaseType(), caze.getAddressLevel(), formType);
   }
 
-  Function<Case, Case> incrementWithNoReceipting =
+  Function<Case, Case> incremenNoReceipt =
       (caze) -> {
         Case lockedCase = getCaseAndLockIt(caze.getCaseId());
         lockedCase.setCeActualResponses(lockedCase.getCeActualResponses() + 1);
@@ -92,9 +96,9 @@ public class CaseReceiptService {
         return lockedCase;
       };
 
-  Function<Case, Case> incrementAndReceiptIfExceedsCapacity =
+  Function<Case, Case> incrementAndReceipt =
       (caze) -> {
-        Case lockedCase = incrementWithNoReceipting.apply(caze);
+        Case lockedCase = incremenNoReceipt.apply(caze);
 
         if (lockedCase.getCeActualResponses() >= lockedCase.getCeExpectedCapacity()) {
           lockedCase.setReceiptReceived(true);
@@ -109,12 +113,9 @@ public class CaseReceiptService {
         return caze;
       };
 
-  Function<Case, Case> noActionRequired = (caze) -> null;
+  Function<Case, Case> noActionRequired = (caze) -> caze;
 
   private Case getCaseAndLockIt(UUID caseId) {
-    /*
-      This stops the actualResponses being updated by another thread for another receipt or linking event
-    */
     Optional<Case> oCase = caseRepository.getCaseAndLockByCaseId(caseId);
 
     if (!oCase.isPresent()) {
@@ -126,15 +127,19 @@ public class CaseReceiptService {
     return oCase.get();
   }
 
-  // This is easily extendable for things like ActionInstruction Types
-  private class ProcessingRule {
-    private Function<Case, Case> functionToExecute;
-    public final boolean saveAndEmitCase;
+  @AllArgsConstructor
+  @EqualsAndHashCode
+  @ToString
+  private class Key {
+    private String caseType;
+    private String addressLevel;
+    private String formType;
+  }
 
-    public ProcessingRule(Function<Case, Case> functionToExecute, boolean saveAndEmitCase) {
-      this.functionToExecute = functionToExecute;
-      this.saveAndEmitCase = saveAndEmitCase;
-    }
+  @AllArgsConstructor
+  private class Rule {
+    private Function<Case, Case> functionToExecute;
+    private final boolean saveAndEmitCase;
 
     public Case run(Case caze) {
       return functionToExecute.apply(caze);

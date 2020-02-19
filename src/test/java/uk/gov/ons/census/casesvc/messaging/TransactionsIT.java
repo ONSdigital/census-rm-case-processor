@@ -99,6 +99,8 @@ public class TransactionsIT {
     caze.setCaseId(TEST_CASE_ID);
     caze.setUacQidLinks(null);
     caze.setEvents(null);
+    caze.setCaseType("HH");
+    caze.setAddressLevel("U");
     caze = caseRepository.saveAndFlush(caze);
 
     UacQidLink uacQidLink = new UacQidLink();
