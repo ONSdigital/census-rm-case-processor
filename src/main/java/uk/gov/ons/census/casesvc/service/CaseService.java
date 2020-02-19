@@ -166,7 +166,6 @@ public class CaseService {
     address.setAddressType(caze.getAddressType());
     address.setArid(caze.getArid());
     address.setEstabArid(caze.getEstabArid());
-    address.setRegion(caze.getRegion().substring(0, 1));
     address.setEstabType(caze.getEstabType());
     address.setLatitude(caze.getLatitude());
     address.setLongitude(caze.getLongitude());
@@ -176,7 +175,9 @@ public class CaseService {
     address.setOrganisationName(caze.getOrganisationName());
     address.setUprn(caze.getUprn());
     address.setAddressLevel(caze.getAddressLevel());
-
+    if (caze.getRegion() != null) {
+      address.setRegion(caze.getRegion().substring(0, 1));
+    }
     return address;
   }
 
