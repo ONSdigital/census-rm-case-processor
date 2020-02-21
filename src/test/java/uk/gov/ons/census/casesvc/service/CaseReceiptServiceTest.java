@@ -108,6 +108,25 @@ public class CaseReceiptServiceTest {
     testRecipting("BL", "A", "H", false, false);
   }
 
+  @Test
+  public void testUnactiveQidDoesNotReceiptsCaseAlreadyReceipted() {
+    //Given
+    Case caze = new Case();
+    caze.setCaseId(UUID.randomUUID());
+    caze.setReceiptReceived(true);
+
+    UacQidLink uacQidLink = new UacQidLink();
+    uacQidLink.setQid(HOUSEHOLD_INDIVIDUAL);
+    uacQidLink.setCaze(caze);
+
+    //When
+    underTest.receiptCase(uacQidLink, EventTypeDTO.RESPONSE_RECEIVED);
+
+    //Then
+    verifyZeroInteractions(caseService);
+    verifyZeroInteractions(caseRepository);
+  }
+
   private void testRecipting(
       String caseType,
       String addressLevel,
@@ -148,8 +167,10 @@ public class CaseReceiptServiceTest {
       when(caseRepository.getCaseAndLockByCaseId(any())).thenReturn(Optional.of(caze));
     }
 
+    //When
     underTest.receiptCase(uacQidLink, EventTypeDTO.RESPONSE_RECEIVED);
 
+    //Then
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
     ArgumentCaptor<Metadata> metadataArgumentCaptor = ArgumentCaptor.forClass(Metadata.class);
     verify(caseService)
@@ -169,23 +190,9 @@ public class CaseReceiptServiceTest {
     assertThat(metadata.getFieldDecision()).isEqualTo(ActionInstructionType.CLOSE);
   }
 
-  @Test
-  public void testUnactiveQidDoesNotReceiptsCaseAlreadyReceipted() {
-    // when
-    Case caze = new Case();
-    caze.setCaseId(UUID.randomUUID());
-    caze.setReceiptReceived(true);
-
-    UacQidLink uacQidLink = new UacQidLink();
-    uacQidLink.setQid(HOUSEHOLD_INDIVIDUAL);
-    uacQidLink.setCaze(caze);
-
-    underTest.receiptCase(uacQidLink, EventTypeDTO.RESPONSE_RECEIVED);
-    verifyZeroInteractions(caseService);
-  }
-
   private void testActualResponseGreaterEqualToReceipting(
       int actualResponses, int expectedCapacity, boolean receiptExpected) {
+    //Given
     Case caze = new Case();
     caze.setCaseId(UUID.randomUUID());
     caze.setReceiptReceived(false);
@@ -203,6 +210,7 @@ public class CaseReceiptServiceTest {
     // When
     underTest.receiptCase(uacQidLink, EventTypeDTO.RESPONSE_RECEIVED);
 
+    //Then
     verify(caseRepository).getCaseAndLockByCaseId(caze.getCaseId());
 
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
