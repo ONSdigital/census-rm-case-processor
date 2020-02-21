@@ -103,10 +103,10 @@ public class CaseReceiptServiceTest {
     testContinuationQidResultInNoChangesOrEmitting("SPG", "U", ENGLAND_HOUSEHOLD_CONTINUATION);
   }
 
-  //  @Test
-  //  public void x() {
-  //    fail("Test for all possible not Mapped exceptions?");
-  //  }
+  @Test(expected = RuntimeException.class)
+  public void testUnmappedThrowsRunTimeException() {
+    testRecipting("BL", "A", "H", false, false);
+  }
 
   private void testRecipting(
       String caseType,
