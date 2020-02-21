@@ -90,6 +90,7 @@ public class UacServiceTest {
     // Given
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setUac("12345");
+    uacQidLink.setQid("01234567890");
     Case caze = new Case();
     UUID caseUuid = UUID.randomUUID();
     caze.setCaseId(caseUuid);
