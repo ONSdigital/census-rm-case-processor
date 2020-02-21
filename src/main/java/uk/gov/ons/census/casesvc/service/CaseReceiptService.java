@@ -62,7 +62,6 @@ public class CaseReceiptService {
     }
 
     Rule rule = rules.get(ruleKey);
-
     Case lockedCase = rule.run(caze);
 
     if (rule.saveAndEmitCase) {

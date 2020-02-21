@@ -130,12 +130,7 @@ public class FulfilmentRequestService {
     individualResponseCase.setAddressLine1(parentCase.getAddressLine1());
     individualResponseCase.setAddressLine2(parentCase.getAddressLine2());
     individualResponseCase.setAddressLine3(parentCase.getAddressLine3());
-
-    // This was not set as per:
-    // https://collaborate2.ons.gov.uk/confluence/display/SDC/14.+Individual+Response
-    // However it's needed if we want to receipt an individual Case
     individualResponseCase.setAddressLevel(parentCase.getAddressLevel());
-
     individualResponseCase.setTownName(parentCase.getTownName());
     individualResponseCase.setPostcode(parentCase.getPostcode());
     individualResponseCase.setLatitude(parentCase.getLatitude());

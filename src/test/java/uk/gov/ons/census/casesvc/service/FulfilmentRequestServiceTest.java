@@ -272,5 +272,6 @@ public class FulfilmentRequestServiceTest {
     assertThat(actualChildCase.getFieldOfficerId()).isNull();
     assertThat(actualChildCase.getTreatmentCode()).isNull();
     assertThat(actualChildCase.getCeExpectedCapacity()).isNull();
+    assertThat(actualChildCase.getAddressLevel()).isEqualTo(parentCase.getAddressLevel());
   }
 }
