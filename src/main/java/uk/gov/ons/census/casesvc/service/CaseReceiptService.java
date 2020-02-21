@@ -55,23 +55,20 @@ public class CaseReceiptService {
 
     if (caze.isReceiptReceived()) return;
 
-    Key compositeKey = makeRulesKey(caze, uacQidLink);
+    Key ruleKey = makeRulesKey(caze, uacQidLink);
 
-    if (rules.containsKey(compositeKey)) {
-      Rule rule = rules.get(compositeKey);
-
-      Case lockedCase = rule.run(caze);
-
-      if (rule.saveAndEmitCase) {
-        caseService.saveCaseAndEmitCaseUpdatedEvent(
-            lockedCase, buildMetadata(causeEventType, ActionInstructionType.CLOSE));
-      }
-
-      return;
+    if (!rules.containsKey(ruleKey)) {
+      throw new RuntimeException(ruleKey.toString() + " does not map to any valid processing rule");
     }
 
-    throw new RuntimeException(
-        compositeKey.toString() + " does not map to any valid processing rule");
+    Rule rule = rules.get(ruleKey);
+
+    Case lockedCase = rule.run(caze);
+
+    if (rule.saveAndEmitCase) {
+      caseService.saveCaseAndEmitCaseUpdatedEvent(
+          lockedCase, buildMetadata(causeEventType, ActionInstructionType.CLOSE));
+    }
   }
 
   private Key makeRulesKey(Case caze, UacQidLink uacQidLink) {
