@@ -131,6 +131,7 @@ public class CaseReceiptServiceTest {
       boolean expectIncrement,
       boolean expectReceipt) {
 
+    //Given
     Case caze = new Case();
     caze.setCaseType(caseType);
     caze.setAddressLevel(addressLevel);
