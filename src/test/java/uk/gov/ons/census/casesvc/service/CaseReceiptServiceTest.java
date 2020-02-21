@@ -110,7 +110,7 @@ public class CaseReceiptServiceTest {
 
   @Test
   public void testUnactiveQidDoesNotReceiptsCaseAlreadyReceipted() {
-    //Given
+    // Given
     Case caze = new Case();
     caze.setCaseId(UUID.randomUUID());
     caze.setReceiptReceived(true);
@@ -119,10 +119,10 @@ public class CaseReceiptServiceTest {
     uacQidLink.setQid(HOUSEHOLD_INDIVIDUAL);
     uacQidLink.setCaze(caze);
 
-    //When
+    // When
     underTest.receiptCase(uacQidLink, EventTypeDTO.RESPONSE_RECEIVED);
 
-    //Then
+    // Then
     verifyZeroInteractions(caseService);
     verifyZeroInteractions(caseRepository);
   }
@@ -150,7 +150,7 @@ public class CaseReceiptServiceTest {
       boolean expectIncrement,
       boolean expectReceipt) {
 
-    //Given
+    // Given
     Case caze = new Case();
     caze.setCaseType(caseType);
     caze.setAddressLevel(addressLevel);
@@ -167,10 +167,10 @@ public class CaseReceiptServiceTest {
       when(caseRepository.getCaseAndLockByCaseId(any())).thenReturn(Optional.of(caze));
     }
 
-    //When
+    // When
     underTest.receiptCase(uacQidLink, EventTypeDTO.RESPONSE_RECEIVED);
 
-    //Then
+    // Then
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
     ArgumentCaptor<Metadata> metadataArgumentCaptor = ArgumentCaptor.forClass(Metadata.class);
     verify(caseService)
@@ -192,7 +192,7 @@ public class CaseReceiptServiceTest {
 
   private void testActualResponseGreaterEqualToReceipting(
       int actualResponses, int expectedCapacity, boolean receiptExpected) {
-    //Given
+    // Given
     Case caze = new Case();
     caze.setCaseId(UUID.randomUUID());
     caze.setReceiptReceived(false);
@@ -210,7 +210,7 @@ public class CaseReceiptServiceTest {
     // When
     underTest.receiptCase(uacQidLink, EventTypeDTO.RESPONSE_RECEIVED);
 
-    //Then
+    // Then
     verify(caseRepository).getCaseAndLockByCaseId(caze.getCaseId());
 
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
