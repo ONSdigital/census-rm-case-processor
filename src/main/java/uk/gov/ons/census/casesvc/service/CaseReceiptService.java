@@ -87,15 +87,6 @@ public class CaseReceiptService {
 
   private Key makeRulesKey(Case caze, UacQidLink uacQidLink) {
     String formType = mapQuestionnaireTypeToFormType(uacQidLink.getQid());
-
-    //    if (isIndividualQuestionnaireType(uacQidLink.getQid())) {
-    //      formType = "Ind";
-    //    } else if (caze.getTreatmentCode().startsWith("CE")) {
-    //      formType = "CE1";
-    //    } else if (iscontinuationQuestionnaireTypes(uacQidLink.getQid())) {
-    //      formType = "Cont";
-    //    }
-
     return new Key(caze.getCaseType(), caze.getAddressLevel(), formType);
   }
 
