@@ -103,6 +103,10 @@ public class UacService {
     uac.setUacHash(Sha256Helper.hash(uacQidLink.getUac()));
     uac.setUac(uacQidLink.getUac());
     uac.setActive(uacQidLink.isActive());
+
+    // It's perfectly possible to derive the Form Type from the supplied data, so RM should not be
+    // forced to incorporate CENSUS business logic. It's for the CENSUS team to put business logic
+    // wherever it's needed, which quite clearly is NOT here. TODO: Put the business logic elsewhere
     uac.setFormType(mapQuestionnaireTypeToFormType(uacQidLink.getQid()));
 
     Case caze = uacQidLink.getCaze();
@@ -175,6 +179,20 @@ public class UacService {
       case 32:
       case 33:
       case 34:
+        return CE1_FORM_TYPE;
+      case 51:
+      case 52:
+      case 53:
+      case 54:
+      case 71:
+      case 72:
+      case 73:
+      case 74:
+        return HH_FORM_TYPE;
+      case 81:
+      case 82:
+      case 83:
+      case 84:
         return CE1_FORM_TYPE;
       default:
         return null;
