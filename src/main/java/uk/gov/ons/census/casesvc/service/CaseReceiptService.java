@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -35,18 +35,30 @@ public class CaseReceiptService {
   private void setUpRules() {
     /*
      This table is based on: https://collaborate2.ons.gov.uk/confluence/pages/viewpage.action?spaceKey=SDC&title=Receipting
-     The invalid rows are missing from here and are handled collectively by throwing a " does not map to any valid processing rule" RunTimeException
     */
     rules.put(new Key("HH", "U", "HH"), new Rule(receiptCase, true));
+    rules.put(new Key("HH", "U", "Ind"), new Rule(invalidMapping, false));
+    rules.put(new Key("HH", "U", "CE1"), new Rule(invalidMapping, false));
     rules.put(new Key("HH", "U", "Cont"), new Rule(noActionRequired, false));
+    rules.put(new Key("HI", "U", "HH"), new Rule(invalidMapping, false));
     rules.put(new Key("HI", "U", "Ind"), new Rule(receiptCase, true));
+    rules.put(new Key("HI", "U", "CE1"), new Rule(invalidMapping, false));
+    rules.put(new Key("HI", "U", "Cont"), new Rule(invalidMapping, false));
+    rules.put(new Key("CE", "E", "HH"), new Rule(invalidMapping, false));
     rules.put(new Key("CE", "E", "CE1"), new Rule(receiptCase, true));
+    rules.put(new Key("CE", "E", "Cont"), new Rule(invalidMapping, false));
+    rules.put(new Key("CE", "U", "HH"), new Rule(invalidMapping, false));
     rules.put(new Key("CE", "U", "Ind"), new Rule(incrementAndReceipt, true));
+    rules.put(new Key("CE", "U", "CE1"), new Rule(invalidMapping, false));
+    rules.put(new Key("CE", "U", "Cont"), new Rule(invalidMapping, false));
     rules.put(new Key("SPG", "E", "HH"), new Rule(noActionRequired, false));
     rules.put(new Key("SPG", "E", "Ind"), new Rule(noActionRequired, false));
+    rules.put(new Key("SPG", "E", "CE1"), new Rule(invalidMapping, false));
+    rules.put(new Key("SPG", "E", "Cont"), new Rule(invalidMapping, false));
     rules.put(new Key("CE", "E", "Ind"), new Rule(incremenNoReceipt, true));
     rules.put(new Key("SPG", "U", "HH"), new Rule(receiptCase, true));
     rules.put(new Key("SPG", "U", "Ind"), new Rule(noActionRequired, false));
+    rules.put(new Key("SPG", "U", "CE1"), new Rule(invalidMapping, false));
     rules.put(new Key("SPG", "U", "Cont"), new Rule(noActionRequired, false));
   }
 
@@ -58,13 +70,13 @@ public class CaseReceiptService {
     Key ruleKey = makeRulesKey(caze, uacQidLink);
 
     if (!rules.containsKey(ruleKey)) {
-      throw new RuntimeException(ruleKey.toString() + " does not map to any valid processing rule");
+      throw new RuntimeException(ruleKey.toString() + " does not map to any known processing rule");
     }
 
     Rule rule = rules.get(ruleKey);
-    Case lockedCase = rule.run(caze);
+    Case lockedCase = rule.run(caze, uacQidLink);
 
-    if (rule.saveAndEmitCase) {
+    if (rule.getSaveAndEmitCase()) {
       caseService.saveCaseAndEmitCaseUpdatedEvent(
           lockedCase, buildMetadata(causeEventType, ActionInstructionType.CLOSE));
     }
@@ -84,17 +96,17 @@ public class CaseReceiptService {
     return new Key(caze.getCaseType(), caze.getAddressLevel(), formType);
   }
 
-  Function<Case, Case> incremenNoReceipt =
-      (caze) -> {
+  BiFunction<Case, UacQidLink, Case> incremenNoReceipt =
+      (caze, uacQidLink) -> {
         Case lockedCase = getCaseAndLockIt(caze.getCaseId());
         lockedCase.setCeActualResponses(lockedCase.getCeActualResponses() + 1);
 
         return lockedCase;
       };
 
-  Function<Case, Case> incrementAndReceipt =
-      (caze) -> {
-        Case lockedCase = incremenNoReceipt.apply(caze);
+  BiFunction<Case, UacQidLink, Case> incrementAndReceipt =
+      (caze, uacQidLink) -> {
+        Case lockedCase = incremenNoReceipt.apply(caze, uacQidLink);
 
         if (lockedCase.getCeActualResponses() >= lockedCase.getCeExpectedCapacity()) {
           lockedCase.setReceiptReceived(true);
@@ -103,13 +115,19 @@ public class CaseReceiptService {
         return lockedCase;
       };
 
-  Function<Case, Case> receiptCase =
-      (caze) -> {
+  BiFunction<Case, UacQidLink, Case> receiptCase =
+      (caze, uacQidLink) -> {
         caze.setReceiptReceived(true);
         return caze;
       };
 
-  Function<Case, Case> noActionRequired = (caze) -> caze;
+  BiFunction<Case, UacQidLink, Case> noActionRequired = (caze, uacQidLink) -> caze;
+
+  BiFunction<Case, UacQidLink, Case> invalidMapping =
+      (caze, uacQidLink) -> {
+        Key ruleKey = makeRulesKey(caze, uacQidLink);
+        throw new RuntimeException(ruleKey.toString() + " is an invalid mapping");
+      };
 
   private Case getCaseAndLockIt(UUID caseId) {
     Optional<Case> oCase = caseRepository.getCaseAndLockByCaseId(caseId);
@@ -134,11 +152,15 @@ public class CaseReceiptService {
 
   @AllArgsConstructor
   private class Rule {
-    private Function<Case, Case> functionToExecute;
+    private BiFunction<Case, UacQidLink, Case> functionToExecute;
     private final boolean saveAndEmitCase;
 
-    public Case run(Case caze) {
-      return functionToExecute.apply(caze);
+    public boolean getSaveAndEmitCase() {
+      return saveAndEmitCase;
+    }
+
+    public Case run(Case caze, UacQidLink uacQidLink) {
+      return functionToExecute.apply(caze, uacQidLink);
     }
   }
 }

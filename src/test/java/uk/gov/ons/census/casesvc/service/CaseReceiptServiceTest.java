@@ -34,68 +34,117 @@ public class CaseReceiptServiceTest {
 
   @Test
   public void test_HH_U_HH() {
-    // HH	U	HH	N	Y	Close
     testRecipting("HH", "U", HOUSEHOLD_HH_ENGLAND, false, true);
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void test_HH_U_Ind() {
+    testRecipting("HH", "U", HOUSEHOLD_INDIVIDUAL, false, false);
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void test_HH_U_CE1() {
+    testRecipting("HH", "U", ENGLAND_CE_QID, "CE_treatmentCode", false, false);
   }
 
   @Test
   public void testHH_U_Cont() {
-    // HH	U	Cont	N	N	None
     testContinuationQidResultInNoChangesOrEmitting("HH", "U", ENGLAND_HOUSEHOLD_CONTINUATION);
   }
 
   @Test
   public void test_HI_U_Ind() {
-    // HI	U	Ind	N	Y	None
     testRecipting("HI", "U", HOUSEHOLD_INDIVIDUAL, false, true);
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void test_HI_U_CE1() {
+    testRecipting("HI", "U", ENGLAND_CE_QID, false, false);
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void test_HI_U_Cont() {
+    testRecipting("HI", "U", ENGLAND_HOUSEHOLD_CONTINUATION, false, false);
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void test_CE_E_HH() {
+    testRecipting("CE", "E", HOUSEHOLD_HH_ENGLAND, false, false);
   }
 
   @Test
   public void test_CE_E_I() {
-    // CE	E	Ind	Y	N	Update
     testRecipting("CE", "E", HOUSEHOLD_INDIVIDUAL, true, false);
   }
 
   @Test
   public void test_CE_E_CE1() {
-    //    CE	E	CE1	N	Y Update
     testRecipting("CE", "E", ENGLAND_CE_QID, "CE_treatmentCode", false, true);
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void test_CE_E_Cont() {
+    testRecipting("CE", "E", ENGLAND_HOUSEHOLD_CONTINUATION, false, false);
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void test_CE_U_HH() {
+    testRecipting("CE", "U", HOUSEHOLD_HH_ENGLAND, false, false);
   }
 
   @Test
   public void CE_U_Ind_Does_Not_Receipt() {
-    // CE	U	Ind	Y	Y if AR >= ER	Update
     testActualResponseGreaterEqualToReceipting(0, 2, false);
   }
 
   @Test
   public void CE_U_Ind_Does_Receipt() {
-    // CE	U	Ind	Y	Y if AR >= ER	Update
     testActualResponseGreaterEqualToReceipting(1, 2, true);
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void test_CE_U_CE1() {
+    testRecipting("CE", "U", ENGLAND_CE_QID, "CE_treatmentCode", false, true);
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void test_CE_U_Cont() {
+    testRecipting("CE", "U", ENGLAND_HOUSEHOLD_CONTINUATION, false, false);
   }
 
   @Test
   public void SPG_E_HH() {
-    // SPG	E	HH	N	N	N
     testContinuationQidResultInNoChangesOrEmitting("SPG", "E", HOUSEHOLD_HH_ENGLAND);
   }
 
   @Test
   public void SPG_E_Ind() {
-    // SPG	E	Ind	N	N	N
     testContinuationQidResultInNoChangesOrEmitting("SPG", "E", HOUSEHOLD_INDIVIDUAL);
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void test_SPG_E_CE1() {
+    testRecipting("SPG", "E", ENGLAND_CE_QID, "CE_treatmentCode", false, true);
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void test_SPG_U_Cont() {
+    testRecipting("SPG", "E", ENGLAND_HOUSEHOLD_CONTINUATION, false, true);
   }
 
   @Test
   public void SPG_U_HH() {
-    // SPG	U	HH	N	Y	Close
     testRecipting("SPG", "U", HOUSEHOLD_HH_ENGLAND, false, true);
   }
 
   @Test
   public void SPG_U_I() {
-    // SPG	U	Ind	N	N	None
     testContinuationQidResultInNoChangesOrEmitting("SPG", "U", HOUSEHOLD_INDIVIDUAL);
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void test_SPG_U_CE1() {
+    testRecipting("SPG", "U", ENGLAND_CE_QID, "CE_treatmentCode", false, true);
   }
 
   @Test
