@@ -42,7 +42,7 @@ import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 public class TransactionsIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final EasyRandom easyRandom = new EasyRandom();
-  private static final String TEST_QID = easyRandom.nextObject(String.class);
+  private static final String TEST_QID = "01234567890";
   private static final String TEST_UAC = easyRandom.nextObject(String.class);
 
   @Value("${queueconfig.receipt-response-inbound-queue}")

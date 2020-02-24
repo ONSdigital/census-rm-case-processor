@@ -90,6 +90,7 @@ public class UacServiceTest {
     // Given
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setUac("12345");
+    uacQidLink.setQid("01234567890");
     Case caze = new Case();
     UUID caseUuid = UUID.randomUUID();
     caze.setCaseId(caseUuid);
@@ -108,6 +109,8 @@ public class UacServiceTest {
             responseManagementEventArgumentCaptor.capture());
     assertEquals(
         "12345", responseManagementEventArgumentCaptor.getValue().getPayload().getUac().getUac());
+    assertEquals(
+        "H", responseManagementEventArgumentCaptor.getValue().getPayload().getUac().getFormType());
   }
 
   @Test
