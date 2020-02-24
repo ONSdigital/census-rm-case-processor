@@ -44,7 +44,7 @@ public class CaseReceiptServiceTest {
 
   @Test(expected = RuntimeException.class)
   public void test_HH_U_CE1() {
-    testRecipting("HH", "U", ENGLAND_CE_QID, "CE_treatmentCode", false, false);
+    testRecipting("HH", "U", ENGLAND_CE_QID, false, false);
   }
 
   @Test
@@ -79,7 +79,7 @@ public class CaseReceiptServiceTest {
 
   @Test
   public void test_CE_E_CE1() {
-    testRecipting("CE", "E", ENGLAND_CE_QID, "CE_treatmentCode", false, true);
+    testRecipting("CE", "E", ENGLAND_CE_QID, false, true);
   }
 
   @Test(expected = RuntimeException.class)
@@ -104,7 +104,7 @@ public class CaseReceiptServiceTest {
 
   @Test(expected = RuntimeException.class)
   public void test_CE_U_CE1() {
-    testRecipting("CE", "U", ENGLAND_CE_QID, "CE_treatmentCode", false, true);
+    testRecipting("CE", "U", ENGLAND_CE_QID, false, true);
   }
 
   @Test(expected = RuntimeException.class)
@@ -124,7 +124,7 @@ public class CaseReceiptServiceTest {
 
   @Test(expected = RuntimeException.class)
   public void test_SPG_E_CE1() {
-    testRecipting("SPG", "E", ENGLAND_CE_QID, "CE_treatmentCode", false, true);
+    testRecipting("SPG", "E", ENGLAND_CE_QID, false, true);
   }
 
   @Test(expected = RuntimeException.class)
@@ -144,7 +144,7 @@ public class CaseReceiptServiceTest {
 
   @Test(expected = RuntimeException.class)
   public void test_SPG_U_CE1() {
-    testRecipting("SPG", "U", ENGLAND_CE_QID, "CE_treatmentCode", false, true);
+    testRecipting("SPG", "U", ENGLAND_CE_QID, false, true);
   }
 
   @Test
@@ -180,22 +180,6 @@ public class CaseReceiptServiceTest {
       String caseType,
       String addressLevel,
       String qid,
-      boolean incrementActualRespsonesExpected,
-      boolean receiptExpected) {
-    testRecipting(
-        caseType,
-        addressLevel,
-        qid,
-        "empty_treatment_code",
-        incrementActualRespsonesExpected,
-        receiptExpected);
-  }
-
-  private void testRecipting(
-      String caseType,
-      String addressLevel,
-      String qid,
-      String treatmentCode,
       boolean expectIncrement,
       boolean expectReceipt) {
 
@@ -206,7 +190,6 @@ public class CaseReceiptServiceTest {
     caze.setCaseId(UUID.randomUUID());
     caze.setReceiptReceived(false);
     caze.setCeActualResponses(0);
-    caze.setTreatmentCode(treatmentCode);
 
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setQid(qid);

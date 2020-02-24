@@ -1,8 +1,7 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static uk.gov.ons.census.casesvc.utility.FormTypeHelper.mapQuestionnaireTypeToFormType;
 import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
-import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.isIndividualQuestionnaireType;
-import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.iscontinuationQuestionnaireTypes;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +22,10 @@ import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 public class CaseReceiptService {
   private final CaseService caseService;
   private final CaseRepository caseRepository;
+  private static final String HH = "H";
+  private static final String IND = "I";
+  private static final String CE1 = "C";
+  private static final String CONT = "Cont";
 
   private Map<Key, Rule> rules = new HashMap<>();
 
@@ -36,30 +39,30 @@ public class CaseReceiptService {
     /*
      This table is based on: https://collaborate2.ons.gov.uk/confluence/pages/viewpage.action?spaceKey=SDC&title=Receipting
     */
-    rules.put(new Key("HH", "U", "HH"), new Rule(receiptCase, true));
-    rules.put(new Key("HH", "U", "Ind"), new Rule(invalidMapping, false));
-    rules.put(new Key("HH", "U", "CE1"), new Rule(invalidMapping, false));
-    rules.put(new Key("HH", "U", "Cont"), new Rule(noActionRequired, false));
-    rules.put(new Key("HI", "U", "HH"), new Rule(invalidMapping, false));
-    rules.put(new Key("HI", "U", "Ind"), new Rule(receiptCase, true));
-    rules.put(new Key("HI", "U", "CE1"), new Rule(invalidMapping, false));
-    rules.put(new Key("HI", "U", "Cont"), new Rule(invalidMapping, false));
-    rules.put(new Key("CE", "E", "HH"), new Rule(invalidMapping, false));
-    rules.put(new Key("CE", "E", "CE1"), new Rule(receiptCase, true));
-    rules.put(new Key("CE", "E", "Cont"), new Rule(invalidMapping, false));
-    rules.put(new Key("CE", "U", "HH"), new Rule(invalidMapping, false));
-    rules.put(new Key("CE", "U", "Ind"), new Rule(incrementAndReceipt, true));
-    rules.put(new Key("CE", "U", "CE1"), new Rule(invalidMapping, false));
-    rules.put(new Key("CE", "U", "Cont"), new Rule(invalidMapping, false));
-    rules.put(new Key("SPG", "E", "HH"), new Rule(noActionRequired, false));
-    rules.put(new Key("SPG", "E", "Ind"), new Rule(noActionRequired, false));
-    rules.put(new Key("SPG", "E", "CE1"), new Rule(invalidMapping, false));
-    rules.put(new Key("SPG", "E", "Cont"), new Rule(invalidMapping, false));
-    rules.put(new Key("CE", "E", "Ind"), new Rule(incremenNoReceipt, true));
-    rules.put(new Key("SPG", "U", "HH"), new Rule(receiptCase, true));
-    rules.put(new Key("SPG", "U", "Ind"), new Rule(noActionRequired, false));
-    rules.put(new Key("SPG", "U", "CE1"), new Rule(invalidMapping, false));
-    rules.put(new Key("SPG", "U", "Cont"), new Rule(noActionRequired, false));
+    rules.put(new Key("HH", "U", HH), new Rule(receiptCase, true));
+    rules.put(new Key("HH", "U", IND), new Rule(invalidMapping, false));
+    rules.put(new Key("HH", "U", CE1), new Rule(invalidMapping, false));
+    rules.put(new Key("HH", "U", CONT), new Rule(noActionRequired, false));
+    rules.put(new Key("HI", "U", HH), new Rule(invalidMapping, false));
+    rules.put(new Key("HI", "U", IND), new Rule(receiptCase, true));
+    rules.put(new Key("HI", "U", CE1), new Rule(invalidMapping, false));
+    rules.put(new Key("HI", "U", CONT), new Rule(invalidMapping, false));
+    rules.put(new Key("CE", "E", HH), new Rule(invalidMapping, false));
+    rules.put(new Key("CE", "E", CE1), new Rule(receiptCase, true));
+    rules.put(new Key("CE", "E", CONT), new Rule(invalidMapping, false));
+    rules.put(new Key("CE", "U", HH), new Rule(invalidMapping, false));
+    rules.put(new Key("CE", "U", IND), new Rule(incrementAndReceipt, true));
+    rules.put(new Key("CE", "U", CE1), new Rule(invalidMapping, false));
+    rules.put(new Key("CE", "U", CONT), new Rule(invalidMapping, false));
+    rules.put(new Key("SPG", "E", HH), new Rule(noActionRequired, false));
+    rules.put(new Key("SPG", "E", IND), new Rule(noActionRequired, false));
+    rules.put(new Key("SPG", "E", CE1), new Rule(invalidMapping, false));
+    rules.put(new Key("SPG", "E", CONT), new Rule(invalidMapping, false));
+    rules.put(new Key("CE", "E", IND), new Rule(incremenNoReceipt, true));
+    rules.put(new Key("SPG", "U", HH), new Rule(receiptCase, true));
+    rules.put(new Key("SPG", "U", IND), new Rule(noActionRequired, false));
+    rules.put(new Key("SPG", "U", CE1), new Rule(invalidMapping, false));
+    rules.put(new Key("SPG", "U", CONT), new Rule(noActionRequired, false));
   }
 
   public void receiptCase(UacQidLink uacQidLink, EventTypeDTO causeEventType) {
@@ -83,15 +86,15 @@ public class CaseReceiptService {
   }
 
   private Key makeRulesKey(Case caze, UacQidLink uacQidLink) {
-    String formType = "HH";
+    String formType = mapQuestionnaireTypeToFormType(uacQidLink.getQid());
 
-    if (isIndividualQuestionnaireType(uacQidLink.getQid())) {
-      formType = "Ind";
-    } else if (caze.getTreatmentCode().startsWith("CE")) {
-      formType = "CE1";
-    } else if (iscontinuationQuestionnaireTypes(uacQidLink.getQid())) {
-      formType = "Cont";
-    }
+    //    if (isIndividualQuestionnaireType(uacQidLink.getQid())) {
+    //      formType = "Ind";
+    //    } else if (caze.getTreatmentCode().startsWith("CE")) {
+    //      formType = "CE1";
+    //    } else if (iscontinuationQuestionnaireTypes(uacQidLink.getQid())) {
+    //      formType = "Cont";
+    //    }
 
     return new Key(caze.getCaseType(), caze.getAddressLevel(), formType);
   }

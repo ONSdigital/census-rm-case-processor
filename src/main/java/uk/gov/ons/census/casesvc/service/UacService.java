@@ -1,5 +1,6 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static uk.gov.ons.census.casesvc.utility.FormTypeHelper.mapQuestionnaireTypeToFormType;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.time.OffsetDateTime;
@@ -9,7 +10,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.cache.UacQidCache;
-import uk.gov.ons.census.casesvc.client.UacQidServiceClient;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
@@ -29,16 +29,12 @@ import uk.gov.ons.census.casesvc.utility.Sha256Helper;
 public class UacService {
   private static final String UAC_UPDATE_ROUTING_KEY = "event.uac.update";
   private static final int CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES = 71;
-  private static final String HH_FORM_TYPE = "H";
-  private static final String IND_FORM_TYPE = "I";
-  private static final String CE1_FORM_TYPE = "C";
 
   private final UacQidLinkRepository uacQidLinkRepository;
   private final RabbitTemplate rabbitTemplate;
   private final UacQidCache uacQidCache;
   private final EventLogger eventLogger;
   private final CaseService caseService;
-  private final UacQidServiceClient uacQidServiceClient;
 
   @Value("${queueconfig.case-event-exchange}")
   private String outboundExchange;
@@ -48,14 +44,12 @@ public class UacService {
       RabbitTemplate rabbitTemplate,
       UacQidCache uacQidCache,
       EventLogger eventLogger,
-      CaseService caseService,
-      UacQidServiceClient uacQidServiceClient) {
+      CaseService caseService) {
     this.rabbitTemplate = rabbitTemplate;
     this.uacQidLinkRepository = uacQidLinkRepository;
     this.uacQidCache = uacQidCache;
     this.eventLogger = eventLogger;
     this.caseService = caseService;
-    this.uacQidServiceClient = uacQidServiceClient;
   }
 
   public UacQidLink saveUacQidLink(UacQidLink uacQidLink) {
@@ -159,43 +153,5 @@ public class UacService {
     }
 
     return uacQidLinkOpt.get();
-  }
-
-  private String mapQuestionnaireTypeToFormType(String qid) {
-    int questionnaireType = Integer.parseInt(qid.substring(0, 2));
-
-    switch (questionnaireType) {
-      case 1:
-      case 2:
-      case 3:
-      case 4:
-        return HH_FORM_TYPE;
-      case 21:
-      case 22:
-      case 23:
-      case 24:
-        return IND_FORM_TYPE;
-      case 31:
-      case 32:
-      case 33:
-      case 34:
-        return CE1_FORM_TYPE;
-      case 51:
-      case 52:
-      case 53:
-      case 54:
-      case 71:
-      case 72:
-      case 73:
-      case 74:
-        return HH_FORM_TYPE;
-      case 81:
-      case 82:
-      case 83:
-      case 84:
-        return CE1_FORM_TYPE;
-      default:
-        return null;
-    }
   }
 }
