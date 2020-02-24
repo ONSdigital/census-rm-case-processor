@@ -29,6 +29,9 @@ import uk.gov.ons.census.casesvc.utility.Sha256Helper;
 public class UacService {
   private static final String UAC_UPDATE_ROUTING_KEY = "event.uac.update";
   private static final int CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES = 71;
+  private static final String HH_FORM_TYPE = "H";
+  private static final String IND_FORM_TYPE = "I";
+  private static final String CE1_FORM_TYPE = "C";
 
   private final UacQidLinkRepository uacQidLinkRepository;
   private final RabbitTemplate rabbitTemplate;
@@ -101,6 +104,11 @@ public class UacService {
     uac.setUac(uacQidLink.getUac());
     uac.setActive(uacQidLink.isActive());
 
+    // It's perfectly possible to derive the Form Type from the supplied data, so RM should not be
+    // forced to incorporate CENSUS business logic. It's for the CENSUS team to put business logic
+    // wherever it's needed, which quite clearly is NOT here. TODO: Put the business logic elsewhere
+    uac.setFormType(mapQuestionnaireTypeToFormType(uacQidLink.getQid()));
+
     Case caze = uacQidLink.getCaze();
     if (caze != null) {
       uac.setCaseId(caze.getCaseId().toString());
@@ -151,5 +159,43 @@ public class UacService {
     }
 
     return uacQidLinkOpt.get();
+  }
+
+  private String mapQuestionnaireTypeToFormType(String qid) {
+    int questionnaireType = Integer.parseInt(qid.substring(0, 2));
+
+    switch (questionnaireType) {
+      case 1:
+      case 2:
+      case 3:
+      case 4:
+        return HH_FORM_TYPE;
+      case 21:
+      case 22:
+      case 23:
+      case 24:
+        return IND_FORM_TYPE;
+      case 31:
+      case 32:
+      case 33:
+      case 34:
+        return CE1_FORM_TYPE;
+      case 51:
+      case 52:
+      case 53:
+      case 54:
+      case 71:
+      case 72:
+      case 73:
+      case 74:
+        return HH_FORM_TYPE;
+      case 81:
+      case 82:
+      case 83:
+      case 84:
+        return CE1_FORM_TYPE;
+      default:
+        return null;
+    }
   }
 }
