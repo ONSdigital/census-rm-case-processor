@@ -130,6 +130,7 @@ public class FulfilmentRequestService {
     individualResponseCase.setAddressLine1(parentCase.getAddressLine1());
     individualResponseCase.setAddressLine2(parentCase.getAddressLine2());
     individualResponseCase.setAddressLine3(parentCase.getAddressLine3());
+    individualResponseCase.setAddressLevel(parentCase.getAddressLevel());
     individualResponseCase.setTownName(parentCase.getTownName());
     individualResponseCase.setPostcode(parentCase.getPostcode());
     individualResponseCase.setLatitude(parentCase.getLatitude());

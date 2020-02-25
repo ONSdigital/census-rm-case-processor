@@ -77,7 +77,6 @@ public class QuestionnaireLinkedReceiverIT {
   @Before
   @Transactional
   public void setUp() {
-    rabbitQueueHelper.purgeQueue(questionnaireLinkedQueue);
     rabbitQueueHelper.purgeQueue(actionQueue);
     rabbitQueueHelper.purgeQueue(rhUacQueue);
     rabbitQueueHelper.purgeQueue(rhCaseQueue);
@@ -219,6 +218,8 @@ public class QuestionnaireLinkedReceiverIT {
     testCase.setSurvey("CENSUS");
     testCase.setUacQidLinks(null);
     testCase.setEvents(null);
+    testCase.setCaseType("HH");
+    testCase.setAddressLevel("U");
     caseRepository.saveAndFlush(testCase);
 
     // Send unaddressed uac message to create uac/qid unaddressed pair
@@ -462,6 +463,8 @@ public class QuestionnaireLinkedReceiverIT {
     testCase.setSurvey("CENSUS");
     testCase.setUacQidLinks(null);
     testCase.setEvents(null);
+    testCase.setCaseType("HH");
+    testCase.setAddressLevel("U");
     caseRepository.saveAndFlush(testCase);
 
     UacQidLink receiptedContinuationUacQidLink = new UacQidLink();
@@ -518,6 +521,8 @@ public class QuestionnaireLinkedReceiverIT {
     testCase.setSurvey("CENSUS");
     testCase.setUacQidLinks(null);
     testCase.setEvents(null);
+    testCase.setCaseType("HH");
+    testCase.setAddressLevel("U");
     caseRepository.saveAndFlush(testCase);
 
     UacQidLink receiptedContinuationUacQidLink = new UacQidLink();
