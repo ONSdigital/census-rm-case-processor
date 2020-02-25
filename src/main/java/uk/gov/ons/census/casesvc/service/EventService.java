@@ -33,7 +33,7 @@ public class EventService {
       CreateCaseSample createCaseSample, OffsetDateTime messageTimestamp) {
     Case caze = caseService.saveCaseSample(createCaseSample);
     int questionnaireType =
-        QuestionnaireTypeHelper.calculateQuestionnaireType(caze.getTreatmentCode());
+        QuestionnaireTypeHelper.calculateQuestionnaireType(caze.getTreatmentCode(), caze.getAddressLevel());
     UacQidLink uacQidLink = uacService.buildUacQidLink(caze, questionnaireType);
     uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
     caseService.saveCaseAndEmitCaseCreatedEvent(caze);
