@@ -1,11 +1,14 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
 import java.time.OffsetDateTime;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
+import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.CCSPropertyDTO;
+import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
@@ -19,19 +22,16 @@ public class CCSPropertyListedService {
   private final UacService uacService;
   private final EventLogger eventLogger;
   private final CaseService caseService;
-  private final CcsToFieldService ccsToFieldService;
   private final UacQidLinkRepository uacQidLinkRepository;
 
   public CCSPropertyListedService(
       UacService uacService,
       EventLogger eventLogger,
       CaseService caseService,
-      CcsToFieldService ccsToFieldService,
       UacQidLinkRepository uacQidLinkRepository) {
     this.uacService = uacService;
     this.eventLogger = eventLogger;
     this.caseService = caseService;
-    this.ccsToFieldService = ccsToFieldService;
     this.uacQidLinkRepository = uacQidLinkRepository;
   }
 
@@ -70,7 +70,8 @@ public class CCSPropertyListedService {
 
   private void sendActiveCCSCaseToField(Case caze) {
     if (!caze.isRefusalReceived() && !caze.isAddressInvalid()) {
-      ccsToFieldService.convertAndSendCCSToField(caze);
+      caseService.saveCaseAndEmitCaseCreatedEvent(
+          caze, buildMetadata(EventTypeDTO.CCS_ADDRESS_LISTED, ActionInstructionType.CREATE));
     }
   }
 

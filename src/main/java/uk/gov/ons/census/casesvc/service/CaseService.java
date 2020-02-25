@@ -105,23 +105,34 @@ public class CaseService {
     return saveCaseAndEmitCaseCreatedEvent(caze, null);
   }
 
+  public PayloadDTO saveCaseAndEmitCaseCreatedEvent(Case caze, Metadata metadata) {
+    return saveCaseAndEmitCaseCreatedEvent(caze, null, metadata);
+  }
+
   public PayloadDTO saveCaseAndEmitCaseCreatedEvent(
-      Case caze, FulfilmentRequestDTO fulfilmentRequest) {
+      Case caze, FulfilmentRequestDTO fulfilmentRequest, Metadata metadata) {
     caseRepository.saveAndFlush(caze);
 
-    return emitCaseCreatedEvent(caze, fulfilmentRequest);
+    return emitCaseCreatedEvent(caze, fulfilmentRequest, metadata);
   }
 
   public PayloadDTO emitCaseCreatedEvent(Case caze) {
-    return emitCaseCreatedEvent(caze, null);
+    return emitCaseCreatedEvent(caze, null, null);
   }
 
   public PayloadDTO emitCaseCreatedEvent(Case caze, FulfilmentRequestDTO fulfilmentRequest) {
+    return emitCaseCreatedEvent(caze, fulfilmentRequest, null);
+  }
+
+  public PayloadDTO emitCaseCreatedEvent(
+      Case caze, FulfilmentRequestDTO fulfilmentRequest, Metadata metadata) {
     EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_CREATED);
     ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
 
     // This has been added in to allow Action Scheduler to process fulfilments for individuals
     responseManagementEvent.getPayload().setFulfilmentRequest(fulfilmentRequest);
+
+    responseManagementEvent.getPayload().setMetadata(metadata);
 
     rabbitTemplate.convertAndSend(
         outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
