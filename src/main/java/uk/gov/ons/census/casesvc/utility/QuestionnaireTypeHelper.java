@@ -45,6 +45,8 @@ public class QuestionnaireTypeHelper {
           String.format("Unknown Country for treatment code %s", treatmentCode));
     }
 
+    // TODO Note this is not the final solution for initial contact QIDs but a stop gap so that we
+    // are at least generating valid combinations
     if (treatmentCode.startsWith("HH") || treatmentCode.startsWith("SPG")) {
       switch (country) {
         case "E":
