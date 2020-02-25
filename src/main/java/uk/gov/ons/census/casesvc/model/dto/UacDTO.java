@@ -15,4 +15,5 @@ public class UacDTO {
   private String region;
   private String caseId;
   private String collectionExerciseId;
+  private String formType;
 }
