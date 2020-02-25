@@ -251,7 +251,7 @@ public class FulfilmentRequestServiceTest {
     assertThat(actualChildCase.getAddressType()).isEqualTo(HOUSEHOLD_RESPONSE_ADDRESS_TYPE);
     assertThat(actualChildCase.getCaseType()).isEqualTo(HOUSEHOLD_INDIVIDUAL_RESPONSE_ADDRESS_TYPE);
     assertThat(actualChildCase.getEstabType()).isEqualTo(parentCase.getEstabType());
-    assertThat(actualChildCase.getAddressLevel()).isNull();
+    assertThat(actualChildCase.getAddressLevel()).isEqualTo(parentCase.getAddressLevel());
     assertThat(actualChildCase.getAbpCode()).isEqualTo(parentCase.getAbpCode());
     assertThat(actualChildCase.getOrganisationName()).isEqualTo(parentCase.getOrganisationName());
     assertThat(actualChildCase.getAddressLine1()).isEqualTo(parentCase.getAddressLine1());
@@ -272,5 +272,6 @@ public class FulfilmentRequestServiceTest {
     assertThat(actualChildCase.getFieldOfficerId()).isNull();
     assertThat(actualChildCase.getTreatmentCode()).isNull();
     assertThat(actualChildCase.getCeExpectedCapacity()).isNull();
+    assertThat(actualChildCase.getAddressLevel()).isEqualTo(parentCase.getAddressLevel());
   }
 }
