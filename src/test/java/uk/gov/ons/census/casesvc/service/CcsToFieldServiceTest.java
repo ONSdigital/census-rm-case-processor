@@ -69,6 +69,7 @@ public class CcsToFieldServiceTest {
     ccsToField.setUndeliveredAsAddress(false);
     ccsToField.setSurveyName(caze.getSurvey());
     ccsToField.setBlankQreReturned(false);
+    ccsToField.setHandDelivery(caze.isHandDelivery());
 
     return ccsToField;
   }

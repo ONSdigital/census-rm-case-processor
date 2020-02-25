@@ -21,4 +21,5 @@ public class CcsToFwmt {
   private String surveyName;
   private Boolean undeliveredAsAddress;
   private Boolean blankQreReturned;
+  private boolean handDelivery;
 }
