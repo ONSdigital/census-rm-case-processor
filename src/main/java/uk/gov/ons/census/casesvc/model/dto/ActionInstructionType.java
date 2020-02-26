@@ -5,5 +5,6 @@ public enum ActionInstructionType {
   UPDATE,
   PAUSE,
   REACTIVATE,
-  CLOSE
+  CLOSE,
+  NONE // At the moment only
 }

@@ -40,30 +40,34 @@ public class CaseReceiptService {
     /*
      This table is based on: https://collaborate2.ons.gov.uk/confluence/pages/viewpage.action?spaceKey=SDC&title=Receipting
     */
-    rules.put(new Key("HH", "U", HH), new Rule(receiptCase, true));
-    rules.put(new Key("HH", "U", IND), new Rule(invalidMapping, false));
-    rules.put(new Key("HH", "U", CE1), new Rule(invalidMapping, false));
-    rules.put(new Key("HH", "U", CONT), new Rule(noActionRequired, false));
-    rules.put(new Key("HI", "U", HH), new Rule(invalidMapping, false));
-    rules.put(new Key("HI", "U", IND), new Rule(receiptCase, true));
-    rules.put(new Key("HI", "U", CE1), new Rule(invalidMapping, false));
-    rules.put(new Key("HI", "U", CONT), new Rule(invalidMapping, false));
-    rules.put(new Key("CE", "E", HH), new Rule(invalidMapping, false));
-    rules.put(new Key("CE", "E", CE1), new Rule(receiptCase, true));
-    rules.put(new Key("CE", "E", CONT), new Rule(invalidMapping, false));
-    rules.put(new Key("CE", "U", HH), new Rule(invalidMapping, false));
-    rules.put(new Key("CE", "U", IND), new Rule(incrementAndReceipt, true));
-    rules.put(new Key("CE", "U", CE1), new Rule(invalidMapping, false));
-    rules.put(new Key("CE", "U", CONT), new Rule(invalidMapping, false));
-    rules.put(new Key("SPG", "E", HH), new Rule(noActionRequired, false));
-    rules.put(new Key("SPG", "E", IND), new Rule(noActionRequired, false));
-    rules.put(new Key("SPG", "E", CE1), new Rule(invalidMapping, false));
-    rules.put(new Key("SPG", "E", CONT), new Rule(invalidMapping, false));
-    rules.put(new Key("CE", "E", IND), new Rule(incremenNoReceipt, true));
-    rules.put(new Key("SPG", "U", HH), new Rule(receiptCase, true));
-    rules.put(new Key("SPG", "U", IND), new Rule(noActionRequired, false));
-    rules.put(new Key("SPG", "U", CE1), new Rule(invalidMapping, false));
-    rules.put(new Key("SPG", "U", CONT), new Rule(noActionRequired, false));
+
+    // This exists to keep the rows on one line and readable
+    ActionInstructionType FIELD_UPDATE = ActionInstructionType.UPDATE;
+
+    rules.put(new Key("HH", "U", HH), new Rule(receiptCase, true, ActionInstructionType.CLOSE));
+    rules.put(new Key("HH", "U", IND), new Rule(invalidMapping));
+    rules.put(new Key("HH", "U", CE1), new Rule(invalidMapping));
+    rules.put(new Key("HH", "U", CONT), new Rule(noActionRequired, false, null));
+    rules.put(new Key("HI", "U", HH), new Rule(invalidMapping));
+    rules.put(new Key("HI", "U", IND), new Rule(receiptCase, true, ActionInstructionType.NONE));
+    rules.put(new Key("HI", "U", CE1), new Rule(invalidMapping));
+    rules.put(new Key("HI", "U", CONT), new Rule(invalidMapping));
+    rules.put(new Key("CE", "E", HH), new Rule(invalidMapping));
+    rules.put(new Key("CE", "E", IND), new Rule(incremenNoReceipt, true, FIELD_UPDATE));
+    rules.put(new Key("CE", "E", CE1), new Rule(receiptCase, true, ActionInstructionType.UPDATE));
+    rules.put(new Key("CE", "E", CONT), new Rule(invalidMapping));
+    rules.put(new Key("CE", "U", HH), new Rule(invalidMapping));
+    rules.put(new Key("CE", "U", IND), new Rule(incrementAndReceipt, true, FIELD_UPDATE));
+    rules.put(new Key("CE", "U", CE1), new Rule(invalidMapping));
+    rules.put(new Key("CE", "U", CONT), new Rule(invalidMapping));
+    rules.put(new Key("SPG", "E", HH), new Rule(noActionRequired, false, null));
+    rules.put(new Key("SPG", "E", IND), new Rule(noActionRequired, false, null));
+    rules.put(new Key("SPG", "E", CE1), new Rule(invalidMapping));
+    rules.put(new Key("SPG", "E", CONT), new Rule(invalidMapping));
+    rules.put(new Key("SPG", "U", HH), new Rule(receiptCase, true, ActionInstructionType.CLOSE));
+    rules.put(new Key("SPG", "U", IND), new Rule(noActionRequired, false, null));
+    rules.put(new Key("SPG", "U", CE1), new Rule(invalidMapping));
+    rules.put(new Key("SPG", "U", CONT), new Rule(noActionRequired, false, null));
   }
 
   public void receiptCase(UacQidLink uacQidLink, EventTypeDTO causeEventType) {
@@ -82,7 +86,7 @@ public class CaseReceiptService {
 
     if (rule.getSaveAndEmitCase()) {
       caseService.saveCaseAndEmitCaseUpdatedEvent(
-          lockedCase, buildMetadata(causeEventType, ActionInstructionType.CLOSE));
+          lockedCase, buildMetadata(causeEventType, rule.getFieldInstruction()));
     }
   }
 
@@ -155,10 +159,19 @@ public class CaseReceiptService {
   @AllArgsConstructor
   private class Rule {
     private BiFunction<Case, UacQidLink, Case> functionToExecute;
-    private final boolean saveAndEmitCase;
+    private boolean saveAndEmitCase;
+    private ActionInstructionType fieldInstruction;
+
+    public Rule(BiFunction<Case, UacQidLink, Case> functionToExecute) {
+      this.functionToExecute = functionToExecute;
+    }
 
     public boolean getSaveAndEmitCase() {
       return saveAndEmitCase;
+    }
+
+    public ActionInstructionType getFieldInstruction() {
+      return fieldInstruction;
     }
 
     public Case run(Case caze, UacQidLink uacQidLink) {

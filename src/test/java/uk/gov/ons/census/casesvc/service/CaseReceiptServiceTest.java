@@ -27,24 +27,22 @@ public class CaseReceiptServiceTest {
   private static final String ENGLAND_CE_QID = "31";
 
   @Mock CaseService caseService;
-
   @Mock CaseRepository caseRepository;
-
   @InjectMocks CaseReceiptService underTest;
 
   @Test
   public void test_HH_U_HH() {
-    testRecipting("HH", "U", HOUSEHOLD_HH_ENGLAND, false, true);
+    testRecipting("HH", "U", HOUSEHOLD_HH_ENGLAND, false, true, ActionInstructionType.CLOSE);
   }
 
   @Test(expected = RuntimeException.class)
   public void test_HH_U_Ind() {
-    testRecipting("HH", "U", HOUSEHOLD_INDIVIDUAL, false, false);
+    testRecipting("HH", "U", HOUSEHOLD_INDIVIDUAL, false, false, null);
   }
 
   @Test(expected = RuntimeException.class)
   public void test_HH_U_CE1() {
-    testRecipting("HH", "U", ENGLAND_CE_QID, false, false);
+    testRecipting("HH", "U", ENGLAND_CE_QID, false, false, null);
   }
 
   @Test
@@ -54,62 +52,62 @@ public class CaseReceiptServiceTest {
 
   @Test
   public void test_HI_U_Ind() {
-    testRecipting("HI", "U", HOUSEHOLD_INDIVIDUAL, false, true);
+    testRecipting("HI", "U", HOUSEHOLD_INDIVIDUAL, false, true, ActionInstructionType.NONE);
   }
 
   @Test(expected = RuntimeException.class)
   public void test_HI_U_CE1() {
-    testRecipting("HI", "U", ENGLAND_CE_QID, false, false);
+    testRecipting("HI", "U", ENGLAND_CE_QID, false, false, null);
   }
 
   @Test(expected = RuntimeException.class)
   public void test_HI_U_Cont() {
-    testRecipting("HI", "U", ENGLAND_HOUSEHOLD_CONTINUATION, false, false);
+    testRecipting("HI", "U", ENGLAND_HOUSEHOLD_CONTINUATION, false, false, null);
   }
 
   @Test(expected = RuntimeException.class)
   public void test_CE_E_HH() {
-    testRecipting("CE", "E", HOUSEHOLD_HH_ENGLAND, false, false);
+    testRecipting("CE", "E", HOUSEHOLD_HH_ENGLAND, false, false, null);
   }
 
   @Test
   public void test_CE_E_I() {
-    testRecipting("CE", "E", HOUSEHOLD_INDIVIDUAL, true, false);
+    testRecipting("CE", "E", HOUSEHOLD_INDIVIDUAL, true, false, ActionInstructionType.UPDATE);
   }
 
   @Test
   public void test_CE_E_CE1() {
-    testRecipting("CE", "E", ENGLAND_CE_QID, false, true);
+    testRecipting("CE", "E", ENGLAND_CE_QID, false, true, ActionInstructionType.UPDATE);
   }
 
   @Test(expected = RuntimeException.class)
   public void test_CE_E_Cont() {
-    testRecipting("CE", "E", ENGLAND_HOUSEHOLD_CONTINUATION, false, false);
+    testRecipting("CE", "E", ENGLAND_HOUSEHOLD_CONTINUATION, false, false, null);
   }
 
   @Test(expected = RuntimeException.class)
   public void test_CE_U_HH() {
-    testRecipting("CE", "U", HOUSEHOLD_HH_ENGLAND, false, false);
+    testRecipting("CE", "U", HOUSEHOLD_HH_ENGLAND, false, false, null);
   }
 
   @Test
   public void CE_U_Ind_Does_Not_Receipt() {
-    testActualResponseGreaterEqualToReceipting(0, 2, false);
+    testActualResponseGreaterEqualToReceipting(0, 2, false, ActionInstructionType.UPDATE);
   }
 
   @Test
   public void CE_U_Ind_Does_Receipt() {
-    testActualResponseGreaterEqualToReceipting(1, 2, true);
+    testActualResponseGreaterEqualToReceipting(1, 2, true, ActionInstructionType.UPDATE);
   }
 
   @Test(expected = RuntimeException.class)
   public void test_CE_U_CE1() {
-    testRecipting("CE", "U", ENGLAND_CE_QID, false, true);
+    testRecipting("CE", "U", ENGLAND_CE_QID, false, true, null);
   }
 
   @Test(expected = RuntimeException.class)
   public void test_CE_U_Cont() {
-    testRecipting("CE", "U", ENGLAND_HOUSEHOLD_CONTINUATION, false, false);
+    testRecipting("CE", "U", ENGLAND_HOUSEHOLD_CONTINUATION, false, false, null);
   }
 
   @Test
@@ -124,17 +122,17 @@ public class CaseReceiptServiceTest {
 
   @Test(expected = RuntimeException.class)
   public void test_SPG_E_CE1() {
-    testRecipting("SPG", "E", ENGLAND_CE_QID, false, true);
+    testRecipting("SPG", "E", ENGLAND_CE_QID, false, true, null);
   }
 
   @Test(expected = RuntimeException.class)
   public void test_SPG_U_Cont() {
-    testRecipting("SPG", "E", ENGLAND_HOUSEHOLD_CONTINUATION, false, true);
+    testRecipting("SPG", "E", ENGLAND_HOUSEHOLD_CONTINUATION, false, true, null);
   }
 
   @Test
   public void SPG_U_HH() {
-    testRecipting("SPG", "U", HOUSEHOLD_HH_ENGLAND, false, true);
+    testRecipting("SPG", "U", HOUSEHOLD_HH_ENGLAND, false, true, ActionInstructionType.CLOSE);
   }
 
   @Test
@@ -144,7 +142,7 @@ public class CaseReceiptServiceTest {
 
   @Test(expected = RuntimeException.class)
   public void test_SPG_U_CE1() {
-    testRecipting("SPG", "U", ENGLAND_CE_QID, false, true);
+    testRecipting("SPG", "U", ENGLAND_CE_QID, false, true, null);
   }
 
   @Test
@@ -154,7 +152,7 @@ public class CaseReceiptServiceTest {
 
   @Test(expected = RuntimeException.class)
   public void testUnmappedThrowsRunTimeException() {
-    testRecipting("BL", "A", "H", false, false);
+    testRecipting("BL", "A", "H", false, false, null);
   }
 
   @Test
@@ -181,7 +179,8 @@ public class CaseReceiptServiceTest {
       String addressLevel,
       String qid,
       boolean expectIncrement,
-      boolean expectReceipt) {
+      boolean expectReceipt,
+      ActionInstructionType expectedActionInstructionType) {
 
     // Given
     Case caze = new Case();
@@ -219,11 +218,11 @@ public class CaseReceiptServiceTest {
 
     Metadata metadata = metadataArgumentCaptor.getValue();
     assertThat(metadata.getCauseEventType()).isEqualTo(RESPONSE_RECEIVED);
-    assertThat(metadata.getFieldDecision()).isEqualTo(ActionInstructionType.CLOSE);
+    assertThat(metadata.getFieldDecision()).isEqualTo(expectedActionInstructionType);
   }
 
   private void testActualResponseGreaterEqualToReceipting(
-      int actualResponses, int expectedCapacity, boolean receiptExpected) {
+      int actualResponses, int expectedCapacity, boolean receiptExpected, ActionInstructionType expectedActionInstructionType) {
     // Given
     Case caze = new Case();
     caze.setCaseId(UUID.randomUUID());
@@ -246,11 +245,16 @@ public class CaseReceiptServiceTest {
     verify(caseRepository).getCaseAndLockByCaseId(caze.getCaseId());
 
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(caseService).saveCaseAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture(), any());
+    ArgumentCaptor<Metadata> metadataArgumentCaptor = ArgumentCaptor.forClass(Metadata.class);
+    verify(caseService).saveCaseAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture(), metadataArgumentCaptor.capture());
     Case actualCase = caseArgumentCaptor.getValue();
     assertThat(actualCase.getCaseId()).isEqualTo(caze.getCaseId());
     assertThat(actualCase.getCeActualResponses()).isEqualTo(actualResponses + 1);
     assertThat(actualCase.isReceiptReceived()).isEqualTo(receiptExpected);
+
+    Metadata metadata = metadataArgumentCaptor.getValue();
+    assertThat(metadata.getCauseEventType()).isEqualTo(RESPONSE_RECEIVED);
+    assertThat(metadata.getFieldDecision()).isEqualTo(expectedActionInstructionType);
   }
 
   public void testContinuationQidResultInNoChangesOrEmitting(
