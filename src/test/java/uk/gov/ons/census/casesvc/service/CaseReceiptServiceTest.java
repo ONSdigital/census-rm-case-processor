@@ -222,7 +222,10 @@ public class CaseReceiptServiceTest {
   }
 
   private void testActualResponseGreaterEqualToReceipting(
-      int actualResponses, int expectedCapacity, boolean receiptExpected, ActionInstructionType expectedActionInstructionType) {
+      int actualResponses,
+      int expectedCapacity,
+      boolean receiptExpected,
+      ActionInstructionType expectedActionInstructionType) {
     // Given
     Case caze = new Case();
     caze.setCaseId(UUID.randomUUID());
@@ -246,7 +249,9 @@ public class CaseReceiptServiceTest {
 
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
     ArgumentCaptor<Metadata> metadataArgumentCaptor = ArgumentCaptor.forClass(Metadata.class);
-    verify(caseService).saveCaseAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture(), metadataArgumentCaptor.capture());
+    verify(caseService)
+        .saveCaseAndEmitCaseUpdatedEvent(
+            caseArgumentCaptor.capture(), metadataArgumentCaptor.capture());
     Case actualCase = caseArgumentCaptor.getValue();
     assertThat(actualCase.getCaseId()).isEqualTo(caze.getCaseId());
     assertThat(actualCase.getCeActualResponses()).isEqualTo(actualResponses + 1);
