@@ -177,13 +177,13 @@
       }
     },
     {
-      "name": "Action.Field",
+      "name": "FieldworkAdapter.caseUpdated",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
       "arguments": {
         "x-dead-letter-exchange": "delayedRedeliveryExchange",
-        "x-dead-letter-routing-key": "Action.Field"
+        "x-dead-letter-routing-key": "FieldworkAdapter.caseUpdated"
       }
     },
     {
@@ -211,15 +211,6 @@
       "name": "events",
       "vhost": "/",
       "type": "topic",
-      "durable": true,
-      "auto_delete": false,
-      "internal": false,
-      "arguments": {}
-    },
-    {
-      "name": "action-outbound-exchange",
-      "vhost": "/",
-      "type": "direct",
       "durable": true,
       "auto_delete": false,
       "internal": false,
@@ -341,11 +332,11 @@
       "arguments": {}
     },
     {
-      "source": "action-outbound-exchange",
+      "source": "events",
       "vhost": "/",
-      "destination": "Action.Field",
+      "destination": "FieldworkAdapter.caseUpdated",
       "destination_type": "queue",
-      "routing_key": "Action.Field.binding",
+      "routing_key": "event.case.*",
       "arguments": {}
     },
     {

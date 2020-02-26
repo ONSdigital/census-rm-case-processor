@@ -19,8 +19,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.CCSPropertyDTO;
-import uk.gov.ons.census.casesvc.model.dto.CcsToFwmt;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
@@ -45,7 +45,6 @@ import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 @SpringBootTest
 @RunWith(SpringJUnit4ClassRunner.class)
 public class CCSPropertyListedIT {
-  private static String FIELD_QUEUE = "Action.Field";
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final String CCS_PROPERTY_LISTED_CHANNEL = "FIELD";
   private static final String CCS_PROPERTY_LISTED_SOURCE = "FIELDWORK_GATEWAY";
@@ -59,11 +58,14 @@ public class CCSPropertyListedIT {
   @Value("${queueconfig.ccs-property-listed-queue}")
   private String ccsPropertyListedQueue;
 
+  @Value("${queueconfig.case-updated-queue}")
+  private String caseUpdatedQueueName;
+
   @Before
   @Transactional
   public void setUp() {
-    rabbitQueueHelper.purgeQueue(FIELD_QUEUE);
     rabbitQueueHelper.purgeQueue(ccsPropertyListedQueue);
+    rabbitQueueHelper.purgeQueue(caseUpdatedQueueName);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
@@ -72,15 +74,22 @@ public class CCSPropertyListedIT {
   @Test
   public void testCCSSubmittedToFieldIT() throws IOException, InterruptedException {
     // GIVEN
-    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(FIELD_QUEUE);
+    BlockingQueue<String> caseUpdatedQueue = rabbitQueueHelper.listen(caseUpdatedQueueName);
     ResponseManagementEvent responseManagementEvent = getResponseManagementEvent();
 
     // When
     rabbitQueueHelper.sendMessage(ccsPropertyListedQueue, responseManagementEvent);
 
     // Then
-    CcsToFwmt ccsToFwmt = rabbitQueueHelper.checkCcsFwmtEmitted(outboundQueue);
-    assertThat(ccsToFwmt.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
+    ResponseManagementEvent ccsToFwmt =
+        rabbitQueueHelper.checkExpectedMessageReceived(caseUpdatedQueue);
+    assertThat(ccsToFwmt.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_CREATED);
+    assertThat(ccsToFwmt.getPayload().getCollectionCase().getId())
+        .isEqualTo(TEST_CASE_ID.toString());
+    assertThat(ccsToFwmt.getPayload().getMetadata().getFieldDecision())
+        .isEqualTo(ActionInstructionType.CREATE);
+    assertThat(ccsToFwmt.getPayload().getMetadata().getCauseEventType())
+        .isEqualTo(EventTypeDTO.CCS_ADDRESS_LISTED);
 
     Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
     assertThat(actualCase.getSurvey()).isEqualTo("CCS");
@@ -94,7 +103,7 @@ public class CCSPropertyListedIT {
   @Test
   public void testCCSListedEventWithQidSet() throws InterruptedException, IOException {
     // GIVEN
-    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(FIELD_QUEUE);
+    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(caseUpdatedQueueName);
     EasyRandom easyRandom = new EasyRandom();
     UacQidLink uacQidLink = easyRandom.nextObject(UacQidLink.class);
     uacQidLink.setQid(TEST_QID);
@@ -126,7 +135,7 @@ public class CCSPropertyListedIT {
   @Test
   public void testCCSListedEventForRefusal() throws IOException, InterruptedException {
     // GIVEN
-    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(FIELD_QUEUE);
+    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(caseUpdatedQueueName);
 
     RefusalDTO refusal = new RefusalDTO();
     refusal.setType(RefusalType.HARD_REFUSAL);
@@ -155,7 +164,7 @@ public class CCSPropertyListedIT {
   @Test
   public void testCCSListedEventForInvalidAddress() throws IOException, InterruptedException {
     // GIVEN
-    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(FIELD_QUEUE);
+    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(caseUpdatedQueueName);
 
     InvalidAddress invalidAddress = new InvalidAddress();
     invalidAddress.setReason("HOUSE DEMOLISHED");
