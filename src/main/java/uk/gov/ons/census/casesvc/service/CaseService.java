@@ -132,6 +132,7 @@ public class CaseService {
     // This has been added in to allow Action Scheduler to process fulfilments for individuals
     responseManagementEvent.getPayload().setFulfilmentRequest(fulfilmentRequest);
 
+    // We need this gubbins to make Fieldwork Adapter work
     responseManagementEvent.getPayload().setMetadata(metadata);
 
     rabbitTemplate.convertAndSend(
