@@ -52,7 +52,7 @@ public class CaseReceiptServiceTest {
 
   @Test
   public void test_HI_U_Ind() {
-    testRecipting("HI", "U", HOUSEHOLD_INDIVIDUAL, false, true, ActionInstructionType.NONE);
+    testRecipting("HI", "U", HOUSEHOLD_INDIVIDUAL, false, true, null);
   }
 
   @Test(expected = RuntimeException.class)

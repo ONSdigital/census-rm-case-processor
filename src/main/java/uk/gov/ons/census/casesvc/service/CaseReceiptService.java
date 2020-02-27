@@ -43,7 +43,7 @@ public class CaseReceiptService {
 
     rules.put(new Key("HH", "U", HH), new Rule(receiptCase, ActionInstructionType.CLOSE));
     rules.put(new Key("HH", "U", CONT), new NoActionRequired());
-    rules.put(new Key("HI", "U", IND), new Rule(receiptCase, ActionInstructionType.NONE));
+    rules.put(new Key("HI", "U", IND), new Rule(receiptCase, null));
     rules.put(new Key("CE", "E", IND), new Rule(incremenNoReceipt, ActionInstructionType.UPDATE));
     rules.put(new Key("CE", "E", CE1), new Rule(receiptCase, ActionInstructionType.UPDATE));
     rules.put(new Key("CE", "U", IND), new Rule(incrementAndReceipt, ActionInstructionType.UPDATE));
