@@ -122,7 +122,7 @@ public class SampleReceiverIT {
   }
 
   @Test
-  public void test1000SamplesExercisingUacQidCaching() throws InterruptedException, IOException {
+  public void test1000SamplesExercisingUacQidCaching() throws InterruptedException {
     // GIVEN
     int expectedSize = 1000;
 
@@ -131,9 +131,9 @@ public class SampleReceiverIT {
             "HH_LF3R2E",
             "HH_LF3R2W",
             "HH_LF3R2N",
-            "CI_LF3R2E",
-            "CI_LF3R2W",
-            "CI_LF3R2N",
+            "SPG_LF3R2E",
+            "SPG_LF3R2W",
+            "SPG_LF3R2N",
             "CE_LF3R2E",
             "CE_LF3R2W",
             "CE_LF3R2N");
@@ -147,6 +147,11 @@ public class SampleReceiverIT {
       createCaseSample.setRegion("E12000009");
       String treatmentCode = treatmentCodes.get(random.nextInt(treatmentCodes.size()));
       createCaseSample.setTreatmentCode(treatmentCode);
+      if (treatmentCode.startsWith("HH") || random.nextBoolean()) {
+        createCaseSample.setAddressLevel("U");
+      } else {
+        createCaseSample.setAddressLevel("E");
+      }
       createCaseSamples.add(createCaseSample);
     }
 
@@ -158,8 +163,8 @@ public class SampleReceiverIT {
               rabbitQueueHelper.sendMessage(inboundQueue, c);
             });
 
-    for (int i = 0; i < 10; i++) {
-      Thread.sleep(1000);
+    for (int i = 0; i < 20; i++) {
+      Thread.sleep(2000);
       List<Case> caseList = caseRepository.findAll();
 
       if (caseList.size() < expectedSize) {
