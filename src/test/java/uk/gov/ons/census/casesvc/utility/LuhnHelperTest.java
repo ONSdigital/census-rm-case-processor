@@ -10,7 +10,6 @@ public class LuhnHelperTest {
 
   @Test
   public void testCheckDigitWorks() {
-    System.out.println(Integer.MAX_VALUE);
     verifyCheckDigit(123, 1230);
     verifyCheckDigit(666, 6668);
     verifyCheckDigit(999, 9993);
