@@ -28,7 +28,7 @@ public class CaseReceiptService {
   private static final String CE1 = "C";
   private static final String CONT = "Cont";
 
-  private Map<Key, IRule> rules = new HashMap<>();
+  private Map<Key, UpdateAndEmitCaseRule> rules = new HashMap<>();
 
   public CaseReceiptService(CaseService caseService, CaseRepository caseRepository) {
     this.caseService = caseService;
@@ -65,7 +65,7 @@ public class CaseReceiptService {
       throw new RuntimeException(ruleKey.toString() + " does not map to any known processing rule");
     }
 
-    IRule rule = rules.get(ruleKey);
+    UpdateAndEmitCaseRule rule = rules.get(ruleKey);
     rule.run(caze, causeEventType);
   }
 
@@ -79,6 +79,18 @@ public class CaseReceiptService {
     }
 
     return new Key(caze.getCaseType(), caze.getAddressLevel(), formType);
+  }
+
+  private Case getCaseAndLockIt(UUID caseId) {
+    Optional<Case> oCase = caseRepository.getCaseAndLockByCaseId(caseId);
+
+    if (!oCase.isPresent()) {
+      throw new RuntimeException(
+          "Failed to get row to increment responses, row is probably locked and this should resolve itself: "
+              + caseId);
+    }
+
+    return oCase.get();
   }
 
   Function<Case, Case> incremenNoReceipt =
@@ -106,18 +118,6 @@ public class CaseReceiptService {
         return caze;
       };
 
-  private Case getCaseAndLockIt(UUID caseId) {
-    Optional<Case> oCase = caseRepository.getCaseAndLockByCaseId(caseId);
-
-    if (!oCase.isPresent()) {
-      throw new RuntimeException(
-          "Failed to get row to increment responses, row is probably locked and this should resolve itself: "
-              + caseId);
-    }
-
-    return oCase.get();
-  }
-
   @AllArgsConstructor
   @EqualsAndHashCode
   @ToString
@@ -127,27 +127,26 @@ public class CaseReceiptService {
     private String formType;
   }
 
-  private interface IRule {
+  private interface UpdateAndEmitCaseRule {
     void run(Case caze, EventTypeDTO causeEventType);
   }
 
   @AllArgsConstructor
-  private class Rule implements IRule {
+  private class Rule implements UpdateAndEmitCaseRule {
     private Function<Case, Case> functionToExecute;
     private ActionInstructionType fieldInstruction;
 
     public void run(Case caze, EventTypeDTO causeEventType) {
-      Case lockedCase = functionToExecute.apply(caze);
+      Case updatedCase = functionToExecute.apply(caze);
       caseService.saveCaseAndEmitCaseUpdatedEvent(
-          lockedCase, buildMetadata(causeEventType, fieldInstruction));
+          updatedCase, buildMetadata(causeEventType, fieldInstruction));
     }
   }
 
-  private class NoActionRequired implements IRule {
-
+  private class NoActionRequired implements UpdateAndEmitCaseRule {
     @Override
     public void run(Case caze, EventTypeDTO causeEventType) {
-      // No Action
+      // No Updating, saving or emitting required
     }
   }
 }
