@@ -62,7 +62,7 @@ public class ActionSchedulerEventReceieverIT {
     EasyRandom easyRandom = new EasyRandom();
     Case caze = easyRandom.nextObject(Case.class);
     caze.setCaseId(TEST_CASE_ID);
-    caze.setCaseRef(123);
+    caze.setCaseRef(123L);
     caze.setUacQidLinks(null);
     caze.setEvents(null);
     caze = caseRepository.saveAndFlush(caze);

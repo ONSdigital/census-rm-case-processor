@@ -112,7 +112,7 @@ public class EventServiceTest {
     Case caze = easyRandom.nextObject(Case.class);
     caze.setUacQidLinks(null);
     caze.setEvents(null);
-    when(caseService.getCaseByCaseRef(eq(123))).thenReturn(caze);
+    when(caseService.getCaseByCaseRef(eq(123L))).thenReturn(caze);
 
     // When
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
@@ -159,7 +159,7 @@ public class EventServiceTest {
     Case caze = easyRandom.nextObject(Case.class);
     caze.setUacQidLinks(null);
     caze.setEvents(null);
-    when(caseService.getCaseByCaseRef(anyInt())).thenReturn(caze);
+    when(caseService.getCaseByCaseRef(anyLong())).thenReturn(caze);
 
     // When
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();

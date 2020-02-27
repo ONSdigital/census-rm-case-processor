@@ -18,7 +18,7 @@ public class CaseRefGeneratorTest {
     // Be careful - on a fast multi-core CPU this test takes minutes, but could be very slow
     int max_num_of_caserefs_to_check = 89999998;
 
-    int[] pseudorandomCaseRefs = new int[max_num_of_caserefs_to_check];
+    long[] pseudorandomCaseRefs = new long[max_num_of_caserefs_to_check];
     IntStream stream = IntStream.range(0, max_num_of_caserefs_to_check);
     AtomicInteger caseRefsGenerated = new AtomicInteger(0);
 
@@ -46,14 +46,14 @@ public class CaseRefGeneratorTest {
     part of the process very much */
     System.out.println("About to check pseudorandom case refs are unique and within bounds");
 
-    Set<Integer> uniqueCaseRefs = new HashSet<>();
+    Set<Long> uniqueCaseRefs = new HashSet<>();
     stream = IntStream.range(0, max_num_of_caserefs_to_check);
     stream
         .parallel()
         .forEach(
             i -> {
-              int caseRef = pseudorandomCaseRefs[i];
-              assertThat(caseRef).isBetween(10000000, 99999999);
+              long caseRef = pseudorandomCaseRefs[i];
+              assertThat(caseRef).isBetween(1000000000L, 9999999999L);
 
               synchronized (uniqueCaseRefs) {
                 if (uniqueCaseRefs.contains(caseRef)) {

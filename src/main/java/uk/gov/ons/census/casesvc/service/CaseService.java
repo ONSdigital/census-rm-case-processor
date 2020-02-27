@@ -187,7 +187,7 @@ public class CaseService {
     // These are the mandatory fields required by RH, as documented in the event dictionary
     collectionCase.setActionableFrom(OffsetDateTime.now());
     collectionCase.setAddress(address);
-    collectionCase.setCaseRef(Integer.toString(caze.getCaseRef()));
+    collectionCase.setCaseRef(Long.toString(caze.getCaseRef()));
     collectionCase.setCaseType(caze.getCaseType());
     collectionCase.setCollectionExerciseId(caze.getCollectionExerciseId());
     collectionCase.setId(caze.getCaseId().toString());
@@ -251,7 +251,7 @@ public class CaseService {
   }
 
   public Case getCaseByCaseId(UUID caseId) {
-    Optional<Case> cazeResult = caseRepository.findByCaseId(caseId);
+    Optional<Case> cazeResult = caseRepository.findById(caseId);
 
     if (cazeResult.isEmpty()) {
       throw new RuntimeException(String.format("Case ID '%s' not present", caseId));
@@ -259,7 +259,7 @@ public class CaseService {
     return cazeResult.get();
   }
 
-  public Case getCaseByCaseRef(int caseRef) {
+  public Case getCaseByCaseRef(long caseRef) {
     Optional<Case> caseOptional = caseRepository.findByCaseRef(caseRef);
 
     if (caseOptional.isEmpty()) {

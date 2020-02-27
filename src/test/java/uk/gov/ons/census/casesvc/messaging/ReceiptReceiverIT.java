@@ -149,7 +149,7 @@ public class ReceiptReceiverIT {
     assertThat(actualUacDTOObject.getQuestionnaireId()).isEqualTo(TEST_NON_CCS_QID_ID);
     assertThat(actualUacDTOObject.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
 
-    Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
+    Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
     assertThat(actualCase.isReceiptReceived()).isTrue();
 
@@ -259,7 +259,7 @@ public class ReceiptReceiverIT {
     Case actualCase = null;
 
     for (int i = 0; i < retryAttempts; i++) {
-      actualCase = caseRepository.findByCaseId(caseID).get();
+      actualCase = caseRepository.findById(caseID).get();
 
       if (actualCase.getCeActualResponses() >= expectedActualResponses) {
         return actualCase;

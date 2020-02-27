@@ -148,7 +148,7 @@ public class FulfilmentRequestServiceTest {
             invocation -> {
               Case caze = invocation.getArgument(0);
               caze.setSecretSequenceNumber(123);
-              caze.setCaseRef(666);
+              caze.setCaseRef(666L);
               return caze;
             });
 
@@ -205,7 +205,7 @@ public class FulfilmentRequestServiceTest {
             invocation -> {
               Case caze = invocation.getArgument(0);
               caze.setSecretSequenceNumber(123);
-              caze.setCaseRef(666);
+              caze.setCaseRef(666L);
               return caze;
             });
 

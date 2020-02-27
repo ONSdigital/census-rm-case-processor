@@ -180,7 +180,7 @@ public class CaseServiceTest {
     // Given
     Case caze = new Case();
     caze.setRegion("E");
-    caze.setCaseRef(123);
+    caze.setCaseRef(123L);
     caze.setCaseId(UUID.randomUUID());
     caze.setPostcode(TEST_POSTCODE);
     caze.setFieldCoordinatorId(FIELD_CORD_ID);
@@ -212,7 +212,7 @@ public class CaseServiceTest {
 
   @Test(expected = RuntimeException.class)
   public void testCaseIdNotFound() {
-    when(caseRepository.findByCaseId(TEST_UUID)).thenReturn(Optional.empty());
+    when(caseRepository.findById(TEST_UUID)).thenReturn(Optional.empty());
 
     String expectedErrorMessage = String.format("Case ID '%s' not present", TEST_UUID);
 

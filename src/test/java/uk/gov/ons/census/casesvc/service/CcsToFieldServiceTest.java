@@ -63,7 +63,7 @@ public class CcsToFieldServiceTest {
     ccsToField.setLatitude(caze.getLatitude());
     ccsToField.setLongitude(caze.getLongitude());
     ccsToField.setCaseId(caze.getCaseId().toString());
-    ccsToField.setCaseRef(Integer.toString(caze.getCaseRef()));
+    ccsToField.setCaseRef(Long.toString(caze.getCaseRef()));
     ccsToField.setAddressType(caze.getAddressType());
     ccsToField.setFieldCoordinatorId(caze.getFieldCoordinatorId());
     ccsToField.setUndeliveredAsAddress(false);

@@ -131,7 +131,7 @@ public class QuestionnaireLinkedReceiverIT {
     assertThat(actualUac.getActive()).isTrue();
 
     // Check database Case is still unreceipted and response received not set
-    Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
+    Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
     assertThat(actualCase.isReceiptReceived()).isFalse();
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
 
@@ -193,7 +193,7 @@ public class QuestionnaireLinkedReceiverIT {
     rabbitQueueHelper.checkMessageIsNotReceived(outboundCaseQueue, 5);
 
     // Check database that Case is still receipted and has response received set
-    Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
+    Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
     assertThat(actualCase.isReceiptReceived()).isTrue();
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
 
@@ -263,7 +263,7 @@ public class QuestionnaireLinkedReceiverIT {
     assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID.toString());
 
     // Check database that Case is still receipted and has response received set
-    Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
+    Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
     assertThat(actualCase.isReceiptReceived()).isTrue();
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
 
@@ -331,8 +331,8 @@ public class QuestionnaireLinkedReceiverIT {
     assertThat(actualUac.getActive()).isTrue();
 
     // Check database HI Case created as expected
-    Case actualHHCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
-    Case actualHICase = caseRepository.findByCaseId(UUID.fromString(expectedHICaseId)).get();
+    Case actualHHCase = caseRepository.findById(TEST_CASE_ID).get();
+    Case actualHICase = caseRepository.findById(UUID.fromString(expectedHICaseId)).get();
     assertThat(actualHICase.getCaseType()).isEqualTo("HI");
     assertThat(actualHICase.getArid()).isEqualTo(actualHHCase.getArid());
     assertThat(actualHICase.getEstabArid()).isEqualTo(actualHHCase.getEstabArid());
@@ -386,7 +386,7 @@ public class QuestionnaireLinkedReceiverIT {
         questionnaireLinkedQueue, managementEvent, outboundCaseQueue);
 
     // THEN
-    Case actualHHCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
+    Case actualHHCase = caseRepository.findById(TEST_CASE_ID).get();
 
     // Check database that CE Case is linked to UacQidLink
     List<UacQidLink> uacQidLinks = uacQidLinkRepository.findAll();
@@ -437,7 +437,7 @@ public class QuestionnaireLinkedReceiverIT {
         questionnaireLinkedQueue, managementEvent, outboundCaseQueue);
 
     // THEN
-    Case actualHHCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
+    Case actualHHCase = caseRepository.findById(TEST_CASE_ID).get();
 
     // Check database that SPG Case is linked to UacQidLink
     List<UacQidLink> uacQidLinks = uacQidLinkRepository.findAll();
@@ -498,7 +498,7 @@ public class QuestionnaireLinkedReceiverIT {
     assertThat(actualUac.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
     assertThat(actualUac.getActive()).isFalse();
 
-    Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
+    Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
     assertThat(actualCase.isReceiptReceived()).isFalse();
 
     List<UacQidLink> uacQidLinks = uacQidLinkRepository.findAll();
@@ -556,7 +556,7 @@ public class QuestionnaireLinkedReceiverIT {
     assertThat(actualUac.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
     assertThat(actualUac.getActive()).isFalse();
 
-    Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
+    Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
     assertThat(actualCase.isReceiptReceived()).isTrue();
 
     List<UacQidLink> uacQidLinks = uacQidLinkRepository.findAll();

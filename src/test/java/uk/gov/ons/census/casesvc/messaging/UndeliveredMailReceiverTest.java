@@ -49,7 +49,7 @@ public class UndeliveredMailReceiverTest {
     OffsetDateTime expectedDate = MsgDateHelper.getMsgTimeStamp(message);
 
     // Given
-    when(caseService.getCaseByCaseRef(eq(123))).thenReturn(caze);
+    when(caseService.getCaseByCaseRef(eq(123L))).thenReturn(caze);
 
     // When
     underTest.receiveMessage(message);
