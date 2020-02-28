@@ -122,9 +122,9 @@ public class SampleReceiverIT {
   }
 
   @Test
-  public void test1000SamplesExercisingUacQidCaching() throws InterruptedException {
+  public void test100SamplesExercisingUacQidCaching() throws InterruptedException {
     // GIVEN
-    int expectedSize = 1000;
+    int expectedSize = 100;
 
     List<String> treatmentCodes =
         Arrays.asList(
@@ -163,7 +163,7 @@ public class SampleReceiverIT {
               rabbitQueueHelper.sendMessage(inboundQueue, c);
             });
 
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 10; i++) {
       Thread.sleep(2000);
       List<Case> caseList = caseRepository.findAll();
 
