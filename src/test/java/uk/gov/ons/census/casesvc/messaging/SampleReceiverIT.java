@@ -122,9 +122,9 @@ public class SampleReceiverIT {
   }
 
   @Test
-  public void test100SamplesExercisingUacQidCaching() throws InterruptedException {
+  public void test1000SamplesExercisingUacQidCaching() throws InterruptedException {
     // GIVEN
-    int expectedSize = 100;
+    int expectedSize = 1000;
 
     List<String> treatmentCodes =
         Arrays.asList(
