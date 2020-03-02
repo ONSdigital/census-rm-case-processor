@@ -44,7 +44,7 @@ public class CaseReceiptService {
     rules.put(new Key("HH", "U", HH), new Rule(receiptCase, ActionInstructionType.CLOSE));
     rules.put(new Key("HH", "U", CONT), new NoActionRequired());
     rules.put(new Key("HI", "U", IND), new Rule(receiptCase, null));
-    rules.put(new Key("CE", "E", IND), new Rule(incremenNoReceipt, ActionInstructionType.UPDATE));
+    rules.put(new Key("CE", "E", IND), new Rule(incrementNoReceipt, ActionInstructionType.UPDATE));
     rules.put(new Key("CE", "E", CE1), new Rule(receiptCase, ActionInstructionType.UPDATE));
     rules.put(new Key("CE", "U", IND), new Rule(incrementAndReceipt, ActionInstructionType.UPDATE));
     rules.put(new Key("SPG", "E", HH), new NoActionRequired());
@@ -93,7 +93,7 @@ public class CaseReceiptService {
     return oCase.get();
   }
 
-  Function<Case, Case> incremenNoReceipt =
+  Function<Case, Case> incrementNoReceipt =
       (caze) -> {
         Case lockedCase = getCaseAndLockIt(caze.getCaseId());
         lockedCase.setCeActualResponses(lockedCase.getCeActualResponses() + 1);
@@ -103,7 +103,7 @@ public class CaseReceiptService {
 
   Function<Case, Case> incrementAndReceipt =
       (caze) -> {
-        Case lockedCase = incremenNoReceipt.apply(caze);
+        Case lockedCase = incrementNoReceipt.apply(caze);
 
         if (lockedCase.getCeActualResponses() >= lockedCase.getCeExpectedCapacity()) {
           lockedCase.setReceiptReceived(true);
