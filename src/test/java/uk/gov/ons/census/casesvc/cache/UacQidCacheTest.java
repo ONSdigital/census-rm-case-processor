@@ -7,7 +7,6 @@ import static org.mockito.Mockito.*;
 import java.util.ArrayList;
 import java.util.List;
 import org.jeasy.random.EasyRandom;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -25,32 +24,6 @@ public class UacQidCacheTest {
   @Mock UacQidServiceClient uacQidServiceClient;
 
   @InjectMocks UacQidCache underTest;
-
-  @Test
-  @Ignore
-  public void testCachingTopUp() {
-    // given
-    ReflectionTestUtils.setField(underTest, "cacheFetch", CACHE_FETCH);
-    ReflectionTestUtils.setField(underTest, "cacheMin", CACHE_MIN);
-    ReflectionTestUtils.setField(underTest, "uacQidGetTimout", 10);
-
-    List<UacQidDTO> uacQids1 = populateUacQidList(1, CACHE_FETCH);
-    when(uacQidServiceClient.getUacQids(anyInt(), anyInt())).thenReturn(uacQids1);
-
-    List<UacQidDTO> actualUacQidDtos1 = new ArrayList<>();
-
-    // when  - 1st call as cache is empty
-    actualUacQidDtos1.add(underTest.getUacQidPair(1));
-    verify(uacQidServiceClient, times(1)).getUacQids(eq(1), eq(CACHE_FETCH));
-
-    // when - some more are called this should top it up
-    actualUacQidDtos1.add(underTest.getUacQidPair(1));
-    actualUacQidDtos1.add(underTest.getUacQidPair(1));
-    actualUacQidDtos1.add(underTest.getUacQidPair(1));
-
-    verify(uacQidServiceClient, atLeast(2)).getUacQids(eq(1), eq(CACHE_FETCH));
-    assertThat(actualUacQidDtos1.get(0)).isEqualTo(uacQids1.get(0));
-  }
 
   @Test
   public void testToppingUpRecoversFromFailure() {
