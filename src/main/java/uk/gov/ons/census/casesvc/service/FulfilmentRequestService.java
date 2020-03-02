@@ -99,8 +99,9 @@ public class FulfilmentRequestService {
       FulfilmentRequestDTO fulfilmentRequestPayload, Case caze) {
     if (individualResponseRequestCodes.contains(fulfilmentRequestPayload.getFulfilmentCode())) {
       Case individualResponseCase =
-          prepareIndividualResponseCase(
+          caseService.prepareIndividualResponseCaseFromParentCase(
               caze, UUID.fromString(fulfilmentRequestPayload.getIndividualCaseId()));
+      individualResponseCase = caseService.saveNewCaseAndStampCaseRef(individualResponseCase);
 
       if (individualResponsePrintRequestCodes.contains(
           fulfilmentRequestPayload.getFulfilmentCode())) {
@@ -110,38 +111,5 @@ public class FulfilmentRequestService {
         caseService.emitCaseCreatedEvent(individualResponseCase);
       }
     }
-  }
-
-  private Case prepareIndividualResponseCase(Case parentCase, UUID newCaseId) {
-    Case individualResponseCase = new Case();
-
-    individualResponseCase.setCaseId(newCaseId);
-    individualResponseCase.setCreatedDateTime(OffsetDateTime.now());
-    individualResponseCase.setAddressType(parentCase.getAddressType());
-    individualResponseCase.setCaseType(HOUSEHOLD_INDIVIDUAL_RESPONSE_CASE_TYPE);
-    individualResponseCase.setCollectionExerciseId(parentCase.getCollectionExerciseId());
-    individualResponseCase.setActionPlanId(parentCase.getActionPlanId());
-    individualResponseCase.setArid(parentCase.getArid());
-    individualResponseCase.setEstabArid(parentCase.getEstabArid());
-    individualResponseCase.setUprn(parentCase.getUprn());
-    individualResponseCase.setEstabType(parentCase.getEstabType());
-    individualResponseCase.setAbpCode(parentCase.getAbpCode());
-    individualResponseCase.setOrganisationName(parentCase.getOrganisationName());
-    individualResponseCase.setAddressLine1(parentCase.getAddressLine1());
-    individualResponseCase.setAddressLine2(parentCase.getAddressLine2());
-    individualResponseCase.setAddressLine3(parentCase.getAddressLine3());
-    individualResponseCase.setAddressLevel(parentCase.getAddressLevel());
-    individualResponseCase.setTownName(parentCase.getTownName());
-    individualResponseCase.setPostcode(parentCase.getPostcode());
-    individualResponseCase.setLatitude(parentCase.getLatitude());
-    individualResponseCase.setLongitude(parentCase.getLongitude());
-    individualResponseCase.setOa(parentCase.getOa());
-    individualResponseCase.setLsoa(parentCase.getLsoa());
-    individualResponseCase.setMsoa(parentCase.getMsoa());
-    individualResponseCase.setLad(parentCase.getLad());
-    individualResponseCase.setRegion(parentCase.getRegion());
-    individualResponseCase.setSurvey(parentCase.getSurvey());
-
-    return caseService.saveNewCaseAndStampCaseRef(individualResponseCase);
   }
 }

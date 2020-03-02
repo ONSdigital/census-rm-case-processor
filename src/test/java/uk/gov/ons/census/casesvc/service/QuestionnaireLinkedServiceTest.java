@@ -186,8 +186,9 @@ public class QuestionnaireLinkedServiceTest {
 
     when(uacService.findByQid(TEST_HI_QID)).thenReturn(testHIUacQidLink);
     when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testHHCase);
-    when(caseService.prepareIndividualResponseCaseFromParentCase(testHHCase))
+    when(caseService.prepareIndividualResponseCaseFromParentCase(any(), any()))
         .thenReturn(testHICase);
+    when(caseService.saveNewCaseAndStampCaseRef(testHICase)).thenReturn(testHICase);
 
     // WHEN
     underTest.processQuestionnaireLinked(managementEvent, messageTimestamp);
@@ -197,7 +198,8 @@ public class QuestionnaireLinkedServiceTest {
     inOrder.verify(uacService).findByQid(TEST_HI_QID);
 
     inOrder.verify(caseService).getCaseByCaseId(TEST_CASE_ID_1);
-    inOrder.verify(caseService).prepareIndividualResponseCaseFromParentCase(testHHCase);
+    inOrder.verify(caseService).prepareIndividualResponseCaseFromParentCase(eq(testHHCase), any());
+    inOrder.verify(caseService).saveNewCaseAndStampCaseRef(testHICase);
 
     ArgumentCaptor<Case> caseCaptor = ArgumentCaptor.forClass(Case.class);
     inOrder.verify(caseService).emitCaseCreatedEvent(caseCaptor.capture());
@@ -340,8 +342,9 @@ public class QuestionnaireLinkedServiceTest {
 
     when(uacService.findByQid(TEST_HI_QID)).thenReturn(testHIUacQidLink);
     when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testHHCase);
-    when(caseService.prepareIndividualResponseCaseFromParentCase(testHHCase))
+    when(caseService.prepareIndividualResponseCaseFromParentCase(any(), any()))
         .thenReturn(testHICase);
+    when(caseService.saveNewCaseAndStampCaseRef(any())).thenReturn(testHICase);
 
     // WHEN
     underTest.processQuestionnaireLinked(managementEvent, messageTimestamp);
@@ -350,7 +353,10 @@ public class QuestionnaireLinkedServiceTest {
     InOrder inOrder = inOrder(uacService, caseService, eventLogger);
     inOrder.verify(uacService).findByQid(TEST_HI_QID);
     inOrder.verify(caseService).getCaseByCaseId(TEST_CASE_ID_1);
-    inOrder.verify(caseService).prepareIndividualResponseCaseFromParentCase(testHHCase);
+    inOrder
+        .verify(caseService)
+        .prepareIndividualResponseCaseFromParentCase(eq(testHHCase), any(UUID.class));
+    inOrder.verify(caseService).saveNewCaseAndStampCaseRef(testHICase);
     inOrder.verify(caseService).emitCaseCreatedEvent(testHICase);
 
     ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);

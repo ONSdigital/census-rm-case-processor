@@ -229,10 +229,10 @@ public class CaseService {
     return collectionCase;
   }
 
-  public Case prepareIndividualResponseCaseFromParentCase(Case parentCase) {
+  public Case prepareIndividualResponseCaseFromParentCase(Case parentCase, UUID caseId) {
     Case individualResponseCase = new Case();
 
-    individualResponseCase.setCaseId(UUID.randomUUID());
+    individualResponseCase.setCaseId(caseId);
     individualResponseCase.setCreatedDateTime(OffsetDateTime.now());
     individualResponseCase.setAddressType(parentCase.getAddressType());
     individualResponseCase.setCaseType(HOUSEHOLD_INDIVIDUAL_RESPONSE_CASE_TYPE);
@@ -247,6 +247,7 @@ public class CaseService {
     individualResponseCase.setAddressLine1(parentCase.getAddressLine1());
     individualResponseCase.setAddressLine2(parentCase.getAddressLine2());
     individualResponseCase.setAddressLine3(parentCase.getAddressLine3());
+    individualResponseCase.setAddressLevel(parentCase.getAddressLevel());
     individualResponseCase.setTownName(parentCase.getTownName());
     individualResponseCase.setPostcode(parentCase.getPostcode());
     individualResponseCase.setLatitude(parentCase.getLatitude());
@@ -259,7 +260,7 @@ public class CaseService {
     individualResponseCase.setSurvey(
         parentCase.getSurvey()); // Should only ever be "CENSUS" from the parent case
 
-    return saveNewCaseAndStampCaseRef(individualResponseCase);
+    return individualResponseCase;
   }
 
   public Case getCaseByCaseId(UUID caseId) {
