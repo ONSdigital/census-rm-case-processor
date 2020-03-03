@@ -3,6 +3,7 @@ package uk.gov.ons.census.casesvc.testutil;
 import static org.jeasy.random.FieldPredicates.inClass;
 import static org.jeasy.random.FieldPredicates.named;
 import static org.jeasy.random.FieldPredicates.ofType;
+import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.CCS_ADDRESS_LISTED;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -213,6 +214,7 @@ public class DataUtils {
 
   public static ResponseManagementEvent getTestResponseManagementCCSAddressListedEvent() {
     ResponseManagementEvent managementEvent = easyRandom.nextObject(ResponseManagementEvent.class);
+    managementEvent.getEvent().setType(CCS_ADDRESS_LISTED);
     CCSPropertyDTO ccsPropertyDTO = managementEvent.getPayload().getCcsProperty();
     ccsPropertyDTO.getCollectionCase().setId(TEST_CASE_ID.toString());
     ccsPropertyDTO.setRefusal(null);

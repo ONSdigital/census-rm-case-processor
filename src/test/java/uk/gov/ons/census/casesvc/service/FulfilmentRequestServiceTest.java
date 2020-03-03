@@ -22,8 +22,6 @@ import uk.gov.ons.census.casesvc.model.entity.Case;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FulfilmentRequestServiceTest {
-  private static final String HOUSEHOLD_RESPONSE_ADDRESS_TYPE = "HH";
-  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_ADDRESS_TYPE = "HI";
   private static final String RM_HOUSEHOLD_INDIVIDUAL_TELEPHONE_CAPTURE = "RM_TC_HI";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_SMS = "UACIT1";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH_SMS = "UACIT2";
@@ -142,15 +140,13 @@ public class FulfilmentRequestServiceTest {
 
     when(caseService.getCaseByCaseId(eq(parentCase.getCaseId()))).thenReturn(parentCase);
 
-    // This simulates the DB creating the ID, which it does when the case is persisted
-    when(caseService.saveNewCaseAndStampCaseRef(any(Case.class)))
-        .then(
-            invocation -> {
-              Case caze = invocation.getArgument(0);
-              caze.setSecretSequenceNumber(123);
-              caze.setCaseRef(666L);
-              return caze;
-            });
+    UUID childCaseId =
+        UUID.fromString(managementEvent.getPayload().getFulfilmentRequest().getIndividualCaseId());
+
+    Case childCase = new Case();
+    when(caseService.prepareIndividualResponseCaseFromParentCase(parentCase, childCaseId))
+        .thenReturn(childCase);
+    when(caseService.saveNewCaseAndStampCaseRef(childCase)).thenReturn(childCase);
 
     // when
     underTest.processFulfilmentRequest(managementEvent, messageTimestamp);
@@ -166,16 +162,12 @@ public class FulfilmentRequestServiceTest {
             anyString(),
             eq(messageTimestamp));
 
-    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
     ArgumentCaptor<FulfilmentRequestDTO> fulfilmentRequestArgumentCaptor =
         ArgumentCaptor.forClass(FulfilmentRequestDTO.class);
     verify(caseService)
-        .emitCaseCreatedEvent(
-            caseArgumentCaptor.capture(), fulfilmentRequestArgumentCaptor.capture());
+        .emitCaseCreatedEvent(eq(childCase), fulfilmentRequestArgumentCaptor.capture());
     assertThat(fulfilmentRequestArgumentCaptor.getValue().getFulfilmentCode())
         .isEqualTo(individualResponseCode);
-    Case actualChildCase = caseArgumentCaptor.getValue();
-    checkIndivdualFulfilmentRequestCase(parentCase, actualChildCase, managementEvent);
   }
 
   private void testIndividualResponseCode(String individualResponseCode) {
@@ -199,15 +191,13 @@ public class FulfilmentRequestServiceTest {
     when(caseService.getCaseByCaseId(UUID.fromString(expectedFulfilmentRequest.getCaseId())))
         .thenReturn(parentCase);
 
-    // This simulates the DB creating the ID, which it does when the case is persisted
-    when(caseService.saveNewCaseAndStampCaseRef(any(Case.class)))
-        .then(
-            invocation -> {
-              Case caze = invocation.getArgument(0);
-              caze.setSecretSequenceNumber(123);
-              caze.setCaseRef(666L);
-              return caze;
-            });
+    UUID childCaseId =
+        UUID.fromString(managementEvent.getPayload().getFulfilmentRequest().getIndividualCaseId());
+
+    Case childCase = new Case();
+    when(caseService.prepareIndividualResponseCaseFromParentCase(parentCase, childCaseId))
+        .thenReturn(childCase);
+    when(caseService.saveNewCaseAndStampCaseRef(childCase)).thenReturn(childCase);
 
     // when
     underTest.processFulfilmentRequest(managementEvent, messageTimestamp);
@@ -223,55 +213,6 @@ public class FulfilmentRequestServiceTest {
             anyString(),
             eq(messageTimestamp));
 
-    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(caseService).emitCaseCreatedEvent(caseArgumentCaptor.capture());
-    Case actualChildCase = caseArgumentCaptor.getValue();
-    checkIndivdualFulfilmentRequestCase(parentCase, actualChildCase, managementEvent);
-  }
-
-  private void checkIndivdualFulfilmentRequestCase(
-      Case parentCase, Case actualChildCase, ResponseManagementEvent managementEvent) {
-    assertThat(actualChildCase.getCaseRef()).isNotEqualTo(parentCase.getCaseRef());
-    assertThat(UUID.fromString(actualChildCase.getCaseId().toString()))
-        .isNotEqualTo(parentCase.getCaseId());
-    assertThat(actualChildCase.getCaseId().toString())
-        .isEqualTo(managementEvent.getPayload().getFulfilmentRequest().getIndividualCaseId());
-    assertThat(actualChildCase.getUacQidLinks()).isNull();
-    assertThat(actualChildCase.getEvents()).isNull();
-    assertThat(actualChildCase.getCreatedDateTime())
-        .isBetween(OffsetDateTime.now().minusSeconds(10), OffsetDateTime.now());
-    assertThat(actualChildCase.getCollectionExerciseId())
-        .isEqualTo(parentCase.getCollectionExerciseId());
-    assertThat(actualChildCase.getActionPlanId()).isEqualTo(parentCase.getActionPlanId());
-    assertThat(actualChildCase.isReceiptReceived()).isFalse();
-    assertThat(actualChildCase.isRefusalReceived()).isFalse();
-    assertThat(actualChildCase.getArid()).isEqualTo(parentCase.getArid());
-    assertThat(actualChildCase.getEstabArid()).isEqualTo(parentCase.getEstabArid());
-    assertThat(actualChildCase.getUprn()).isEqualTo(parentCase.getUprn());
-    assertThat(actualChildCase.getAddressType()).isEqualTo(HOUSEHOLD_RESPONSE_ADDRESS_TYPE);
-    assertThat(actualChildCase.getCaseType()).isEqualTo(HOUSEHOLD_INDIVIDUAL_RESPONSE_ADDRESS_TYPE);
-    assertThat(actualChildCase.getEstabType()).isEqualTo(parentCase.getEstabType());
-    assertThat(actualChildCase.getAddressLevel()).isEqualTo(parentCase.getAddressLevel());
-    assertThat(actualChildCase.getAbpCode()).isEqualTo(parentCase.getAbpCode());
-    assertThat(actualChildCase.getOrganisationName()).isEqualTo(parentCase.getOrganisationName());
-    assertThat(actualChildCase.getAddressLine1()).isEqualTo(parentCase.getAddressLine1());
-    assertThat(actualChildCase.getAddressLine2()).isEqualTo(parentCase.getAddressLine2());
-    assertThat(actualChildCase.getAddressLine3()).isEqualTo(parentCase.getAddressLine3());
-    assertThat(actualChildCase.getTownName()).isEqualTo(parentCase.getTownName());
-    assertThat(actualChildCase.getPostcode()).isEqualTo(parentCase.getPostcode());
-    assertThat(actualChildCase.getLatitude()).isEqualTo(parentCase.getLatitude());
-    assertThat(actualChildCase.getLongitude()).isEqualTo(parentCase.getLongitude());
-    assertThat(actualChildCase.getOa()).isEqualTo(parentCase.getOa());
-    assertThat(actualChildCase.getLsoa()).isEqualTo(parentCase.getLsoa());
-    assertThat(actualChildCase.getMsoa()).isEqualTo(parentCase.getMsoa());
-    assertThat(actualChildCase.getLad()).isEqualTo(parentCase.getLad());
-    assertThat(actualChildCase.getRegion()).isEqualTo(parentCase.getRegion());
-    assertThat(actualChildCase.getHtcWillingness()).isNull();
-    assertThat(actualChildCase.getHtcDigital()).isNull();
-    assertThat(actualChildCase.getFieldCoordinatorId()).isNull();
-    assertThat(actualChildCase.getFieldOfficerId()).isNull();
-    assertThat(actualChildCase.getTreatmentCode()).isNull();
-    assertThat(actualChildCase.getCeExpectedCapacity()).isNull();
-    assertThat(actualChildCase.getAddressLevel()).isEqualTo(parentCase.getAddressLevel());
+    verify(caseService).emitCaseCreatedEvent(childCase);
   }
 }

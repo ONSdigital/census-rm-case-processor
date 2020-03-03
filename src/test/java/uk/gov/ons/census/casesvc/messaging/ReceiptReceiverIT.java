@@ -1,6 +1,7 @@
 package uk.gov.ons.census.casesvc.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.RESPONSE_RECEIVED;
 import static uk.gov.ons.census.casesvc.service.QidReceiptService.QID_RECEIPTED;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementQuestionnaireLinkedEvent;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementReceiptEvent;
@@ -34,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
+import uk.gov.ons.census.casesvc.model.dto.Metadata;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -52,7 +54,7 @@ import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 public class ReceiptReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final EasyRandom easyRandom = new EasyRandom();
-  private final String TEST_NON_CCS_QID_ID = "0134567890123456";
+  private final String ENGLAND_HOUSEHOLD = "0134567890123456";
   private static final String TEST_UAC = easyRandom.nextObject(String.class);
   private static final String HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_ENGLAND = "21";
 
@@ -110,7 +112,7 @@ public class ReceiptReceiverIT {
     uacQidLink.setId(UUID.randomUUID());
     uacQidLink.setCaze(caze);
     uacQidLink.setCcsCase(false);
-    uacQidLink.setQid(TEST_NON_CCS_QID_ID);
+    uacQidLink.setQid(ENGLAND_HOUSEHOLD);
     uacQidLink.setUac(TEST_UAC);
     uacQidLinkRepository.saveAndFlush(uacQidLink);
 
@@ -142,11 +144,15 @@ public class ReceiptReceiverIT {
     assertThat(responseManagementEvent.getPayload().getMetadata().getCauseEventType())
         .isEqualTo(EventTypeDTO.RESPONSE_RECEIVED);
 
+    Metadata metaData = responseManagementEvent.getPayload().getMetadata();
+    assertThat(metaData.getCauseEventType()).isEqualTo(RESPONSE_RECEIVED);
+    assertThat(metaData.getFieldDecision()).isEqualTo(ActionInstructionType.CLOSE);
+
     responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(rhUacOutboundQueue);
     assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
     UacDTO actualUacDTOObject = responseManagementEvent.getPayload().getUac();
     assertThat(actualUacDTOObject.getUac()).isEqualTo(TEST_UAC);
-    assertThat(actualUacDTOObject.getQuestionnaireId()).isEqualTo(TEST_NON_CCS_QID_ID);
+    assertThat(actualUacDTOObject.getQuestionnaireId()).isEqualTo(ENGLAND_HOUSEHOLD);
     assertThat(actualUacDTOObject.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
 
     Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
@@ -160,7 +166,7 @@ public class ReceiptReceiverIT {
     assertThat(event.getEventDescription()).isEqualTo(QID_RECEIPTED);
 
     UacQidLink actualUacQidLink = event.getUacQidLink();
-    assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_NON_CCS_QID_ID);
+    assertThat(actualUacQidLink.getQid()).isEqualTo(ENGLAND_HOUSEHOLD);
     assertThat(actualUacQidLink.getUac()).isEqualTo(TEST_UAC);
     assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
     assertThat(actualUacQidLink.isActive()).isFalse();

@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -28,7 +28,7 @@ public class CaseReceiptService {
   private static final String CE1 = "C";
   private static final String CONT = "Cont";
 
-  private Map<Key, Rule> rules = new HashMap<>();
+  private Map<Key, UpdateAndEmitCaseRule> rules = new HashMap<>();
 
   public CaseReceiptService(CaseService caseService, CaseRepository caseRepository) {
     this.caseService = caseService;
@@ -40,30 +40,18 @@ public class CaseReceiptService {
     /*
      This table is based on: https://collaborate2.ons.gov.uk/confluence/pages/viewpage.action?spaceKey=SDC&title=Receipting
     */
-    rules.put(new Key("HH", "U", HH), new Rule(receiptCase, true));
-    rules.put(new Key("HH", "U", IND), new Rule(invalidMapping, false));
-    rules.put(new Key("HH", "U", CE1), new Rule(invalidMapping, false));
-    rules.put(new Key("HH", "U", CONT), new Rule(noActionRequired, false));
-    rules.put(new Key("HI", "U", HH), new Rule(invalidMapping, false));
-    rules.put(new Key("HI", "U", IND), new Rule(receiptCase, true));
-    rules.put(new Key("HI", "U", CE1), new Rule(invalidMapping, false));
-    rules.put(new Key("HI", "U", CONT), new Rule(invalidMapping, false));
-    rules.put(new Key("CE", "E", HH), new Rule(invalidMapping, false));
-    rules.put(new Key("CE", "E", CE1), new Rule(receiptCase, true));
-    rules.put(new Key("CE", "E", CONT), new Rule(invalidMapping, false));
-    rules.put(new Key("CE", "U", HH), new Rule(invalidMapping, false));
-    rules.put(new Key("CE", "U", IND), new Rule(incrementAndReceipt, true));
-    rules.put(new Key("CE", "U", CE1), new Rule(invalidMapping, false));
-    rules.put(new Key("CE", "U", CONT), new Rule(invalidMapping, false));
-    rules.put(new Key("SPG", "E", HH), new Rule(noActionRequired, false));
-    rules.put(new Key("SPG", "E", IND), new Rule(noActionRequired, false));
-    rules.put(new Key("SPG", "E", CE1), new Rule(invalidMapping, false));
-    rules.put(new Key("SPG", "E", CONT), new Rule(invalidMapping, false));
-    rules.put(new Key("CE", "E", IND), new Rule(incremenNoReceipt, true));
-    rules.put(new Key("SPG", "U", HH), new Rule(receiptCase, true));
-    rules.put(new Key("SPG", "U", IND), new Rule(noActionRequired, false));
-    rules.put(new Key("SPG", "U", CE1), new Rule(invalidMapping, false));
-    rules.put(new Key("SPG", "U", CONT), new Rule(noActionRequired, false));
+
+    rules.put(new Key("HH", "U", HH), new Rule(receiptCase, ActionInstructionType.CLOSE));
+    rules.put(new Key("HH", "U", CONT), new NoActionRequired());
+    rules.put(new Key("HI", "U", IND), new Rule(receiptCase, null));
+    rules.put(new Key("CE", "E", IND), new Rule(incrementNoReceipt, ActionInstructionType.UPDATE));
+    rules.put(new Key("CE", "E", CE1), new Rule(receiptCase, ActionInstructionType.UPDATE));
+    rules.put(new Key("CE", "U", IND), new Rule(incrementAndReceipt, ActionInstructionType.UPDATE));
+    rules.put(new Key("SPG", "E", HH), new NoActionRequired());
+    rules.put(new Key("SPG", "E", IND), new NoActionRequired());
+    rules.put(new Key("SPG", "U", HH), new Rule(receiptCase, ActionInstructionType.CLOSE));
+    rules.put(new Key("SPG", "U", IND), new NoActionRequired());
+    rules.put(new Key("SPG", "U", CONT), new NoActionRequired());
   }
 
   public void receiptCase(UacQidLink uacQidLink, EventTypeDTO causeEventType) {
@@ -77,13 +65,8 @@ public class CaseReceiptService {
       throw new RuntimeException(ruleKey.toString() + " does not map to any known processing rule");
     }
 
-    Rule rule = rules.get(ruleKey);
-    Case lockedCase = rule.run(caze, uacQidLink);
-
-    if (rule.getSaveAndEmitCase()) {
-      caseService.saveCaseAndEmitCaseUpdatedEvent(
-          lockedCase, buildMetadata(causeEventType, ActionInstructionType.CLOSE));
-    }
+    UpdateAndEmitCaseRule rule = rules.get(ruleKey);
+    rule.run(caze, causeEventType);
   }
 
   private Key makeRulesKey(Case caze, UacQidLink uacQidLink) {
@@ -98,39 +81,6 @@ public class CaseReceiptService {
     return new Key(caze.getCaseType(), caze.getAddressLevel(), formType);
   }
 
-  BiFunction<Case, UacQidLink, Case> incremenNoReceipt =
-      (caze, uacQidLink) -> {
-        Case lockedCase = getCaseAndLockIt(caze.getCaseId());
-        lockedCase.setCeActualResponses(lockedCase.getCeActualResponses() + 1);
-
-        return lockedCase;
-      };
-
-  BiFunction<Case, UacQidLink, Case> incrementAndReceipt =
-      (caze, uacQidLink) -> {
-        Case lockedCase = incremenNoReceipt.apply(caze, uacQidLink);
-
-        if (lockedCase.getCeActualResponses() >= lockedCase.getCeExpectedCapacity()) {
-          lockedCase.setReceiptReceived(true);
-        }
-
-        return lockedCase;
-      };
-
-  BiFunction<Case, UacQidLink, Case> receiptCase =
-      (caze, uacQidLink) -> {
-        caze.setReceiptReceived(true);
-        return caze;
-      };
-
-  BiFunction<Case, UacQidLink, Case> noActionRequired = (caze, uacQidLink) -> caze;
-
-  BiFunction<Case, UacQidLink, Case> invalidMapping =
-      (caze, uacQidLink) -> {
-        Key ruleKey = makeRulesKey(caze, uacQidLink);
-        throw new RuntimeException(ruleKey.toString() + " is an invalid mapping");
-      };
-
   private Case getCaseAndLockIt(UUID caseId) {
     Optional<Case> oCase = caseRepository.getCaseAndLockByCaseId(caseId);
 
@@ -143,6 +93,31 @@ public class CaseReceiptService {
     return oCase.get();
   }
 
+  Function<Case, Case> incrementNoReceipt =
+      (caze) -> {
+        Case lockedCase = getCaseAndLockIt(caze.getCaseId());
+        lockedCase.setCeActualResponses(lockedCase.getCeActualResponses() + 1);
+
+        return lockedCase;
+      };
+
+  Function<Case, Case> incrementAndReceipt =
+      (caze) -> {
+        Case lockedCase = incrementNoReceipt.apply(caze);
+
+        if (lockedCase.getCeActualResponses() >= lockedCase.getCeExpectedCapacity()) {
+          lockedCase.setReceiptReceived(true);
+        }
+
+        return lockedCase;
+      };
+
+  Function<Case, Case> receiptCase =
+      (caze) -> {
+        caze.setReceiptReceived(true);
+        return caze;
+      };
+
   @AllArgsConstructor
   @EqualsAndHashCode
   @ToString
@@ -152,17 +127,26 @@ public class CaseReceiptService {
     private String formType;
   }
 
+  private interface UpdateAndEmitCaseRule {
+    void run(Case caze, EventTypeDTO causeEventType);
+  }
+
   @AllArgsConstructor
-  private class Rule {
-    private BiFunction<Case, UacQidLink, Case> functionToExecute;
-    private final boolean saveAndEmitCase;
+  private class Rule implements UpdateAndEmitCaseRule {
+    private Function<Case, Case> functionToExecute;
+    private ActionInstructionType fieldInstruction;
 
-    public boolean getSaveAndEmitCase() {
-      return saveAndEmitCase;
+    public void run(Case caze, EventTypeDTO causeEventType) {
+      Case updatedCase = functionToExecute.apply(caze);
+      caseService.saveCaseAndEmitCaseUpdatedEvent(
+          updatedCase, buildMetadata(causeEventType, fieldInstruction));
     }
+  }
 
-    public Case run(Case caze, UacQidLink uacQidLink) {
-      return functionToExecute.apply(caze, uacQidLink);
+  private class NoActionRequired implements UpdateAndEmitCaseRule {
+    @Override
+    public void run(Case caze, EventTypeDTO causeEventType) {
+      // No Updating, saving or emitting required
     }
   }
 }

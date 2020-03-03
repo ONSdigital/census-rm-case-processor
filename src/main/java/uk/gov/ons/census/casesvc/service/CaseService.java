@@ -105,23 +105,35 @@ public class CaseService {
     return saveCaseAndEmitCaseCreatedEvent(caze, null);
   }
 
+  public PayloadDTO saveCaseAndEmitCaseCreatedEvent(Case caze, Metadata metadata) {
+    return saveCaseAndEmitCaseCreatedEvent(caze, null, metadata);
+  }
+
   public PayloadDTO saveCaseAndEmitCaseCreatedEvent(
-      Case caze, FulfilmentRequestDTO fulfilmentRequest) {
+      Case caze, FulfilmentRequestDTO fulfilmentRequest, Metadata metadata) {
     caseRepository.saveAndFlush(caze);
 
-    return emitCaseCreatedEvent(caze, fulfilmentRequest);
+    return emitCaseCreatedEvent(caze, fulfilmentRequest, metadata);
   }
 
   public PayloadDTO emitCaseCreatedEvent(Case caze) {
-    return emitCaseCreatedEvent(caze, null);
+    return emitCaseCreatedEvent(caze, null, null);
   }
 
   public PayloadDTO emitCaseCreatedEvent(Case caze, FulfilmentRequestDTO fulfilmentRequest) {
+    return emitCaseCreatedEvent(caze, fulfilmentRequest, null);
+  }
+
+  public PayloadDTO emitCaseCreatedEvent(
+      Case caze, FulfilmentRequestDTO fulfilmentRequest, Metadata metadata) {
     EventDTO eventDTO = EventHelper.createEventDTO(EventTypeDTO.CASE_CREATED);
     ResponseManagementEvent responseManagementEvent = prepareCaseEvent(caze, eventDTO);
 
     // This has been added in to allow Action Scheduler to process fulfilments for individuals
     responseManagementEvent.getPayload().setFulfilmentRequest(fulfilmentRequest);
+
+    // We need this gubbins to make Fieldwork Adapter work
+    responseManagementEvent.getPayload().setMetadata(metadata);
 
     rabbitTemplate.convertAndSend(
         outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
@@ -217,10 +229,10 @@ public class CaseService {
     return collectionCase;
   }
 
-  public Case prepareIndividualResponseCaseFromParentCase(Case parentCase) {
+  public Case prepareIndividualResponseCaseFromParentCase(Case parentCase, UUID caseId) {
     Case individualResponseCase = new Case();
 
-    individualResponseCase.setCaseId(UUID.randomUUID());
+    individualResponseCase.setCaseId(caseId);
     individualResponseCase.setCreatedDateTime(OffsetDateTime.now());
     individualResponseCase.setAddressType(parentCase.getAddressType());
     individualResponseCase.setCaseType(HOUSEHOLD_INDIVIDUAL_RESPONSE_CASE_TYPE);
@@ -235,6 +247,7 @@ public class CaseService {
     individualResponseCase.setAddressLine1(parentCase.getAddressLine1());
     individualResponseCase.setAddressLine2(parentCase.getAddressLine2());
     individualResponseCase.setAddressLine3(parentCase.getAddressLine3());
+    individualResponseCase.setAddressLevel(parentCase.getAddressLevel());
     individualResponseCase.setTownName(parentCase.getTownName());
     individualResponseCase.setPostcode(parentCase.getPostcode());
     individualResponseCase.setLatitude(parentCase.getLatitude());
@@ -247,7 +260,7 @@ public class CaseService {
     individualResponseCase.setSurvey(
         parentCase.getSurvey()); // Should only ever be "CENSUS" from the parent case
 
-    return saveNewCaseAndStampCaseRef(individualResponseCase);
+    return individualResponseCase;
   }
 
   public Case getCaseByCaseId(UUID caseId) {

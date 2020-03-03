@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementCCSAddressListedEvent;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
@@ -21,7 +20,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
+import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.InvalidAddress;
+import uk.gov.ons.census.casesvc.model.dto.Metadata;
 import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.UacDTO;
@@ -39,7 +40,6 @@ public class CCSPropertyListedServiceTest {
   @Mock EventLogger eventLogger;
   @Mock CaseService caseService;
   @Mock UacService uacService;
-  @Mock CcsToFieldService ccsToFieldService;
   @Mock UacQidLinkRepository uacQidLinkRepository;
 
   @InjectMocks CCSPropertyListedService underTest;
@@ -74,11 +74,17 @@ public class CCSPropertyListedServiceTest {
     checkCorrectEventLogging(inOrder, expectedCase, managementEvent, messageTimestamp);
 
     ArgumentCaptor<Case> caseCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(ccsToFieldService).convertAndSendCCSToField(caseCaptor.capture());
+    ArgumentCaptor<Metadata> metadataCaptor = ArgumentCaptor.forClass(Metadata.class);
+    verify(caseService)
+        .saveCaseAndEmitCaseCreatedEvent(caseCaptor.capture(), metadataCaptor.capture());
     Case actualCaseToFieldService = caseCaptor.getValue();
     assertThat(actualCaseToFieldService.getCaseId())
         .isEqualTo(UUID.fromString(expectedCase.getCaseId().toString()));
     assertThat(actualCaseToFieldService.getSurvey()).isEqualTo("CCS");
+
+    Metadata actualMetadata = metadataCaptor.getValue();
+    assertThat(actualMetadata.getCauseEventType()).isEqualTo(managementEvent.getEvent().getType());
+    assertThat(actualMetadata.getFieldDecision()).isEqualTo(ActionInstructionType.CREATE);
   }
 
   @Test
@@ -123,8 +129,6 @@ public class CCSPropertyListedServiceTest {
     assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(expectedCase.getCaseId());
     assertThat(actualUacQidLink.isCcsCase()).isTrue();
     assertThat(actualUacQidLink.getCaze().getSurvey()).isEqualTo("CCS");
-
-    verifyZeroInteractions(ccsToFieldService);
   }
 
   @Test
@@ -163,7 +167,6 @@ public class CCSPropertyListedServiceTest {
             false);
 
     checkCorrectEventLogging(inOrder, expectedCase, managementEvent, messageTimestamp);
-    verifyZeroInteractions(ccsToFieldService);
   }
 
   @Test
@@ -193,7 +196,6 @@ public class CCSPropertyListedServiceTest {
     // Then
     InOrder inOrder = inOrder(caseService, eventLogger);
     checkCorrectEventLogging(inOrder, expectedCase, managementEvent, messageTimestamp);
-    verifyZeroInteractions(ccsToFieldService);
   }
 
   private Case getExpectedCCSCase(String id) {

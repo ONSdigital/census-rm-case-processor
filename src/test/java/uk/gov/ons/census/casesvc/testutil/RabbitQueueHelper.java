@@ -22,7 +22,6 @@ import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ActiveProfiles;
-import uk.gov.ons.census.casesvc.model.dto.CcsToFwmt;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 
 @Component
@@ -90,15 +89,6 @@ public class RabbitQueueHelper {
       throws InterruptedException {
     String actualMessage = queue.poll(timeOut, TimeUnit.SECONDS);
     assertNull("Message received when not expected", actualMessage);
-  }
-
-  public CcsToFwmt checkCcsFwmtEmitted(BlockingQueue<String> queue)
-      throws InterruptedException, IOException {
-    String actualMessage = queue.poll(20, TimeUnit.SECONDS);
-    assertNotNull("Did not receive message before timeout", actualMessage);
-    CcsToFwmt ccsFwmt = objectMapper.readValue(actualMessage, CcsToFwmt.class);
-    assertNotNull(ccsFwmt);
-    return ccsFwmt;
   }
 
   public List<Integer> collectAllActualResponseCountsForCaseId(

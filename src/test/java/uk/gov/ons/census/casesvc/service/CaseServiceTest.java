@@ -10,9 +10,11 @@ import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.service.CaseService.CASE_UPDATE_ROUTING_KEY;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 
+import java.time.OffsetDateTime;
 import java.util.*;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
+import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -33,6 +35,7 @@ import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 @RunWith(MockitoJUnitRunner.class)
 public class CaseServiceTest {
 
+  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_ADDRESS_TYPE = "HI";
   private static final String FIELD_CORD_ID = "FIELD_CORD_ID";
   private static final String FIELD_OFFICER_ID = "FIELD_OFFICER_ID";
   private static final Integer CE_CAPACITY = 37;
@@ -263,5 +266,60 @@ public class CaseServiceTest {
 
     // Then
     assertThat(payload.getCollectionCase().getAddress().getRegion()).isNull();
+  }
+
+  @Test
+  public void checkIndividualCaseCreatedCorrectly() {
+    // Given
+    EasyRandom easyRandom = new EasyRandom();
+    Case parentCase = easyRandom.nextObject(Case.class);
+    UUID childCaseId = UUID.randomUUID();
+
+    // When
+    Case actualChildCase =
+        underTest.prepareIndividualResponseCaseFromParentCase(parentCase, childCaseId);
+
+    // Then
+    assertThat(actualChildCase.getCaseRef()).isNotEqualTo(parentCase.getCaseRef());
+    assertThat(UUID.fromString(actualChildCase.getCaseId().toString()))
+        .isNotEqualTo(parentCase.getCaseId());
+    assertThat(actualChildCase.getCaseId()).isEqualTo(childCaseId);
+    assertThat(actualChildCase.getUacQidLinks()).isNull();
+    assertThat(actualChildCase.getEvents()).isNull();
+    assertThat(actualChildCase.getCreatedDateTime())
+        .isBetween(OffsetDateTime.now().minusSeconds(10), OffsetDateTime.now());
+    assertThat(actualChildCase.getCollectionExerciseId())
+        .isEqualTo(parentCase.getCollectionExerciseId());
+    assertThat(actualChildCase.getActionPlanId()).isEqualTo(parentCase.getActionPlanId());
+    assertThat(actualChildCase.isReceiptReceived()).isFalse();
+    assertThat(actualChildCase.isRefusalReceived()).isFalse();
+    assertThat(actualChildCase.getArid()).isEqualTo(parentCase.getArid());
+    assertThat(actualChildCase.getEstabArid()).isEqualTo(parentCase.getEstabArid());
+    assertThat(actualChildCase.getUprn()).isEqualTo(parentCase.getUprn());
+    assertThat(actualChildCase.getAddressType()).isEqualTo(parentCase.getAddressType());
+    assertThat(actualChildCase.getCaseType()).isEqualTo(HOUSEHOLD_INDIVIDUAL_RESPONSE_ADDRESS_TYPE);
+    assertThat(actualChildCase.getEstabType()).isEqualTo(parentCase.getEstabType());
+    assertThat(actualChildCase.getAddressLevel()).isEqualTo(parentCase.getAddressLevel());
+    assertThat(actualChildCase.getAbpCode()).isEqualTo(parentCase.getAbpCode());
+    assertThat(actualChildCase.getOrganisationName()).isEqualTo(parentCase.getOrganisationName());
+    assertThat(actualChildCase.getAddressLine1()).isEqualTo(parentCase.getAddressLine1());
+    assertThat(actualChildCase.getAddressLine2()).isEqualTo(parentCase.getAddressLine2());
+    assertThat(actualChildCase.getAddressLine3()).isEqualTo(parentCase.getAddressLine3());
+    assertThat(actualChildCase.getTownName()).isEqualTo(parentCase.getTownName());
+    assertThat(actualChildCase.getPostcode()).isEqualTo(parentCase.getPostcode());
+    assertThat(actualChildCase.getLatitude()).isEqualTo(parentCase.getLatitude());
+    assertThat(actualChildCase.getLongitude()).isEqualTo(parentCase.getLongitude());
+    assertThat(actualChildCase.getOa()).isEqualTo(parentCase.getOa());
+    assertThat(actualChildCase.getLsoa()).isEqualTo(parentCase.getLsoa());
+    assertThat(actualChildCase.getMsoa()).isEqualTo(parentCase.getMsoa());
+    assertThat(actualChildCase.getLad()).isEqualTo(parentCase.getLad());
+    assertThat(actualChildCase.getRegion()).isEqualTo(parentCase.getRegion());
+    assertThat(actualChildCase.getHtcWillingness()).isNull();
+    assertThat(actualChildCase.getHtcDigital()).isNull();
+    assertThat(actualChildCase.getFieldCoordinatorId()).isNull();
+    assertThat(actualChildCase.getFieldOfficerId()).isNull();
+    assertThat(actualChildCase.getTreatmentCode()).isNull();
+    assertThat(actualChildCase.getCeExpectedCapacity()).isNull();
+    assertThat(actualChildCase.getAddressLevel()).isEqualTo(parentCase.getAddressLevel());
   }
 }
