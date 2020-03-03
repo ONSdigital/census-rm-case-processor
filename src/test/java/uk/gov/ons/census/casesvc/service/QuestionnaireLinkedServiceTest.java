@@ -198,7 +198,9 @@ public class QuestionnaireLinkedServiceTest {
     inOrder.verify(uacService).findByQid(TEST_HI_QID);
 
     inOrder.verify(caseService).getCaseByCaseId(TEST_CASE_ID_1);
-    inOrder.verify(caseService).prepareIndividualResponseCaseFromParentCase(eq(testHHCase), any());
+    inOrder
+        .verify(caseService)
+        .prepareIndividualResponseCaseFromParentCase(eq(testHHCase), any(UUID.class));
     inOrder.verify(caseService).saveNewCaseAndStampCaseRef(testHICase);
 
     ArgumentCaptor<Case> caseCaptor = ArgumentCaptor.forClass(Case.class);

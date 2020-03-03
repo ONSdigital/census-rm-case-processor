@@ -15,7 +15,6 @@ import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
 @Service
 public class QuestionnaireLinkedService {
-
   private static final String QUESTIONNAIRE_LINKED = "Questionnaire Linked";
 
   private final UacService uacService;
