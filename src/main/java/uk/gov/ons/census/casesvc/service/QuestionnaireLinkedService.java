@@ -44,8 +44,7 @@ public class QuestionnaireLinkedService {
     Case caze = caseService.getCaseByCaseId(UUID.fromString(uac.getCaseId()));
 
     if (isIndividualQuestionnaireType(questionnaireId) && caze.getCaseType().equals("HH")) {
-      UUID individualCaseId = UUID.randomUUID();
-      caze = caseService.prepareIndividualResponseCaseFromParentCase(caze, individualCaseId);
+      caze = caseService.prepareIndividualResponseCaseFromParentCase(caze, UUID.randomUUID());
       caze = caseService.saveNewCaseAndStampCaseRef(caze);
       caseService.emitCaseCreatedEvent(caze);
     }
