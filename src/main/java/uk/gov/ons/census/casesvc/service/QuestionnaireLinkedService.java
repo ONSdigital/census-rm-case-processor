@@ -15,7 +15,7 @@ import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
 @Service
 public class QuestionnaireLinkedService {
-
+  private final UUID TEST_CASE_ID_1 = UUID.randomUUID();
   private static final String QUESTIONNAIRE_LINKED = "Questionnaire Linked";
 
   private final UacService uacService;
@@ -45,7 +45,7 @@ public class QuestionnaireLinkedService {
     Case caze = caseService.getCaseByCaseId(UUID.fromString(uac.getCaseId()));
 
     if (isIndividualQuestionnaireType(questionnaireId) && caze.getCaseType().equals("HH")) {
-      caze = caseService.prepareIndividualResponseCaseFromParentCase(caze, UUID.randomUUID());
+      caze = caseService.prepareIndividualResponseCaseFromParentCase(caze, TEST_CASE_ID_1);
       caze = caseService.saveNewCaseAndStampCaseRef(caze);
       caseService.emitCaseCreatedEvent(caze);
     }
