@@ -65,8 +65,7 @@ public class CaseReceiptService {
       throw new RuntimeException(ruleKey.toString() + " does not map to any known processing rule");
     }
 
-    UpdateAndEmitCaseRule rule = rules.get(ruleKey);
-    rule.run(caze, causeEventType);
+    rules.get(ruleKey).run(caze, causeEventType);
   }
 
   private Key makeRulesKey(Case caze, UacQidLink uacQidLink) {

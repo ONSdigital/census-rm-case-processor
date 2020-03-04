@@ -12,6 +12,9 @@ import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 
 import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.IntStream;
+
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.jeasy.random.EasyRandom;
@@ -321,5 +324,64 @@ public class CaseServiceTest {
     assertThat(actualChildCase.getTreatmentCode()).isNull();
     assertThat(actualChildCase.getCeExpectedCapacity()).isNull();
     assertThat(actualChildCase.getAddressLevel()).isEqualTo(parentCase.getAddressLevel());
+  }
+
+  @Test
+  public void testFunctionSpeedVsNormalFunctionCall() {
+    int runTimes = 2000000000;
+
+    long startTime;
+    long endTime;
+    long totalTime;
+
+    long pointerTotalTime = 0;
+    long standardCallTotalTime = 0;
+
+    for (int j = 0; j < 10; j++) {
+
+      startTime = System.nanoTime();
+
+      int val = runTimes * -1;
+      for (int i = 0; i < runTimes; i++) {
+        val = testFunction.apply(val);
+      }
+
+      assertThat(val).isEqualTo(0);
+
+      endTime = System.nanoTime();
+      totalTime = endTime - startTime;
+      System.out.println("Function Pointer Milliseconds to run: " + (totalTime / 1000000));
+      pointerTotalTime += totalTime;
+
+      /// Run against standard function
+
+      startTime = System.nanoTime();
+
+      val = runTimes * -1;
+      for (int i = 0; i < runTimes; i++) {
+        val = standardFunction(val);
+      }
+
+      assertThat(val).isEqualTo(0);
+
+      endTime = System.nanoTime();
+      totalTime = endTime - startTime;
+      System.out.println("Standard Function Milliseconds to run: " + (totalTime / 1000000));
+      standardCallTotalTime += totalTime;
+
+    }
+    System.out.println("Total Time to run with Function Pointer : " + pointerTotalTime/1000000);
+    System.out.println("Total Time to run with Standard Function: " + standardCallTotalTime/1000000);
+  }
+
+  Function<Integer, Integer> testFunction =
+          (arg1) -> {
+            int result = arg1 + 1;
+            return result;
+          };
+
+  Integer standardFunction(Integer arg1) {
+    int result = arg1 + 1;
+    return result;
   }
 }
