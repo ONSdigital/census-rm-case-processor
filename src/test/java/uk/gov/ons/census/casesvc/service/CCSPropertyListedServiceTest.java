@@ -4,13 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementCCSAddressListedEvent;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.time.OffsetDateTime;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,7 +37,8 @@ import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 public class CCSPropertyListedServiceTest {
 
   private static final UUID TEST_UAC_QID_LINK_ID = UUID.randomUUID();
-  private static final String TEST_QID = "710000000043";
+  private static final String TEST_QID_1 = "710000000043";
+  private static final String TEST_QID_2 = "610000000043";
 
   @Mock EventLogger eventLogger;
   @Mock CaseService caseService;
@@ -88,25 +91,37 @@ public class CCSPropertyListedServiceTest {
   }
 
   @Test
-  public void testCaseListedWithQidSet() {
+  public void testCaseListedWithMultipleQidsSet() {
     // Given
     ResponseManagementEvent managementEvent = getTestResponseManagementCCSAddressListedEvent();
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
-    UacDTO uacDTO = new UacDTO();
-    uacDTO.setQuestionnaireId(TEST_QID);
-    managementEvent.getPayload().getCcsProperty().setUac(uacDTO);
+    List<UacDTO> qids = new ArrayList<>();
 
-    UacQidLink uacQidLink = new UacQidLink();
-    uacQidLink.setId(TEST_UAC_QID_LINK_ID);
-    uacQidLink.setQid(TEST_QID);
-    uacQidLink.setCcsCase(true);
-    when(uacService.findByQid(TEST_QID)).thenReturn(uacQidLink);
+    UacDTO firstQid = new UacDTO();
+    firstQid.setQuestionnaireId(TEST_QID_1);
+    qids.add(firstQid);
+
+    UacDTO secondQid = new UacDTO();
+    secondQid.setQuestionnaireId(TEST_QID_2);
+    qids.add(secondQid);
+    managementEvent.getPayload().getCcsProperty().setUac(qids);
+
+    UacQidLink firstUacQidLink = new UacQidLink();
+    firstUacQidLink.setId(TEST_UAC_QID_LINK_ID);
+    firstUacQidLink.setQid(TEST_QID_1);
+    firstUacQidLink.setCcsCase(true);
+    when(uacService.findByQid(TEST_QID_1)).thenReturn(firstUacQidLink);
+
+    UacQidLink secondUacQidLink = new UacQidLink();
+    secondUacQidLink.setId(TEST_UAC_QID_LINK_ID);
+    secondUacQidLink.setQid(TEST_QID_2);
+    secondUacQidLink.setCcsCase(true);
+    when(uacService.findByQid(TEST_QID_2)).thenReturn(secondUacQidLink);
 
     Case expectedCase =
         getExpectedCCSCase(
             managementEvent.getPayload().getCcsProperty().getCollectionCase().getId());
-    expectedCase.setUacQidLinks(Collections.singletonList(uacQidLink));
 
     when(caseService.createCCSCase(
             expectedCase.getCaseId().toString(),
@@ -123,12 +138,13 @@ public class CCSPropertyListedServiceTest {
     checkCorrectEventLogging(inOrder, expectedCase, managementEvent, messageTimestamp);
 
     ArgumentCaptor<UacQidLink> uacQidLinkArgumentCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    verify(uacQidLinkRepository).saveAndFlush(uacQidLinkArgumentCaptor.capture());
-    UacQidLink actualUacQidLink = uacQidLinkArgumentCaptor.getValue();
-    assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID);
-    assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(expectedCase.getCaseId());
-    assertThat(actualUacQidLink.isCcsCase()).isTrue();
-    assertThat(actualUacQidLink.getCaze().getSurvey()).isEqualTo("CCS");
+    verify(uacQidLinkRepository, times(2)).saveAndFlush(uacQidLinkArgumentCaptor.capture());
+
+    UacQidLink firstActualUacQidLink = uacQidLinkArgumentCaptor.getAllValues().get(0);
+    testUacQidLinkForCase(expectedCase, firstActualUacQidLink, TEST_QID_1);
+
+    UacQidLink secondActualQidLink = uacQidLinkArgumentCaptor.getAllValues().get(1);
+    testUacQidLinkForCase(expectedCase, secondActualQidLink, TEST_QID_2);
   }
 
   @Test
@@ -229,5 +245,12 @@ public class CCSPropertyListedServiceTest {
     String actualLoggedPayload = ccsPayload.getValue();
     assertThat(actualLoggedPayload)
         .isEqualTo(convertObjectToJson(managementEvent.getPayload().getCcsProperty()));
+  }
+
+  private void testUacQidLinkForCase(Case expectedCase, UacQidLink uacQidLink, String qid) {
+    assertThat(uacQidLink.getQid()).isEqualTo(qid);
+    assertThat(uacQidLink.getCaze().getCaseId()).isEqualTo(expectedCase.getCaseId());
+    assertThat(uacQidLink.isCcsCase()).isTrue();
+    assertThat(uacQidLink.getCaze().getSurvey()).isEqualTo("CCS");
   }
 }

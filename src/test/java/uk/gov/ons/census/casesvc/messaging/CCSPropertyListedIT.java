@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
@@ -45,10 +46,16 @@ import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 @SpringBootTest
 @RunWith(SpringJUnit4ClassRunner.class)
 public class CCSPropertyListedIT {
+
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final String CCS_PROPERTY_LISTED_CHANNEL = "FIELD";
   private static final String CCS_PROPERTY_LISTED_SOURCE = "FIELDWORK_GATEWAY";
-  private static final String TEST_QID = "71000000000121";
+  private static final String TEST_QID_1 = "71000000000121";
+  private static final String TEST_QID_2 = "61000000000121";
+  private static final String CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES = "71";
+  private static final String CCS_POSTBACK_CONTINUATION_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES = "61";
+
+  EasyRandom easyRandom = new EasyRandom();
 
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
   @Autowired private CaseRepository caseRepository;
@@ -94,29 +101,33 @@ public class CCSPropertyListedIT {
     Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
     assertThat(actualCase.getSurvey()).isEqualTo("CCS");
 
-    checkUacQidLinks(1);
+    List<UacQidLink> actualUacQidLinks = uacQidLinkRepository.findAll();
+    assertThat(actualUacQidLinks.size()).isEqualTo(1);
+    testCheckUacQidLinks(
+        actualUacQidLinks.get(0), CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
 
     validateEvents(
         eventRepository.findAll(), responseManagementEvent.getPayload().getCcsProperty());
   }
 
   @Test
-  public void testCCSListedEventWithQidSet() throws InterruptedException, IOException {
+  public void testCCSListedEventWithQidsSet() throws InterruptedException, IOException {
     // GIVEN
     BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(caseUpdatedQueueName);
-    EasyRandom easyRandom = new EasyRandom();
-    UacQidLink uacQidLink = easyRandom.nextObject(UacQidLink.class);
-    uacQidLink.setQid(TEST_QID);
-    uacQidLink.setCaze(null);
-    uacQidLink.setCcsCase(true);
-    uacQidLink.setEvents(null);
-    uacQidLinkRepository.save(uacQidLink);
 
-    UacDTO uacDTO = new UacDTO();
-    uacDTO.setQuestionnaireId(TEST_QID);
+    createUnlinkedUacQid(TEST_QID_1);
+    createUnlinkedUacQid(TEST_QID_2);
+
+    List<UacDTO> qids = new ArrayList<>();
+    UacDTO firstQid = new UacDTO();
+    firstQid.setQuestionnaireId(TEST_QID_1);
+    qids.add(firstQid);
+    UacDTO secondQid = new UacDTO();
+    secondQid.setQuestionnaireId(TEST_QID_2);
+    qids.add(secondQid);
 
     ResponseManagementEvent responseManagementEvent = getResponseManagementEvent();
-    responseManagementEvent.getPayload().getCcsProperty().setUac(uacDTO);
+    responseManagementEvent.getPayload().getCcsProperty().setUac(qids);
 
     // When
     rabbitQueueHelper.sendMessage(ccsPropertyListedQueue, responseManagementEvent);
@@ -126,7 +137,15 @@ public class CCSPropertyListedIT {
 
     Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
     assertThat(actualCase.getSurvey()).isEqualTo("CCS");
-    checkUacQidLinks(2);
+
+    List<UacQidLink> actualUacQidLinks = uacQidLinkRepository.findAll();
+    assertThat(actualUacQidLinks.size()).isEqualTo(3); // Including generated UAC/QID in receiver
+    testCheckUacQidLinks(
+        actualUacQidLinks.get(0), CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
+    testCheckUacQidLinks(
+        actualUacQidLinks.get(1), CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
+    testCheckUacQidLinks(
+        actualUacQidLinks.get(2), CCS_POSTBACK_CONTINUATION_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
 
     validateEvents(
         eventRepository.findAll(), responseManagementEvent.getPayload().getCcsProperty());
@@ -155,7 +174,10 @@ public class CCSPropertyListedIT {
     assertThat(actualCase.getSurvey()).isEqualTo("CCS");
     assertThat(actualCase.isRefusalReceived()).isTrue();
 
-    checkUacQidLinks(1);
+    List<UacQidLink> actualUacQidLinks = uacQidLinkRepository.findAll();
+    assertThat(actualUacQidLinks.size()).isEqualTo(1);
+    testCheckUacQidLinks(
+        actualUacQidLinks.get(0), CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
 
     validateEvents(
         eventRepository.findAll(), responseManagementEvent.getPayload().getCcsProperty());
@@ -182,7 +204,10 @@ public class CCSPropertyListedIT {
     assertThat(actualCase.getSurvey()).isEqualTo("CCS");
     assertThat(actualCase.isAddressInvalid()).isTrue();
 
-    checkUacQidLinks(1);
+    List<UacQidLink> actualUacQidLinks = uacQidLinkRepository.findAll();
+    assertThat(actualUacQidLinks.size()).isEqualTo(1);
+    testCheckUacQidLinks(
+        actualUacQidLinks.get(0), CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
 
     validateEvents(
         eventRepository.findAll(), responseManagementEvent.getPayload().getCcsProperty());
@@ -224,15 +249,6 @@ public class CCSPropertyListedIT {
     assertThat(actualCCSPropertyDTO).isEqualTo(expectedCCSPropertyDto);
   }
 
-  private void checkUacQidLinks(int expectedLinksTotal) {
-    List<UacQidLink> actualUacQidLinks = uacQidLinkRepository.findAll();
-    assertThat(actualUacQidLinks.size()).isEqualTo(expectedLinksTotal);
-    UacQidLink actualUacQidLink = actualUacQidLinks.get(0);
-    assertThat(actualUacQidLink.getQid().substring(0, 2)).isEqualTo("71");
-    assertThat(actualUacQidLink.isCcsCase()).isTrue();
-    assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
-  }
-
   private ResponseManagementEvent getResponseManagementEvent() {
     CCSPropertyDTO ccsPropertyDTO = getCCSProperty();
 
@@ -260,5 +276,20 @@ public class CCSPropertyListedIT {
     ccsPropertyDTO.setSampleUnit(setUpSampleUnitDTO());
 
     return ccsPropertyDTO;
+  }
+
+  private void createUnlinkedUacQid(String qid) {
+    UacQidLink uacQidLink = easyRandom.nextObject(UacQidLink.class);
+    uacQidLink.setQid(qid);
+    uacQidLink.setCaze(null);
+    uacQidLink.setCcsCase(true);
+    uacQidLink.setEvents(null);
+    uacQidLinkRepository.save(uacQidLink);
+  }
+
+  private void testCheckUacQidLinks(UacQidLink uacQidLink, String questionnaireType) {
+    assertThat(uacQidLink.getQid().substring(0, 2)).isEqualTo(questionnaireType);
+    assertThat(uacQidLink.isCcsCase()).isTrue();
+    assertThat(uacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
   }
 }

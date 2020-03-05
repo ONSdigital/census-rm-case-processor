@@ -4,12 +4,14 @@ import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.CCSPropertyDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
+import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
@@ -40,7 +42,7 @@ public class CCSPropertyListedService {
     CCSPropertyDTO ccsProperty = ccsPropertyListedEvent.getPayload().getCcsProperty();
     boolean isRefused = ccsProperty.getRefusal() != null;
     boolean isInvalidAddress = ccsProperty.getInvalidAddress() != null;
-    boolean isQidProvided = ccsProperty.getUac() != null;
+    boolean hasOneOrMoreQids = ccsProperty.getUac() != null;
 
     Case caze =
         caseService.createCCSCase(
@@ -52,8 +54,8 @@ public class CCSPropertyListedService {
     // always generate a new uac-qid pair even if linking existing pair, this is in case field
     // worker has to visit address again and launch an EQ
     uacService.createUacQidLinkedToCCSCase(caze);
-    if (isQidProvided) {
-      addUacLinkForQidAndCaze(ccsProperty.getUac().getQuestionnaireId(), caze);
+    if (hasOneOrMoreQids) {
+      handleUacQidLinksForCase(ccsProperty.getUac(), caze);
     } else {
       sendActiveCCSCaseToField(caze);
     }
@@ -68,6 +70,12 @@ public class CCSPropertyListedService {
         messageTimestamp);
   }
 
+  private void handleUacQidLinksForCase(List<UacDTO> qids, Case caze) {
+    for (UacDTO qid : qids) {
+      addUacLinkForQidAndCase(qid.getQuestionnaireId(), caze);
+    }
+  }
+
   private void sendActiveCCSCaseToField(Case caze) {
     if (!caze.isRefusalReceived() && !caze.isAddressInvalid()) {
       caseService.saveCaseAndEmitCaseCreatedEvent(
@@ -75,7 +83,7 @@ public class CCSPropertyListedService {
     }
   }
 
-  private void addUacLinkForQidAndCaze(String qid, Case caze) {
+  private void addUacLinkForQidAndCase(String qid, Case caze) {
     UacQidLink uacQidLink = uacService.findByQid(qid);
     uacQidLink.setCaze(caze);
     uacQidLinkRepository.saveAndFlush(uacQidLink);
