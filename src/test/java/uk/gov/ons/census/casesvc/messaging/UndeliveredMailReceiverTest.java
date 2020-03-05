@@ -27,6 +27,7 @@ import uk.gov.ons.census.casesvc.service.UacService;
 import uk.gov.ons.census.casesvc.utility.MsgDateHelper;
 
 public class UndeliveredMailReceiverTest {
+  private static final long TEST_CASE_REF = 1234567890L;
 
   @Test
   public void testReceiveMessageWithCaseRef() {
@@ -35,7 +36,7 @@ public class UndeliveredMailReceiverTest {
     event.getEvent().setDateTime(OffsetDateTime.now());
     event.setPayload(new PayloadDTO());
     event.getPayload().setFulfilmentInformation(new FulfilmentInformation());
-    event.getPayload().getFulfilmentInformation().setCaseRef("123");
+    event.getPayload().getFulfilmentInformation().setCaseRef(Long.toString(TEST_CASE_REF));
 
     Case caze = new Case();
 
@@ -49,7 +50,7 @@ public class UndeliveredMailReceiverTest {
     OffsetDateTime expectedDate = MsgDateHelper.getMsgTimeStamp(message);
 
     // Given
-    when(caseService.getCaseByCaseRef(eq(123L))).thenReturn(caze);
+    when(caseService.getCaseByCaseRef(eq(TEST_CASE_REF))).thenReturn(caze);
 
     // When
     underTest.receiveMessage(message);
@@ -68,7 +69,7 @@ public class UndeliveredMailReceiverTest {
             eq("Undelivered mail reported"),
             eq(EventType.UNDELIVERED_MAIL_REPORTED),
             eq(event.getEvent()),
-            eq("{\"caseRef\":\"123\"}"),
+            eq("{\"caseRef\":\"1234567890\"}"),
             eq(expectedDate));
 
     verify(eventLogger, never()).logUacQidEvent(any(), any(), any(), any(), any(), any(), any());

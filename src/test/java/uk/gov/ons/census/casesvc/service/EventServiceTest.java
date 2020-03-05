@@ -26,6 +26,7 @@ import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EventServiceTest {
+  private static final long TEST_CASE_REF = 1234567890L;
 
   @Mock CaseService caseService;
 
@@ -112,7 +113,7 @@ public class EventServiceTest {
     Case caze = easyRandom.nextObject(Case.class);
     caze.setUacQidLinks(null);
     caze.setEvents(null);
-    when(caseService.getCaseByCaseRef(eq(123L))).thenReturn(caze);
+    when(caseService.getCaseByCaseRef(eq(TEST_CASE_REF))).thenReturn(caze);
 
     // When
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
@@ -129,7 +130,7 @@ public class EventServiceTest {
     PrintCaseSelected printCaseSelected = new PrintCaseSelected();
     printCaseSelected.setActionRuleId("Test actionRuleId");
     printCaseSelected.setBatchId("Test batchId");
-    printCaseSelected.setCaseRef(123);
+    printCaseSelected.setCaseRef(TEST_CASE_REF);
     printCaseSelected.setPackCode("Test packCode");
 
     PayloadDTO payload = new PayloadDTO();
@@ -147,7 +148,7 @@ public class EventServiceTest {
             eq(EventType.PRINT_CASE_SELECTED),
             eq(event),
             eq(
-                "{\"printCaseSelected\":{\"caseRef\":123,\"packCode\":\"Test packCode\","
+                "{\"printCaseSelected\":{\"caseRef\":1234567890,\"packCode\":\"Test packCode\","
                     + "\"actionRuleId\":\"Test actionRuleId\",\"batchId\":\"Test batchId\"}}"),
             eq(messageTimestamp));
   }
@@ -173,7 +174,7 @@ public class EventServiceTest {
 
     FieldCaseSelected fieldCaseSelected = new FieldCaseSelected();
     fieldCaseSelected.setActionRuleId("Test actionRuleId");
-    fieldCaseSelected.setCaseRef(123);
+    fieldCaseSelected.setCaseRef(TEST_CASE_REF);
 
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
@@ -191,7 +192,8 @@ public class EventServiceTest {
             eq("Case sent for fieldwork followup"),
             eq(EventType.FIELD_CASE_SELECTED),
             eq(event),
-            eq("{\"fieldCaseSelected\":{\"caseRef\":123,\"actionRuleId\":\"Test actionRuleId\"}}"),
+            eq(
+                "{\"fieldCaseSelected\":{\"caseRef\":1234567890,\"actionRuleId\":\"Test actionRuleId\"}}"),
             eq(messageTimestamp));
   }
 }

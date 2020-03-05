@@ -3,6 +3,7 @@ package uk.gov.ons.census.casesvc.utility;
 import uk.gov.ons.census.casesvc.utility.pseudorandom.PseudorandomNumberGenerator;
 
 public class CaseRefGenerator {
+  //  This gives a caseRef 9 long, plus 1 checkbit at the end = 10
   private static final int LOWEST_POSSIBLE_CASE_REF = 100000000;
   private static final int HIGHEST_POSSIBLE_CASE_REF = 999999999;
 

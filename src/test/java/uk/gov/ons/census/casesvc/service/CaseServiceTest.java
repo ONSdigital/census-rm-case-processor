@@ -46,6 +46,7 @@ public class CaseServiceTest {
   private static final UUID TEST_UUID = UUID.randomUUID();
   private static final UUID TEST_ACTION_PLAN_ID = UUID.randomUUID();
   private static final UUID TEST_COLLECTION_EXERCISE_ID = UUID.randomUUID();
+  private static final long TEST_CASE_REF = 1234567890L;
   private static final byte[] caserefgeneratorkey =
       new byte[] {0x10, 0x20, 0x10, 0x20, 0x10, 0x20, 0x10, 0x20};
   private static final Integer CE_ACTUAL_CAPACITY = 0;
@@ -183,7 +184,7 @@ public class CaseServiceTest {
     // Given
     Case caze = new Case();
     caze.setRegion("E");
-    caze.setCaseRef(123L);
+    caze.setCaseRef(TEST_CASE_REF);
     caze.setCaseId(UUID.randomUUID());
     caze.setPostcode(TEST_POSTCODE);
     caze.setFieldCoordinatorId(FIELD_CORD_ID);
