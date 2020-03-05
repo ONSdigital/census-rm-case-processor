@@ -8,7 +8,9 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import lombok.Data;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -17,6 +19,11 @@ import org.hibernate.annotations.TypeDefs;
 @Data
 @TypeDefs({@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)})
 @Entity
+@Table(
+    indexes = {
+      @Index(name = "event_type_idx", columnList = "event_type"),
+      @Index(name = "rm_event_processed_idx", columnList = "rm_event_processed")
+    })
 public class Event {
   @Id private UUID id;
 
@@ -29,10 +36,10 @@ public class Event {
 
   @Column private String eventDescription;
 
-  @Column(columnDefinition = "timestamp with time zone")
+  @Column(name = "rm_event_processed", columnDefinition = "timestamp with time zone")
   private OffsetDateTime rmEventProcessed;
 
-  @Column
+  @Column(name = "event_type")
   @Enumerated(EnumType.STRING)
   private EventType eventType;
 
