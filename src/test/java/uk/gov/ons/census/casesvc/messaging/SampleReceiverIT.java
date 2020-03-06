@@ -82,6 +82,7 @@ public class SampleReceiverIT {
     BlockingQueue<String> actionMessages = rabbitQueueHelper.listen(actionSchedulerQueue);
 
     CreateCaseSample createCaseSample = new CreateCaseSample();
+    createCaseSample.setAddressType("HH");
     createCaseSample.setPostcode("ABC123");
     createCaseSample.setRegion("E12000009");
     createCaseSample.setTreatmentCode("HH_LF3R2E");
@@ -143,6 +144,7 @@ public class SampleReceiverIT {
 
     for (int i = 0; i < expectedSize; i++) {
       CreateCaseSample createCaseSample = new CreateCaseSample();
+      createCaseSample.setAddressType("HH");
       createCaseSample.setPostcode("ABC123");
       createCaseSample.setRegion("E12000009");
       String treatmentCode = treatmentCodes.get(random.nextInt(treatmentCodes.size()));

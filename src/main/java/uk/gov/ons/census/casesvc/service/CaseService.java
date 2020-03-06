@@ -1,9 +1,7 @@
 package uk.gov.ons.census.casesvc.service;
 
 import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -78,6 +76,12 @@ public class CaseService {
     caze.setSurvey(CENSUS_SURVEY);
     caze.setCeActualResponses(0);
     caze.setHandDelivery(isTreatmentCodeDirectDelivered(createCaseSample.getTreatmentCode()));
+
+    if (caze.getCaseType().equals("CE")) {
+      Map<String, String> metadata = new HashMap<>();
+      metadata.put("secureEstablishment", createCaseSample.getSecureEstablishment().toString());
+      caze.setMetadata(metadata);
+    }
 
     return saveNewCaseAndStampCaseRef(caze);
   }
@@ -224,6 +228,7 @@ public class CaseService {
     collectionCase.setAddressInvalid(caze.isAddressInvalid());
     collectionCase.setUndeliveredAsAddressed(caze.isUndeliveredAsAddressed());
     collectionCase.setHandDelivery(caze.isHandDelivery());
+    collectionCase.setMetadata(caze.getMetadata());
     // Yes. You can add stuff to the bottom of this list if you like.
 
     return collectionCase;

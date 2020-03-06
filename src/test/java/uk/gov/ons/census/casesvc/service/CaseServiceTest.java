@@ -49,6 +49,7 @@ public class CaseServiceTest {
   private static final byte[] caserefgeneratorkey =
       new byte[] {0x10, 0x20, 0x10, 0x20, 0x10, 0x20, 0x10, 0x20};
   private static final Integer CE_ACTUAL_CAPACITY = 0;
+  private static final String TEST_ADDRESS_TYPE_CE = "CE";
   private List<String> directDeliveryTreatmentCodes =
       new ArrayList<>(Arrays.asList("CE_LDIEE", "test"));
 
@@ -110,6 +111,79 @@ public class CaseServiceTest {
     assertThat(savedCase.getCeActualResponses()).isEqualTo(0);
     assertThat(savedCase.getCaseType()).isEqualTo(TEST_ADDRESS_TYPE);
     assertThat(savedCase.isHandDelivery()).isFalse();
+    assertThat(savedCase.getMetadata()).isNull();
+  }
+
+  @Test
+  public void testSaveCaseSampleCE() {
+    CreateCaseSample createCaseSample = new CreateCaseSample();
+    createCaseSample.setTreatmentCode(TEST_TREATMENT_CODE);
+    createCaseSample.setFieldCoordinatorId(FIELD_CORD_ID);
+    createCaseSample.setFieldOfficerId(FIELD_OFFICER_ID);
+    createCaseSample.setCeExpectedCapacity(CE_CAPACITY);
+    createCaseSample.setAddressType(TEST_ADDRESS_TYPE_CE);
+    createCaseSample.setSecureEstablishment(Boolean.FALSE);
+
+    ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
+    ReflectionTestUtils.setField(
+        underTest, "directDeliveryTreatmentCodes", directDeliveryTreatmentCodes);
+
+    // Given
+    when(caseRepository.saveAndFlush(any(Case.class))).then(obj -> obj.getArgument(0));
+
+    // When
+    underTest.saveCaseSample(createCaseSample);
+
+    // Then
+    verify(mapperFacade).map(createCaseSample, Case.class);
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseRepository, times(2)).saveAndFlush(caseArgumentCaptor.capture());
+
+    Case savedCase = caseArgumentCaptor.getAllValues().get(1);
+    assertThat(savedCase.getTreatmentCode()).isEqualTo(TEST_TREATMENT_CODE);
+    assertThat(savedCase.getFieldCoordinatorId()).isEqualTo(FIELD_CORD_ID);
+    assertThat(savedCase.getFieldOfficerId()).isEqualTo(FIELD_OFFICER_ID);
+    assertThat(savedCase.getCeExpectedCapacity()).isEqualTo(CE_CAPACITY);
+    assertThat(savedCase.getCeActualResponses()).isEqualTo(0);
+    assertThat(savedCase.getCaseType()).isEqualTo(TEST_ADDRESS_TYPE_CE);
+    assertThat(savedCase.isHandDelivery()).isFalse();
+    assertThat(Boolean.valueOf(savedCase.getMetadata().get("secureEstablishment"))).isFalse();
+  }
+
+  @Test
+  public void testSaveCaseSampleCESecure() {
+    CreateCaseSample createCaseSample = new CreateCaseSample();
+    createCaseSample.setTreatmentCode(TEST_TREATMENT_CODE);
+    createCaseSample.setFieldCoordinatorId(FIELD_CORD_ID);
+    createCaseSample.setFieldOfficerId(FIELD_OFFICER_ID);
+    createCaseSample.setCeExpectedCapacity(CE_CAPACITY);
+    createCaseSample.setAddressType(TEST_ADDRESS_TYPE_CE);
+    createCaseSample.setSecureEstablishment(Boolean.TRUE);
+
+    ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
+    ReflectionTestUtils.setField(
+        underTest, "directDeliveryTreatmentCodes", directDeliveryTreatmentCodes);
+
+    // Given
+    when(caseRepository.saveAndFlush(any(Case.class))).then(obj -> obj.getArgument(0));
+
+    // When
+    underTest.saveCaseSample(createCaseSample);
+
+    // Then
+    verify(mapperFacade).map(createCaseSample, Case.class);
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseRepository, times(2)).saveAndFlush(caseArgumentCaptor.capture());
+
+    Case savedCase = caseArgumentCaptor.getAllValues().get(1);
+    assertThat(savedCase.getTreatmentCode()).isEqualTo(TEST_TREATMENT_CODE);
+    assertThat(savedCase.getFieldCoordinatorId()).isEqualTo(FIELD_CORD_ID);
+    assertThat(savedCase.getFieldOfficerId()).isEqualTo(FIELD_OFFICER_ID);
+    assertThat(savedCase.getCeExpectedCapacity()).isEqualTo(CE_CAPACITY);
+    assertThat(savedCase.getCeActualResponses()).isEqualTo(0);
+    assertThat(savedCase.getCaseType()).isEqualTo(TEST_ADDRESS_TYPE_CE);
+    assertThat(savedCase.isHandDelivery()).isFalse();
+    assertThat(Boolean.valueOf(savedCase.getMetadata().get("secureEstablishment"))).isTrue();
   }
 
   @Test
@@ -211,6 +285,46 @@ public class CaseServiceTest {
     assertThat(collectionCase.getFieldOfficerId()).isEqualTo(FIELD_OFFICER_ID);
     assertThat(collectionCase.getCeExpectedCapacity()).isEqualTo(CE_CAPACITY);
     assertThat(collectionCase.getCeActualResponses()).isEqualTo(CE_ACTUAL_CAPACITY);
+    assertThat(collectionCase.getMetadata()).isNull();
+  }
+
+  @Test
+  public void testEmitCaseCreatedEventCESecure() {
+    // Given
+    Case caze = new Case();
+    caze.setRegion("E");
+    caze.setCaseRef(123);
+    caze.setCaseId(UUID.randomUUID());
+    caze.setPostcode(TEST_POSTCODE);
+    caze.setFieldCoordinatorId(FIELD_CORD_ID);
+    caze.setFieldOfficerId(FIELD_OFFICER_ID);
+    caze.setCeExpectedCapacity(CE_CAPACITY);
+    caze.setCeActualResponses(CE_ACTUAL_CAPACITY);
+    Map<String, String> metadata = new HashMap<>();
+    metadata.put("secureEstablishment", "TRUE");
+    caze.setMetadata(metadata);
+    ReflectionTestUtils.setField(underTest, "outboundExchange", TEST_EXCHANGE);
+
+    // When
+    underTest.saveCaseAndEmitCaseCreatedEvent(caze);
+
+    // Then
+    verify(caseRepository).saveAndFlush(eq(caze));
+
+    ArgumentCaptor<ResponseManagementEvent> rmeArgumentCaptor =
+        ArgumentCaptor.forClass(ResponseManagementEvent.class);
+    verify(rabbitTemplate)
+        .convertAndSend(
+            eq(TEST_EXCHANGE), eq(CASE_UPDATE_ROUTING_KEY), rmeArgumentCaptor.capture());
+
+    CollectionCase collectionCase = rmeArgumentCaptor.getValue().getPayload().getCollectionCase();
+
+    assertEquals(TEST_POSTCODE, collectionCase.getAddress().getPostcode());
+    assertThat(collectionCase.getFieldCoordinatorId()).isEqualTo(FIELD_CORD_ID);
+    assertThat(collectionCase.getFieldOfficerId()).isEqualTo(FIELD_OFFICER_ID);
+    assertThat(collectionCase.getCeExpectedCapacity()).isEqualTo(CE_CAPACITY);
+    assertThat(collectionCase.getCeActualResponses()).isEqualTo(CE_ACTUAL_CAPACITY);
+    assertThat(Boolean.valueOf(collectionCase.getMetadata().get("secureEstablishment"))).isTrue();
   }
 
   @Test(expected = RuntimeException.class)
