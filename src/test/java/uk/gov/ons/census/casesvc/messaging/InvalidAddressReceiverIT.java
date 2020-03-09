@@ -130,7 +130,7 @@ public class InvalidAddressReceiverIT {
     assertThat(actualPayloadCase.getId()).isEqualTo(caze.getCaseId().toString());
     assertThat(actualPayloadCase.getAddressInvalid()).isTrue();
 
-    Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
+    Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
     assertThat(actualCase.isAddressInvalid()).isTrue();
 
@@ -226,7 +226,7 @@ public class InvalidAddressReceiverIT {
     rabbitQueueHelper.checkMessageIsNotReceived(outboundQueue, 3);
 
     // Check case not changed
-    Optional<Case> actualCaseOpt = caseRepository.findByCaseId(caze.getCaseId());
+    Optional<Case> actualCaseOpt = caseRepository.findById(caze.getCaseId());
     Case actualCase = actualCaseOpt.get();
     assertThat(actualCase.isAddressInvalid()).isFalse();
 

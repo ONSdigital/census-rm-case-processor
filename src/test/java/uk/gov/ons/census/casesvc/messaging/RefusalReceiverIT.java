@@ -87,7 +87,7 @@ public class RefusalReceiverIT {
     caseRepository.saveAndFlush(caze);
 
     OffsetDateTime cazeCreatedTime =
-        caseRepository.findByCaseId(TEST_CASE_ID).get().getCreatedDateTime();
+        caseRepository.findById(TEST_CASE_ID).get().getCreatedDateTime();
 
     ResponseManagementEvent managementEvent = getTestResponseManagementRefusalEvent();
     managementEvent.getEvent().setTransactionId(UUID.randomUUID());
@@ -112,7 +112,7 @@ public class RefusalReceiverIT {
     assertThat(eventDTO.getSource()).isEqualTo("CASE_SERVICE");
     assertThat(eventDTO.getChannel()).isEqualTo("RM");
 
-    Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
+    Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
     assertThat(actualCase.isRefusalReceived()).isTrue();
     assertThat(actualCase.getLastUpdated()).isNotEqualTo(cazeCreatedTime);
