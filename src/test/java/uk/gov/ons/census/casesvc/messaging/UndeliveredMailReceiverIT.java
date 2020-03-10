@@ -45,7 +45,7 @@ import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 public class UndeliveredMailReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final EasyRandom easyRandom = new EasyRandom();
-  private static final int TEST_CASE_REF = easyRandom.nextInt();
+  private static final long TEST_CASE_REF = easyRandom.nextLong();
   private static final String TEST_QID = easyRandom.nextObject(String.class);
   private static final String TEST_UAC = easyRandom.nextObject(String.class);
 
@@ -148,7 +148,7 @@ public class UndeliveredMailReceiverIT {
     event.getEvent().setType(EventTypeDTO.UNDELIVERED_MAIL_REPORTED);
     event.setPayload(new PayloadDTO());
     event.getPayload().setFulfilmentInformation(new FulfilmentInformation());
-    event.getPayload().getFulfilmentInformation().setCaseRef(Integer.toString(TEST_CASE_REF));
+    event.getPayload().getFulfilmentInformation().setCaseRef(Long.toString(TEST_CASE_REF));
 
     String json = convertObjectToJson(event);
     Message message =
@@ -164,7 +164,7 @@ public class UndeliveredMailReceiverIT {
     assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_UPDATED);
     CollectionCase actualCase = responseManagementEvent.getPayload().getCollectionCase();
     assertThat(actualCase.getId()).isEqualTo(TEST_CASE_ID.toString());
-    assertThat(actualCase.getCaseRef()).isEqualTo(Integer.toString(TEST_CASE_REF));
+    assertThat(actualCase.getCaseRef()).isEqualTo(Long.toString(TEST_CASE_REF));
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
     assertThat(actualCase.getUndeliveredAsAddressed()).isTrue();
 

@@ -26,7 +26,7 @@ public class Case {
   @Generated(GenerationTime.INSERT)
   private int secretSequenceNumber;
 
-  @Column private Integer caseRef;
+  @Column private Long caseRef;
 
   @Column private String arid;
 

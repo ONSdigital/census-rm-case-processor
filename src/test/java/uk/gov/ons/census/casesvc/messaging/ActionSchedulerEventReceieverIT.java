@@ -38,6 +38,7 @@ import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class ActionSchedulerEventReceieverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
+  private static final long TEST_CASE_REF = 1234567890L;
 
   @Value("${queueconfig.action-case-queue}")
   private String actionCaseQueue;
@@ -62,7 +63,7 @@ public class ActionSchedulerEventReceieverIT {
     EasyRandom easyRandom = new EasyRandom();
     Case caze = easyRandom.nextObject(Case.class);
     caze.setCaseId(TEST_CASE_ID);
-    caze.setCaseRef(123);
+    caze.setCaseRef(TEST_CASE_REF);
     caze.setUacQidLinks(null);
     caze.setEvents(null);
     caze = caseRepository.saveAndFlush(caze);
@@ -106,7 +107,7 @@ public class ActionSchedulerEventReceieverIT {
     ObjectMapper objectMapper = new ObjectMapper();
     PayloadDTO actualPayload =
         objectMapper.readValue(actualEvent.getEventPayload(), PayloadDTO.class);
-    assertThat(123).isEqualTo(actualPayload.getPrintCaseSelected().getCaseRef());
+    assertThat(TEST_CASE_REF).isEqualTo(actualPayload.getPrintCaseSelected().getCaseRef());
     assertThat("Test packCode").isEqualTo(actualPayload.getPrintCaseSelected().getPackCode());
     assertThat("Test batchId").isEqualTo(actualPayload.getPrintCaseSelected().getBatchId());
     assertThat("Test actionRuleId")
