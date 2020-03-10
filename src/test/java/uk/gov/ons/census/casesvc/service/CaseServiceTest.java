@@ -330,7 +330,7 @@ public class CaseServiceTest {
     // Given
     Case caze = new Case();
     caze.setRegion("E");
-    caze.setCaseRef(123);
+    caze.setCaseRef(123L);
     caze.setCaseId(UUID.randomUUID());
     caze.setPostcode(TEST_POSTCODE);
     caze.setFieldCoordinatorId(FIELD_CORD_ID);
