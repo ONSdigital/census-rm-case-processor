@@ -47,7 +47,7 @@ public class UndeliveredMailReceiver {
     } else {
       caze =
           caseService.getCaseByCaseRef(
-              Integer.parseInt(event.getPayload().getFulfilmentInformation().getCaseRef()));
+              Long.parseLong(event.getPayload().getFulfilmentInformation().getCaseRef()));
     }
 
     caze.setUndeliveredAsAddressed(true);

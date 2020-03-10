@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class FieldCaseSelected {
-  private int caseRef;
+  private long caseRef;
   private String actionRuleId;
 }

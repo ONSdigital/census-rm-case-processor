@@ -229,8 +229,8 @@ public class FulfilmentRequestReceiverIT {
     List<Case> cases = caseRepository.findAll();
     assertThat(cases.size()).isEqualTo(2);
 
-    Case actualParentCase = caseRepository.findByCaseId(parentCase.getCaseId()).get();
-    Case actualChildCase = caseRepository.findByCaseId(TEST_INDIVIDUAL_CASE_ID).get();
+    Case actualParentCase = caseRepository.findById(parentCase.getCaseId()).get();
+    Case actualChildCase = caseRepository.findById(TEST_INDIVIDUAL_CASE_ID).get();
 
     // Ensure emitted RM message matches new case
     assertThat(UUID.fromString(responseManagementEvent.getPayload().getCollectionCase().getId()))
@@ -331,8 +331,8 @@ public class FulfilmentRequestReceiverIT {
     List<Case> cases = caseRepository.findAll();
     assertThat(cases.size()).isEqualTo(2);
 
-    Case actualParentCase = caseRepository.findByCaseId(parentCase.getCaseId()).get();
-    Case actualChildCase = caseRepository.findByCaseId(TEST_INDIVIDUAL_CASE_ID).get();
+    Case actualParentCase = caseRepository.findById(parentCase.getCaseId()).get();
+    Case actualChildCase = caseRepository.findById(TEST_INDIVIDUAL_CASE_ID).get();
 
     // Ensure emitted RM message matches new case
     assertThat(UUID.fromString(responseManagementEvent.getPayload().getCollectionCase().getId()))
@@ -404,8 +404,8 @@ public class FulfilmentRequestReceiverIT {
     List<Case> cases = caseRepository.findAll();
     assertThat(cases.size()).isEqualTo(2);
 
-    Case actualParentCase = caseRepository.findByCaseId(parentCase.getCaseId()).get();
-    Case actualChildCase = caseRepository.findByCaseId(TEST_INDIVIDUAL_CASE_ID).get();
+    Case actualParentCase = caseRepository.findById(parentCase.getCaseId()).get();
+    Case actualChildCase = caseRepository.findById(TEST_INDIVIDUAL_CASE_ID).get();
 
     // Ensure emitted RM message matches new case
     assertThat(UUID.fromString(responseManagementEvent.getPayload().getCollectionCase().getId()))

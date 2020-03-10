@@ -77,7 +77,7 @@ public class EventService {
   }
 
   private void processEvent(
-      int caseRef,
+      long caseRef,
       ResponseManagementEvent responseManagementEvent,
       String eventDescription,
       EventType eventType,

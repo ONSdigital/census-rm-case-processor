@@ -98,7 +98,7 @@ public class CCSPropertyListedIT {
     assertThat(ccsToFwmt.getPayload().getMetadata().getCauseEventType())
         .isEqualTo(EventTypeDTO.CCS_ADDRESS_LISTED);
 
-    Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
+    Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
     assertThat(actualCase.getSurvey()).isEqualTo("CCS");
 
     List<UacQidLink> actualUacQidLinks = uacQidLinkRepository.findAll();
@@ -135,7 +135,7 @@ public class CCSPropertyListedIT {
     // Then
     rabbitQueueHelper.checkMessageIsNotReceived(outboundQueue, 5);
 
-    Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
+    Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
     assertThat(actualCase.getSurvey()).isEqualTo("CCS");
 
     List<UacQidLink> actualUacQidLinks = uacQidLinkRepository.findAll();
@@ -170,7 +170,7 @@ public class CCSPropertyListedIT {
     // Then
     rabbitQueueHelper.checkMessageIsNotReceived(outboundQueue, 5);
 
-    Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
+    Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
     assertThat(actualCase.getSurvey()).isEqualTo("CCS");
     assertThat(actualCase.isRefusalReceived()).isTrue();
 
@@ -200,7 +200,7 @@ public class CCSPropertyListedIT {
     // Then
     rabbitQueueHelper.checkMessageIsNotReceived(outboundQueue, 5);
 
-    Case actualCase = caseRepository.findByCaseId(TEST_CASE_ID).get();
+    Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
     assertThat(actualCase.getSurvey()).isEqualTo("CCS");
     assertThat(actualCase.isAddressInvalid()).isTrue();
 

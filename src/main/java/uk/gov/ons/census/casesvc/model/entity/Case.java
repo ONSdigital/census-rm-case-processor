@@ -32,7 +32,7 @@ public class Case {
   private int secretSequenceNumber;
 
   @Column(name = "case_ref")
-  private Integer caseRef;
+  private Long caseRef;
 
   @Column private String arid;
 
