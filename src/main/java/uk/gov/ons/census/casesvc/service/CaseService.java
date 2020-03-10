@@ -79,7 +79,8 @@ public class CaseService {
 
     if (caze.getCaseType().equals("CE")) {
       Map<String, String> metadata = new HashMap<>();
-      metadata.put("secureEstablishment", createCaseSample.getSecureEstablishment().toString());
+      Boolean secureEstablishment = Boolean.valueOf(createCaseSample.getSecureEstablishment() == 1);
+      metadata.put("secureEstablishment", secureEstablishment.toString());
       caze.setMetadata(metadata);
     }
 

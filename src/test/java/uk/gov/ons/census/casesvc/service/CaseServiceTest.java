@@ -122,7 +122,7 @@ public class CaseServiceTest {
     createCaseSample.setFieldOfficerId(FIELD_OFFICER_ID);
     createCaseSample.setCeExpectedCapacity(CE_CAPACITY);
     createCaseSample.setAddressType(TEST_ADDRESS_TYPE_CE);
-    createCaseSample.setSecureEstablishment(Boolean.FALSE);
+    createCaseSample.setSecureEstablishment(0);
 
     ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
     ReflectionTestUtils.setField(
@@ -158,7 +158,7 @@ public class CaseServiceTest {
     createCaseSample.setFieldOfficerId(FIELD_OFFICER_ID);
     createCaseSample.setCeExpectedCapacity(CE_CAPACITY);
     createCaseSample.setAddressType(TEST_ADDRESS_TYPE_CE);
-    createCaseSample.setSecureEstablishment(Boolean.TRUE);
+    createCaseSample.setSecureEstablishment(0);
 
     ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
     ReflectionTestUtils.setField(

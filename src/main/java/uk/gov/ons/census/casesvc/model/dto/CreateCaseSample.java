@@ -32,5 +32,5 @@ public class CreateCaseSample {
   private Integer ceExpectedCapacity;
   private String collectionExerciseId;
   private String actionPlanId;
-  private Boolean secureEstablishment;
+  private Integer secureEstablishment;
 }
