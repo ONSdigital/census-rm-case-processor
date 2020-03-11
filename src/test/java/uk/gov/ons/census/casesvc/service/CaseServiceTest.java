@@ -30,6 +30,7 @@ import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.SampleUnitDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
+import uk.gov.ons.census.casesvc.model.entity.CaseMetadata;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -88,6 +89,7 @@ public class CaseServiceTest {
     createCaseSample.setFieldOfficerId(FIELD_OFFICER_ID);
     createCaseSample.setCeExpectedCapacity(CE_CAPACITY);
     createCaseSample.setAddressType(TEST_ADDRESS_TYPE);
+    createCaseSample.setSecureEstablishment(0);
 
     ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
     ReflectionTestUtils.setField(
@@ -112,7 +114,7 @@ public class CaseServiceTest {
     assertThat(savedCase.getCeActualResponses()).isEqualTo(0);
     assertThat(savedCase.getCaseType()).isEqualTo(TEST_ADDRESS_TYPE);
     assertThat(savedCase.isHandDelivery()).isFalse();
-    assertThat(savedCase.getMetadata()).isNull();
+    assertThat(savedCase.getMetadata().getSecureEstablishment()).isFalse();
   }
 
   @Test
@@ -148,7 +150,7 @@ public class CaseServiceTest {
     assertThat(savedCase.getCeActualResponses()).isEqualTo(0);
     assertThat(savedCase.getCaseType()).isEqualTo(TEST_ADDRESS_TYPE_CE);
     assertThat(savedCase.isHandDelivery()).isFalse();
-    assertThat(Boolean.valueOf(savedCase.getMetadata().get("secureEstablishment"))).isFalse();
+    assertThat(savedCase.getMetadata().getSecureEstablishment()).isFalse();
   }
 
   @Test
@@ -184,7 +186,7 @@ public class CaseServiceTest {
     assertThat(savedCase.getCeActualResponses()).isEqualTo(0);
     assertThat(savedCase.getCaseType()).isEqualTo(TEST_ADDRESS_TYPE_CE);
     assertThat(savedCase.isHandDelivery()).isFalse();
-    assertThat(Boolean.valueOf(savedCase.getMetadata().get("secureEstablishment"))).isTrue();
+    assertThat(savedCase.getMetadata().getSecureEstablishment()).isTrue();
   }
 
   @Test
@@ -220,7 +222,7 @@ public class CaseServiceTest {
     assertThat(savedCase.getCeActualResponses()).isEqualTo(0);
     assertThat(savedCase.getCaseType()).isEqualTo(TEST_ADDRESS_TYPE_CE);
     assertThat(savedCase.isHandDelivery()).isFalse();
-    assertThat(Boolean.valueOf(savedCase.getMetadata().get("secureEstablishment"))).isFalse();
+    assertThat(savedCase.getMetadata().getSecureEstablishment()).isFalse();
   }
 
   @Test
@@ -337,8 +339,8 @@ public class CaseServiceTest {
     caze.setFieldOfficerId(FIELD_OFFICER_ID);
     caze.setCeExpectedCapacity(CE_CAPACITY);
     caze.setCeActualResponses(CE_ACTUAL_CAPACITY);
-    Map<String, String> metadata = new HashMap<>();
-    metadata.put("secureEstablishment", "TRUE");
+    CaseMetadata metadata = new CaseMetadata();
+    metadata.setSecureEstablishment(true);
     caze.setMetadata(metadata);
     ReflectionTestUtils.setField(underTest, "outboundExchange", TEST_EXCHANGE);
 
@@ -361,7 +363,7 @@ public class CaseServiceTest {
     assertThat(collectionCase.getFieldOfficerId()).isEqualTo(FIELD_OFFICER_ID);
     assertThat(collectionCase.getCeExpectedCapacity()).isEqualTo(CE_CAPACITY);
     assertThat(collectionCase.getCeActualResponses()).isEqualTo(CE_ACTUAL_CAPACITY);
-    assertThat(Boolean.valueOf(collectionCase.getMetadata().get("secureEstablishment"))).isTrue();
+    assertThat(collectionCase.getMetadata().getSecureEstablishment()).isTrue();
   }
 
   @Test(expected = RuntimeException.class)

@@ -87,6 +87,7 @@ public class SampleReceiverIT {
     createCaseSample.setRegion("E12000009");
     createCaseSample.setTreatmentCode("HH_LF3R2E");
     createCaseSample.setCeExpectedCapacity(null);
+    createCaseSample.setSecureEstablishment(0);
     // WHEN
     rabbitQueueHelper.sendMessage(inboundQueue, createCaseSample);
 
@@ -147,6 +148,7 @@ public class SampleReceiverIT {
       createCaseSample.setAddressType("HH");
       createCaseSample.setPostcode("ABC123");
       createCaseSample.setRegion("E12000009");
+      createCaseSample.setSecureEstablishment(0);
       String treatmentCode = treatmentCodes.get(random.nextInt(treatmentCodes.size()));
       createCaseSample.setTreatmentCode(treatmentCode);
       if (treatmentCode.startsWith("HH") || random.nextBoolean()) {

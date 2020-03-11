@@ -3,7 +3,6 @@ package uk.gov.ons.census.casesvc.model.entity;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -121,5 +120,5 @@ public class Case {
 
   @Type(type = "jsonb")
   @Column(columnDefinition = "jsonb")
-  private Map<String, String> metadata;
+  private CaseMetadata metadata;
 }

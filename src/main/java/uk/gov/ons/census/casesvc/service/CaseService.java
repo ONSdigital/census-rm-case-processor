@@ -17,6 +17,7 @@ import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.SampleUnitDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
+import uk.gov.ons.census.casesvc.model.entity.CaseMetadata;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.utility.CaseRefGenerator;
 import uk.gov.ons.census.casesvc.utility.EventHelper;
@@ -77,12 +78,10 @@ public class CaseService {
     caze.setCeActualResponses(0);
     caze.setHandDelivery(isTreatmentCodeDirectDelivered(createCaseSample.getTreatmentCode()));
 
-    if (caze.getCaseType().equals("CE")) {
-      Map<String, String> metadata = new HashMap<>();
-      Boolean secureEstablishment = Boolean.valueOf(createCaseSample.getSecureEstablishment() == 1);
-      metadata.put("secureEstablishment", secureEstablishment.toString());
-      caze.setMetadata(metadata);
-    }
+    CaseMetadata metadata = new CaseMetadata();
+    Boolean secureEstablishment = Boolean.valueOf(createCaseSample.getSecureEstablishment() == 1);
+    metadata.setSecureEstablishment(secureEstablishment);
+    caze.setMetadata(metadata);
 
     return saveNewCaseAndStampCaseRef(caze);
   }
