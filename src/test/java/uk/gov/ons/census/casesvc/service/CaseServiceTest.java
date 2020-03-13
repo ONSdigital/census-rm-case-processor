@@ -118,42 +118,6 @@ public class CaseServiceTest {
   }
 
   @Test
-  public void testSaveCaseSampleCE() {
-    CreateCaseSample createCaseSample = new CreateCaseSample();
-    createCaseSample.setTreatmentCode(TEST_TREATMENT_CODE);
-    createCaseSample.setFieldCoordinatorId(FIELD_CORD_ID);
-    createCaseSample.setFieldOfficerId(FIELD_OFFICER_ID);
-    createCaseSample.setCeExpectedCapacity(CE_CAPACITY);
-    createCaseSample.setAddressType(TEST_ADDRESS_TYPE_CE);
-    createCaseSample.setSecureEstablishment(0);
-
-    ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
-    ReflectionTestUtils.setField(
-        underTest, "directDeliveryTreatmentCodes", directDeliveryTreatmentCodes);
-
-    // Given
-    when(caseRepository.saveAndFlush(any(Case.class))).then(obj -> obj.getArgument(0));
-
-    // When
-    underTest.saveCaseSample(createCaseSample);
-
-    // Then
-    verify(mapperFacade).map(createCaseSample, Case.class);
-    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(caseRepository, times(2)).saveAndFlush(caseArgumentCaptor.capture());
-
-    Case savedCase = caseArgumentCaptor.getAllValues().get(1);
-    assertThat(savedCase.getTreatmentCode()).isEqualTo(TEST_TREATMENT_CODE);
-    assertThat(savedCase.getFieldCoordinatorId()).isEqualTo(FIELD_CORD_ID);
-    assertThat(savedCase.getFieldOfficerId()).isEqualTo(FIELD_OFFICER_ID);
-    assertThat(savedCase.getCeExpectedCapacity()).isEqualTo(CE_CAPACITY);
-    assertThat(savedCase.getCeActualResponses()).isEqualTo(0);
-    assertThat(savedCase.getCaseType()).isEqualTo(TEST_ADDRESS_TYPE_CE);
-    assertThat(savedCase.isHandDelivery()).isFalse();
-    assertThat(savedCase.getMetadata().getSecureEstablishment()).isFalse();
-  }
-
-  @Test
   public void testSaveCaseSampleCESecureTrue() {
     CreateCaseSample createCaseSample = new CreateCaseSample();
     createCaseSample.setTreatmentCode(TEST_TREATMENT_CODE);
