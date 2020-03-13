@@ -46,7 +46,7 @@ public class CaseReceiptService {
     rules.put(new Key("HI", "U", IND), new Rule(receiptCase, null));
     rules.put(new Key("CE", "E", IND), new Rule(incrementNoReceipt, ActionInstructionType.UPDATE));
     rules.put(new Key("CE", "E", CE1), new Rule(receiptCase, ActionInstructionType.UPDATE));
-    rules.put(new Key("CE", "U", IND), new Rule(incrementAndReceipt, ActionInstructionType.UPDATE));
+    rules.put(new Key("CE", "U", IND), new CeUnitRule());
     rules.put(new Key("SPG", "E", HH), new NoActionRequired());
     rules.put(new Key("SPG", "E", IND), new NoActionRequired());
     rules.put(new Key("SPG", "U", HH), new Rule(receiptCase, ActionInstructionType.CLOSE));
@@ -101,17 +101,6 @@ public class CaseReceiptService {
         return lockedCase;
       };
 
-  Function<Case, Case> incrementAndReceipt =
-      (caze) -> {
-        Case lockedCase = incrementNoReceipt.apply(caze);
-
-        if (lockedCase.getCeActualResponses() >= lockedCase.getCeExpectedCapacity()) {
-          lockedCase.setReceiptReceived(true);
-        }
-
-        return lockedCase;
-      };
-
   Function<Case, Case> receiptCase =
       (caze) -> {
         caze.setReceiptReceived(true);
@@ -140,6 +129,22 @@ public class CaseReceiptService {
       Case updatedCase = functionToExecute.apply(caze);
       caseService.saveCaseAndEmitCaseUpdatedEvent(
           updatedCase, buildMetadata(causeEventType, fieldInstruction));
+    }
+  }
+
+  private class CeUnitRule implements UpdateAndEmitCaseRule {
+    public void run(Case caze, EventTypeDTO causeEventType) {
+      ActionInstructionType fieldInstruction = ActionInstructionType.UPDATE;
+
+      Case lockedCase = incrementNoReceipt.apply(caze);
+
+      if (lockedCase.getCeActualResponses() >= lockedCase.getCeExpectedCapacity()) {
+        lockedCase.setReceiptReceived(true);
+        fieldInstruction = ActionInstructionType.CLOSE;
+      }
+
+      caseService.saveCaseAndEmitCaseUpdatedEvent(
+          lockedCase, buildMetadata(causeEventType, fieldInstruction));
     }
   }
 

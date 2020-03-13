@@ -52,7 +52,7 @@ public class CaseReceiptServiceTest {
       {new Key("CE", "E", "CE1"), new Expectation("N", "Y", ActionInstructionType.UPDATE)},
       {new Key("CE", "E", "Cont"), new Expectation(RuntimeException.class)},
       {new Key("CE", "E", "HH"), new Expectation(RuntimeException.class)},
-      {new Key("CE", "U", "Ind"), new Expectation("Y", "Y AR >= ER", ActionInstructionType.UPDATE)},
+      {new Key("CE", "U", "Ind"), new Expectation("Y", "Y AR >= ER", ActionInstructionType.CLOSE)},
       {new Key("CE", "U", "Ind"), new Expectation("Y", "N AR < ER", ActionInstructionType.UPDATE)},
       {new Key("CE", "U", "CE1"), new Expectation(RuntimeException.class)},
       {new Key("CE", "U", "Cont"), new Expectation(RuntimeException.class)},
