@@ -3,6 +3,8 @@ package uk.gov.ons.census.casesvc.service;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.isIndividualQuestionnaireType;
 
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
 @Service
 public class QuestionnaireLinkedService {
+  private static final Logger log = LoggerFactory.getLogger(QuestionnaireLinkedService.class);
   private static final String QUESTIONNAIRE_LINKED = "Questionnaire Linked";
 
   private final UacService uacService;
@@ -39,7 +42,7 @@ public class QuestionnaireLinkedService {
     String questionnaireId = uac.getQuestionnaireId();
     UacQidLink uacQidLink = uacService.findByQid(questionnaireId);
 
-    checkQidNotLinkedToAnotherCase(uac, uacQidLink);
+    logErrorIfQidIsLinkedToAnotherCase(uac, uacQidLink, uac.getCaseId());
 
     Case caze = caseService.getCaseByCaseId(UUID.fromString(uac.getCaseId()));
 
@@ -67,11 +70,15 @@ public class QuestionnaireLinkedService {
         messageTimestamp);
   }
 
-  private void checkQidNotLinkedToAnotherCase(UacDTO uac, UacQidLink uacQidLink) {
+  private void logErrorIfQidIsLinkedToAnotherCase(
+      UacDTO uac, UacQidLink uacQidLink, String newLinkedCaseId) {
     if (uacQidLink.getCaze() != null
         && !uacQidLink.getCaze().getCaseId().equals(UUID.fromString(uac.getCaseId()))) {
-      throw new RuntimeException(
-          "UacQidLink already linked to case id: " + uacQidLink.getCaze().getCaseId());
+      log.with("uac_qid_link_id", uacQidLink.getId())
+          .with("previous_case_id", uacQidLink.getCaze().getCaseId())
+          .with("new_case_id", newLinkedCaseId)
+          .error(
+              "Received QID link for QID that was previously linked to a different case, re-linking to new case");
     }
   }
 }
