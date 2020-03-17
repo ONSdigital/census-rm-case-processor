@@ -74,7 +74,7 @@ public class QuestionnaireLinkedService {
       UacDTO uac, UacQidLink uacQidLink, String newLinkedCaseId) {
     if (uacQidLink.getCaze() != null
         && !uacQidLink.getCaze().getCaseId().equals(UUID.fromString(uac.getCaseId()))) {
-      log.with("uac_qid_link_id", uacQidLink.getId())
+      log.with("qid", uacQidLink.getQid())
           .with("previous_case_id", uacQidLink.getCaze().getCaseId())
           .with("new_case_id", newLinkedCaseId)
           .error(
