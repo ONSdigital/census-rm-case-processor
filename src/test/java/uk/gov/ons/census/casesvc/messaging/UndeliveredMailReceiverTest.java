@@ -9,14 +9,18 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.testutil.MessageConstructor.constructMessageWithValidTimeStamp;
+import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
 import java.time.OffsetDateTime;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.messaging.Message;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
+import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
+import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.FulfilmentInformation;
+import uk.gov.ons.census.casesvc.model.dto.Metadata;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -34,6 +38,7 @@ public class UndeliveredMailReceiverTest {
     ResponseManagementEvent event = new ResponseManagementEvent();
     event.setEvent(new EventDTO());
     event.getEvent().setDateTime(OffsetDateTime.now());
+    event.getEvent().setType(EventTypeDTO.UNDELIVERED_MAIL_REPORTED);
     event.setPayload(new PayloadDTO());
     event.getPayload().setFulfilmentInformation(new FulfilmentInformation());
     event.getPayload().getFulfilmentInformation().setCaseRef(Long.toString(TEST_CASE_REF));
@@ -57,7 +62,10 @@ public class UndeliveredMailReceiverTest {
 
     // Then
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(caseService).saveCaseAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture());
+    Metadata expectedMetadata =
+        buildMetadata(EventTypeDTO.UNDELIVERED_MAIL_REPORTED, ActionInstructionType.CREATE);
+    verify(caseService)
+        .saveCaseAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture(), eq(expectedMetadata));
     Case actualCase = caseArgumentCaptor.getValue();
     assertThat(actualCase).isEqualTo(caze);
     assertThat(caseArgumentCaptor.getValue().isUndeliveredAsAddressed()).isTrue();
@@ -81,6 +89,7 @@ public class UndeliveredMailReceiverTest {
     ResponseManagementEvent event = new ResponseManagementEvent();
     event.setEvent(new EventDTO());
     event.getEvent().setDateTime(OffsetDateTime.now());
+    event.getEvent().setType(EventTypeDTO.UNDELIVERED_MAIL_REPORTED);
     event.setPayload(new PayloadDTO());
     event.getPayload().setFulfilmentInformation(new FulfilmentInformation());
     event.getPayload().getFulfilmentInformation().setQuestionnaireId("76543");
@@ -105,7 +114,10 @@ public class UndeliveredMailReceiverTest {
 
     // Then
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(caseService).saveCaseAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture());
+    Metadata expectedMetadata =
+        buildMetadata(EventTypeDTO.UNDELIVERED_MAIL_REPORTED, ActionInstructionType.CREATE);
+    verify(caseService)
+        .saveCaseAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture(), eq(expectedMetadata));
     Case actualCase = caseArgumentCaptor.getValue();
     assertThat(actualCase).isEqualTo(caze);
     assertThat(caseArgumentCaptor.getValue().isUndeliveredAsAddressed()).isTrue();
