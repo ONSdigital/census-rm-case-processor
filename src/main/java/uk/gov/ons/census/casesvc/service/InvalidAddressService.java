@@ -30,10 +30,6 @@ public class InvalidAddressService {
 
   public void processMessage(
       ResponseManagementEvent invalidAddressEvent, OffsetDateTime messageTimestamp) {
-    if (!processEvent(invalidAddressEvent, messageTimestamp)) {
-      return;
-    }
-
     InvalidAddress invalidAddress = invalidAddressEvent.getPayload().getInvalidAddress();
 
     Case caze =
@@ -45,62 +41,13 @@ public class InvalidAddressService {
         caze, buildMetadataForInvalidAddress(invalidAddressEvent));
 
     eventLogger.logCaseEvent(
-        caze,
-        invalidAddressEvent.getEvent().getDateTime(),
-        "Invalid address",
-        EventType.ADDRESS_NOT_VALID,
-        invalidAddressEvent.getEvent(),
-        convertObjectToJson(invalidAddress),
-        messageTimestamp);
-  }
-
-  private boolean processEvent(
-      ResponseManagementEvent addressEvent, OffsetDateTime messageTimestamp) {
-    String logEventDescription;
-    EventType logEventType;
-    JsonNode logEventPayload;
-    EventDTO event = addressEvent.getEvent();
-
-    switch (event.getType()) {
-      case ADDRESS_NOT_VALID:
-        return true;
-
-      case ADDRESS_MODIFIED:
-        logEventDescription = "Address modified";
-        logEventType = EventType.ADDRESS_MODIFIED;
-        logEventPayload = addressEvent.getPayload().getAddressModification();
-        break;
-
-      case ADDRESS_TYPE_CHANGED:
-        logEventDescription = "Address type changed";
-        logEventType = EventType.ADDRESS_TYPE_CHANGED;
-        logEventPayload = addressEvent.getPayload().getAddressTypeChange();
-        break;
-
-      case NEW_ADDRESS_REPORTED:
-        logEventDescription = "New Address reported";
-        logEventType = EventType.NEW_ADDRESS_REPORTED;
-        logEventPayload = addressEvent.getPayload().getNewAddressReported();
-        break;
-
-      default:
-        // Should never get here
-        throw new RuntimeException(
-            String.format("Event Type '%s' is invalid on this topic", event.getType()));
-    }
-
-    Case caze = caseService.getCaseByCaseId(getCaseId(logEventPayload));
-
-    eventLogger.logCaseEvent(
-        caze,
-        addressEvent.getEvent().getDateTime(),
-        logEventDescription,
-        logEventType,
-        event,
-        JsonHelper.convertObjectToJson(logEventPayload),
-        messageTimestamp);
-
-    return false;
+            caze,
+            invalidAddressEvent.getEvent().getDateTime(),
+            "Invalid address",
+            EventType.ADDRESS_NOT_VALID,
+            invalidAddressEvent.getEvent(),
+            convertObjectToJson(invalidAddress),
+            messageTimestamp);
   }
 
   private Metadata buildMetadataForInvalidAddress(ResponseManagementEvent event) {
@@ -108,9 +55,5 @@ public class InvalidAddressService {
       return buildMetadata(event.getEvent().getType(), ActionInstructionType.CLOSE);
     }
     return buildMetadata(event.getEvent().getType(), null);
-  }
-
-  private UUID getCaseId(JsonNode json) {
-    return UUID.fromString(json.at("/collectionCase/id").asText());
   }
 }

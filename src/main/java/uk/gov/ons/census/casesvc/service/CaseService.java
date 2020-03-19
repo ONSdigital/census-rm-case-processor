@@ -224,6 +224,7 @@ public class CaseService {
     collectionCase.setAddressInvalid(caze.isAddressInvalid());
     collectionCase.setUndeliveredAsAddressed(caze.isUndeliveredAsAddressed());
     collectionCase.setHandDelivery(caze.isHandDelivery());
+    collectionCase.setSkellingtonCase(caze.isSkellingtonCase());
     // Yes. You can add stuff to the bottom of this list if you like.
 
     return collectionCase;

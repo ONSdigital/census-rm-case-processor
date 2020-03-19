@@ -125,4 +125,7 @@ public class Case {
 
   @Column(columnDefinition = "BOOLEAN DEFAULT false")
   private boolean handDelivery;
+
+  @Column(columnDefinition = "BOOLEAN DEFAULT false")
+  private boolean skellingtonCase;
 }

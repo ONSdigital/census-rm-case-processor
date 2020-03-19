@@ -1,12 +1,10 @@
 package uk.gov.ons.census.casesvc.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 import static org.skyscreamer.jsonassert.JSONCompareMode.STRICT;
 import static org.springframework.data.domain.Sort.Direction.ASC;
-import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.ADDRESS_MODIFIED;
-import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.ADDRESS_TYPE_CHANGED;
-import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.NEW_ADDRESS_REPORTED;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.createNewAddressReportedJson;
+import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.*;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.createTestAddressModifiedJson;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.createTestAddressTypeChangeJson;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
@@ -36,11 +34,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
+import uk.gov.ons.census.casesvc.model.dto.Address;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCaseCaseId;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.InvalidAddress;
+import uk.gov.ons.census.casesvc.model.dto.NewAddressReported;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -57,11 +57,11 @@ import uk.gov.ons.census.casesvc.utility.JsonHelper;
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @RunWith(SpringJUnit4ClassRunner.class)
-public class InvalidAddressReceiverIT {
+public class AddressReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
 
-  @Value("${queueconfig.invalid-address-inbound-queue}")
-  private String invalidAddressInboundQueue;
+  @Value("${queueconfig.address-inbound-queue}")
+  private String addressReceiver;
 
   @Value("${queueconfig.rh-case-queue}")
   private String rhCaseQueue;
@@ -74,7 +74,7 @@ public class InvalidAddressReceiverIT {
   @Before
   @Transactional
   public void setUp() {
-    rabbitQueueHelper.purgeQueue(invalidAddressInboundQueue);
+    rabbitQueueHelper.purgeQueue(addressReceiver);
     rabbitQueueHelper.purgeQueue(rhCaseQueue);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
@@ -117,7 +117,7 @@ public class InvalidAddressReceiverIT {
             .build();
 
     // WHEN
-    rabbitQueueHelper.sendMessage(invalidAddressInboundQueue, message);
+    rabbitQueueHelper.sendMessage(addressReceiver, message);
 
     // THEN
 
@@ -176,18 +176,58 @@ public class InvalidAddressReceiverIT {
   }
 
   @Test
-  public void testNewAddressReportedEventTypeLoggedOnly()
-      throws InterruptedException, JSONException {
-    PayloadDTO payload = new PayloadDTO();
-    payload.setNewAddressReported(createNewAddressReportedJson(TEST_CASE_ID));
+  public void testNewAddressCallsNewAddressReportedService()
+          throws InterruptedException,IOException {
+    // GIVEN
+    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
 
-    testEventTypeLoggedOnly(
-        payload,
-        JsonHelper.convertObjectToJson(payload.getNewAddressReported()),
-        NEW_ADDRESS_REPORTED,
-        EventType.NEW_ADDRESS_REPORTED,
-        "New Address reported");
+    Address address = new Address();
+    address.setAddressLevel("E");
+    address.setRegion("W");
+
+    CollectionCase collectionCase = new CollectionCase();
+    collectionCase.setId(UUID.randomUUID().toString());
+    collectionCase.setCaseType("HH");
+    collectionCase.setAddress(address);
+
+    NewAddressReported newAddressReported = new NewAddressReported();
+    newAddressReported.setCollectionCase(collectionCase);
+
+    EventDTO eventDTO = new EventDTO();
+    eventDTO.setType(NEW_ADDRESS_REPORTED);
+    eventDTO.setDateTime(OffsetDateTime.now());
+
+    ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
+    responseManagementEvent.setEvent(eventDTO);
+
+    PayloadDTO payloadDTO = new PayloadDTO();
+    payloadDTO.setNewAddressReported(newAddressReported);
+    responseManagementEvent.setPayload(payloadDTO);
+
+    // WHEN
+    rabbitQueueHelper.sendMessage(addressReceiver, responseManagementEvent);
+
+    // THEN
+    ResponseManagementEvent actualResponseManagementEvent =
+            rabbitQueueHelper.checkExpectedMessageReceived(outboundQueue);
+
+    assertThat(actualResponseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_CREATED);
+    CollectionCase actualPayloadCase = actualResponseManagementEvent.getPayload().getCollectionCase();
+    assertThat(actualPayloadCase.getId()).isEqualTo(collectionCase.getId());
+    assertThat(actualPayloadCase.isSkellingtonCase()).isTrue().as("Is Skellington Case");
+
+    Case actualCase = caseRepository.findById(UUID.fromString(collectionCase.getId())).get();
+    assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
+    assertThat(actualCase.isSkellingtonCase()).isTrue().as("Is Skellington Case In DB");
+
+    // check database for log eventDTO
+    List<Event> events = eventRepository.findAll();
+    assertThat(events.size()).isEqualTo(1);
+    Event event = events.get(0);
+    assertThat(event.getEventDescription()).isEqualTo("New Address reported");
+    assertThat(event.getEventType()).isEqualTo(EventType.NEW_ADDRESS_REPORTED);
   }
+
 
   public void testEventTypeLoggedOnly(
       PayloadDTO payload,
@@ -220,7 +260,7 @@ public class InvalidAddressReceiverIT {
         MessageBuilder.withBody(json.getBytes())
             .setContentType(MessageProperties.CONTENT_TYPE_JSON)
             .build();
-    rabbitQueueHelper.sendMessage(invalidAddressInboundQueue, message);
+    rabbitQueueHelper.sendMessage(addressReceiver, message);
 
     // Check no message emitted
     rabbitQueueHelper.checkMessageIsNotReceived(outboundQueue, 3);
