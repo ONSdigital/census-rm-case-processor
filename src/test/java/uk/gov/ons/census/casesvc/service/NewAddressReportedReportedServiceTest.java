@@ -1,5 +1,13 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.OffsetDateTime;
+import java.util.UUID;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,20 +26,10 @@ import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.utility.JsonHelper;
 
-import java.time.OffsetDateTime;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @RunWith(MockitoJUnitRunner.class)
 public class NewAddressReportedReportedServiceTest {
 
-  @InjectMocks
-  NewAddressReportedService underTest;
+  @InjectMocks NewAddressReportedService underTest;
 
   @Mock CaseService caseService;
   @Mock EventLogger eventLogger;
@@ -113,7 +111,11 @@ public class NewAddressReportedReportedServiceTest {
   @Test(expected = RuntimeException.class)
   public void testBadCasetype() {
     ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
-    newAddressEvent.getPayload().getNewAddressReported().getCollectionCase().setCaseType("BadCaseType");
+    newAddressEvent
+        .getPayload()
+        .getNewAddressReported()
+        .getCollectionCase()
+        .setCaseType("BadCaseType");
 
     try {
       underTest.processNewAddress(newAddressEvent, OffsetDateTime.now());

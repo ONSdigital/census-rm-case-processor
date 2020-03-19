@@ -1,7 +1,6 @@
 package uk.gov.ons.census.casesvc.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
 import static org.skyscreamer.jsonassert.JSONCompareMode.STRICT;
 import static org.springframework.data.domain.Sort.Direction.ASC;
 import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.*;
@@ -177,7 +176,7 @@ public class AddressReceiverIT {
 
   @Test
   public void testNewAddressCallsNewAddressReportedService()
-          throws InterruptedException,IOException {
+      throws InterruptedException, IOException {
     // GIVEN
     BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
 
@@ -209,10 +208,12 @@ public class AddressReceiverIT {
 
     // THEN
     ResponseManagementEvent actualResponseManagementEvent =
-            rabbitQueueHelper.checkExpectedMessageReceived(outboundQueue);
+        rabbitQueueHelper.checkExpectedMessageReceived(outboundQueue);
 
-    assertThat(actualResponseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_CREATED);
-    CollectionCase actualPayloadCase = actualResponseManagementEvent.getPayload().getCollectionCase();
+    assertThat(actualResponseManagementEvent.getEvent().getType())
+        .isEqualTo(EventTypeDTO.CASE_CREATED);
+    CollectionCase actualPayloadCase =
+        actualResponseManagementEvent.getPayload().getCollectionCase();
     assertThat(actualPayloadCase.getId()).isEqualTo(collectionCase.getId());
     assertThat(actualPayloadCase.isSkellingtonCase()).isTrue().as("Is Skellington Case");
 
@@ -227,7 +228,6 @@ public class AddressReceiverIT {
     assertThat(event.getEventDescription()).isEqualTo("New Address reported");
     assertThat(event.getEventType()).isEqualTo(EventType.NEW_ADDRESS_REPORTED);
   }
-
 
   public void testEventTypeLoggedOnly(
       PayloadDTO payload,

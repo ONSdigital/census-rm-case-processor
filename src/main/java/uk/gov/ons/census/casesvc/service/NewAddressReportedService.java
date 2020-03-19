@@ -1,5 +1,9 @@
 package uk.gov.ons.census.casesvc.service;
 
+import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
@@ -7,11 +11,6 @@ import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.utility.JsonHelper;
-
-import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
 
 @Component
 public class NewAddressReportedService {

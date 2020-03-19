@@ -1,5 +1,12 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
+import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.ADDRESS_NOT_VALID;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
+
+import java.time.OffsetDateTime;
+import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -16,14 +23,6 @@ import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
-
-import java.time.OffsetDateTime;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.ADDRESS_NOT_VALID;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InvalidAddressServiceTest {
@@ -74,14 +73,14 @@ public class InvalidAddressServiceTest {
     assertThat(metadata.getFieldDecision()).isEqualTo(ActionInstructionType.CLOSE);
 
     verify(eventLogger)
-                .logCaseEvent(
-                        eq(expectedCase),
-                        any(OffsetDateTime.class),
-                        eq("Invalid address"),
-                        eq(EventType.ADDRESS_NOT_VALID),
-                        eq(managementEvent.getEvent()),
-                        anyString(),
-                        eq(messageTimestamp));
-        verifyNoMoreInteractions(eventLogger);
+        .logCaseEvent(
+            eq(expectedCase),
+            any(OffsetDateTime.class),
+            eq("Invalid address"),
+            eq(EventType.ADDRESS_NOT_VALID),
+            eq(managementEvent.getEvent()),
+            anyString(),
+            eq(messageTimestamp));
+    verifyNoMoreInteractions(eventLogger);
   }
 }

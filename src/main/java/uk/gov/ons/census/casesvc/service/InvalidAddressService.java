@@ -4,19 +4,16 @@ import static uk.gov.ons.census.casesvc.utility.EventHelper.isEventChannelField;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
-import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.InvalidAddress;
 import uk.gov.ons.census.casesvc.model.dto.Metadata;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
-import uk.gov.ons.census.casesvc.utility.JsonHelper;
 
 @Component
 public class InvalidAddressService {
@@ -41,13 +38,13 @@ public class InvalidAddressService {
         caze, buildMetadataForInvalidAddress(invalidAddressEvent));
 
     eventLogger.logCaseEvent(
-            caze,
-            invalidAddressEvent.getEvent().getDateTime(),
-            "Invalid address",
-            EventType.ADDRESS_NOT_VALID,
-            invalidAddressEvent.getEvent(),
-            convertObjectToJson(invalidAddress),
-            messageTimestamp);
+        caze,
+        invalidAddressEvent.getEvent().getDateTime(),
+        "Invalid address",
+        EventType.ADDRESS_NOT_VALID,
+        invalidAddressEvent.getEvent(),
+        convertObjectToJson(invalidAddress),
+        messageTimestamp);
   }
 
   private Metadata buildMetadataForInvalidAddress(ResponseManagementEvent event) {

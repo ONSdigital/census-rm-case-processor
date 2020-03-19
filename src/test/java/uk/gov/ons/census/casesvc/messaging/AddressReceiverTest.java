@@ -1,5 +1,14 @@
 package uk.gov.ons.census.casesvc.messaging;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.Mockito.*;
+import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.*;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.*;
+import static uk.gov.ons.census.casesvc.testutil.MessageConstructor.constructMessageWithValidTimeStamp;
+
+import java.io.IOException;
+import java.time.OffsetDateTime;
+import java.util.UUID;
 import org.json.JSONException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -8,10 +17,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.messaging.Message;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
-import uk.gov.ons.census.casesvc.model.dto.CollectionCaseCaseId;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
-import uk.gov.ons.census.casesvc.model.dto.InvalidAddress;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -21,17 +28,6 @@ import uk.gov.ons.census.casesvc.service.InvalidAddressService;
 import uk.gov.ons.census.casesvc.service.NewAddressReportedService;
 import uk.gov.ons.census.casesvc.utility.JsonHelper;
 import uk.gov.ons.census.casesvc.utility.MsgDateHelper;
-
-import java.io.IOException;
-import java.time.OffsetDateTime;
-import java.util.UUID;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.*;
-import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.*;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.*;
-import static uk.gov.ons.census.casesvc.testutil.MessageConstructor.constructMessageWithValidTimeStamp;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AddressReceiverTest {
@@ -54,7 +50,8 @@ public class AddressReceiverTest {
     EventDTO event = new EventDTO();
     event.setType(ADDRESS_NOT_VALID);
     responseManagementEvent.setEvent(event);
-    Message<ResponseManagementEvent> message = constructMessageWithValidTimeStamp(responseManagementEvent);
+    Message<ResponseManagementEvent> message =
+        constructMessageWithValidTimeStamp(responseManagementEvent);
     OffsetDateTime expectedDateTime = MsgDateHelper.getMsgTimeStamp(message);
 
     underTest.receiveMessage(message);
@@ -68,12 +65,14 @@ public class AddressReceiverTest {
     EventDTO event = new EventDTO();
     event.setType(NEW_ADDRESS_REPORTED);
     responseManagementEvent.setEvent(event);
-    Message<ResponseManagementEvent> message = constructMessageWithValidTimeStamp(responseManagementEvent);
+    Message<ResponseManagementEvent> message =
+        constructMessageWithValidTimeStamp(responseManagementEvent);
     OffsetDateTime expectedDateTime = MsgDateHelper.getMsgTimeStamp(message);
 
     underTest.receiveMessage(message);
 
-    verify(newAddressReportedService).processNewAddress(eq(responseManagementEvent), eq(expectedDateTime));
+    verify(newAddressReportedService)
+        .processNewAddress(eq(responseManagementEvent), eq(expectedDateTime));
   }
 
   @Test

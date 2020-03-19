@@ -2,10 +2,9 @@ package uk.gov.ons.census.casesvc.messaging;
 
 import static uk.gov.ons.census.casesvc.utility.MsgDateHelper.getMsgTimeStamp;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.time.OffsetDateTime;
 import java.util.UUID;
-
-import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
