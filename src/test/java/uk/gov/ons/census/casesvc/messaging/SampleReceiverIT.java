@@ -82,10 +82,12 @@ public class SampleReceiverIT {
     BlockingQueue<String> actionMessages = rabbitQueueHelper.listen(actionSchedulerQueue);
 
     CreateCaseSample createCaseSample = new CreateCaseSample();
+    createCaseSample.setAddressType("HH");
     createCaseSample.setPostcode("ABC123");
     createCaseSample.setRegion("E12000009");
     createCaseSample.setTreatmentCode("HH_LF3R2E");
     createCaseSample.setCeExpectedCapacity(null);
+    createCaseSample.setSecureEstablishment(0);
     // WHEN
     rabbitQueueHelper.sendMessage(inboundQueue, createCaseSample);
 
@@ -143,8 +145,10 @@ public class SampleReceiverIT {
 
     for (int i = 0; i < expectedSize; i++) {
       CreateCaseSample createCaseSample = new CreateCaseSample();
+      createCaseSample.setAddressType("HH");
       createCaseSample.setPostcode("ABC123");
       createCaseSample.setRegion("E12000009");
+      createCaseSample.setSecureEstablishment(0);
       String treatmentCode = treatmentCodes.get(random.nextInt(treatmentCodes.size()));
       createCaseSample.setTreatmentCode(treatmentCode);
       if (treatmentCode.startsWith("HH") || random.nextBoolean()) {

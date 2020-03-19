@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.time.OffsetDateTime;
 import lombok.Data;
+import uk.gov.ons.census.casesvc.model.entity.CaseMetadata;
 
 @Data
 @JsonInclude(Include.NON_NULL)
@@ -35,4 +36,5 @@ public class CollectionCase {
   private Boolean undeliveredAsAddressed;
   private boolean handDelivery;
   private boolean skellingtonCase;
+  private CaseMetadata metadata;
 }

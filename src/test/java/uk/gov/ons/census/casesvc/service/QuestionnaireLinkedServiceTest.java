@@ -291,31 +291,54 @@ public class QuestionnaireLinkedServiceTest {
     verifyNoMoreInteractions(eventLogger);
   }
 
-  @Test(expected = RuntimeException.class)
-  public void testAlreadyLinkedToDifferentCaseUacQidThrowsException() {
+  @Test
+  public void testQidAlreadyLinkedToDifferentCaseCanBeReLinked() {
+    // Given
     ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
     UacDTO uac = managementEvent.getPayload().getUac();
     uac.setCaseId(TEST_CASE_ID_1.toString());
     uac.setQuestionnaireId(TEST_HI_QID);
 
-    Case caze = getRandomCase();
-    caze.setCaseId(UUID.randomUUID());
+    Case testCase = getRandomCase();
+    testCase.setCaseId(UUID.randomUUID());
 
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setQid(TEST_HI_QID);
-    uacQidLink.setCaze(caze);
+    uacQidLink.setCaze(testCase);
 
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     when(uacService.findByQid(TEST_HI_QID)).thenReturn(uacQidLink);
+    when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testCase);
 
-    try {
-      underTest.processQuestionnaireLinked(managementEvent, messageTimestamp);
-    } catch (RuntimeException rte) {
-      assertThat(rte.getMessage())
-          .isEqualTo("UacQidLink already linked to case id: " + caze.getCaseId());
-      throw rte;
-    }
+    // When
+    underTest.processQuestionnaireLinked(managementEvent, messageTimestamp);
+
+    // Then
+    InOrder inOrder = inOrder(uacService, caseService, eventLogger);
+
+    inOrder.verify(uacService).findByQid(anyString());
+
+    inOrder.verify(caseService).getCaseByCaseId(any(UUID.class));
+    verifyNoMoreInteractions(caseService);
+
+    ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
+    inOrder.verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
+    UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
+    assertThat(actualUacQidLink.getQid()).isEqualTo(uacQidLink.getQid());
+    assertThat(actualUacQidLink.getUac()).isEqualTo(uacQidLink.getUac());
+    verifyNoMoreInteractions(uacService);
+
+    verify(eventLogger)
+        .logUacQidEvent(
+            eq(uacQidLink),
+            any(OffsetDateTime.class),
+            eq("Questionnaire Linked"),
+            eq(EventType.QUESTIONNAIRE_LINKED),
+            eq(managementEvent.getEvent()),
+            anyString(),
+            eq(messageTimestamp));
+    verifyNoMoreInteractions(eventLogger);
   }
 
   @Test

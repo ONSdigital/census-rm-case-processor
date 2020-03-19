@@ -1,9 +1,7 @@
 package uk.gov.ons.census.casesvc.service;
 
 import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +17,7 @@ import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.SampleUnitDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
+import uk.gov.ons.census.casesvc.model.entity.CaseMetadata;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.utility.CaseRefGenerator;
 import uk.gov.ons.census.casesvc.utility.EventHelper;
@@ -78,6 +77,11 @@ public class CaseService {
     caze.setSurvey(CENSUS_SURVEY);
     caze.setCeActualResponses(0);
     caze.setHandDelivery(isTreatmentCodeDirectDelivered(createCaseSample.getTreatmentCode()));
+
+    CaseMetadata metadata = new CaseMetadata();
+    Boolean secureEstablishment = Boolean.valueOf(createCaseSample.getSecureEstablishment() == 1);
+    metadata.setSecureEstablishment(secureEstablishment);
+    caze.setMetadata(metadata);
 
     return saveNewCaseAndStampCaseRef(caze);
   }
@@ -225,6 +229,7 @@ public class CaseService {
     collectionCase.setUndeliveredAsAddressed(caze.isUndeliveredAsAddressed());
     collectionCase.setHandDelivery(caze.isHandDelivery());
     collectionCase.setSkellingtonCase(caze.isSkellingtonCase());
+    collectionCase.setMetadata(caze.getMetadata());
     // Yes. You can add stuff to the bottom of this list if you like.
 
     return collectionCase;
