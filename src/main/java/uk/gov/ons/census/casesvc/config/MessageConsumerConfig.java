@@ -217,7 +217,7 @@ public class MessageConsumerConfig {
   }
 
   @Bean
-  AmqpInboundChannelAdapter invalidAddressInbound(
+  AmqpInboundChannelAdapter addressInbound(
       @Qualifier("addressContainer") SimpleMessageListenerContainer listenerContainer,
       @Qualifier("addressInputChannel") MessageChannel channel) {
     AmqpInboundChannelAdapter adapter = new AmqpInboundChannelAdapter(listenerContainer);
