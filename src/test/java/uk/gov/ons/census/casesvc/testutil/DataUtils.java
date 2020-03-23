@@ -116,6 +116,27 @@ public class DataUtils {
     payload.setRefusal(null);
     payload.setPrintCaseSelected(null);
 
+    payload.getResponse().setUnreceipt(false);
+
+    return managementEvent;
+  }
+
+  public static ResponseManagementEvent getTestResponseManagementReceiptEventUnreceipt() {
+    ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
+
+    EventDTO event = managementEvent.getEvent();
+    event.setType(EventTypeDTO.RESPONSE_RECEIVED);
+    event.setSource("RECEIPT_SERVICE");
+    event.setChannel("EQ");
+
+    PayloadDTO payload = managementEvent.getPayload();
+    payload.setUac(null);
+    payload.setCollectionCase(null);
+    payload.setRefusal(null);
+    payload.setPrintCaseSelected(null);
+
+    payload.getResponse().setUnreceipt(true);
+
     return managementEvent;
   }
 
