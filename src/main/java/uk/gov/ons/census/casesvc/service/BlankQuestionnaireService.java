@@ -40,8 +40,6 @@ public class BlankQuestionnaireService {
   public void handleBlankQuestionnaire(UacQidLink uacQidLink, EventTypeDTO causeEventType) {
     Case caze = uacQidLink.getCaze();
 
-    if (caze.isReceiptReceived()) return;
-
     BlankQuestionnaireService.Key ruleKey = makeRulesKey(caze, uacQidLink);
 
     if (!rules.containsKey(ruleKey)) {
