@@ -18,21 +18,31 @@ public class QidReceiptService {
 
   private static final Logger log = LoggerFactory.getLogger(QidReceiptService.class);
   public static final String QID_RECEIPTED = "QID Receipted";
+  public static final String BLANK_QUESTIONNAIRE_RECEIVED = "Blank questionnaire received";
   private final UacService uacService;
   private final EventLogger eventLogger;
   private final CaseReceiptService caseReceiptService;
+  private final BlankQuestionnaireService blankQuestionnaireService;
 
   public QidReceiptService(
-      UacService uacService, EventLogger eventLogger, CaseReceiptService caseReceiptService) {
+      UacService uacService,
+      EventLogger eventLogger,
+      CaseReceiptService caseReceiptService,
+      BlankQuestionnaireService blankQuestionnaireService) {
     this.uacService = uacService;
     this.eventLogger = eventLogger;
     this.caseReceiptService = caseReceiptService;
+    this.blankQuestionnaireService = blankQuestionnaireService;
   }
 
   public void processReceipt(
       ResponseManagementEvent receiptEvent, OffsetDateTime messageTimestamp) {
     ResponseDTO receiptPayload = receiptEvent.getPayload().getResponse();
     UacQidLink uacQidLink = uacService.findByQid(receiptPayload.getQuestionnaireId());
+    if (receiptPayload.getUnreceipt()) {
+      processUnreceipt(receiptEvent, messageTimestamp, uacQidLink);
+      return;
+    }
     uacQidLink.setActive(false);
 
     uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
@@ -54,6 +64,38 @@ public class QidReceiptService {
         QID_RECEIPTED,
         EventType.RESPONSE_RECEIVED,
         receiptEvent.getEvent(),
+        convertObjectToJson(receiptPayload),
+        messageTimestamp);
+  }
+
+  public void processUnreceipt(
+      ResponseManagementEvent unreceiptEvent,
+      OffsetDateTime messageTimestamp,
+      UacQidLink uacQidLink) {
+    ResponseDTO receiptPayload = unreceiptEvent.getPayload().getResponse();
+    uacQidLink.setActive(false);
+    uacQidLink.setBlankQuestionnaire(true);
+
+    uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
+
+    Case caze = uacQidLink.getCaze();
+
+    if (caze != null) {
+      blankQuestionnaireService.handleBlankQuestionnaire(
+          uacQidLink, unreceiptEvent.getEvent().getType());
+    } else {
+      log.with("qid", receiptPayload.getQuestionnaireId())
+          .with("tx_id", unreceiptEvent.getEvent().getTransactionId())
+          .with("channel", unreceiptEvent.getEvent().getChannel())
+          .warn("Unreceipt received for unaddressed UAC/QID pair not yet linked to a case");
+    }
+
+    eventLogger.logUacQidEvent(
+        uacQidLink,
+        unreceiptEvent.getEvent().getDateTime(),
+        BLANK_QUESTIONNAIRE_RECEIVED,
+        EventType.RESPONSE_RECEIVED,
+        unreceiptEvent.getEvent(),
         convertObjectToJson(receiptPayload),
         messageTimestamp);
   }
