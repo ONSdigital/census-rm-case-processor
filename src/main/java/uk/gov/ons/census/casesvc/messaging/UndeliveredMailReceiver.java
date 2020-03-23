@@ -1,6 +1,7 @@
 package uk.gov.ons.census.casesvc.messaging;
 
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 import static uk.gov.ons.census.casesvc.utility.MsgDateHelper.getMsgTimeStamp;
 
 import java.time.OffsetDateTime;
@@ -10,6 +11,7 @@ import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
+import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
@@ -51,7 +53,8 @@ public class UndeliveredMailReceiver {
     }
 
     caze.setUndeliveredAsAddressed(true);
-    caseService.saveCaseAndEmitCaseUpdatedEvent(caze);
+    caseService.saveCaseAndEmitCaseUpdatedEvent(
+        caze, buildMetadata(event.getEvent().getType(), ActionInstructionType.CREATE));
 
     if (uacQidLink != null) {
       eventLogger.logUacQidEvent(

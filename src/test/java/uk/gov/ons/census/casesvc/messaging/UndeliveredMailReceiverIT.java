@@ -23,6 +23,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
@@ -111,6 +112,10 @@ public class UndeliveredMailReceiverIT {
         rabbitQueueHelper.checkExpectedMessageReceived(outboundQueue);
 
     assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_UPDATED);
+    assertThat(responseManagementEvent.getPayload().getMetadata().getFieldDecision())
+        .isEqualTo(ActionInstructionType.CREATE);
+    assertThat(responseManagementEvent.getPayload().getMetadata().getCauseEventType())
+        .isEqualTo(EventTypeDTO.UNDELIVERED_MAIL_REPORTED);
     CollectionCase actualCase = responseManagementEvent.getPayload().getCollectionCase();
     assertThat(actualCase.getId()).isEqualTo(TEST_CASE_ID.toString());
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
@@ -162,6 +167,10 @@ public class UndeliveredMailReceiverIT {
         rabbitQueueHelper.checkExpectedMessageReceived(outboundQueue);
 
     assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_UPDATED);
+    assertThat(responseManagementEvent.getPayload().getMetadata().getFieldDecision())
+        .isEqualTo(ActionInstructionType.CREATE);
+    assertThat(responseManagementEvent.getPayload().getMetadata().getCauseEventType())
+        .isEqualTo(EventTypeDTO.UNDELIVERED_MAIL_REPORTED);
     CollectionCase actualCase = responseManagementEvent.getPayload().getCollectionCase();
     assertThat(actualCase.getId()).isEqualTo(TEST_CASE_ID.toString());
     assertThat(actualCase.getCaseRef()).isEqualTo(Long.toString(TEST_CASE_REF));
