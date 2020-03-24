@@ -230,7 +230,7 @@ public class NewAddressReportedReportedServiceTest {
     expectedCase.setReceiptReceived(false);
     expectedCase.setAddressInvalid(false);
     expectedCase.setUndeliveredAsAddressed(false);
-    expectedCase.setSkellingtonCase(true);
+    expectedCase.setSkellington(true);
 
     return expectedCase;
   }

@@ -45,7 +45,7 @@ public class NewAddressReportedService {
 
   private Case createNewSkellingtonCase(CollectionCase collectionCase) {
     Case skeliingtonCase = new Case();
-    skeliingtonCase.setSkellingtonCase(true);
+    skeliingtonCase.setSkellington(true);
     skeliingtonCase.setCaseId(UUID.fromString(collectionCase.getId()));
     skeliingtonCase.setCollectionExerciseId(collectionCase.getCollectionExerciseId());
     skeliingtonCase.setAddressLine1(collectionCase.getAddress().getAddressLine1());

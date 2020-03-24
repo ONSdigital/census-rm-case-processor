@@ -215,11 +215,11 @@ public class AddressReceiverIT {
     CollectionCase actualPayloadCase =
         actualResponseManagementEvent.getPayload().getCollectionCase();
     assertThat(actualPayloadCase.getId()).isEqualTo(collectionCase.getId());
-    assertThat(actualPayloadCase.isSkellingtonCase()).isTrue().as("Is Skellington Case");
+    assertThat(actualPayloadCase.isSkellington()).isTrue().as("Is Skellington Case");
 
     Case actualCase = caseRepository.findById(UUID.fromString(collectionCase.getId())).get();
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
-    assertThat(actualCase.isSkellingtonCase()).isTrue().as("Is Skellington Case In DB");
+    assertThat(actualCase.isSkellington()).isTrue().as("Is Skellington Case In DB");
 
     // check database for log eventDTO
     List<Event> events = eventRepository.findAll();
