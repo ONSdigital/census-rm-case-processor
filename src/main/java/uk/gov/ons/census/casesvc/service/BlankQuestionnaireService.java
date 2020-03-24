@@ -18,8 +18,6 @@ import uk.gov.ons.census.casesvc.model.dto.Metadata;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
-import javax.persistence.criteria.CriteriaBuilder;
-
 @Component
 public class BlankQuestionnaireService {
 
@@ -97,7 +95,6 @@ public class BlankQuestionnaireService {
     rules.put(
         new BlankQuestionnaireService.Key("CE", "E", CONT_FORM_TYPE, true),
         new BlankQuestionnaireService.NoActionRequired());
-
   }
 
   public void handleBlankQuestionnaire(UacQidLink uacQidLink, EventTypeDTO causeEventType) {

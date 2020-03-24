@@ -1,5 +1,6 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static uk.gov.ons.census.casesvc.utility.FormTypeHelper.CONT_FORM_TYPE;
 import static uk.gov.ons.census.casesvc.utility.FormTypeHelper.mapQuestionnaireTypeToFormType;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
@@ -97,11 +98,16 @@ public class UacService {
     uac.setUacHash(Sha256Helper.hash(uacQidLink.getUac()));
     uac.setUac(uacQidLink.getUac());
     uac.setActive(uacQidLink.isActive());
-
     // It's perfectly possible to derive the Form Type from the supplied data, so RM should not be
     // forced to incorporate CENSUS business logic. It's for the CENSUS team to put business logic
     // wherever it's needed, which quite clearly is NOT here. TODO: Put the business logic elsewhere
-    uac.setFormType(mapQuestionnaireTypeToFormType(uacQidLink.getQid()));
+    String formType = mapQuestionnaireTypeToFormType(uacQidLink.getQid());
+    if (formType != null && formType.equals(CONT_FORM_TYPE)) {
+      // We want to send out null form type rather than "Cont" for continuation questionnaires
+      // since they are not a valid form type in EQ/RH
+      formType = null;
+    }
+    uac.setFormType(formType);
 
     Case caze = uacQidLink.getCaze();
     if (caze != null) {
