@@ -1,5 +1,8 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static uk.gov.ons.census.casesvc.utility.FormTypeHelper.CONT_FORM_TYPE;
+import static uk.gov.ons.census.casesvc.utility.FormTypeHelper.HH_FORM_TYPE;
+import static uk.gov.ons.census.casesvc.utility.FormTypeHelper.IND_FORM_TYPE;
 import static uk.gov.ons.census.casesvc.utility.FormTypeHelper.mapQuestionnaireTypeToFormType;
 import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
@@ -15,11 +18,12 @@ import uk.gov.ons.census.casesvc.model.dto.Metadata;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
+import javax.persistence.criteria.CriteriaBuilder;
+
 @Component
 public class BlankQuestionnaireService {
 
   private final CaseService caseService;
-  private static final String HH = "H";
 
   private Map<BlankQuestionnaireService.Key, BlankQreRule> rules = new HashMap<>();
 
@@ -34,11 +38,66 @@ public class BlankQuestionnaireService {
     */
 
     rules.put(
-        new BlankQuestionnaireService.Key("HH", "U", HH, true),
+        new BlankQuestionnaireService.Key("HH", "U", HH_FORM_TYPE, true),
         new BlankQuestionnaireService.NoActionRequired());
     rules.put(
-        new BlankQuestionnaireService.Key("HH", "U", HH, false),
+        new BlankQuestionnaireService.Key("HH", "U", HH_FORM_TYPE, false),
         new BlankQuestionnaireService.UnreceiptCaseAndSendToField());
+    rules.put(
+        new BlankQuestionnaireService.Key("CE", "U", IND_FORM_TYPE, true),
+        new BlankQuestionnaireService.NoActionRequired());
+    rules.put(
+        new BlankQuestionnaireService.Key("SPG", "U", IND_FORM_TYPE, true),
+        new BlankQuestionnaireService.NoActionRequired());
+    rules.put(
+        new BlankQuestionnaireService.Key("SPG", "U", HH_FORM_TYPE, true),
+        new BlankQuestionnaireService.NoActionRequired());
+    rules.put(
+        new BlankQuestionnaireService.Key("HI", "U", IND_FORM_TYPE, false),
+        new BlankQuestionnaireService.UnreceiptCase());
+    rules.put(
+        new BlankQuestionnaireService.Key("CE", "E", IND_FORM_TYPE, false),
+        new BlankQuestionnaireService.NoActionRequired());
+    rules.put(
+        new BlankQuestionnaireService.Key("CE", "U", IND_FORM_TYPE, false),
+        new BlankQuestionnaireService.NoActionRequired());
+    rules.put(
+        new BlankQuestionnaireService.Key("SPG", "U", HH_FORM_TYPE, false),
+        new BlankQuestionnaireService.UnreceiptCaseAndSendToField());
+    rules.put(
+        new BlankQuestionnaireService.Key("SPG", "U", IND_FORM_TYPE, false),
+        new BlankQuestionnaireService.NoActionRequired());
+    rules.put(
+        new BlankQuestionnaireService.Key("HH", "U", CONT_FORM_TYPE, false),
+        new BlankQuestionnaireService.NoActionRequired());
+    rules.put(
+        new BlankQuestionnaireService.Key("SPG", "U", CONT_FORM_TYPE, false),
+        new BlankQuestionnaireService.NoActionRequired());
+    rules.put(
+        new BlankQuestionnaireService.Key("SPG", "E", CONT_FORM_TYPE, false),
+        new BlankQuestionnaireService.NoActionRequired());
+    rules.put(
+        new BlankQuestionnaireService.Key("CE", "U", CONT_FORM_TYPE, false),
+        new BlankQuestionnaireService.NoActionRequired());
+    rules.put(
+        new BlankQuestionnaireService.Key("CE", "E", CONT_FORM_TYPE, false),
+        new BlankQuestionnaireService.NoActionRequired());
+    rules.put(
+        new BlankQuestionnaireService.Key("HH", "U", CONT_FORM_TYPE, true),
+        new BlankQuestionnaireService.NoActionRequired());
+    rules.put(
+        new BlankQuestionnaireService.Key("SPG", "U", CONT_FORM_TYPE, true),
+        new BlankQuestionnaireService.NoActionRequired());
+    rules.put(
+        new BlankQuestionnaireService.Key("SPG", "E", CONT_FORM_TYPE, true),
+        new BlankQuestionnaireService.NoActionRequired());
+    rules.put(
+        new BlankQuestionnaireService.Key("CE", "U", CONT_FORM_TYPE, true),
+        new BlankQuestionnaireService.NoActionRequired());
+    rules.put(
+        new BlankQuestionnaireService.Key("CE", "E", CONT_FORM_TYPE, true),
+        new BlankQuestionnaireService.NoActionRequired());
+
   }
 
   public void handleBlankQuestionnaire(UacQidLink uacQidLink, EventTypeDTO causeEventType) {
@@ -98,6 +157,14 @@ public class BlankQuestionnaireService {
     public void run(Case caze, EventTypeDTO causeEventType) {
       Metadata metadata = buildMetadata(causeEventType, ActionInstructionType.UPDATE, true);
       caseService.unreceiptCase(caze, metadata);
+    }
+  }
+
+  private class UnreceiptCase implements BlankQreRule {
+
+    @Override
+    public void run(Case caze, EventTypeDTO causeEventType) {
+      caseService.unreceiptCase(caze, null);
     }
   }
 

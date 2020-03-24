@@ -45,7 +45,25 @@ public class BlankQuestionnaireServiceTest {
   public static Collection<Object[]> data() {
     Object[][] ruleToTest = {
       {new Key("HH", "U", "HH", true), new Expectation(false, false)},
+      {new Key("CE", "U", "Ind", true), new Expectation(false, false)},
+      {new Key("SPG", "U", "HH", false), new Expectation(true, true)},
+      {new Key("SPG", "U", "Ind", true), new Expectation(false, false)},
       {new Key("HH", "U", "HH", false), new Expectation(true, true)},
+      {new Key("HI", "U", "Ind", false), new Expectation(true, false)},
+      {new Key("CE", "E", "Ind", false), new Expectation(false, false)},
+      {new Key("CE", "U", "Ind", false), new Expectation(false, false)},
+      {new Key("SPG", "U", "HH", false), new Expectation(true, true)},
+      {new Key("SPG", "U", "Ind", false), new Expectation(false, false)},
+      {new Key("HH", "U", "Cont", false), new Expectation(false, false)},
+      {new Key("SPG", "U", "Cont", false), new Expectation(false, false)},
+      {new Key("SPG", "U", "Cont", false), new Expectation(false, false)},
+      {new Key("CE", "U", "Cont", false), new Expectation(false, false)},
+      {new Key("CE", "U", "Cont", false), new Expectation(false, false)},
+      {new Key("HH", "U", "Cont", true), new Expectation(false, false)},
+      {new Key("SPG", "U", "Cont", true), new Expectation(false, false)},
+      {new Key("SPG", "U", "Cont", true), new Expectation(false, false)},
+      {new Key("CE", "U", "Cont", true), new Expectation(false, false)},
+      {new Key("CE", "U", "Cont", true), new Expectation(false, false)},
     };
 
     return Arrays.asList(ruleToTest);
@@ -120,11 +138,17 @@ public class BlankQuestionnaireServiceTest {
       return;
     }
 
-    if (sendToField) {
+    if (unreceiptCase && sendToField) {
       ArgumentCaptor<Metadata> metadataArgumentCaptor = ArgumentCaptor.forClass(Metadata.class);
       verify(caseService).unreceiptCase(any(), metadataArgumentCaptor.capture());
       assertThat(metadataArgumentCaptor.getValue().getFieldDecision())
           .isEqualTo(ActionInstructionType.UPDATE);
+      return;
+    }
+
+    if (unreceiptCase && !sendToField) {
+      verify(caseService).unreceiptCase(any(), eq(null));
+      return;
     }
   }
 

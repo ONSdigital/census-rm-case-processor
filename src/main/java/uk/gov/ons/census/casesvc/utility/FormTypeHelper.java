@@ -1,10 +1,11 @@
 package uk.gov.ons.census.casesvc.utility;
 
 public class FormTypeHelper {
-  private static final String HH_FORM_TYPE = "H";
-  private static final String IND_FORM_TYPE = "I";
-  private static final String CE1_FORM_TYPE = "C";
-  private static final String CONT_FORM_TYPE = "Cont";
+  // TODO make these an enum
+  public static final String HH_FORM_TYPE = "H";
+  public static final String IND_FORM_TYPE = "I";
+  public static final String CE1_FORM_TYPE = "C";
+  public static final String CONT_FORM_TYPE = "Cont";
 
   public static String mapQuestionnaireTypeToFormType(String qid) {
     int questionnaireType = Integer.parseInt(qid.substring(0, 2));
