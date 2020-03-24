@@ -287,6 +287,7 @@ public class CaseService {
     return caseOptional.get();
   }
 
+  // TODO: This is doing more than setting receipt flag
   public void unreceiptCase(Case caze, Metadata metadata) {
     caze.setReceiptReceived(false);
     saveCaseAndEmitCaseUpdatedEvent(caze, metadata);

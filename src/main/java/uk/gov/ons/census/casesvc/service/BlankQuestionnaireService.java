@@ -98,6 +98,8 @@ public class BlankQuestionnaireService {
   }
 
   public void handleBlankQuestionnaire(UacQidLink uacQidLink, EventTypeDTO causeEventType) {
+    //TODO: think we can use the case from the caller method here instead?
+
     Case caze = uacQidLink.getCaze();
 
     BlankQuestionnaireService.Key ruleKey = makeRulesKey(caze, uacQidLink);
