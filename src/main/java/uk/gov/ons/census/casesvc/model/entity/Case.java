@@ -11,6 +11,7 @@ import javax.persistence.Index;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Data;
+import lombok.ToString;
 import org.hibernate.annotations.*;
 
 @Data
@@ -19,8 +20,8 @@ import org.hibernate.annotations.*;
 @Table(
     name = "cases",
     indexes = {
-      @Index(name = "cases_case_ref_idx", columnList = "case_ref"),
-      @Index(name = "lsoa_idx", columnList = "lsoa")
+        @Index(name = "cases_case_ref_idx", columnList = "case_ref"),
+        @Index(name = "lsoa_idx", columnList = "lsoa")
     })
 public class Case {
 
@@ -102,8 +103,10 @@ public class Case {
   private OffsetDateTime createdDateTime;
 
   @OneToMany(mappedBy = "caze")
+  @ToString.Exclude
   List<UacQidLink> uacQidLinks;
 
+  @ToString.Exclude
   @OneToMany(mappedBy = "caze")
   List<Event> events;
 

@@ -10,6 +10,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
 @Entity
@@ -22,9 +23,12 @@ public class UacQidLink {
 
   @Column private String uac;
 
-  @ManyToOne private Case caze;
+  @ManyToOne
+  @ToString.Exclude
+  private Case caze;
 
   @OneToMany(mappedBy = "uacQidLink")
+  @ToString.Exclude
   private List<Event> events;
 
   @Column private UUID batchId;

@@ -17,6 +17,7 @@ import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
 @Component
 public class BlankQuestionnaireService {
+
   private final CaseService caseService;
   private static final String HH = "H";
 
@@ -32,6 +33,9 @@ public class BlankQuestionnaireService {
      This table is based on: TODO
     */
 
+    rules.put(
+        new BlankQuestionnaireService.Key("HH", "U", HH, true),
+        new BlankQuestionnaireService.NoActionRequired());
     rules.put(
         new BlankQuestionnaireService.Key("HH", "U", HH, false),
         new BlankQuestionnaireService.UnreceiptCaseAndSendToField());
@@ -74,6 +78,7 @@ public class BlankQuestionnaireService {
   @EqualsAndHashCode
   @ToString
   private class Key {
+
     private String caseType;
     private String addressLevel;
     private String formType;
@@ -81,14 +86,24 @@ public class BlankQuestionnaireService {
   }
 
   private interface BlankQreRule {
+
     void run(Case caze, EventTypeDTO causeEventType);
   }
 
   private class UnreceiptCaseAndSendToField implements BlankQreRule {
+
     @Override
     public void run(Case caze, EventTypeDTO causeEventType) {
       Metadata metadata = buildMetadata(causeEventType, ActionInstructionType.UPDATE, true);
       caseService.unreceiptCase(caze, metadata);
+    }
+  }
+
+  private class NoActionRequired implements BlankQreRule {
+
+    @Override
+    public void run(Case caze, EventTypeDTO causeEventType) {
+      // No Updating, saving or emitting required
     }
   }
 }

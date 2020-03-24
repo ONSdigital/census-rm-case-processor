@@ -12,6 +12,7 @@ import javax.persistence.Index;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import lombok.Data;
+import lombok.ToString;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
@@ -21,15 +22,19 @@ import org.hibernate.annotations.TypeDefs;
 @Entity
 @Table(
     indexes = {
-      @Index(name = "event_type_idx", columnList = "event_type"),
-      @Index(name = "rm_event_processed_idx", columnList = "rm_event_processed")
+        @Index(name = "event_type_idx", columnList = "event_type"),
+        @Index(name = "rm_event_processed_idx", columnList = "rm_event_processed")
     })
 public class Event {
   @Id private UUID id;
 
-  @ManyToOne private UacQidLink uacQidLink;
+  @ManyToOne
+  @ToString.Exclude
+  private UacQidLink uacQidLink;
 
-  @ManyToOne private Case caze;
+  @ManyToOne
+  @ToString.Exclude
+  private Case caze;
 
   @Column(columnDefinition = "timestamp with time zone")
   private OffsetDateTime eventDate;
