@@ -44,8 +44,8 @@ public class BlankQuestionnaireServiceTest {
   @Parameterized.Parameters(name = "Test Key: {0}")
   public static Collection<Object[]> data() {
     Object[][] ruleToTest = {
-        {new Key("HH", "U", "HH", true), new Expectation(false, false)},
-        {new Key("HH", "U", "HH", false), new Expectation(true, true)},
+      {new Key("HH", "U", "HH", true), new Expectation(false, false)},
+      {new Key("HH", "U", "HH", false), new Expectation(true, true)},
     };
 
     return Arrays.asList(ruleToTest);
@@ -60,8 +60,7 @@ public class BlankQuestionnaireServiceTest {
         this.key.formType,
         this.key.hasOtherValidReceiptForFormType,
         this.expectation.unreceiptCase,
-        this.expectation.sendToField
-    );
+        this.expectation.sendToField);
   }
 
   @Test
@@ -73,10 +72,8 @@ public class BlankQuestionnaireServiceTest {
         this.key.formType,
         this.key.hasOtherValidReceiptForFormType,
         this.expectation.unreceiptCase,
-        this.expectation.sendToField
-    );
+        this.expectation.sendToField);
   }
-
 
   private void runBlankQreTestCaseNotYetReceipted(
       String caseType,
@@ -126,11 +123,10 @@ public class BlankQuestionnaireServiceTest {
     if (sendToField) {
       ArgumentCaptor<Metadata> metadataArgumentCaptor = ArgumentCaptor.forClass(Metadata.class);
       verify(caseService).unreceiptCase(any(), metadataArgumentCaptor.capture());
-      assertThat(metadataArgumentCaptor.getValue().getFieldDecision()).isEqualTo(
-          ActionInstructionType.UPDATE);
+      assertThat(metadataArgumentCaptor.getValue().getFieldDecision())
+          .isEqualTo(ActionInstructionType.UPDATE);
     }
   }
-
 
   private void runBlankQreTestCaseAlreadyReceipted(
       String caseType,
@@ -180,31 +176,31 @@ public class BlankQuestionnaireServiceTest {
     if (sendToField) {
       ArgumentCaptor<Metadata> metadataArgumentCaptor = ArgumentCaptor.forClass(Metadata.class);
       verify(caseService).unreceiptCase(any(), metadataArgumentCaptor.capture());
-      assertThat(metadataArgumentCaptor.getValue().getFieldDecision()).isEqualTo(
-          ActionInstructionType.UPDATE);
+      assertThat(metadataArgumentCaptor.getValue().getFieldDecision())
+          .isEqualTo(ActionInstructionType.UPDATE);
     }
   }
 
-//
-//
-//  @Test
-//  public void testUnactiveQidDoesNotReceiptsCaseAlreadyReceipted() {
-//    // when
-//    CaseService caseService = mock(CaseService.class);
-//    CaseRepository caseRepository = mock(CaseRepository.class);
-//    CaseReceiptService caseReceiptService = new CaseReceiptService(caseService, caseRepository);
-//
-//    Case caze = new Case();
-//    caze.setCaseId(UUID.randomUUID());
-//    caze.setReceiptReceived(true);
-//
-//    UacQidLink uacQidLink = new UacQidLink();
-//    uacQidLink.setQid(HOUSEHOLD_INDIVIDUAL);
-//    uacQidLink.setCaze(caze);
-//
-//    caseReceiptService.receiptCase(uacQidLink, RESPONSE_RECEIVED);
-//    verifyZeroInteractions(caseService);
-//  }
+  //
+  //
+  //  @Test
+  //  public void testUnactiveQidDoesNotReceiptsCaseAlreadyReceipted() {
+  //    // when
+  //    CaseService caseService = mock(CaseService.class);
+  //    CaseRepository caseRepository = mock(CaseRepository.class);
+  //    CaseReceiptService caseReceiptService = new CaseReceiptService(caseService, caseRepository);
+  //
+  //    Case caze = new Case();
+  //    caze.setCaseId(UUID.randomUUID());
+  //    caze.setReceiptReceived(true);
+  //
+  //    UacQidLink uacQidLink = new UacQidLink();
+  //    uacQidLink.setQid(HOUSEHOLD_INDIVIDUAL);
+  //    uacQidLink.setCaze(caze);
+  //
+  //    caseReceiptService.receiptCase(uacQidLink, RESPONSE_RECEIVED);
+  //    verifyZeroInteractions(caseService);
+  //  }
 
   private String getQid(String qidType) {
     switch (qidType) {
@@ -243,7 +239,5 @@ public class BlankQuestionnaireServiceTest {
 
     boolean unreceiptCase;
     boolean sendToField;
-
   }
 }
-

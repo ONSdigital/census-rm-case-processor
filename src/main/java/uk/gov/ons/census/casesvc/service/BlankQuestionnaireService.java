@@ -61,16 +61,18 @@ public class BlankQuestionnaireService {
         caze.getCaseType(),
         caze.getAddressLevel(),
         formType,
-        caseHasOtherValidReceiptForFormType(caze, formType));
+        caseHasOtherValidReceiptForFormType(caze, formType, uacQidLink));
   }
 
-  private boolean caseHasOtherValidReceiptForFormType(Case caze, String formType) {
+  private boolean caseHasOtherValidReceiptForFormType(
+      Case caze, String formType, UacQidLink uacQidLink) {
     return caze.getUacQidLinks().stream()
         .anyMatch(
             u ->
                 !u.isActive()
                     && !u.isBlankQuestionnaire()
-                    && mapQuestionnaireTypeToFormType(u.getQid()).equals(formType));
+                    && mapQuestionnaireTypeToFormType(u.getQid()).equals(formType)
+                    && !u.equals(uacQidLink));
     // TODO deal with possible NPE
   }
 

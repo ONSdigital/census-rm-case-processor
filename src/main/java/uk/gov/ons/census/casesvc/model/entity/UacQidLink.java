@@ -23,9 +23,7 @@ public class UacQidLink {
 
   @Column private String uac;
 
-  @ManyToOne
-  @ToString.Exclude
-  private Case caze;
+  @ManyToOne @ToString.Exclude private Case caze;
 
   @OneToMany(mappedBy = "uacQidLink")
   @ToString.Exclude
