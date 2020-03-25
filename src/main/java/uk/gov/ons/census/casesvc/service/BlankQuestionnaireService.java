@@ -98,7 +98,7 @@ public class BlankQuestionnaireService {
   }
 
   public void handleBlankQuestionnaire(UacQidLink uacQidLink, EventTypeDTO causeEventType) {
-    //TODO: think we can use the case from the caller method here instead?
+    // TODO: think we can use the case from the caller method here instead?
 
     Case caze = uacQidLink.getCaze();
 
@@ -154,7 +154,11 @@ public class BlankQuestionnaireService {
 
     @Override
     public void run(Case caze, EventTypeDTO causeEventType) {
-      Metadata metadata = buildMetadata(causeEventType, ActionInstructionType.UPDATE, true);
+      Metadata metadata = null;
+      if (!caze.isRefusalReceived() && !caze.isAddressInvalid()) {
+        // Only send to fieldwork if the case is not refused or address invalid
+        metadata = buildMetadata(causeEventType, ActionInstructionType.UPDATE, true);
+      }
       caseService.unreceiptCase(caze, metadata);
     }
   }

@@ -59,7 +59,6 @@ public class ReceiptReceiverIT {
   private static final String HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_ENGLAND = "21";
   public static final String BLANK_QUESTIONNAIRE_RECEIVED = "Blank questionnaire received";
 
-
   @Value("${queueconfig.receipt-response-inbound-queue}")
   private String inboundQueue;
 
@@ -271,9 +270,8 @@ public class ReceiptReceiverIT {
 
   // TODO: Test for already receipted blank q're
 
-
   @Test
-  public void testParallelReceiptAndLinkingOfReceiptedQidUpdatesToCorrectNumbeAndIsReceipted()
+  public void testParallelReceiptAndLinkingOfReceiptedQidUpdatesToCorrectNumberAndIsReceipted()
       throws Exception {
     int numberOfReceiptsAndLinkToSend = 3;
     int expectedResponseCount = numberOfReceiptsAndLinkToSend * 2;

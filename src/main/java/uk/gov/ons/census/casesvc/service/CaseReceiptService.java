@@ -56,7 +56,7 @@ public class CaseReceiptService {
   public void receiptCase(UacQidLink uacQidLink, EventTypeDTO causeEventType) {
     Case caze = uacQidLink.getCaze();
 
-    if (caze.isReceiptReceived()) return;
+    if (caze.isReceiptReceived() || uacQidLink.isBlankQuestionnaire()) return;
 
     Key ruleKey = makeRulesKey(caze, uacQidLink);
 

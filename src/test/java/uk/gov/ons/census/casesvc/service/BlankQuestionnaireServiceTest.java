@@ -93,6 +93,28 @@ public class BlankQuestionnaireServiceTest {
         this.expectation.sendToField);
   }
 
+  @Test
+  public void refusedCasesAreNotSentToFieldTableTests() {
+    runRefusedCaseIsNeverSentToField(
+        this.key.caseType,
+        this.key.addressLevel,
+        getQid(this.key.formType),
+        this.key.formType,
+        this.key.hasOtherValidReceiptForFormType,
+        this.expectation.unreceiptCase);
+  }
+
+  @Test
+  public void addressInvalidCasesAreNotSentToFieldTableTests() {
+    runAddressInvalidCaseIsNeverSentToField(
+        this.key.caseType,
+        this.key.addressLevel,
+        getQid(this.key.formType),
+        this.key.formType,
+        this.key.hasOtherValidReceiptForFormType,
+        this.expectation.unreceiptCase);
+  }
+
   private void runBlankQreTestCaseNotYetReceipted(
       String caseType,
       String addressLevel,
@@ -111,6 +133,8 @@ public class BlankQuestionnaireServiceTest {
     caze.setCaseType(caseType);
     caze.setAddressLevel(addressLevel);
     caze.setCaseId(UUID.randomUUID());
+    caze.setRefusalReceived(false);
+    caze.setAddressInvalid(false);
     caze.setReceiptReceived(false);
 
     UacQidLink uacQidLink = new UacQidLink();
@@ -170,6 +194,8 @@ public class BlankQuestionnaireServiceTest {
     caze.setCaseType(caseType);
     caze.setAddressLevel(addressLevel);
     caze.setCaseId(UUID.randomUUID());
+    caze.setRefusalReceived(false);
+    caze.setAddressInvalid(false);
     caze.setReceiptReceived(true);
 
     UacQidLink uacQidLink = new UacQidLink();
@@ -205,26 +231,105 @@ public class BlankQuestionnaireServiceTest {
     }
   }
 
-  //
-  //
-  //  @Test
-  //  public void testUnactiveQidDoesNotReceiptsCaseAlreadyReceipted() {
-  //    // when
-  //    CaseService caseService = mock(CaseService.class);
-  //    CaseRepository caseRepository = mock(CaseRepository.class);
-  //    CaseReceiptService caseReceiptService = new CaseReceiptService(caseService, caseRepository);
-  //
-  //    Case caze = new Case();
-  //    caze.setCaseId(UUID.randomUUID());
-  //    caze.setReceiptReceived(true);
-  //
-  //    UacQidLink uacQidLink = new UacQidLink();
-  //    uacQidLink.setQid(HOUSEHOLD_INDIVIDUAL);
-  //    uacQidLink.setCaze(caze);
-  //
-  //    caseReceiptService.receiptCase(uacQidLink, RESPONSE_RECEIVED);
-  //    verifyZeroInteractions(caseService);
-  //  }
+  private void runRefusedCaseIsNeverSentToField(
+      String caseType,
+      String addressLevel,
+      String qid,
+      String formType,
+      boolean hasOtherValidReceiptForFormType,
+      boolean unreceiptCase) {
+
+    CaseService caseService = mock(CaseService.class);
+    CaseRepository caseRepository = mock(CaseRepository.class);
+    UacService uacService = mock(UacService.class);
+    BlankQuestionnaireService underTest = new BlankQuestionnaireService(caseService);
+
+    Case caze = new Case();
+    caze.setCaseType(caseType);
+    caze.setAddressLevel(addressLevel);
+    caze.setCaseId(UUID.randomUUID());
+    caze.setRefusalReceived(true);
+    caze.setAddressInvalid(false);
+
+    UacQidLink uacQidLink = new UacQidLink();
+    uacQidLink.setQid(qid);
+    uacQidLink.setCaze(caze);
+    uacQidLink.setActive(false);
+    caze.setUacQidLinks(List.of(uacQidLink));
+    when(uacService.findByQid(eq(qid))).thenReturn(uacQidLink);
+
+    if (hasOtherValidReceiptForFormType) {
+      String otherQid = getQid(formType) + "1";
+      UacQidLink otherUacQidLink = new UacQidLink();
+      otherUacQidLink.setQid(otherQid);
+      otherUacQidLink.setCaze(caze);
+      otherUacQidLink.setActive(false);
+      caze.setUacQidLinks(List.of(uacQidLink, otherUacQidLink));
+      when(uacService.findByQid(eq(otherQid))).thenReturn(otherUacQidLink);
+    }
+
+    underTest.handleBlankQuestionnaire(uacQidLink, RESPONSE_RECEIVED);
+
+    if (!unreceiptCase) {
+      verifyZeroInteractions(caseService);
+      verifyZeroInteractions(caseRepository);
+      return;
+    }
+
+    ArgumentCaptor<Metadata> metadataArgumentCaptor = ArgumentCaptor.forClass(Metadata.class);
+    verify(caseService).unreceiptCase(any(), metadataArgumentCaptor.capture());
+    assertThat(metadataArgumentCaptor.getValue()).isNull();
+  }
+
+  private void runAddressInvalidCaseIsNeverSentToField(
+      String caseType,
+      String addressLevel,
+      String qid,
+      String formType,
+      boolean hasOtherValidReceiptForFormType,
+      boolean unreceiptCase) {
+
+    CaseService caseService = mock(CaseService.class);
+    CaseRepository caseRepository = mock(CaseRepository.class);
+    UacService uacService = mock(UacService.class);
+    BlankQuestionnaireService underTest = new BlankQuestionnaireService(caseService);
+
+    Case caze = new Case();
+    caze.setCaseType(caseType);
+    caze.setAddressLevel(addressLevel);
+    caze.setCaseId(UUID.randomUUID());
+    caze.setRefusalReceived(false);
+    caze.setAddressInvalid(true);
+
+    UacQidLink uacQidLink = new UacQidLink();
+    uacQidLink.setQid(qid);
+    uacQidLink.setCaze(caze);
+    uacQidLink.setActive(false);
+    caze.setUacQidLinks(List.of(uacQidLink));
+    when(uacService.findByQid(eq(qid))).thenReturn(uacQidLink);
+
+    if (hasOtherValidReceiptForFormType) {
+      String otherQid = getQid(formType) + "1";
+      UacQidLink otherUacQidLink = new UacQidLink();
+      otherUacQidLink.setQid(otherQid);
+      otherUacQidLink.setCaze(caze);
+      otherUacQidLink.setActive(false);
+      caze.setUacQidLinks(List.of(uacQidLink, otherUacQidLink));
+      when(uacService.findByQid(eq(otherQid))).thenReturn(otherUacQidLink);
+    }
+
+    underTest.handleBlankQuestionnaire(uacQidLink, RESPONSE_RECEIVED);
+
+    if (!unreceiptCase) {
+      verifyZeroInteractions(caseService);
+      verifyZeroInteractions(caseRepository);
+      return;
+    }
+
+    ArgumentCaptor<Metadata> metadataArgumentCaptor = ArgumentCaptor.forClass(Metadata.class);
+    verify(caseService).unreceiptCase(any(), metadataArgumentCaptor.capture());
+    assertThat(metadataArgumentCaptor.getValue()).isNull();
+  }
 
   private String getQid(String qidType) {
     switch (qidType) {
