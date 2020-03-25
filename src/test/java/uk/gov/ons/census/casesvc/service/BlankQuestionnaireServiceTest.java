@@ -154,7 +154,7 @@ public class BlankQuestionnaireServiceTest {
       when(uacService.findByQid(eq(otherQid))).thenReturn(otherUacQidLink);
     }
 
-    underTest.handleBlankQuestionnaire(uacQidLink, RESPONSE_RECEIVED);
+    underTest.handleBlankQuestionnaire(caze, uacQidLink, RESPONSE_RECEIVED);
 
     if (!unreceiptCase && !sendToField) {
       verifyZeroInteractions(caseService);
@@ -215,7 +215,7 @@ public class BlankQuestionnaireServiceTest {
       when(uacService.findByQid(eq(otherQid))).thenReturn(otherUacQidLink);
     }
 
-    underTest.handleBlankQuestionnaire(uacQidLink, RESPONSE_RECEIVED);
+    underTest.handleBlankQuestionnaire(caze, uacQidLink, RESPONSE_RECEIVED);
 
     if (!unreceiptCase && !sendToField) {
       verifyZeroInteractions(caseService);
@@ -268,7 +268,7 @@ public class BlankQuestionnaireServiceTest {
       when(uacService.findByQid(eq(otherQid))).thenReturn(otherUacQidLink);
     }
 
-    underTest.handleBlankQuestionnaire(uacQidLink, RESPONSE_RECEIVED);
+    underTest.handleBlankQuestionnaire(caze, uacQidLink, RESPONSE_RECEIVED);
 
     if (!unreceiptCase) {
       verifyZeroInteractions(caseService);
@@ -318,7 +318,7 @@ public class BlankQuestionnaireServiceTest {
       when(uacService.findByQid(eq(otherQid))).thenReturn(otherUacQidLink);
     }
 
-    underTest.handleBlankQuestionnaire(uacQidLink, RESPONSE_RECEIVED);
+    underTest.handleBlankQuestionnaire(caze, uacQidLink, RESPONSE_RECEIVED);
 
     if (!unreceiptCase) {
       verifyZeroInteractions(caseService);

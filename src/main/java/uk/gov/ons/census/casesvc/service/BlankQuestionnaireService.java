@@ -8,6 +8,8 @@ import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -32,7 +34,7 @@ public class BlankQuestionnaireService {
 
   private void setUpRules() {
     /*
-     This table is based on: TODO
+     This table is based on: https://collaborate2.ons.gov.uk/confluence/display/SDC/Process+Flow+for+Blank+PQs
     */
 
     rules.put(
@@ -97,11 +99,7 @@ public class BlankQuestionnaireService {
         new BlankQuestionnaireService.NoActionRequired());
   }
 
-  public void handleBlankQuestionnaire(UacQidLink uacQidLink, EventTypeDTO causeEventType) {
-    // TODO: think we can use the case from the caller method here instead?
-
-    Case caze = uacQidLink.getCaze();
-
+  public void handleBlankQuestionnaire(Case caze, UacQidLink uacQidLink, EventTypeDTO causeEventType) {
     BlankQuestionnaireService.Key ruleKey = makeRulesKey(caze, uacQidLink);
 
     if (!rules.containsKey(ruleKey)) {
@@ -129,9 +127,8 @@ public class BlankQuestionnaireService {
             u ->
                 !u.isActive()
                     && !u.isBlankQuestionnaire()
-                    && mapQuestionnaireTypeToFormType(u.getQid()).equals(formType)
+                    && Objects.equals(mapQuestionnaireTypeToFormType(u.getQid()), formType)
                     && !u.equals(uacQidLink));
-    // TODO deal with possible NPE
   }
 
   @AllArgsConstructor

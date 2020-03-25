@@ -82,7 +82,7 @@ public class QidReceiptService {
 
     if (caze != null) {
       blankQuestionnaireService.handleBlankQuestionnaire(
-          uacQidLink, unreceiptEvent.getEvent().getType());
+          caze, uacQidLink, unreceiptEvent.getEvent().getType());
     } else {
       log.with("qid", receiptPayload.getQuestionnaireId())
           .with("tx_id", unreceiptEvent.getEvent().getTransactionId())

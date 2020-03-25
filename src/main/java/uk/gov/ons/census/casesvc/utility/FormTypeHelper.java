@@ -1,7 +1,6 @@
 package uk.gov.ons.census.casesvc.utility;
 
-public class FormTypeHelper {
-  // TODO make these an enum
+  tpublic class FormTypeHelper {
   public static final String HH_FORM_TYPE = "H";
   public static final String IND_FORM_TYPE = "I";
   public static final String CE1_FORM_TYPE = "C";
@@ -16,12 +15,12 @@ public class FormTypeHelper {
       case 2:
       case 3:
       case 4:
-        // TODO
+        // CCS Postback
       case 51:
       case 52:
       case 53:
       case 54:
-        // CCS
+        // CCS Household
       case 71:
       case 72:
       case 73:
@@ -38,7 +37,7 @@ public class FormTypeHelper {
       case 32:
       case 33:
       case 34:
-        // TODO
+        // CCS CE Manager
       case 81:
       case 82:
       case 83:
@@ -49,6 +48,7 @@ public class FormTypeHelper {
       case 12:
       case 13:
       case 14:
+        // CCS Continuation
       case 61:
       case 63:
         return CONT_FORM_TYPE;

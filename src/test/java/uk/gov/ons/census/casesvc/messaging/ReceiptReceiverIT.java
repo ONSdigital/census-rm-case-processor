@@ -238,7 +238,6 @@ public class ReceiptReceiverIT {
     assertThat(metaData.getCauseEventType()).isEqualTo(RESPONSE_RECEIVED);
     assertThat(metaData.getFieldDecision()).isEqualTo(ActionInstructionType.UPDATE);
 
-    // TODO:  Could test the FWMT adapter queue instead?
     responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(rhUacOutboundQueue);
     assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
     UacDTO actualUacDTOObject = responseManagementEvent.getPayload().getUac();
@@ -267,8 +266,6 @@ public class ReceiptReceiverIT {
     String utcDateAsString = new JSONObject(event.getEventPayload()).getString("dateTime");
     assertThat(isStringFormattedAsUTCDate(utcDateAsString)).isTrue();
   }
-
-  // TODO: Test for already receipted blank q're
 
   @Test
   public void testParallelReceiptAndLinkingOfReceiptedQidUpdatesToCorrectNumberAndIsReceipted()
