@@ -25,7 +25,7 @@ public class NewAddressReportedService {
   public void processNewAddress(
       ResponseManagementEvent newAddressEvent, OffsetDateTime messageTimestamp) {
     CollectionCase newCollectionCase =
-        newAddressEvent.getPayload().getNewAddressReported().getCollectionCase();
+        newAddressEvent.getPayload().getNewAddress().getCollectionCase();
     validDateNewAddressCollectionCaseForMandatoryFields(newCollectionCase);
 
     Case skellingtonCase = createNewSkellingtonCase(newCollectionCase);

@@ -19,7 +19,7 @@ import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.Address;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
-import uk.gov.ons.census.casesvc.model.dto.NewAddressReported;
+import uk.gov.ons.census.casesvc.model.dto.NewAddress;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -27,7 +27,7 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.utility.JsonHelper;
 
 @RunWith(MockitoJUnitRunner.class)
-public class NewAddressReportedReportedServiceTest {
+public class NewAddressReportedServiceTest {
 
   @InjectMocks NewAddressReportedService underTest;
 
@@ -49,11 +49,11 @@ public class NewAddressReportedReportedServiceTest {
     address.setAddressType("HH");
     collectionCase.setAddress(address);
 
-    NewAddressReported newAddressReported = new NewAddressReported();
-    newAddressReported.setCollectionCase(collectionCase);
+    NewAddress newAddress = new NewAddress();
+    newAddress.setCollectionCase(collectionCase);
 
     PayloadDTO payloadDTO = new PayloadDTO();
-    payloadDTO.setNewAddressReported(newAddressReported);
+    payloadDTO.setNewAddress(newAddress);
     ResponseManagementEvent newAddressEvent = new ResponseManagementEvent();
     newAddressEvent.setPayload(payloadDTO);
     EventDTO eventDTO = new EventDTO();
@@ -97,7 +97,7 @@ public class NewAddressReportedReportedServiceTest {
   @Test(expected = RuntimeException.class)
   public void testMissingUUID() {
     ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
-    newAddressEvent.getPayload().getNewAddressReported().getCollectionCase().setId("Xdd344234");
+    newAddressEvent.getPayload().getNewAddress().getCollectionCase().setId("Xdd344234");
 
     try {
       underTest.processNewAddress(newAddressEvent, OffsetDateTime.now());
@@ -111,11 +111,7 @@ public class NewAddressReportedReportedServiceTest {
   @Test(expected = RuntimeException.class)
   public void testBadCasetype() {
     ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
-    newAddressEvent
-        .getPayload()
-        .getNewAddressReported()
-        .getCollectionCase()
-        .setCaseType("BadCaseType");
+    newAddressEvent.getPayload().getNewAddress().getCollectionCase().setCaseType("BadCaseType");
 
     try {
       underTest.processNewAddress(newAddressEvent, OffsetDateTime.now());
@@ -131,7 +127,7 @@ public class NewAddressReportedReportedServiceTest {
     ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
     newAddressEvent
         .getPayload()
-        .getNewAddressReported()
+        .getNewAddress()
         .getCollectionCase()
         .getAddress()
         .setAddressLevel("X");
@@ -151,7 +147,7 @@ public class NewAddressReportedReportedServiceTest {
     ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
     newAddressEvent
         .getPayload()
-        .getNewAddressReported()
+        .getNewAddress()
         .getCollectionCase()
         .getAddress()
         .setRegion("UpNorth");
@@ -175,11 +171,11 @@ public class NewAddressReportedReportedServiceTest {
     collectionCase.setCaseType("HH");
     collectionCase.setAddress(address);
 
-    NewAddressReported newAddressReported = new NewAddressReported();
-    newAddressReported.setCollectionCase(collectionCase);
+    NewAddress newAddress = new NewAddress();
+    newAddress.setCollectionCase(collectionCase);
 
     PayloadDTO payloadDTO = new PayloadDTO();
-    payloadDTO.setNewAddressReported(newAddressReported);
+    payloadDTO.setNewAddress(newAddress);
     ResponseManagementEvent newAddressEvent = new ResponseManagementEvent();
     newAddressEvent.setPayload(payloadDTO);
 

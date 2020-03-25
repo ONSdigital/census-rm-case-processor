@@ -20,7 +20,7 @@ public class PayloadDTO {
   private FieldCaseSelected fieldCaseSelected;
   private FulfilmentInformation fulfilmentInformation;
   private Metadata metadata;
-  private NewAddressReported newAddressReported;
+  private NewAddress newAddress;
 
   @JsonProperty("CCSProperty")
   private CCSPropertyDTO ccsProperty;

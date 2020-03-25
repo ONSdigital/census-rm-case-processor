@@ -4,7 +4,7 @@ import java.util.UUID;
 import lombok.Data;
 
 @Data
-public class NewAddressReported {
+public class NewAddress {
   UUID sourceCaseID;
   CollectionCase collectionCase;
 }

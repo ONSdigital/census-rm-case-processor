@@ -39,7 +39,7 @@ import uk.gov.ons.census.casesvc.model.dto.CollectionCaseCaseId;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.InvalidAddress;
-import uk.gov.ons.census.casesvc.model.dto.NewAddressReported;
+import uk.gov.ons.census.casesvc.model.dto.NewAddress;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -189,8 +189,8 @@ public class AddressReceiverIT {
     collectionCase.setCaseType("HH");
     collectionCase.setAddress(address);
 
-    NewAddressReported newAddressReported = new NewAddressReported();
-    newAddressReported.setCollectionCase(collectionCase);
+    NewAddress newAddress = new NewAddress();
+    newAddress.setCollectionCase(collectionCase);
 
     EventDTO eventDTO = new EventDTO();
     eventDTO.setType(NEW_ADDRESS_REPORTED);
@@ -200,7 +200,7 @@ public class AddressReceiverIT {
     responseManagementEvent.setEvent(eventDTO);
 
     PayloadDTO payloadDTO = new PayloadDTO();
-    payloadDTO.setNewAddressReported(newAddressReported);
+    payloadDTO.setNewAddress(newAddress);
     responseManagementEvent.setPayload(payloadDTO);
 
     // WHEN
