@@ -1,6 +1,6 @@
 package uk.gov.ons.census.casesvc.utility;
 
-  tpublic class FormTypeHelper {
+  public class FormTypeHelper {
   public static final String HH_FORM_TYPE = "H";
   public static final String IND_FORM_TYPE = "I";
   public static final String CE1_FORM_TYPE = "C";
