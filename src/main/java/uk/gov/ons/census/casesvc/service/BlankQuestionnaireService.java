@@ -9,7 +9,6 @@ import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -99,7 +98,8 @@ public class BlankQuestionnaireService {
         new BlankQuestionnaireService.NoActionRequired());
   }
 
-  public void handleBlankQuestionnaire(Case caze, UacQidLink uacQidLink, EventTypeDTO causeEventType) {
+  public void handleBlankQuestionnaire(
+      Case caze, UacQidLink uacQidLink, EventTypeDTO causeEventType) {
     BlankQuestionnaireService.Key ruleKey = makeRulesKey(caze, uacQidLink);
 
     if (!rules.containsKey(ruleKey)) {
