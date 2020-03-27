@@ -182,6 +182,7 @@ public class AddressReceiverIT {
 
     Address address = new Address();
     address.setAddressLevel("E");
+    address.setAddressType("HH");
     address.setRegion("W");
 
     CollectionCase collectionCase = new CollectionCase();
@@ -215,11 +216,11 @@ public class AddressReceiverIT {
     CollectionCase actualPayloadCase =
         actualResponseManagementEvent.getPayload().getCollectionCase();
     assertThat(actualPayloadCase.getId()).isEqualTo(collectionCase.getId());
-    assertThat(actualPayloadCase.isSkellington()).isTrue().as("Is Skellington Case");
+    assertThat(actualPayloadCase.isSkeleton()).isTrue().as("Is Skeleton Case");
 
     Case actualCase = caseRepository.findById(UUID.fromString(collectionCase.getId())).get();
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
-    assertThat(actualCase.isSkellington()).isTrue().as("Is Skellington Case In DB");
+    assertThat(actualCase.isSkeleton()).isTrue().as("Is Skeleton Case In DB");
 
     // check database for log eventDTO
     List<Event> events = eventRepository.findAll();

@@ -1,10 +1,9 @@
 package uk.gov.ons.census.casesvc.service;
 
 import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
@@ -26,15 +25,15 @@ public class NewAddressReportedService {
       ResponseManagementEvent newAddressEvent, OffsetDateTime messageTimestamp) {
     CollectionCase newCollectionCase =
         newAddressEvent.getPayload().getNewAddress().getCollectionCase();
-    validDateNewAddressCollectionCaseForMandatoryFields(newCollectionCase);
+    checkManadatoryFieldsPresent(newCollectionCase);
 
-    Case skellingtonCase = createNewSkellingtonCase(newCollectionCase);
+    Case skeletonCase = createSkeletonCase(newCollectionCase);
 
-    skellingtonCase = caseService.saveNewCaseAndStampCaseRef(skellingtonCase);
-    caseService.emitCaseCreatedEvent(skellingtonCase);
+    skeletonCase = caseService.saveNewCaseAndStampCaseRef(skeletonCase);
+    caseService.emitCaseCreatedEvent(skeletonCase);
 
     eventLogger.logCaseEvent(
-        skellingtonCase,
+        skeletonCase,
         newAddressEvent.getEvent().getDateTime(),
         "New Address reported",
         EventType.NEW_ADDRESS_REPORTED,
@@ -43,87 +42,77 @@ public class NewAddressReportedService {
         messageTimestamp);
   }
 
-  private Case createNewSkellingtonCase(CollectionCase collectionCase) {
-    Case skeliingtonCase = new Case();
-    skeliingtonCase.setSkellington(true);
-    skeliingtonCase.setCaseId(UUID.fromString(collectionCase.getId()));
-    skeliingtonCase.setCollectionExerciseId(collectionCase.getCollectionExerciseId());
-    skeliingtonCase.setAddressLine1(collectionCase.getAddress().getAddressLine1());
-    skeliingtonCase.setAddressLine2(collectionCase.getAddress().getAddressLine2());
-    skeliingtonCase.setAddressLine3(collectionCase.getAddress().getAddressLine3());
-    skeliingtonCase.setTownName(collectionCase.getAddress().getTownName());
-    skeliingtonCase.setPostcode(collectionCase.getAddress().getPostcode());
-    skeliingtonCase.setArid(collectionCase.getAddress().getArid());
-    skeliingtonCase.setLatitude(collectionCase.getAddress().getLatitude());
-    skeliingtonCase.setLongitude(collectionCase.getAddress().getLongitude());
-    skeliingtonCase.setUprn(collectionCase.getAddress().getUprn());
-    skeliingtonCase.setRegion(collectionCase.getAddress().getRegion());
-    skeliingtonCase.setActionPlanId(collectionCase.getActionPlanId()); // This is essential
-    skeliingtonCase.setTreatmentCode(collectionCase.getTreatmentCode()); // This is essential
-    skeliingtonCase.setAddressLevel(collectionCase.getAddress().getAddressLevel());
-    skeliingtonCase.setAbpCode(collectionCase.getAddress().getApbCode());
-    skeliingtonCase.setCaseType(collectionCase.getCaseType());
-    skeliingtonCase.setAddressType(collectionCase.getAddress().getAddressType());
-    skeliingtonCase.setUprn(collectionCase.getAddress().getUprn());
-    skeliingtonCase.setEstabArid(collectionCase.getAddress().getEstabArid());
-    skeliingtonCase.setEstabType(collectionCase.getAddress().getEstabType());
-    skeliingtonCase.setOrganisationName(collectionCase.getAddress().getOrganisationName());
-    skeliingtonCase.setOa(collectionCase.getOa());
-    skeliingtonCase.setLsoa(collectionCase.getLsoa());
-    skeliingtonCase.setMsoa(collectionCase.getMsoa());
-    skeliingtonCase.setLad(collectionCase.getLad());
-    skeliingtonCase.setHtcWillingness(collectionCase.getHtcWillingness());
-    skeliingtonCase.setHtcDigital(collectionCase.getHtcDigital());
-    skeliingtonCase.setFieldCoordinatorId(collectionCase.getFieldCoordinatorId());
-    skeliingtonCase.setFieldOfficerId(collectionCase.getFieldOfficerId());
-    skeliingtonCase.setCeExpectedCapacity(collectionCase.getCeExpectedCapacity());
-    skeliingtonCase.setCeActualResponses(collectionCase.getCeActualResponses());
-    skeliingtonCase.setHandDelivery(collectionCase.isHandDelivery());
+  private Case createSkeletonCase(CollectionCase collectionCase) {
+    Case skeletonCase = new Case();
+    skeletonCase.setSkeleton(true);
+    skeletonCase.setCaseId(UUID.fromString(collectionCase.getId()));
+    skeletonCase.setCollectionExerciseId(collectionCase.getCollectionExerciseId());
+    skeletonCase.setAddressLine1(collectionCase.getAddress().getAddressLine1());
+    skeletonCase.setAddressLine2(collectionCase.getAddress().getAddressLine2());
+    skeletonCase.setAddressLine3(collectionCase.getAddress().getAddressLine3());
+    skeletonCase.setTownName(collectionCase.getAddress().getTownName());
+    skeletonCase.setPostcode(collectionCase.getAddress().getPostcode());
+    skeletonCase.setArid(collectionCase.getAddress().getArid());
+    skeletonCase.setLatitude(collectionCase.getAddress().getLatitude());
+    skeletonCase.setLongitude(collectionCase.getAddress().getLongitude());
+    skeletonCase.setUprn(collectionCase.getAddress().getUprn());
+    skeletonCase.setRegion(collectionCase.getAddress().getRegion());
+    skeletonCase.setActionPlanId(collectionCase.getActionPlanId()); // This is essential
+    skeletonCase.setTreatmentCode(collectionCase.getTreatmentCode()); // This is essential
+    skeletonCase.setAddressLevel(collectionCase.getAddress().getAddressLevel());
+    skeletonCase.setAbpCode(collectionCase.getAddress().getApbCode());
+    skeletonCase.setCaseType(collectionCase.getCaseType());
+    skeletonCase.setAddressType(collectionCase.getAddress().getAddressType());
+    skeletonCase.setUprn(collectionCase.getAddress().getUprn());
+    skeletonCase.setEstabArid(collectionCase.getAddress().getEstabArid());
+    skeletonCase.setEstabType(collectionCase.getAddress().getEstabType());
+    skeletonCase.setOrganisationName(collectionCase.getAddress().getOrganisationName());
+    skeletonCase.setOa(collectionCase.getOa());
+    skeletonCase.setLsoa(collectionCase.getLsoa());
+    skeletonCase.setMsoa(collectionCase.getMsoa());
+    skeletonCase.setLad(collectionCase.getLad());
+    skeletonCase.setHtcWillingness(collectionCase.getHtcWillingness());
+    skeletonCase.setHtcDigital(collectionCase.getHtcDigital());
+    skeletonCase.setFieldCoordinatorId(collectionCase.getFieldCoordinatorId());
+    skeletonCase.setFieldOfficerId(collectionCase.getFieldOfficerId());
+    skeletonCase.setCeExpectedCapacity(collectionCase.getCeExpectedCapacity());
+    skeletonCase.setCeActualResponses(collectionCase.getCeActualResponses());
+    skeletonCase.setHandDelivery(collectionCase.isHandDelivery());
 
-    skeliingtonCase.setSurvey("CENSUS");
-    skeliingtonCase.setRefusalReceived(false);
-    skeliingtonCase.setReceiptReceived(false);
-    skeliingtonCase.setAddressInvalid(false);
-    skeliingtonCase.setUndeliveredAsAddressed(false);
-    return skeliingtonCase;
+    skeletonCase.setSurvey("CENSUS");
+    skeletonCase.setRefusalReceived(false);
+    skeletonCase.setReceiptReceived(false);
+    skeletonCase.setAddressInvalid(false);
+    skeletonCase.setUndeliveredAsAddressed(false);
+    return skeletonCase;
   }
 
   // https://collaborate2.ons.gov.uk/confluence/display/SDC/Handle+New+Address+Reported+Events
-  // Only a small number of mandatory fields to create a skellington case
-  private UUID validDateNewAddressCollectionCaseForMandatoryFields(
-      CollectionCase newCollectionCase) {
-    UUID newCaseId;
+  // Only a small number of mandatory fields to create a skeleton case
+  private void checkManadatoryFieldsPresent(CollectionCase newCollectionCase) {
 
-    try {
-      newCaseId = UUID.fromString(newCollectionCase.getId());
-    } catch (IllegalArgumentException e) {
+    if (StringUtils.isEmpty(newCollectionCase.getId())) {
       throw new RuntimeException(
           "Expected NewAddress CollectionCase Id to be a valid UUID, got: "
               + newCollectionCase.getId());
     }
 
-    List<String> valiidCaseTypes = Arrays.asList(new String[] {"HH", "HI", "CE", "SPG"});
-
-    if (!valiidCaseTypes.contains(newCollectionCase.getCaseType())) {
+    if (StringUtils.isEmpty(newCollectionCase.getAddress().getAddressType())) {
       throw new RuntimeException(
-          "Unexpected newAddress CollectionCase caseType: " + newCollectionCase.getCaseType());
+          "Unexpected newAddress CollectionCase addressType: "
+              + newCollectionCase.getAddress().getAddressType());
     }
 
-    String newAddressLevel = newCollectionCase.getAddress().getAddressLevel();
-
-    if (!newAddressLevel.equals("E") && !newAddressLevel.equals("U")) {
+    if (StringUtils.isEmpty(newCollectionCase.getAddress().getAddressLevel())) {
       throw new RuntimeException(
           "Unexpected a valid address level in newAddress CollectionCase Address, received: "
-              + newAddressLevel);
+              + newCollectionCase.getAddress().getAddressLevel());
     }
 
-    String newRegion = newCollectionCase.getAddress().getRegion();
-    List<String> validRegions = Arrays.asList(new String[] {"E", "W", "N"});
-
-    if (!validRegions.contains(newRegion)) {
-      throw new RuntimeException("Invalid newAddress collectionCase Address Region: " + newRegion);
+    if (StringUtils.isEmpty(newCollectionCase.getAddress().getRegion())) {
+      throw new RuntimeException(
+          "Invalid newAddress collectionCase Address Region: "
+              + newCollectionCase.getAddress().getRegion());
     }
-
-    return newCaseId;
   }
 }

@@ -35,7 +35,7 @@ public class NewAddressReportedServiceTest {
   @Mock EventLogger eventLogger;
 
   @Test
-  public void testCreatingSkellingtonCaseWithAllEventFields() {
+  public void testCreatingSkeletonCaseWithAllEventFields() {
     // given
     EasyRandom easyRandom = new EasyRandom();
     CollectionCase collectionCase = easyRandom.nextObject(CollectionCase.class);
@@ -97,47 +97,52 @@ public class NewAddressReportedServiceTest {
   @Test(expected = RuntimeException.class)
   public void testMissingUUID() {
     ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
-    newAddressEvent.getPayload().getNewAddress().getCollectionCase().setId("Xdd344234");
+    newAddressEvent.getPayload().getNewAddress().getCollectionCase().setId(null);
 
     try {
       underTest.processNewAddress(newAddressEvent, OffsetDateTime.now());
     } catch (RuntimeException e) {
       assertThat(e.getMessage())
-          .isEqualTo("Expected NewAddress CollectionCase Id to be a valid UUID, got: Xdd344234");
+          .isEqualTo("Expected NewAddress CollectionCase Id to be a valid UUID, got: null");
       throw e;
     }
   }
 
   @Test(expected = RuntimeException.class)
-  public void testBadCasetype() {
-    ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
-    newAddressEvent.getPayload().getNewAddress().getCollectionCase().setCaseType("BadCaseType");
-
-    try {
-      underTest.processNewAddress(newAddressEvent, OffsetDateTime.now());
-    } catch (RuntimeException e) {
-      assertThat(e.getMessage())
-          .isEqualTo("Unexpected newAddress CollectionCase caseType: BadCaseType");
-      throw e;
-    }
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testBadAddressLevel() {
+  public void testMissingAddressType() {
     ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
     newAddressEvent
         .getPayload()
         .getNewAddress()
         .getCollectionCase()
         .getAddress()
-        .setAddressLevel("X");
+        .setAddressType(null);
+
+    try {
+      underTest.processNewAddress(newAddressEvent, OffsetDateTime.now());
+    } catch (RuntimeException e) {
+      assertThat(e.getMessage())
+          .isEqualTo("Unexpected newAddress CollectionCase addressType: null");
+      throw e;
+    }
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testMissingAddressLevel() {
+    ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
+    newAddressEvent
+        .getPayload()
+        .getNewAddress()
+        .getCollectionCase()
+        .getAddress()
+        .setAddressLevel(null);
 
     try {
       underTest.processNewAddress(newAddressEvent, OffsetDateTime.now());
     } catch (RuntimeException e) {
       assertThat(e.getMessage())
           .isEqualTo(
-              "Unexpected a valid address level in newAddress CollectionCase Address, received: X");
+              "Unexpected a valid address level in newAddress CollectionCase Address, received: null");
       throw e;
     }
   }
@@ -145,18 +150,13 @@ public class NewAddressReportedServiceTest {
   @Test(expected = RuntimeException.class)
   public void testBadRegion() {
     ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
-    newAddressEvent
-        .getPayload()
-        .getNewAddress()
-        .getCollectionCase()
-        .getAddress()
-        .setRegion("UpNorth");
+    newAddressEvent.getPayload().getNewAddress().getCollectionCase().getAddress().setRegion(null);
 
     try {
       underTest.processNewAddress(newAddressEvent, OffsetDateTime.now());
     } catch (RuntimeException e) {
       assertThat(e.getMessage())
-          .isEqualTo("Invalid newAddress collectionCase Address Region: UpNorth");
+          .isEqualTo("Invalid newAddress collectionCase Address Region: null");
       throw e;
     }
   }
@@ -165,10 +165,10 @@ public class NewAddressReportedServiceTest {
     Address address = new Address();
     address.setAddressLevel("U");
     address.setRegion("E");
+    address.setAddressType("U");
 
     CollectionCase collectionCase = new CollectionCase();
     collectionCase.setId(UUID.randomUUID().toString());
-    collectionCase.setCaseType("HH");
     collectionCase.setAddress(address);
 
     NewAddress newAddress = new NewAddress();
@@ -226,7 +226,7 @@ public class NewAddressReportedServiceTest {
     expectedCase.setReceiptReceived(false);
     expectedCase.setAddressInvalid(false);
     expectedCase.setUndeliveredAsAddressed(false);
-    expectedCase.setSkellington(true);
+    expectedCase.setSkeleton(true);
 
     return expectedCase;
   }
