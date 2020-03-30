@@ -290,29 +290,4 @@ public class DataUtils {
 
     return parentNode;
   }
-
-  public static JsonNode createNewAddressReportedJson(UUID caseId) {
-    ObjectNode collectionCaseNode =
-        objectMapper.createObjectNode().put("id", caseId.toString()).put("ceExpectedResponses", 20);
-
-    ObjectNode addressNode =
-        objectMapper
-            .createObjectNode()
-            .put("orgName", "XXXXXXXXXXXXX")
-            .put("addressLine1", "1a main street")
-            .put("addressLine2", "upper upperingham")
-            .put("addressLine3", "")
-            .put("townName", "upton")
-            .put("postcode", "UP103UP")
-            .put("region", "E")
-            .put("addressType", "CE")
-            .put("estabType", "XXX");
-
-    collectionCaseNode.set("address", addressNode);
-
-    ObjectNode parentNode = objectMapper.createObjectNode();
-    parentNode.set("collectionCase", collectionCaseNode);
-
-    return parentNode;
-  }
 }

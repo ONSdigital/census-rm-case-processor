@@ -41,7 +41,7 @@ queueconfig:
   action-case-queue: action.events
   uac-qid-created-queue: case.uac-qid-created
   uac-qid-created-exchange: uac-qid-created-exchange
-  invalid-address-inbound-queue: case.invalidAddressQueue
+  address-inbound-queue: case.addressQueue
   undelivered-mail-queue: case.undeliveredMailQueue
   ccs-property-listed-queue: case.ccsPropertyListedQueue
   consumers: 50

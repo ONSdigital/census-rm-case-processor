@@ -126,6 +126,9 @@ public class Case {
   @Column(columnDefinition = "BOOLEAN DEFAULT false")
   private boolean handDelivery;
 
+  @Column(columnDefinition = "BOOLEAN DEFAULT false")
+  private boolean skeleton;
+
   @Type(type = "jsonb")
   @Column(columnDefinition = "jsonb")
   private CaseMetadata metadata;
