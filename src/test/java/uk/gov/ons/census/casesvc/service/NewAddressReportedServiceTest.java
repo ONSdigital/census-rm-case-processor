@@ -121,7 +121,7 @@ public class NewAddressReportedServiceTest {
       underTest.processNewAddress(newAddressEvent, OffsetDateTime.now());
     } catch (RuntimeException e) {
       assertThat(e.getMessage())
-          .isEqualTo("missing in newAddress in newAddress CollectionCase Address");
+          .isEqualTo("missing addressType in newAddress CollectionCase Address");
       throw e;
     }
   }

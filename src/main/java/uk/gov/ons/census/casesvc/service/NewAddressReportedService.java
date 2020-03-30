@@ -96,7 +96,7 @@ public class NewAddressReportedService {
     }
 
     if (StringUtils.isEmpty(newCollectionCase.getAddress().getAddressType())) {
-      throw new RuntimeException("missing in newAddress in newAddress CollectionCase Address");
+      throw new RuntimeException("missing addressType in newAddress CollectionCase Address");
     }
 
     if (StringUtils.isEmpty(newCollectionCase.getAddress().getAddressLevel())) {
