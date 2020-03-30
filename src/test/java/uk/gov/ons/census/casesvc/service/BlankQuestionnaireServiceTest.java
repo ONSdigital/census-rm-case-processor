@@ -64,6 +64,7 @@ public class BlankQuestionnaireServiceTest {
       {new Key("SPG", "U", "Cont", true), new Expectation(false, false)},
       {new Key("CE", "U", "Cont", true), new Expectation(false, false)},
       {new Key("CE", "U", "Cont", true), new Expectation(false, false)},
+      {new Key("HH", "U", "Ind", true), new Expectation(true)}
     };
 
     return Arrays.asList(ruleToTest);
@@ -77,8 +78,7 @@ public class BlankQuestionnaireServiceTest {
         getQid(this.key.formType),
         this.key.formType,
         this.key.hasOtherValidReceiptForFormType,
-        this.expectation.unreceiptCase,
-        this.expectation.sendToField);
+        this.expectation);
   }
 
   @Test
@@ -89,8 +89,7 @@ public class BlankQuestionnaireServiceTest {
         getQid(this.key.formType),
         this.key.formType,
         this.key.hasOtherValidReceiptForFormType,
-        this.expectation.unreceiptCase,
-        this.expectation.sendToField);
+        this.expectation);
   }
 
   @Test
@@ -101,7 +100,7 @@ public class BlankQuestionnaireServiceTest {
         getQid(this.key.formType),
         this.key.formType,
         this.key.hasOtherValidReceiptForFormType,
-        this.expectation.unreceiptCase);
+        this.expectation);
   }
 
   @Test
@@ -112,7 +111,7 @@ public class BlankQuestionnaireServiceTest {
         getQid(this.key.formType),
         this.key.formType,
         this.key.hasOtherValidReceiptForFormType,
-        this.expectation.unreceiptCase);
+        this.expectation);
   }
 
   private void runBlankQreTestCaseNotYetReceipted(
@@ -121,8 +120,7 @@ public class BlankQuestionnaireServiceTest {
       String qid,
       String formType,
       boolean hasOtherValidReceiptForFormType,
-      boolean unreceiptCase,
-      boolean sendToField) {
+      Expectation expectation) {
 
     CaseService caseService = mock(CaseService.class);
     CaseRepository caseRepository = mock(CaseRepository.class);
@@ -154,15 +152,20 @@ public class BlankQuestionnaireServiceTest {
       when(uacService.findByQid(eq(otherQid))).thenReturn(otherUacQidLink);
     }
 
+    if (expectation.invalid) {
+      checkExceptionIsRaised(caseService, underTest, caze, uacQidLink);
+      return;
+    }
+
     underTest.handleBlankQuestionnaire(caze, uacQidLink, RESPONSE_RECEIVED);
 
-    if (!unreceiptCase && !sendToField) {
+    if (!expectation.unreceiptCase && !expectation.sendToField) {
       verifyZeroInteractions(caseService);
       verifyZeroInteractions(caseRepository);
       return;
     }
 
-    if (unreceiptCase && sendToField) {
+    if (expectation.unreceiptCase && expectation.sendToField) {
       ArgumentCaptor<Metadata> metadataArgumentCaptor = ArgumentCaptor.forClass(Metadata.class);
       verify(caseService).unreceiptCase(any(), metadataArgumentCaptor.capture());
       assertThat(metadataArgumentCaptor.getValue().getFieldDecision())
@@ -170,10 +173,27 @@ public class BlankQuestionnaireServiceTest {
       return;
     }
 
-    if (unreceiptCase && !sendToField) {
+    if (expectation.unreceiptCase && !expectation.sendToField) {
       verify(caseService).unreceiptCase(any(), eq(null));
       return;
     }
+  }
+
+  private void checkExceptionIsRaised(
+      CaseService caseService,
+      BlankQuestionnaireService underTest,
+      Case caze,
+      UacQidLink uacQidLink) {
+    try {
+      underTest.handleBlankQuestionnaire(caze, uacQidLink, RESPONSE_RECEIVED);
+    } catch (RuntimeException rte) {
+      assertThat(rte).isInstanceOf(RuntimeException.class);
+      assertThat(rte.getMessage()).endsWith(" does not map to any known processing rule");
+      verifyZeroInteractions(caseService);
+      return;
+    }
+
+    fail("Expected RuntimeException to be thrown");
   }
 
   private void runBlankQreTestCaseAlreadyReceipted(
@@ -182,8 +202,7 @@ public class BlankQuestionnaireServiceTest {
       String qid,
       String formType,
       boolean hasOtherValidReceiptForFormType,
-      boolean unreceiptCase,
-      boolean sendToField) {
+      Expectation expectation) {
 
     CaseService caseService = mock(CaseService.class);
     CaseRepository caseRepository = mock(CaseRepository.class);
@@ -215,15 +234,20 @@ public class BlankQuestionnaireServiceTest {
       when(uacService.findByQid(eq(otherQid))).thenReturn(otherUacQidLink);
     }
 
+    if (expectation.invalid) {
+      checkExceptionIsRaised(caseService, underTest, caze, uacQidLink);
+      return;
+    }
+
     underTest.handleBlankQuestionnaire(caze, uacQidLink, RESPONSE_RECEIVED);
 
-    if (!unreceiptCase && !sendToField) {
+    if (!expectation.unreceiptCase && !expectation.sendToField) {
       verifyZeroInteractions(caseService);
       verifyZeroInteractions(caseRepository);
       return;
     }
 
-    if (sendToField) {
+    if (expectation.sendToField) {
       ArgumentCaptor<Metadata> metadataArgumentCaptor = ArgumentCaptor.forClass(Metadata.class);
       verify(caseService).unreceiptCase(any(), metadataArgumentCaptor.capture());
       assertThat(metadataArgumentCaptor.getValue().getFieldDecision())
@@ -237,7 +261,7 @@ public class BlankQuestionnaireServiceTest {
       String qid,
       String formType,
       boolean hasOtherValidReceiptForFormType,
-      boolean unreceiptCase) {
+      Expectation expectation) {
 
     CaseService caseService = mock(CaseService.class);
     CaseRepository caseRepository = mock(CaseRepository.class);
@@ -268,9 +292,14 @@ public class BlankQuestionnaireServiceTest {
       when(uacService.findByQid(eq(otherQid))).thenReturn(otherUacQidLink);
     }
 
+    if (expectation.invalid) {
+      checkExceptionIsRaised(caseService, underTest, caze, uacQidLink);
+      return;
+    }
+
     underTest.handleBlankQuestionnaire(caze, uacQidLink, RESPONSE_RECEIVED);
 
-    if (!unreceiptCase) {
+    if (!expectation.unreceiptCase) {
       verifyZeroInteractions(caseService);
       verifyZeroInteractions(caseRepository);
       return;
@@ -287,7 +316,7 @@ public class BlankQuestionnaireServiceTest {
       String qid,
       String formType,
       boolean hasOtherValidReceiptForFormType,
-      boolean unreceiptCase) {
+      Expectation expectation) {
 
     CaseService caseService = mock(CaseService.class);
     CaseRepository caseRepository = mock(CaseRepository.class);
@@ -318,9 +347,14 @@ public class BlankQuestionnaireServiceTest {
       when(uacService.findByQid(eq(otherQid))).thenReturn(otherUacQidLink);
     }
 
+    if (expectation.invalid) {
+      checkExceptionIsRaised(caseService, underTest, caze, uacQidLink);
+      return;
+    }
+
     underTest.handleBlankQuestionnaire(caze, uacQidLink, RESPONSE_RECEIVED);
 
-    if (!unreceiptCase) {
+    if (!expectation.unreceiptCase) {
       verifyZeroInteractions(caseService);
       verifyZeroInteractions(caseRepository);
       return;
@@ -362,11 +396,20 @@ public class BlankQuestionnaireServiceTest {
     }
   }
 
-  @AllArgsConstructor
   @EqualsAndHashCode
   private static class Expectation {
 
     boolean unreceiptCase;
     boolean sendToField;
+    boolean invalid;
+
+    public Expectation(boolean unreceiptCase, boolean sendToField) {
+      this.unreceiptCase = unreceiptCase;
+      this.sendToField = sendToField;
+    }
+
+    public Expectation(boolean invalid) {
+      this.invalid = true;
+    }
   }
 }
