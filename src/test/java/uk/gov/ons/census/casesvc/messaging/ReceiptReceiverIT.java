@@ -194,6 +194,8 @@ public class ReceiptReceiverIT {
     caze.setEvents(null);
     caze.setCaseType("HH");
     caze.setAddressLevel("U");
+    caze.setRefusalReceived(false);
+    caze.setAddressInvalid(false);
     caze = caseRepository.saveAndFlush(caze);
 
     UacQidLink uacQidLink = new UacQidLink();
