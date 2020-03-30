@@ -117,9 +117,9 @@ public class RefusalReceiverIT {
     assertThat(actualCase.isRefusalReceived()).isTrue();
     assertThat(actualCase.getLastUpdated()).isNotEqualTo(cazeCreatedTime);
 
-    // check the metadata is included with field close decision
+    // check the metadata is included with field CANCEL decision
     assertThat(responseManagementEvent.getPayload().getMetadata().getFieldDecision())
-        .isEqualTo(ActionInstructionType.CLOSE);
+        .isEqualTo(ActionInstructionType.CANCEL);
     assertThat(responseManagementEvent.getPayload().getMetadata().getCauseEventType())
         .isEqualTo(EventTypeDTO.REFUSAL_RECEIVED);
 

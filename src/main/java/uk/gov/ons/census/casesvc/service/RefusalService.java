@@ -51,7 +51,7 @@ public class RefusalService {
 
   private Metadata buildMetadataForRefusal(ResponseManagementEvent event) {
     if (!isEventChannelField(event)) {
-      return buildMetadata(event.getEvent().getType(), ActionInstructionType.CLOSE);
+      return buildMetadata(event.getEvent().getType(), ActionInstructionType.CANCEL);
     }
     return buildMetadata(event.getEvent().getType(), null);
   }

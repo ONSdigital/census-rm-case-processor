@@ -69,7 +69,7 @@ public class RefusalServiceTest {
 
     assertThat(actualCase.isRefusalReceived()).isTrue();
     assertThat(metadata.getCauseEventType()).isEqualTo(EventTypeDTO.REFUSAL_RECEIVED);
-    assertThat(metadata.getFieldDecision()).isEqualTo(ActionInstructionType.CLOSE);
+    assertThat(metadata.getFieldDecision()).isEqualTo(ActionInstructionType.CANCEL);
     inOrder
         .verify(eventLogger, times(1))
         .logCaseEvent(
