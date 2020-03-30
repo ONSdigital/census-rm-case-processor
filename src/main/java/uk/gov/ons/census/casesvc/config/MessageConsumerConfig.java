@@ -63,8 +63,8 @@ public class MessageConsumerConfig {
   @Value("${queueconfig.uac-qid-created-queue}")
   private String uacQidCreatedQueue;
 
-  @Value("${queueconfig.invalid-address-inbound-queue}")
-  private String invalidAddressInboundQueue;
+  @Value("${queueconfig.address-inbound-queue}")
+  private String addressInboundQueue;
 
   @Value("${queueconfig.survey-launched-queue}")
   private String surveyLaunchedQueue;
@@ -125,7 +125,7 @@ public class MessageConsumerConfig {
   }
 
   @Bean
-  public MessageChannel invalidAddressInputChannel() {
+  public MessageChannel addressInputChannel() {
     return new DirectChannel();
   }
 
@@ -217,9 +217,9 @@ public class MessageConsumerConfig {
   }
 
   @Bean
-  AmqpInboundChannelAdapter invalidAddressInbound(
-      @Qualifier("invalidAddressContainer") SimpleMessageListenerContainer listenerContainer,
-      @Qualifier("invalidAddressInputChannel") MessageChannel channel) {
+  AmqpInboundChannelAdapter addressInbound(
+      @Qualifier("addressContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("addressInputChannel") MessageChannel channel) {
     AmqpInboundChannelAdapter adapter = new AmqpInboundChannelAdapter(listenerContainer);
     adapter.setOutputChannel(channel);
     return adapter;
@@ -298,8 +298,8 @@ public class MessageConsumerConfig {
   }
 
   @Bean
-  public SimpleMessageListenerContainer invalidAddressContainer() {
-    return setupListenerContainer(invalidAddressInboundQueue, ResponseManagementEvent.class);
+  public SimpleMessageListenerContainer addressContainer() {
+    return setupListenerContainer(addressInboundQueue, ResponseManagementEvent.class);
   }
 
   @Bean
