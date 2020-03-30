@@ -102,8 +102,7 @@ public class NewAddressReportedServiceTest {
     try {
       underTest.processNewAddress(newAddressEvent, OffsetDateTime.now());
     } catch (RuntimeException e) {
-      assertThat(e.getMessage())
-          .isEqualTo("Expected NewAddress CollectionCase Id to be a valid UUID, got: null");
+      assertThat(e.getMessage()).isEqualTo("missing id in newAddress CollectionCase");
       throw e;
     }
   }
@@ -122,7 +121,7 @@ public class NewAddressReportedServiceTest {
       underTest.processNewAddress(newAddressEvent, OffsetDateTime.now());
     } catch (RuntimeException e) {
       assertThat(e.getMessage())
-          .isEqualTo("Unexpected newAddress CollectionCase addressType: null");
+          .isEqualTo("missing in newAddress in newAddress CollectionCase Address");
       throw e;
     }
   }
@@ -141,22 +140,20 @@ public class NewAddressReportedServiceTest {
       underTest.processNewAddress(newAddressEvent, OffsetDateTime.now());
     } catch (RuntimeException e) {
       assertThat(e.getMessage())
-          .isEqualTo(
-              "Unexpected a valid address level in newAddress CollectionCase Address, received: null");
+          .isEqualTo("missing addressLevel in newAddress CollectionCase Address");
       throw e;
     }
   }
 
   @Test(expected = RuntimeException.class)
-  public void testBadRegion() {
+  public void testMssingRegion() {
     ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
     newAddressEvent.getPayload().getNewAddress().getCollectionCase().getAddress().setRegion(null);
 
     try {
       underTest.processNewAddress(newAddressEvent, OffsetDateTime.now());
     } catch (RuntimeException e) {
-      assertThat(e.getMessage())
-          .isEqualTo("Invalid newAddress collectionCase Address Region: null");
+      assertThat(e.getMessage()).isEqualTo("missing region in newAddress CollectionCase Address");
       throw e;
     }
   }

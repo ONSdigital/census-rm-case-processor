@@ -92,27 +92,19 @@ public class NewAddressReportedService {
   private void checkManadatoryFieldsPresent(CollectionCase newCollectionCase) {
 
     if (StringUtils.isEmpty(newCollectionCase.getId())) {
-      throw new RuntimeException(
-          "Expected NewAddress CollectionCase Id to be a valid UUID, got: "
-              + newCollectionCase.getId());
+      throw new RuntimeException("missing id in newAddress CollectionCase");
     }
 
     if (StringUtils.isEmpty(newCollectionCase.getAddress().getAddressType())) {
-      throw new RuntimeException(
-          "Unexpected newAddress CollectionCase addressType: "
-              + newCollectionCase.getAddress().getAddressType());
+      throw new RuntimeException("missing in newAddress in newAddress CollectionCase Address");
     }
 
     if (StringUtils.isEmpty(newCollectionCase.getAddress().getAddressLevel())) {
-      throw new RuntimeException(
-          "Unexpected a valid address level in newAddress CollectionCase Address, received: "
-              + newCollectionCase.getAddress().getAddressLevel());
+      throw new RuntimeException("missing addressLevel in newAddress CollectionCase Address");
     }
 
     if (StringUtils.isEmpty(newCollectionCase.getAddress().getRegion())) {
-      throw new RuntimeException(
-          "Invalid newAddress collectionCase Address Region: "
-              + newCollectionCase.getAddress().getRegion());
+      throw new RuntimeException("missing region in newAddress CollectionCase Address");
     }
   }
 }
