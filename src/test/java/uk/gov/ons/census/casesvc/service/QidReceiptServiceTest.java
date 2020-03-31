@@ -141,4 +141,39 @@ public class QidReceiptServiceTest {
             eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
   }
+
+  @Test
+  public void testUnreceiptForUnlinkedQidIsLoggedAndQidUpdated() {
+
+    ResponseManagementEvent managementEvent = getTestResponseManagementReceiptEventUnreceipt();
+    managementEvent.getPayload().getResponse().setQuestionnaireId(TEST_NON_CCS_QID_ID);
+    UacQidLink uacQidLink = generateRandomUacQidLink();
+    uacQidLink.setQid(TEST_NON_CCS_QID_ID);
+    uacQidLink.setBlankQuestionnaire(false);
+    uacQidLink.setCaze(null);
+    when(uacService.findByQid(eq(uacQidLink.getQid()))).thenReturn(uacQidLink);
+
+    // When
+    underTest.processUnreceipt(managementEvent, OffsetDateTime.now(), uacQidLink);
+
+    // Then
+    verifyZeroInteractions(caseReceiptService);
+    verifyZeroInteractions(blankQuestionnaireService);
+    verify(eventLogger)
+        .logUacQidEvent(
+            eq(uacQidLink),
+            any(),
+            eq("Blank questionnaire received"),
+            eq(EventType.RESPONSE_RECEIVED),
+            any(),
+            any(),
+            any());
+    ArgumentCaptor<UacQidLink> uacQidLinkArgumentCaptor = ArgumentCaptor.forClass(UacQidLink.class);
+    verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkArgumentCaptor.capture());
+    UacQidLink actualUacQidLink = uacQidLinkArgumentCaptor.getValue();
+    assertThat(actualUacQidLink)
+        .isEqualToIgnoringGivenFields(uacQidLink, "blankQuestionnaire", "active");
+    assertThat(actualUacQidLink.isBlankQuestionnaire()).isTrue();
+    assertThat(actualUacQidLink.isActive()).isFalse();
+  }
 }
