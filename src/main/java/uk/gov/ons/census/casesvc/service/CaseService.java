@@ -180,8 +180,6 @@ public class CaseService {
     address.setAddressLine2(caze.getAddressLine2());
     address.setAddressLine3(caze.getAddressLine3());
     address.setAddressType(caze.getAddressType());
-    address.setArid(caze.getArid());
-    address.setEstabArid(caze.getEstabArid());
     address.setEstabType(caze.getEstabType());
     address.setLatitude(caze.getLatitude());
     address.setLongitude(caze.getLongitude());
@@ -190,6 +188,7 @@ public class CaseService {
     address.setApbCode(caze.getAbpCode());
     address.setOrganisationName(caze.getOrganisationName());
     address.setUprn(caze.getUprn());
+    address.setEstabUprn(caze.getEstabUprn());
     address.setAddressLevel(caze.getAddressLevel());
     if (caze.getRegion() != null) {
       address.setRegion(caze.getRegion().substring(0, 1));
@@ -244,9 +243,8 @@ public class CaseService {
     individualResponseCase.setCaseType(HOUSEHOLD_INDIVIDUAL_RESPONSE_CASE_TYPE);
     individualResponseCase.setCollectionExerciseId(parentCase.getCollectionExerciseId());
     individualResponseCase.setActionPlanId(parentCase.getActionPlanId());
-    individualResponseCase.setArid(parentCase.getArid());
-    individualResponseCase.setEstabArid(parentCase.getEstabArid());
     individualResponseCase.setUprn(parentCase.getUprn());
+    individualResponseCase.setEstabUprn(parentCase.getEstabUprn());
     individualResponseCase.setEstabType(parentCase.getEstabType());
     individualResponseCase.setAbpCode(parentCase.getAbpCode());
     individualResponseCase.setOrganisationName(parentCase.getOrganisationName());

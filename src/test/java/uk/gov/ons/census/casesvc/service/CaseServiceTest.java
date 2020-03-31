@@ -410,9 +410,8 @@ public class CaseServiceTest {
     assertThat(actualChildCase.getActionPlanId()).isEqualTo(parentCase.getActionPlanId());
     assertThat(actualChildCase.isReceiptReceived()).isFalse();
     assertThat(actualChildCase.isRefusalReceived()).isFalse();
-    assertThat(actualChildCase.getArid()).isEqualTo(parentCase.getArid());
-    assertThat(actualChildCase.getEstabArid()).isEqualTo(parentCase.getEstabArid());
     assertThat(actualChildCase.getUprn()).isEqualTo(parentCase.getUprn());
+    assertThat(actualChildCase.getEstabUprn()).isEqualTo(parentCase.getEstabUprn());
     assertThat(actualChildCase.getAddressType()).isEqualTo(parentCase.getAddressType());
     assertThat(actualChildCase.getCaseType()).isEqualTo(HOUSEHOLD_INDIVIDUAL_RESPONSE_ADDRESS_TYPE);
     assertThat(actualChildCase.getEstabType()).isEqualTo(parentCase.getEstabType());

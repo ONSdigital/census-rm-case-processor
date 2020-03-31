@@ -34,11 +34,9 @@ public class Case {
   @Column(name = "case_ref")
   private Long caseRef;
 
-  @Column private String arid;
-
-  @Column private String estabArid;
-
   @Column private String uprn;
+
+  @Column private String estabUprn;
 
   @Column private String caseType;
 
@@ -132,4 +130,6 @@ public class Case {
   @Type(type = "jsonb")
   @Column(columnDefinition = "jsonb")
   private CaseMetadata metadata;
+
+  @Column private String printBatch;
 }
