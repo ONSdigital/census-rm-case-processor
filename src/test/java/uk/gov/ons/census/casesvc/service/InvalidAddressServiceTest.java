@@ -70,7 +70,7 @@ public class InvalidAddressServiceTest {
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
     Metadata metadata = metadataArgumentCaptor.getValue();
     assertThat(metadata.getCauseEventType()).isEqualTo(ADDRESS_NOT_VALID);
-    assertThat(metadata.getFieldDecision()).isEqualTo(ActionInstructionType.CLOSE);
+    assertThat(metadata.getFieldDecision()).isEqualTo(ActionInstructionType.CANCEL);
 
     verify(eventLogger)
         .logCaseEvent(

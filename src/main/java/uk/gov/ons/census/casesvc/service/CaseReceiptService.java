@@ -41,7 +41,7 @@ public class CaseReceiptService {
      This table is based on: https://collaborate2.ons.gov.uk/confluence/pages/viewpage.action?spaceKey=SDC&title=Receipting
     */
 
-    rules.put(new Key("HH", "U", HH), new Rule(receiptCase, ActionInstructionType.CLOSE));
+    rules.put(new Key("HH", "U", HH), new Rule(receiptCase, ActionInstructionType.CANCEL));
     rules.put(new Key("HH", "U", CONT), new NoActionRequired());
     rules.put(new Key("HI", "U", IND), new Rule(receiptCase, null));
     rules.put(new Key("CE", "E", IND), new Rule(incrementNoReceipt, ActionInstructionType.UPDATE));
@@ -49,7 +49,7 @@ public class CaseReceiptService {
     rules.put(new Key("CE", "U", IND), new CeUnitRule());
     rules.put(new Key("SPG", "E", HH), new NoActionRequired());
     rules.put(new Key("SPG", "E", IND), new NoActionRequired());
-    rules.put(new Key("SPG", "U", HH), new Rule(receiptCase, ActionInstructionType.CLOSE));
+    rules.put(new Key("SPG", "U", HH), new Rule(receiptCase, ActionInstructionType.CANCEL));
     rules.put(new Key("SPG", "U", IND), new NoActionRequired());
     rules.put(new Key("SPG", "U", CONT), new NoActionRequired());
   }
@@ -140,7 +140,7 @@ public class CaseReceiptService {
 
       if (lockedCase.getCeActualResponses() >= lockedCase.getCeExpectedCapacity()) {
         lockedCase.setReceiptReceived(true);
-        fieldInstruction = ActionInstructionType.CLOSE;
+        fieldInstruction = ActionInstructionType.CANCEL;
       }
 
       caseService.saveCaseAndEmitCaseUpdatedEvent(
