@@ -139,15 +139,15 @@ public class ReceiptReceiverIT {
     assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID.toString());
     assertThat(actualCollectionCase.getReceiptReceived()).isTrue();
 
-    // check the metadata is included with field close decision
+    // check the metadata is included with field CANCEL decision
     assertThat(responseManagementEvent.getPayload().getMetadata().getFieldDecision())
-        .isEqualTo(ActionInstructionType.CLOSE);
+        .isEqualTo(ActionInstructionType.CANCEL);
     assertThat(responseManagementEvent.getPayload().getMetadata().getCauseEventType())
         .isEqualTo(EventTypeDTO.RESPONSE_RECEIVED);
 
     Metadata metaData = responseManagementEvent.getPayload().getMetadata();
     assertThat(metaData.getCauseEventType()).isEqualTo(RESPONSE_RECEIVED);
-    assertThat(metaData.getFieldDecision()).isEqualTo(ActionInstructionType.CLOSE);
+    assertThat(metaData.getFieldDecision()).isEqualTo(ActionInstructionType.CANCEL);
 
     responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(rhUacOutboundQueue);
     assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
