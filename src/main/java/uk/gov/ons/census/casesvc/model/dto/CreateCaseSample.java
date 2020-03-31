@@ -32,4 +32,5 @@ public class CreateCaseSample {
   private String collectionExerciseId;
   private String actionPlanId;
   private Integer secureEstablishment;
+  private String printBatch;
 }
