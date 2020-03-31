@@ -118,6 +118,7 @@ public class QuestionnaireLinkedServiceTest {
     testUacQidLink.setActive(false);
     testUacQidLink.setCaze(null);
     testUacQidLink.setCcsCase(false);
+    testUacQidLink.setBlankQuestionnaire(false);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     when(uacService.findByQid(TEST_HH_QID)).thenReturn(testUacQidLink);
@@ -423,6 +424,7 @@ public class QuestionnaireLinkedServiceTest {
     testUacQidLink.setCaze(null);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
     testUacQidLink.setCcsCase(false);
+    testUacQidLink.setBlankQuestionnaire(false);
 
     ResponseManagementEvent linkingEvent = getTestResponseManagementQuestionnaireLinkedEvent();
     UacDTO uac = linkingEvent.getPayload().getUac();

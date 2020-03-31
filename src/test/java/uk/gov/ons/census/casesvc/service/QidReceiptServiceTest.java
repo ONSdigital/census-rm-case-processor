@@ -151,7 +151,6 @@ public class QidReceiptServiceTest {
     uacQidLink.setQid(TEST_NON_CCS_QID_ID);
     uacQidLink.setBlankQuestionnaire(false);
     uacQidLink.setCaze(null);
-    when(uacService.findByQid(eq(uacQidLink.getQid()))).thenReturn(uacQidLink);
 
     // When
     underTest.processUnreceipt(managementEvent, OffsetDateTime.now(), uacQidLink);

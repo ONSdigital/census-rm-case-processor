@@ -84,3 +84,5 @@ logging:
 # that tests it. Once the direct delivery treatment codes have been finalised then we can add
 # them to the list.
 directdeliverytreatmentcodes: CE_LDIEE
+
+caserefgeneratorkey: rPr3qsjlU42hsDX5npfuCzlyF4UYfDTO
