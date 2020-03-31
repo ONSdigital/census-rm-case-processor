@@ -17,6 +17,9 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
+// The bidirectional relationships with other entities can cause stack overflows with the default
+// toString
+@ToString(onlyExplicitlyIncluded = true)
 @Data
 @TypeDefs({@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)})
 @Entity
@@ -28,9 +31,9 @@ import org.hibernate.annotations.TypeDefs;
 public class Event {
   @Id private UUID id;
 
-  @ManyToOne @ToString.Exclude private UacQidLink uacQidLink;
+  @ManyToOne private UacQidLink uacQidLink;
 
-  @ManyToOne @ToString.Exclude private Case caze;
+  @ManyToOne private Case caze;
 
   @Column(columnDefinition = "timestamp with time zone")
   private OffsetDateTime eventDate;

@@ -14,6 +14,9 @@ import lombok.Data;
 import lombok.ToString;
 import org.hibernate.annotations.*;
 
+// The bidirectional relationships with other entities can cause stack overflows with the default
+// toString
+@ToString(onlyExplicitlyIncluded = true)
 @Data
 @Entity
 @TypeDefs({@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)})
@@ -103,10 +106,8 @@ public class Case {
   private OffsetDateTime createdDateTime;
 
   @OneToMany(mappedBy = "caze")
-  @ToString.Exclude
   List<UacQidLink> uacQidLinks;
 
-  @ToString.Exclude
   @OneToMany(mappedBy = "caze")
   List<Event> events;
 

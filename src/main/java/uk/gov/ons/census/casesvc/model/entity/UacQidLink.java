@@ -12,6 +12,9 @@ import javax.persistence.Table;
 import lombok.Data;
 import lombok.ToString;
 
+// The bidirectional relationships with other entities can cause stack overflows with the default
+// toString
+@ToString(onlyExplicitlyIncluded = true)
 @Data
 @Entity
 @Table(indexes = {@Index(name = "qid_idx", columnList = "qid")})
@@ -23,10 +26,9 @@ public class UacQidLink {
 
   @Column private String uac;
 
-  @ManyToOne @ToString.Exclude private Case caze;
+  @ManyToOne private Case caze;
 
   @OneToMany(mappedBy = "uacQidLink")
-  @ToString.Exclude
   private List<Event> events;
 
   @Column private UUID batchId;
