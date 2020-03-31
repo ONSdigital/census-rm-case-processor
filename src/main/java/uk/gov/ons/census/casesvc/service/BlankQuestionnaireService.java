@@ -24,7 +24,7 @@ public class BlankQuestionnaireService {
 
   private final CaseService caseService;
 
-  private Map<BlankQuestionnaireService.Key, BlankQreRule> rules = new HashMap<>();
+  private Map<BlankQuestionnaireService.Key, BlankQuestionnaireRule> rules = new HashMap<>();
 
   public BlankQuestionnaireService(CaseService caseService) {
     this.caseService = caseService;
@@ -106,7 +106,7 @@ public class BlankQuestionnaireService {
       throw new RuntimeException(ruleKey.toString() + " does not map to any known processing rule");
     }
 
-    BlankQreRule rule = rules.get(ruleKey);
+    BlankQuestionnaireRule rule = rules.get(ruleKey);
     rule.run(caze, causeEventType);
   }
 
@@ -142,12 +142,12 @@ public class BlankQuestionnaireService {
     private boolean hasOtherValidReceiptForFormType;
   }
 
-  private interface BlankQreRule {
+  private interface BlankQuestionnaireRule {
 
     void run(Case caze, EventTypeDTO causeEventType);
   }
 
-  private class UnreceiptCaseAndSendToField implements BlankQreRule {
+  private class UnreceiptCaseAndSendToField implements BlankQuestionnaireRule {
 
     @Override
     public void run(Case caze, EventTypeDTO causeEventType) {
@@ -160,7 +160,7 @@ public class BlankQuestionnaireService {
     }
   }
 
-  private class UnreceiptCase implements BlankQreRule {
+  private class UnreceiptCase implements BlankQuestionnaireRule {
 
     @Override
     public void run(Case caze, EventTypeDTO causeEventType) {
@@ -168,7 +168,7 @@ public class BlankQuestionnaireService {
     }
   }
 
-  private class NoActionRequired implements BlankQreRule {
+  private class NoActionRequired implements BlankQuestionnaireRule {
 
     @Override
     public void run(Case caze, EventTypeDTO causeEventType) {
