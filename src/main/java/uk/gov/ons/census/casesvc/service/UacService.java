@@ -102,7 +102,7 @@ public class UacService {
     // forced to incorporate CENSUS business logic. It's for the CENSUS team to put business logic
     // wherever it's needed, which quite clearly is NOT here. TODO: Put the business logic elsewhere
     String formType = mapQuestionnaireTypeToFormType(uacQidLink.getQid());
-    if (formType != null && formType.equals(CONT_FORM_TYPE)) {
+    if (CONT_FORM_TYPE.equals(formType)) {
       // We want to send out null form type rather than "Cont" for continuation questionnaires
       // since they are not a valid form type in EQ/RH
       formType = null;
