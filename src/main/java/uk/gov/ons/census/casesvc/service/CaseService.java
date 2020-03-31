@@ -229,6 +229,7 @@ public class CaseService {
     collectionCase.setHandDelivery(caze.isHandDelivery());
     collectionCase.setSkeleton(caze.isSkeleton());
     collectionCase.setMetadata(caze.getMetadata());
+    collectionCase.setPrintBatch(caze.getPrintBatch());
     // Yes. You can add stuff to the bottom of this list if you like.
 
     return collectionCase;

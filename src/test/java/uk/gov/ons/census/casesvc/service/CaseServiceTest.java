@@ -267,6 +267,7 @@ public class CaseServiceTest {
     caze.setFieldOfficerId(FIELD_OFFICER_ID);
     caze.setCeExpectedCapacity(CE_CAPACITY);
     caze.setCeActualResponses(CE_ACTUAL_CAPACITY);
+    caze.setPrintBatch("TEST_PRINT_BATCH");
     ReflectionTestUtils.setField(underTest, "outboundExchange", TEST_EXCHANGE);
 
     // When
@@ -289,6 +290,7 @@ public class CaseServiceTest {
     assertThat(collectionCase.getCeExpectedCapacity()).isEqualTo(CE_CAPACITY);
     assertThat(collectionCase.getCeActualResponses()).isEqualTo(CE_ACTUAL_CAPACITY);
     assertThat(collectionCase.getMetadata()).isNull();
+    assertThat(collectionCase.getPrintBatch()).isEqualTo(caze.getPrintBatch());
   }
 
   @Test

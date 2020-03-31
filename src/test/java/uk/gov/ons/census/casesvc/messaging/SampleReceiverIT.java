@@ -88,8 +88,6 @@ public class SampleReceiverIT {
     createCaseSample.setTreatmentCode("HH_LF3R2E");
     createCaseSample.setCeExpectedCapacity(null);
     createCaseSample.setSecureEstablishment(0);
-    createCaseSample.setEstabUprn("EstabUprnTest");
-    createCaseSample.setPrintBatch("PrintBatchTest");
     // WHEN
     rabbitQueueHelper.sendMessage(inboundQueue, createCaseSample);
 
