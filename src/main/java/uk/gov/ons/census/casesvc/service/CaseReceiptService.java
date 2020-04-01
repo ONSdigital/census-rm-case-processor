@@ -2,7 +2,6 @@ package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.utility.FormTypeHelper.mapQuestionnaireTypeToFormType;
 import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
-import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.iscontinuationQuestionnaireTypes;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,7 +56,7 @@ public class CaseReceiptService {
   public void receiptCase(UacQidLink uacQidLink, EventTypeDTO causeEventType) {
     Case caze = uacQidLink.getCaze();
 
-    if (caze.isReceiptReceived()) return;
+    if (caze.isReceiptReceived() || uacQidLink.isBlankQuestionnaire()) return;
 
     Key ruleKey = makeRulesKey(caze, uacQidLink);
 
@@ -70,14 +69,7 @@ public class CaseReceiptService {
   }
 
   private Key makeRulesKey(Case caze, UacQidLink uacQidLink) {
-    String formType;
-
-    if (iscontinuationQuestionnaireTypes(uacQidLink.getQid())) {
-      formType = "Cont";
-    } else {
-      formType = mapQuestionnaireTypeToFormType(uacQidLink.getQid());
-    }
-
+    String formType = mapQuestionnaireTypeToFormType(uacQidLink.getQid());
     return new Key(caze.getCaseType(), caze.getAddressLevel(), formType);
   }
 

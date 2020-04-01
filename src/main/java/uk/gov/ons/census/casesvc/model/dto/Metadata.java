@@ -6,4 +6,5 @@ import lombok.Data;
 public class Metadata {
   private ActionInstructionType fieldDecision;
   private EventTypeDTO causeEventType;
+  private Boolean blankQuestionnaireReceived;
 }

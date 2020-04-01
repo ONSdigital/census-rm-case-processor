@@ -24,16 +24,19 @@ public class QuestionnaireLinkedService {
   private final CaseService caseService;
   private final EventLogger eventLogger;
   private final CaseReceiptService caseReceiptService;
+  private final BlankQuestionnaireService blankQuestionnaireService;
 
   public QuestionnaireLinkedService(
       UacService uacService,
       CaseService caseService,
       EventLogger eventLogger,
-      CaseReceiptService caseReceiptService) {
+      CaseReceiptService caseReceiptService,
+      BlankQuestionnaireService blankQuestionnaireService) {
     this.uacService = uacService;
     this.caseService = caseService;
     this.eventLogger = eventLogger;
     this.caseReceiptService = caseReceiptService;
+    this.blankQuestionnaireService = blankQuestionnaireService;
   }
 
   public void processQuestionnaireLinked(
@@ -55,7 +58,12 @@ public class QuestionnaireLinkedService {
     uacQidLink.setCaze(caze);
 
     if (!uacQidLink.isActive()) {
-      caseReceiptService.receiptCase(uacQidLink, questionnaireLinkedEvent.getEvent().getType());
+      if (uacQidLink.isBlankQuestionnaire()) {
+        blankQuestionnaireService.handleBlankQuestionnaire(
+            caze, uacQidLink, questionnaireLinkedEvent.getEvent().getType());
+      } else {
+        caseReceiptService.receiptCase(uacQidLink, questionnaireLinkedEvent.getEvent().getType());
+      }
     }
 
     uacService.saveAndEmitUacUpdatedEvent(uacQidLink);

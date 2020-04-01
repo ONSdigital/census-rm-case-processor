@@ -287,4 +287,9 @@ public class CaseService {
 
     return caseOptional.get();
   }
+
+  public void unreceiptCase(Case caze, Metadata metadata) {
+    caze.setReceiptReceived(false);
+    saveCaseAndEmitCaseUpdatedEvent(caze, metadata);
+  }
 }

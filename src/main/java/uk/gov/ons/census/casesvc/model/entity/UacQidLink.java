@@ -10,7 +10,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Data;
+import lombok.ToString;
 
+// The bidirectional relationships with other entities can cause stack overflows with the default
+// toString
+@ToString(onlyExplicitlyIncluded = true)
 @Data
 @Entity
 @Table(indexes = {@Index(name = "qid_idx", columnList = "qid")})
@@ -33,4 +37,7 @@ public class UacQidLink {
 
   @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
   private boolean ccsCase;
+
+  @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+  private boolean blankQuestionnaire;
 }
