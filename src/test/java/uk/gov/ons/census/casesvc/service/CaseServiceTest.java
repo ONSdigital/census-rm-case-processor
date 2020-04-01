@@ -24,8 +24,11 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
+import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
+import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
+import uk.gov.ons.census.casesvc.model.dto.Metadata;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.SampleUnitDTO;
@@ -438,5 +441,40 @@ public class CaseServiceTest {
     assertThat(actualChildCase.getTreatmentCode()).isNull();
     assertThat(actualChildCase.getCeExpectedCapacity()).isNull();
     assertThat(actualChildCase.getAddressLevel()).isEqualTo(parentCase.getAddressLevel());
+  }
+
+  @Test
+  public void testUnreceiptCaseWithMetadata() {
+    // Given
+    Case caze = getRandomCase();
+    caze.setReceiptReceived(true);
+
+    Metadata metadata = new Metadata();
+    metadata.setBlankQuestionnaireReceived(true);
+    metadata.setFieldDecision(ActionInstructionType.UPDATE);
+    metadata.setCauseEventType(EventTypeDTO.RESPONSE_RECEIVED);
+
+    // When
+    underTest.unreceiptCase(caze, metadata);
+
+    // Then
+    // Check the case is saved with receipt received false
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseRepository).saveAndFlush(caseArgumentCaptor.capture());
+    Case actualSavedCase = caseArgumentCaptor.getValue();
+    assertThat(actualSavedCase.getCaseId()).isEqualTo(caze.getCaseId());
+    assertThat(actualSavedCase.isReceiptReceived()).isFalse();
+
+    // Check the correct case updated event is emitted
+    ArgumentCaptor<ResponseManagementEvent> eventArgumentCaptor =
+        ArgumentCaptor.forClass(ResponseManagementEvent.class);
+    verify(rabbitTemplate)
+        .convertAndSend(eq(null), eq(CASE_UPDATE_ROUTING_KEY), eventArgumentCaptor.capture());
+    ResponseManagementEvent emittedEvent = eventArgumentCaptor.getValue();
+    assertThat(emittedEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_UPDATED);
+    assertThat(emittedEvent.getPayload().getCollectionCase().getReceiptReceived()).isFalse();
+    assertThat(emittedEvent.getPayload().getCollectionCase().getId())
+        .isEqualTo(caze.getCaseId().toString());
+    assertThat(emittedEvent.getPayload().getMetadata()).isEqualToComparingFieldByField(metadata);
   }
 }

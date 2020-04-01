@@ -149,7 +149,7 @@ public class CaseReceiptServiceTest {
   }
 
   @Test
-  public void testUnactiveQidDoesNotReceiptsCaseAlreadyReceipted() {
+  public void testInactiveQidDoesNotReceiptsCaseAlreadyReceipted() {
     // when
     CaseService caseService = mock(CaseService.class);
     CaseRepository caseRepository = mock(CaseRepository.class);
@@ -161,6 +161,25 @@ public class CaseReceiptServiceTest {
 
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setQid(HOUSEHOLD_INDIVIDUAL);
+    uacQidLink.setCaze(caze);
+
+    caseReceiptService.receiptCase(uacQidLink, RESPONSE_RECEIVED);
+    verifyZeroInteractions(caseService);
+  }
+
+  @Test
+  public void testQidMarkedBlankQuestionnaireDoesNotReceiptCase() {
+    // when
+    CaseService caseService = mock(CaseService.class);
+    CaseRepository caseRepository = mock(CaseRepository.class);
+    CaseReceiptService caseReceiptService = new CaseReceiptService(caseService, caseRepository);
+
+    Case caze = new Case();
+    caze.setCaseId(UUID.randomUUID());
+
+    UacQidLink uacQidLink = new UacQidLink();
+    uacQidLink.setQid(HOUSEHOLD_INDIVIDUAL);
+    uacQidLink.setBlankQuestionnaire(true);
     uacQidLink.setCaze(caze);
 
     caseReceiptService.receiptCase(uacQidLink, RESPONSE_RECEIVED);

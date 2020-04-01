@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
+import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -38,6 +39,8 @@ public class QuestionnaireLinkedServiceTest {
   @Mock EventLogger eventLogger;
 
   @Mock CaseReceiptService caseReceiptService;
+
+  @Mock BlankQuestionnaireService blankQuestionnaireService;
 
   @InjectMocks QuestionnaireLinkedService underTest;
 
@@ -115,6 +118,7 @@ public class QuestionnaireLinkedServiceTest {
     testUacQidLink.setActive(false);
     testUacQidLink.setCaze(null);
     testUacQidLink.setCcsCase(false);
+    testUacQidLink.setBlankQuestionnaire(false);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     when(uacService.findByQid(TEST_HH_QID)).thenReturn(testUacQidLink);
@@ -420,6 +424,7 @@ public class QuestionnaireLinkedServiceTest {
     testUacQidLink.setCaze(null);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
     testUacQidLink.setCcsCase(false);
+    testUacQidLink.setBlankQuestionnaire(false);
 
     ResponseManagementEvent linkingEvent = getTestResponseManagementQuestionnaireLinkedEvent();
     UacDTO uac = linkingEvent.getPayload().getUac();
@@ -472,7 +477,7 @@ public class QuestionnaireLinkedServiceTest {
   }
 
   @Test
-  public void testLinkingaActiveQidtoUnreceiptCaseDoesntReceipt() {
+  public void testLinkingAnActiveQidToAnUnreceiptedCaseDoesntReceipt() {
     // GIVEN
     Case testCase = getRandomCaseWithUacQidLinks(1);
     testCase.setCaseId(TEST_CASE_ID_1);
@@ -515,5 +520,54 @@ public class QuestionnaireLinkedServiceTest {
     verifyNoMoreInteractions(uacService);
 
     verifyZeroInteractions(caseReceiptService);
+  }
+
+  @Test
+  public void testLinkingToQidMarkedBlank() {
+    // GIVEN
+    Case testCase = getRandomCase();
+    testCase.setCaseId(TEST_CASE_ID_1);
+    testCase.setSurvey("CENSUS");
+    testCase.setReceiptReceived(false);
+    testCase.setUacQidLinks(null);
+
+    UacQidLink testUacQidLink = new UacQidLink();
+    testUacQidLink.setBlankQuestionnaire(true);
+    testUacQidLink.setActive(false);
+    testUacQidLink.setQid(TEST_NON_CCS_QID_ID);
+    testUacQidLink.setCaze(null);
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+    testUacQidLink.setCcsCase(false);
+
+    ResponseManagementEvent linkingEvent = getTestResponseManagementQuestionnaireLinkedEvent();
+    UacDTO uac = linkingEvent.getPayload().getUac();
+    uac.setCaseId(TEST_CASE_ID_1.toString());
+    uac.setQuestionnaireId(TEST_HH_QID);
+
+    when(uacService.findByQid(TEST_HH_QID)).thenReturn(testUacQidLink);
+    when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testCase);
+
+    // WHEN
+    underTest.processQuestionnaireLinked(linkingEvent, messageTimestamp);
+
+    // THEN
+
+    verify(uacService).findByQid(anyString());
+
+    verify(caseService).getCaseByCaseId(eq(testCase.getCaseId()));
+    verifyNoMoreInteractions(caseService);
+
+    ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
+    verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
+    UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
+    assertThat(actualUacQidLink.getQid()).isEqualTo(testUacQidLink.getQid());
+    assertThat(actualUacQidLink.getUac()).isEqualTo(testUacQidLink.getUac());
+    assertThat(actualUacQidLink.isCcsCase()).isFalse();
+    assertThat(actualUacQidLink.getCaze().getSurvey()).isEqualTo("CENSUS");
+    verifyNoMoreInteractions(uacService);
+
+    verify(blankQuestionnaireService)
+        .handleBlankQuestionnaire(
+            eq(testCase), eq(testUacQidLink), eq(EventTypeDTO.QUESTIONNAIRE_LINKED));
   }
 }
