@@ -133,9 +133,9 @@ public class AddressReceiverIT {
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
     assertThat(actualCase.isAddressInvalid()).isTrue();
 
-    // check the metadata is included with field close decision
+    // check the metadata is included with field CANCEL decision
     assertThat(responseManagementEvent.getPayload().getMetadata().getFieldDecision())
-        .isEqualTo(ActionInstructionType.CLOSE);
+        .isEqualTo(ActionInstructionType.CANCEL);
     assertThat(responseManagementEvent.getPayload().getMetadata().getCauseEventType())
         .isEqualTo(EventTypeDTO.ADDRESS_NOT_VALID);
 
