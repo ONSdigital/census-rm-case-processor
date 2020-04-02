@@ -52,9 +52,8 @@ public class UndeliveredMailReceiver {
               Long.parseLong(event.getPayload().getFulfilmentInformation().getCaseRef()));
     }
 
-    caze.setUndeliveredAsAddressed(true);
     caseService.saveCaseAndEmitCaseUpdatedEvent(
-        caze, buildMetadata(event.getEvent().getType(), ActionInstructionType.CREATE));
+        caze, buildMetadata(event.getEvent().getType(), ActionInstructionType.UPDATE));
 
     if (uacQidLink != null) {
       eventLogger.logUacQidEvent(

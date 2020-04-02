@@ -83,7 +83,6 @@ public class NewAddressReportedService {
     skeletonCase.setRefusalReceived(false);
     skeletonCase.setReceiptReceived(false);
     skeletonCase.setAddressInvalid(false);
-    skeletonCase.setUndeliveredAsAddressed(false);
     return skeletonCase;
   }
 
