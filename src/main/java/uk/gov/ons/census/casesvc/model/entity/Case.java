@@ -11,8 +11,12 @@ import javax.persistence.Index;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Data;
+import lombok.ToString;
 import org.hibernate.annotations.*;
 
+// The bidirectional relationships with other entities can cause stack overflows with the default
+// toString
+@ToString(onlyExplicitlyIncluded = true)
 @Data
 @Entity
 @TypeDefs({@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)})
@@ -113,9 +117,6 @@ public class Case {
 
   @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
   private boolean addressInvalid;
-
-  @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
-  private boolean undeliveredAsAddressed;
 
   @Column(columnDefinition = "timestamp with time zone")
   @UpdateTimestamp

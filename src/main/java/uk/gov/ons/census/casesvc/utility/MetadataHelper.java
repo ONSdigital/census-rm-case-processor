@@ -8,9 +8,17 @@ public class MetadataHelper {
 
   public static Metadata buildMetadata(
       EventTypeDTO eventType, ActionInstructionType actionInstructionType) {
+    return buildMetadata(eventType, actionInstructionType, null);
+  }
+
+  public static Metadata buildMetadata(
+      EventTypeDTO eventType,
+      ActionInstructionType actionInstructionType,
+      Boolean blankQuestionnaireReceived) {
     Metadata metadata = new Metadata();
     metadata.setCauseEventType(eventType);
     metadata.setFieldDecision(actionInstructionType);
+    metadata.setBlankQuestionnaireReceived(blankQuestionnaireReceived);
     return metadata;
   }
 }

@@ -63,12 +63,11 @@ public class UndeliveredMailReceiverTest {
     // Then
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
     Metadata expectedMetadata =
-        buildMetadata(EventTypeDTO.UNDELIVERED_MAIL_REPORTED, ActionInstructionType.CREATE);
+        buildMetadata(EventTypeDTO.UNDELIVERED_MAIL_REPORTED, ActionInstructionType.UPDATE);
     verify(caseService)
         .saveCaseAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture(), eq(expectedMetadata));
     Case actualCase = caseArgumentCaptor.getValue();
     assertThat(actualCase).isEqualTo(caze);
-    assertThat(caseArgumentCaptor.getValue().isUndeliveredAsAddressed()).isTrue();
 
     verify(eventLogger)
         .logCaseEvent(
@@ -115,12 +114,11 @@ public class UndeliveredMailReceiverTest {
     // Then
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
     Metadata expectedMetadata =
-        buildMetadata(EventTypeDTO.UNDELIVERED_MAIL_REPORTED, ActionInstructionType.CREATE);
+        buildMetadata(EventTypeDTO.UNDELIVERED_MAIL_REPORTED, ActionInstructionType.UPDATE);
     verify(caseService)
         .saveCaseAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture(), eq(expectedMetadata));
     Case actualCase = caseArgumentCaptor.getValue();
     assertThat(actualCase).isEqualTo(caze);
-    assertThat(caseArgumentCaptor.getValue().isUndeliveredAsAddressed()).isTrue();
 
     verify(eventLogger)
         .logUacQidEvent(

@@ -81,7 +81,6 @@ public class UndeliveredMailReceiverIT {
     caze.setCaseId(TEST_CASE_ID);
     caze.setUacQidLinks(null);
     caze.setEvents(null);
-    caze.setUndeliveredAsAddressed(false);
     caze.setSurvey("CENSUS");
     caze = caseRepository.saveAndFlush(caze);
 
@@ -113,13 +112,12 @@ public class UndeliveredMailReceiverIT {
 
     assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_UPDATED);
     assertThat(responseManagementEvent.getPayload().getMetadata().getFieldDecision())
-        .isEqualTo(ActionInstructionType.CREATE);
+        .isEqualTo(ActionInstructionType.UPDATE);
     assertThat(responseManagementEvent.getPayload().getMetadata().getCauseEventType())
         .isEqualTo(EventTypeDTO.UNDELIVERED_MAIL_REPORTED);
     CollectionCase actualCase = responseManagementEvent.getPayload().getCollectionCase();
     assertThat(actualCase.getId()).isEqualTo(TEST_CASE_ID.toString());
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
-    assertThat(actualCase.getUndeliveredAsAddressed()).isTrue();
 
     // check database for log eventDTO
     List<Event> events = eventRepository.findAll();
@@ -143,7 +141,6 @@ public class UndeliveredMailReceiverIT {
     caze.setCaseRef(TEST_CASE_REF);
     caze.setUacQidLinks(null);
     caze.setEvents(null);
-    caze.setUndeliveredAsAddressed(false);
     caze.setSurvey("CENSUS");
     caseRepository.saveAndFlush(caze);
 
@@ -168,14 +165,13 @@ public class UndeliveredMailReceiverIT {
 
     assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_UPDATED);
     assertThat(responseManagementEvent.getPayload().getMetadata().getFieldDecision())
-        .isEqualTo(ActionInstructionType.CREATE);
+        .isEqualTo(ActionInstructionType.UPDATE);
     assertThat(responseManagementEvent.getPayload().getMetadata().getCauseEventType())
         .isEqualTo(EventTypeDTO.UNDELIVERED_MAIL_REPORTED);
     CollectionCase actualCase = responseManagementEvent.getPayload().getCollectionCase();
     assertThat(actualCase.getId()).isEqualTo(TEST_CASE_ID.toString());
     assertThat(actualCase.getCaseRef()).isEqualTo(Long.toString(TEST_CASE_REF));
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
-    assertThat(actualCase.getUndeliveredAsAddressed()).isTrue();
 
     // check database for log eventDTO
     List<Event> events = eventRepository.findAll();

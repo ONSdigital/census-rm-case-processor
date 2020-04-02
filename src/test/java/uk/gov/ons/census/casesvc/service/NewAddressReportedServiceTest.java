@@ -221,7 +221,6 @@ public class NewAddressReportedServiceTest {
     expectedCase.setRefusalReceived(false);
     expectedCase.setReceiptReceived(false);
     expectedCase.setAddressInvalid(false);
-    expectedCase.setUndeliveredAsAddressed(false);
     expectedCase.setSkeleton(true);
 
     return expectedCase;

@@ -225,7 +225,6 @@ public class CaseService {
     collectionCase.setReceiptReceived(caze.isReceiptReceived());
     collectionCase.setRefusalReceived(caze.isRefusalReceived());
     collectionCase.setAddressInvalid(caze.isAddressInvalid());
-    collectionCase.setUndeliveredAsAddressed(caze.isUndeliveredAsAddressed());
     collectionCase.setHandDelivery(caze.isHandDelivery());
     collectionCase.setSkeleton(caze.isSkeleton());
     collectionCase.setMetadata(caze.getMetadata());
@@ -285,5 +284,10 @@ public class CaseService {
     }
 
     return caseOptional.get();
+  }
+
+  public void unreceiptCase(Case caze, Metadata metadata) {
+    caze.setReceiptReceived(false);
+    saveCaseAndEmitCaseUpdatedEvent(caze, metadata);
   }
 }

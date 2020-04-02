@@ -57,6 +57,7 @@ public class ReceiptReceiverIT {
   private final String ENGLAND_HOUSEHOLD = "0134567890123456";
   private static final String TEST_UAC = easyRandom.nextObject(String.class);
   private static final String HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_ENGLAND = "21";
+  public static final String BLANK_QUESTIONNAIRE_RECEIVED = "Blank questionnaire received";
 
   @Value("${queueconfig.receipt-response-inbound-queue}")
   private String inboundQueue;
@@ -170,6 +171,7 @@ public class ReceiptReceiverIT {
     assertThat(actualUacQidLink.getUac()).isEqualTo(TEST_UAC);
     assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
     assertThat(actualUacQidLink.isActive()).isFalse();
+    assertThat(actualUacQidLink.isBlankQuestionnaire()).isFalse();
 
     // Test date saved format here
     String utcDateAsString = new JSONObject(event.getEventPayload()).getString("dateTime");
@@ -177,7 +179,98 @@ public class ReceiptReceiverIT {
   }
 
   @Test
-  public void testParallelReceiptAndLinkingOfReceiptedQidUpdatesToCorrectNumbeAndIsReceipted()
+  public void testBlankQuestionnaireReceiptEmitsMessageAndEventIsLoggedForCase()
+      throws InterruptedException, IOException, JSONException {
+    // GIVEN
+    BlockingQueue<String> rhUacOutboundQueue = rabbitQueueHelper.listen(rhUacQueue);
+    BlockingQueue<String> rhCaseOutboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
+
+    EasyRandom easyRandom = new EasyRandom();
+    Case caze = easyRandom.nextObject(Case.class);
+    caze.setCaseId(TEST_CASE_ID);
+    caze.setReceiptReceived(false);
+    caze.setSurvey("CENSUS");
+    caze.setUacQidLinks(null);
+    caze.setEvents(null);
+    caze.setCaseType("HH");
+    caze.setAddressLevel("U");
+    caze.setRefusalReceived(false);
+    caze.setAddressInvalid(false);
+    caze = caseRepository.saveAndFlush(caze);
+
+    UacQidLink uacQidLink = new UacQidLink();
+    uacQidLink.setId(UUID.randomUUID());
+    uacQidLink.setCaze(caze);
+    uacQidLink.setCcsCase(false);
+    uacQidLink.setQid(ENGLAND_HOUSEHOLD);
+    uacQidLink.setUac(TEST_UAC);
+    uacQidLink.setBlankQuestionnaire(false);
+    uacQidLink.setActive(true);
+    uacQidLinkRepository.saveAndFlush(uacQidLink);
+
+    ResponseManagementEvent managementEvent = getTestResponseManagementReceiptEvent();
+    managementEvent.getPayload().getResponse().setQuestionnaireId(uacQidLink.getQid());
+    managementEvent.getEvent().setTransactionId(UUID.randomUUID());
+    managementEvent.getPayload().getResponse().setUnreceipt(true);
+    String json = convertObjectToJson(managementEvent);
+    Message message =
+        MessageBuilder.withBody(json.getBytes())
+            .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+            .build();
+
+    // WHEN
+    rabbitQueueHelper.sendMessage(inboundQueue, message);
+
+    // THEN
+
+    // check messages sent
+    ResponseManagementEvent responseManagementEvent =
+        rabbitQueueHelper.checkExpectedMessageReceived(rhCaseOutboundQueue);
+    CollectionCase actualCollectionCase = responseManagementEvent.getPayload().getCollectionCase();
+    assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID.toString());
+    assertThat(actualCollectionCase.getReceiptReceived()).isFalse();
+
+    // check the metadata is included with field close decision
+    assertThat(responseManagementEvent.getPayload().getMetadata().getFieldDecision())
+        .isEqualTo(ActionInstructionType.UPDATE);
+    assertThat(responseManagementEvent.getPayload().getMetadata().getCauseEventType())
+        .isEqualTo(EventTypeDTO.RESPONSE_RECEIVED);
+
+    Metadata metaData = responseManagementEvent.getPayload().getMetadata();
+    assertThat(metaData.getCauseEventType()).isEqualTo(RESPONSE_RECEIVED);
+    assertThat(metaData.getFieldDecision()).isEqualTo(ActionInstructionType.UPDATE);
+
+    responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(rhUacOutboundQueue);
+    assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
+    UacDTO actualUacDTOObject = responseManagementEvent.getPayload().getUac();
+    assertThat(actualUacDTOObject.getUac()).isEqualTo(TEST_UAC);
+    assertThat(actualUacDTOObject.getQuestionnaireId()).isEqualTo(ENGLAND_HOUSEHOLD);
+    assertThat(actualUacDTOObject.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
+
+    Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
+    assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
+    assertThat(actualCase.isReceiptReceived()).isFalse();
+
+    // check database for log eventDTO
+    List<Event> events = eventRepository.findAll();
+    assertThat(events.size()).isEqualTo(1);
+    Event event = events.get(0);
+    assertThat(event.getEventDescription()).isEqualTo(BLANK_QUESTIONNAIRE_RECEIVED);
+
+    UacQidLink actualUacQidLink = event.getUacQidLink();
+    assertThat(actualUacQidLink.getQid()).isEqualTo(ENGLAND_HOUSEHOLD);
+    assertThat(actualUacQidLink.getUac()).isEqualTo(TEST_UAC);
+    assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
+    assertThat(actualUacQidLink.isActive()).isFalse();
+    assertThat(actualUacQidLink.isBlankQuestionnaire()).isTrue();
+
+    // Test date saved format here
+    String utcDateAsString = new JSONObject(event.getEventPayload()).getString("dateTime");
+    assertThat(isStringFormattedAsUTCDate(utcDateAsString)).isTrue();
+  }
+
+  @Test
+  public void testParallelReceiptAndLinkingOfReceiptedQidUpdatesToCorrectNumberAndIsReceipted()
       throws Exception {
     int numberOfReceiptsAndLinkToSend = 3;
     int expectedResponseCount = numberOfReceiptsAndLinkToSend * 2;
