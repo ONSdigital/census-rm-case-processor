@@ -216,13 +216,14 @@ public class NewAddressReportedServiceTest {
     expectedCase.setFieldCoordinatorId(collectionCase.getFieldCoordinatorId());
     expectedCase.setFieldOfficerId(collectionCase.getFieldOfficerId());
     expectedCase.setCeExpectedCapacity(collectionCase.getCeExpectedCapacity());
-    expectedCase.setCeActualResponses(collectionCase.getCeActualResponses());
+
     expectedCase.setHandDelivery(collectionCase.isHandDelivery());
     expectedCase.setSurvey("CENSUS");
     expectedCase.setRefusalReceived(false);
     expectedCase.setReceiptReceived(false);
     expectedCase.setAddressInvalid(false);
     expectedCase.setSkeleton(true);
+    expectedCase.setCeActualResponses(0);
 
     return expectedCase;
   }

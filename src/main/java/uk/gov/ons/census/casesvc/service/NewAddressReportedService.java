@@ -76,13 +76,14 @@ public class NewAddressReportedService {
     skeletonCase.setFieldCoordinatorId(collectionCase.getFieldCoordinatorId());
     skeletonCase.setFieldOfficerId(collectionCase.getFieldOfficerId());
     skeletonCase.setCeExpectedCapacity(collectionCase.getCeExpectedCapacity());
-    skeletonCase.setCeActualResponses(collectionCase.getCeActualResponses());
     skeletonCase.setHandDelivery(collectionCase.isHandDelivery());
 
     skeletonCase.setSurvey("CENSUS");
     skeletonCase.setRefusalReceived(false);
     skeletonCase.setReceiptReceived(false);
     skeletonCase.setAddressInvalid(false);
+    skeletonCase.setCeActualResponses(0);
+
     return skeletonCase;
   }
 

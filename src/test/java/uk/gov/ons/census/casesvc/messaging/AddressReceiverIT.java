@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
+
+import org.assertj.core.api.Assertions;
 import org.jeasy.random.EasyRandom;
 import org.json.JSONException;
 import org.junit.Before;
@@ -217,7 +219,7 @@ public class AddressReceiverIT {
         actualResponseManagementEvent.getPayload().getCollectionCase();
     assertThat(actualPayloadCase.getId()).isEqualTo(collectionCase.getId());
     assertThat(actualPayloadCase.isSkeleton()).isTrue().as("Is Skeleton Case");
-
+    
     Case actualCase = caseRepository.findById(UUID.fromString(collectionCase.getId())).get();
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
     assertThat(actualCase.isSkeleton()).isTrue().as("Is Skeleton Case In DB");
