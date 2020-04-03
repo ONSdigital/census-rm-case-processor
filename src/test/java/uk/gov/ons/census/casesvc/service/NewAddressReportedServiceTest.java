@@ -204,9 +204,9 @@ public class NewAddressReportedServiceTest {
     expectedCase.setFieldCoordinatorId(collectionCase.getFieldCoordinatorId());
     expectedCase.setFieldOfficerId(collectionCase.getFieldOfficerId());
     expectedCase.setCeExpectedCapacity(collectionCase.getCeExpectedCapacity());
+    expectedCase.setSurvey(collectionCase.getSurvey());
 
     expectedCase.setHandDelivery(false);
-    expectedCase.setSurvey("CENSUS");
     expectedCase.setRefusalReceived(false);
     expectedCase.setReceiptReceived(false);
     expectedCase.setAddressInvalid(false);

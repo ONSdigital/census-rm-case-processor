@@ -64,8 +64,8 @@ public class NewAddressReportedService {
     skeletonCase.setFieldCoordinatorId(collectionCase.getFieldCoordinatorId());
     skeletonCase.setFieldOfficerId(collectionCase.getFieldOfficerId());
     skeletonCase.setCeExpectedCapacity(collectionCase.getCeExpectedCapacity());
+    skeletonCase.setSurvey(collectionCase.getSurvey());
 
-    skeletonCase.setSurvey("CENSUS");
     skeletonCase.setHandDelivery(false);
     skeletonCase.setRefusalReceived(false);
     skeletonCase.setReceiptReceived(false);
@@ -76,7 +76,6 @@ public class NewAddressReportedService {
   }
 
   // https://collaborate2.ons.gov.uk/confluence/display/SDC/Handle+New+Address+Reported+Events
-  // Only a small number of mandatory fields to create a skeleton case
   private void checkManadatoryFieldsPresent(CollectionCase newCollectionCase) {
 
     if (StringUtils.isEmpty(newCollectionCase.getId())) {
