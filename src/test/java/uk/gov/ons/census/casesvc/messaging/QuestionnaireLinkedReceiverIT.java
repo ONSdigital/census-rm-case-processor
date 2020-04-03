@@ -334,8 +334,8 @@ public class QuestionnaireLinkedReceiverIT {
     Case actualHHCase = caseRepository.findById(TEST_CASE_ID).get();
     Case actualHICase = caseRepository.findById(UUID.fromString(expectedHICaseId)).get();
     assertThat(actualHICase.getCaseType()).isEqualTo("HI");
-    assertThat(actualHICase.getArid()).isEqualTo(actualHHCase.getArid());
-    assertThat(actualHICase.getEstabArid()).isEqualTo(actualHHCase.getEstabArid());
+    assertThat(actualHICase.getUprn()).isEqualTo(actualHHCase.getUprn());
+    assertThat(actualHICase.getEstabUprn()).isEqualTo(actualHHCase.getEstabUprn());
 
     // Check database that HI Case is linked to UacQidLink
     List<UacQidLink> uacQidLinks = uacQidLinkRepository.findAll();

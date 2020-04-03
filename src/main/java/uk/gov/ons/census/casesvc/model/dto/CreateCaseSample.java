@@ -4,9 +4,8 @@ import lombok.Data;
 
 @Data
 public class CreateCaseSample {
-  private String arid;
-  private String estabArid;
   private String uprn;
+  private String estabUprn;
   private String addressType;
   private String estabType;
   private String addressLevel;
@@ -33,4 +32,5 @@ public class CreateCaseSample {
   private String collectionExerciseId;
   private String actionPlanId;
   private Integer secureEstablishment;
+  private String printBatch;
 }

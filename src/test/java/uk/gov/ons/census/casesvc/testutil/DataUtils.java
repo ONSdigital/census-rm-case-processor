@@ -283,7 +283,7 @@ public class DataUtils {
             .put("postcode", "UP103UP")
             .put("region", "E")
             .put("uprn", "XXXXXXXXXXXXX")
-            .put("arid", "XXXXX");
+            .put("estabUprn", "XXXXX");
 
     ObjectNode parentNode = objectMapper.createObjectNode();
     parentNode.set("collectionCase", collectionCaseNode);
