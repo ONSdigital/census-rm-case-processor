@@ -51,16 +51,15 @@ public class NewAddressReportedService {
     skeletonCase.setAddressLine3(collectionCase.getAddress().getAddressLine3());
     skeletonCase.setTownName(collectionCase.getAddress().getTownName());
     skeletonCase.setPostcode(collectionCase.getAddress().getPostcode());
-    skeletonCase.setArid(collectionCase.getAddress().getArid());
     skeletonCase.setLatitude(collectionCase.getAddress().getLatitude());
     skeletonCase.setLongitude(collectionCase.getAddress().getLongitude());
     skeletonCase.setUprn(collectionCase.getAddress().getUprn());
+    skeletonCase.setEstabUprn(collectionCase.getAddress().getEstabUprn());
+    skeletonCase.setEstabType(collectionCase.getAddress().getEstabType());
     skeletonCase.setRegion(collectionCase.getAddress().getRegion());
     skeletonCase.setAddressLevel(collectionCase.getAddress().getAddressLevel());
     skeletonCase.setCaseType(collectionCase.getCaseType());
     skeletonCase.setAddressType(collectionCase.getAddress().getAddressType());
-    skeletonCase.setUprn(collectionCase.getAddress().getUprn());
-    skeletonCase.setEstabArid(collectionCase.getAddress().getEstabArid());
     skeletonCase.setEstabType(collectionCase.getAddress().getEstabType());
     skeletonCase.setOrganisationName(collectionCase.getAddress().getOrganisationName());
     skeletonCase.setFieldCoordinatorId(collectionCase.getFieldCoordinatorId());

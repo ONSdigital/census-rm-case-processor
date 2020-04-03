@@ -270,6 +270,7 @@ public class CaseServiceTest {
     caze.setFieldOfficerId(FIELD_OFFICER_ID);
     caze.setCeExpectedCapacity(CE_CAPACITY);
     caze.setCeActualResponses(CE_ACTUAL_CAPACITY);
+    caze.setPrintBatch("TEST_PRINT_BATCH");
     ReflectionTestUtils.setField(underTest, "outboundExchange", TEST_EXCHANGE);
 
     // When
@@ -292,6 +293,7 @@ public class CaseServiceTest {
     assertThat(collectionCase.getCeExpectedCapacity()).isEqualTo(CE_CAPACITY);
     assertThat(collectionCase.getCeActualResponses()).isEqualTo(CE_ACTUAL_CAPACITY);
     assertThat(collectionCase.getMetadata()).isNull();
+    assertThat(collectionCase.getPrintBatch()).isEqualTo(caze.getPrintBatch());
   }
 
   @Test
@@ -413,9 +415,8 @@ public class CaseServiceTest {
     assertThat(actualChildCase.getActionPlanId()).isEqualTo(parentCase.getActionPlanId());
     assertThat(actualChildCase.isReceiptReceived()).isFalse();
     assertThat(actualChildCase.isRefusalReceived()).isFalse();
-    assertThat(actualChildCase.getArid()).isEqualTo(parentCase.getArid());
-    assertThat(actualChildCase.getEstabArid()).isEqualTo(parentCase.getEstabArid());
     assertThat(actualChildCase.getUprn()).isEqualTo(parentCase.getUprn());
+    assertThat(actualChildCase.getEstabUprn()).isEqualTo(parentCase.getEstabUprn());
     assertThat(actualChildCase.getAddressType()).isEqualTo(parentCase.getAddressType());
     assertThat(actualChildCase.getCaseType()).isEqualTo(HOUSEHOLD_INDIVIDUAL_RESPONSE_ADDRESS_TYPE);
     assertThat(actualChildCase.getEstabType()).isEqualTo(parentCase.getEstabType());

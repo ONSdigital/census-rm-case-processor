@@ -192,15 +192,14 @@ public class NewAddressReportedServiceTest {
     expectedCase.setAddressLine3(collectionCase.getAddress().getAddressLine3());
     expectedCase.setTownName(collectionCase.getAddress().getTownName());
     expectedCase.setPostcode(collectionCase.getAddress().getPostcode());
-    expectedCase.setArid(collectionCase.getAddress().getArid());
     expectedCase.setLatitude(collectionCase.getAddress().getLatitude());
     expectedCase.setLongitude(collectionCase.getAddress().getLongitude());
     expectedCase.setUprn(collectionCase.getAddress().getUprn());
+    expectedCase.setEstabUprn(collectionCase.getAddress().getEstabUprn());
     expectedCase.setRegion(collectionCase.getAddress().getRegion());
     expectedCase.setAddressLevel(collectionCase.getAddress().getAddressLevel());
     expectedCase.setAddressType(collectionCase.getAddress().getAddressType());
     expectedCase.setUprn(collectionCase.getAddress().getUprn());
-    expectedCase.setEstabArid(collectionCase.getAddress().getEstabArid());
     expectedCase.setEstabType(collectionCase.getAddress().getEstabType());
     expectedCase.setOrganisationName(collectionCase.getAddress().getOrganisationName());
     expectedCase.setFieldCoordinatorId(collectionCase.getFieldCoordinatorId());
