@@ -54,7 +54,6 @@ public class NewAddressReportedService {
     skeletonCase.setLatitude(collectionCase.getAddress().getLatitude());
     skeletonCase.setLongitude(collectionCase.getAddress().getLongitude());
     skeletonCase.setUprn(collectionCase.getAddress().getUprn());
-    skeletonCase.setEstabUprn(collectionCase.getAddress().getEstabUprn());
     skeletonCase.setEstabType(collectionCase.getAddress().getEstabType());
     skeletonCase.setRegion(collectionCase.getAddress().getRegion());
     skeletonCase.setAddressLevel(collectionCase.getAddress().getAddressLevel());

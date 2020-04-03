@@ -195,7 +195,6 @@ public class NewAddressReportedServiceTest {
     expectedCase.setLatitude(collectionCase.getAddress().getLatitude());
     expectedCase.setLongitude(collectionCase.getAddress().getLongitude());
     expectedCase.setUprn(collectionCase.getAddress().getUprn());
-    expectedCase.setEstabUprn(collectionCase.getAddress().getEstabUprn());
     expectedCase.setRegion(collectionCase.getAddress().getRegion());
     expectedCase.setAddressLevel(collectionCase.getAddress().getAddressLevel());
     expectedCase.setAddressType(collectionCase.getAddress().getAddressType());

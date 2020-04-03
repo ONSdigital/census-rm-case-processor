@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
-
-import org.assertj.core.api.Assertions;
 import org.jeasy.random.EasyRandom;
 import org.json.JSONException;
 import org.junit.Before;
