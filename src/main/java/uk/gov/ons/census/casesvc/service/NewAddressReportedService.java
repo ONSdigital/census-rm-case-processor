@@ -46,7 +46,6 @@ public class NewAddressReportedService {
     Case skeletonCase = new Case();
     skeletonCase.setSkeleton(true);
     skeletonCase.setCaseId(UUID.fromString(collectionCase.getId()));
-    skeletonCase.setCollectionExerciseId(collectionCase.getCollectionExerciseId());
     skeletonCase.setAddressLine1(collectionCase.getAddress().getAddressLine1());
     skeletonCase.setAddressLine2(collectionCase.getAddress().getAddressLine2());
     skeletonCase.setAddressLine3(collectionCase.getAddress().getAddressLine3());
@@ -57,28 +56,19 @@ public class NewAddressReportedService {
     skeletonCase.setLongitude(collectionCase.getAddress().getLongitude());
     skeletonCase.setUprn(collectionCase.getAddress().getUprn());
     skeletonCase.setRegion(collectionCase.getAddress().getRegion());
-    skeletonCase.setActionPlanId(collectionCase.getActionPlanId()); // This is essential
-    skeletonCase.setTreatmentCode(collectionCase.getTreatmentCode()); // This is essential
     skeletonCase.setAddressLevel(collectionCase.getAddress().getAddressLevel());
-    skeletonCase.setAbpCode(collectionCase.getAddress().getApbCode());
     skeletonCase.setCaseType(collectionCase.getCaseType());
     skeletonCase.setAddressType(collectionCase.getAddress().getAddressType());
     skeletonCase.setUprn(collectionCase.getAddress().getUprn());
     skeletonCase.setEstabArid(collectionCase.getAddress().getEstabArid());
     skeletonCase.setEstabType(collectionCase.getAddress().getEstabType());
     skeletonCase.setOrganisationName(collectionCase.getAddress().getOrganisationName());
-    skeletonCase.setOa(collectionCase.getOa());
-    skeletonCase.setLsoa(collectionCase.getLsoa());
-    skeletonCase.setMsoa(collectionCase.getMsoa());
-    skeletonCase.setLad(collectionCase.getLad());
-    skeletonCase.setHtcWillingness(collectionCase.getHtcWillingness());
-    skeletonCase.setHtcDigital(collectionCase.getHtcDigital());
     skeletonCase.setFieldCoordinatorId(collectionCase.getFieldCoordinatorId());
     skeletonCase.setFieldOfficerId(collectionCase.getFieldOfficerId());
     skeletonCase.setCeExpectedCapacity(collectionCase.getCeExpectedCapacity());
-    skeletonCase.setHandDelivery(collectionCase.isHandDelivery());
 
     skeletonCase.setSurvey("CENSUS");
+    skeletonCase.setHandDelivery(false);
     skeletonCase.setRefusalReceived(false);
     skeletonCase.setReceiptReceived(false);
     skeletonCase.setAddressInvalid(false);

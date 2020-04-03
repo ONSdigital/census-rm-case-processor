@@ -187,9 +187,6 @@ public class NewAddressReportedServiceTest {
     Case expectedCase = new Case();
     expectedCase.setCaseId(UUID.fromString(collectionCase.getId()));
     expectedCase.setCaseType(collectionCase.getCaseType());
-    expectedCase.setActionPlanId(collectionCase.getActionPlanId());
-    expectedCase.setCollectionExerciseId(collectionCase.getCollectionExerciseId());
-    expectedCase.setTreatmentCode(collectionCase.getTreatmentCode());
     expectedCase.setAddressLine1(collectionCase.getAddress().getAddressLine1());
     expectedCase.setAddressLine2(collectionCase.getAddress().getAddressLine2());
     expectedCase.setAddressLine3(collectionCase.getAddress().getAddressLine3());
@@ -200,14 +197,7 @@ public class NewAddressReportedServiceTest {
     expectedCase.setLongitude(collectionCase.getAddress().getLongitude());
     expectedCase.setUprn(collectionCase.getAddress().getUprn());
     expectedCase.setRegion(collectionCase.getAddress().getRegion());
-    expectedCase.setOa(collectionCase.getOa());
-    expectedCase.setLsoa(collectionCase.getLsoa());
-    expectedCase.setMsoa(collectionCase.getMsoa());
-    expectedCase.setLad(collectionCase.getLad());
-    expectedCase.setHtcWillingness(collectionCase.getHtcWillingness());
-    expectedCase.setHtcDigital(collectionCase.getHtcDigital());
     expectedCase.setAddressLevel(collectionCase.getAddress().getAddressLevel());
-    expectedCase.setAbpCode(collectionCase.getAddress().getApbCode());
     expectedCase.setAddressType(collectionCase.getAddress().getAddressType());
     expectedCase.setUprn(collectionCase.getAddress().getUprn());
     expectedCase.setEstabArid(collectionCase.getAddress().getEstabArid());
@@ -217,7 +207,7 @@ public class NewAddressReportedServiceTest {
     expectedCase.setFieldOfficerId(collectionCase.getFieldOfficerId());
     expectedCase.setCeExpectedCapacity(collectionCase.getCeExpectedCapacity());
 
-    expectedCase.setHandDelivery(collectionCase.isHandDelivery());
+    expectedCase.setHandDelivery(false);
     expectedCase.setSurvey("CENSUS");
     expectedCase.setRefusalReceived(false);
     expectedCase.setReceiptReceived(false);

@@ -219,7 +219,7 @@ public class AddressReceiverIT {
         actualResponseManagementEvent.getPayload().getCollectionCase();
     assertThat(actualPayloadCase.getId()).isEqualTo(collectionCase.getId());
     assertThat(actualPayloadCase.isSkeleton()).isTrue().as("Is Skeleton Case");
-    
+
     Case actualCase = caseRepository.findById(UUID.fromString(collectionCase.getId())).get();
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
     assertThat(actualCase.isSkeleton()).isTrue().as("Is Skeleton Case In DB");
