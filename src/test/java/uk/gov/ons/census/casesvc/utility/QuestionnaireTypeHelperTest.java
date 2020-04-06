@@ -12,7 +12,7 @@ public class QuestionnaireTypeHelperTest {
 
     // When
     int actualQuestionnaireType =
-        QuestionnaireTypeHelper.calculateQuestionnaireType("HH_LF2R3BE", "U");
+        QuestionnaireTypeHelper.calculateQuestionnaireType("HH", "E1000", "U");
 
     // Then
     assertEquals(1, actualQuestionnaireType);
@@ -24,7 +24,7 @@ public class QuestionnaireTypeHelperTest {
 
     // When
     int actualQuestionnaireType =
-        QuestionnaireTypeHelper.calculateQuestionnaireType("HH_LF2R1W", "U");
+        QuestionnaireTypeHelper.calculateQuestionnaireType("HH", "W1000", "U");
 
     // Then
     assertEquals(2, actualQuestionnaireType);
@@ -36,7 +36,7 @@ public class QuestionnaireTypeHelperTest {
 
     // When
     int actualQuestionnaireType =
-        QuestionnaireTypeHelper.calculateQuestionnaireType("HH_1LSFN", "U");
+        QuestionnaireTypeHelper.calculateQuestionnaireType("HH", "N1000", "U");
 
     // Then
     assertEquals(4, actualQuestionnaireType);
@@ -48,7 +48,7 @@ public class QuestionnaireTypeHelperTest {
 
     // When
     int actualQuestionnaireType =
-        QuestionnaireTypeHelper.calculateQuestionnaireType("SPG_QDHSE", "U");
+        QuestionnaireTypeHelper.calculateQuestionnaireType("SPG", "E1000", "U");
 
     // Then
     assertEquals(1, actualQuestionnaireType);
@@ -60,7 +60,7 @@ public class QuestionnaireTypeHelperTest {
 
     // When
     int actualQuestionnaireType =
-        QuestionnaireTypeHelper.calculateQuestionnaireType("SPG_QDHSW", "U");
+        QuestionnaireTypeHelper.calculateQuestionnaireType("SPG", "W1000", "U");
 
     // Then
     assertEquals(2, actualQuestionnaireType);
@@ -72,7 +72,7 @@ public class QuestionnaireTypeHelperTest {
 
     // When
     int actualQuestionnaireType =
-        QuestionnaireTypeHelper.calculateQuestionnaireType("CE_L666E", "U");
+        QuestionnaireTypeHelper.calculateQuestionnaireType("CE", "E1000", "U");
 
     // Then
     assertEquals(21, actualQuestionnaireType);
@@ -84,7 +84,7 @@ public class QuestionnaireTypeHelperTest {
 
     // When
     int actualQuestionnaireType =
-        QuestionnaireTypeHelper.calculateQuestionnaireType("CE_L666W", "U");
+        QuestionnaireTypeHelper.calculateQuestionnaireType("CE", "W1000", "U");
 
     // Then
     assertEquals(22, actualQuestionnaireType);
@@ -96,7 +96,7 @@ public class QuestionnaireTypeHelperTest {
 
     // When
     int actualQuestionnaireType =
-        QuestionnaireTypeHelper.calculateQuestionnaireType("CE_L666N", "U");
+        QuestionnaireTypeHelper.calculateQuestionnaireType("CE", "N1000", "U");
 
     // Then
     assertEquals(24, actualQuestionnaireType);
@@ -108,7 +108,7 @@ public class QuestionnaireTypeHelperTest {
 
     // When
     int actualQuestionnaireType =
-        QuestionnaireTypeHelper.calculateQuestionnaireType("CE_L666E", "E");
+        QuestionnaireTypeHelper.calculateQuestionnaireType("CE", "E1000", "E");
 
     // Then
     assertEquals(31, actualQuestionnaireType);
@@ -120,7 +120,7 @@ public class QuestionnaireTypeHelperTest {
 
     // When
     int actualQuestionnaireType =
-        QuestionnaireTypeHelper.calculateQuestionnaireType("CE_L666W", "E");
+        QuestionnaireTypeHelper.calculateQuestionnaireType("CE", "W1000", "E");
 
     // Then
     assertEquals(32, actualQuestionnaireType);
@@ -132,7 +132,7 @@ public class QuestionnaireTypeHelperTest {
 
     // When
     int actualQuestionnaireType =
-        QuestionnaireTypeHelper.calculateQuestionnaireType("CE_L666N", "E");
+        QuestionnaireTypeHelper.calculateQuestionnaireType("CE", "N", "E");
 
     // Then
     assertEquals(34, actualQuestionnaireType);
@@ -198,7 +198,7 @@ public class QuestionnaireTypeHelperTest {
     // Given
 
     // When
-    QuestionnaireTypeHelper.calculateQuestionnaireType("CE_L666X", "U");
+    QuestionnaireTypeHelper.calculateQuestionnaireType("CE", "L", "U");
 
     // Then
     // Exception thrown - expected
@@ -209,7 +209,7 @@ public class QuestionnaireTypeHelperTest {
     // Given
 
     // When
-    QuestionnaireTypeHelper.calculateQuestionnaireType("ZZ_L666E", "U");
+    QuestionnaireTypeHelper.calculateQuestionnaireType("ZZ", "E", "U");
 
     // Then
     // Exception thrown - expected

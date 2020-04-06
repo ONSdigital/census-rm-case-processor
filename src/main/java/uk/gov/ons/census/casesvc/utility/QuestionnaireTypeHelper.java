@@ -38,16 +38,17 @@ public class QuestionnaireTypeHelper {
               CCS_POSTBACK_CONTINUATION_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES,
               CCS_POSTBACK_CONTINUATION_QUESTIONNAIRE_FOR_WALES_WELSH));
 
-  public static int calculateQuestionnaireType(String treatmentCode, String addressLevel) {
-    String country = treatmentCode.substring(treatmentCode.length() - 1);
+  public static int calculateQuestionnaireType(
+      String caseType, String region, String addressLevel) {
+    String country = region.substring(0, 1);
     if (!country.equals("E") && !country.equals("W") && !country.equals("N")) {
       throw new IllegalArgumentException(
-          String.format("Unknown Country for treatment code %s", treatmentCode));
+          String.format("Unknown Country for treatment code %s", caseType));
     }
 
     // TODO Note this is not the final solution for initial contact QIDs but a stop gap so that we
     // are at least generating valid combinations
-    if (treatmentCode.startsWith("HH") || treatmentCode.startsWith("SPG")) {
+    if (caseType.startsWith("HH") || caseType.startsWith("SPG")) {
       switch (country) {
         case "E":
           return 1;
@@ -56,7 +57,7 @@ public class QuestionnaireTypeHelper {
         case "N":
           return 4;
       }
-    } else if (treatmentCode.startsWith("CE") && addressLevel.equals("U")) {
+    } else if (caseType.startsWith("CE") && addressLevel.equals("U")) {
       switch (country) {
         case "E":
           return 21;
@@ -65,7 +66,7 @@ public class QuestionnaireTypeHelper {
         case "N":
           return 24;
       }
-    } else if (treatmentCode.startsWith("CE") && addressLevel.equals("E")) {
+    } else if (caseType.startsWith("CE") && addressLevel.equals("E")) {
       switch (country) {
         case "E":
           return 31;
@@ -76,10 +77,10 @@ public class QuestionnaireTypeHelper {
       }
     } else {
       throw new IllegalArgumentException(
-          String.format("Unexpected Case Type for treatment code %s", treatmentCode));
+          String.format("Unexpected Case Type for treatment code %s", caseType));
     }
 
-    throw new RuntimeException(String.format("Unprocessable treatment code '%s'", treatmentCode));
+    throw new RuntimeException(String.format("Unprocessable treatment code '%s'", caseType));
   }
 
   public static boolean isQuestionnaireWelsh(String treatmentCode) {
