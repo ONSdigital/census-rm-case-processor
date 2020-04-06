@@ -15,6 +15,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.Address;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
@@ -86,6 +87,29 @@ public class NewAddressReportedServiceTest {
             eq(eventDTO),
             eq(JsonHelper.convertObjectToJson(newAddressEvent.getPayload())),
             eq(expectedDateTime));
+  }
+
+  @Test
+  public void testRequiredFieldsSetIfNotOnEvent() {
+    String collectionExerciseId = UUID.randomUUID().toString();
+    ReflectionTestUtils.setField(underTest, "collectionExerciseId", collectionExerciseId);
+
+    ResponseManagementEvent responseManagementEvent = getMinimalValidNewAddress();
+    underTest.processNewAddress(responseManagementEvent, OffsetDateTime.now());
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+
+    verify(caseService).saveNewCaseAndStampCaseRef(caseArgumentCaptor.capture());
+    Case actualCase = caseArgumentCaptor.getValue();
+    assertThat(actualCase.getCaseType())
+        .isEqualTo(
+            responseManagementEvent
+                .getPayload()
+                .getNewAddress()
+                .getCollectionCase()
+                .getAddress()
+                .getAddressType());
+
+    assertThat(actualCase.getCollectionExerciseId()).isEqualTo(collectionExerciseId);
   }
 
   @Test
@@ -162,7 +186,7 @@ public class NewAddressReportedServiceTest {
     Address address = new Address();
     address.setAddressLevel("U");
     address.setRegion("E");
-    address.setAddressType("U");
+    address.setAddressType("SPG");
 
     CollectionCase collectionCase = new CollectionCase();
     collectionCase.setId(UUID.randomUUID().toString());
@@ -186,6 +210,7 @@ public class NewAddressReportedServiceTest {
   private Case getExpectedCase(CollectionCase collectionCase) {
     Case expectedCase = new Case();
     expectedCase.setCaseId(UUID.fromString(collectionCase.getId()));
+    expectedCase.setCollectionExerciseId(collectionCase.getCollectionExerciseId());
     expectedCase.setCaseType(collectionCase.getCaseType());
     expectedCase.setAddressLine1(collectionCase.getAddress().getAddressLine1());
     expectedCase.setAddressLine2(collectionCase.getAddress().getAddressLine2());
@@ -204,7 +229,7 @@ public class NewAddressReportedServiceTest {
     expectedCase.setFieldCoordinatorId(collectionCase.getFieldCoordinatorId());
     expectedCase.setFieldOfficerId(collectionCase.getFieldOfficerId());
     expectedCase.setCeExpectedCapacity(collectionCase.getCeExpectedCapacity());
-    expectedCase.setSurvey(collectionCase.getSurvey());
+    expectedCase.setSurvey("CENSUS");
 
     expectedCase.setHandDelivery(false);
     expectedCase.setRefusalReceived(false);
