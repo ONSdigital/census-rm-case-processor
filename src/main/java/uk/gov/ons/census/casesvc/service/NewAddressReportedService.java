@@ -2,6 +2,7 @@ package uk.gov.ons.census.casesvc.service;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
@@ -15,6 +16,12 @@ import uk.gov.ons.census.casesvc.utility.JsonHelper;
 public class NewAddressReportedService {
   private final CaseService caseService;
   private final EventLogger eventLogger;
+
+  @Value("${censusconfig.collectionexerciseid}")
+  private String censusCollectionExerciseId;
+
+  @Value("${censusconfig.actionplanid}")
+  private String censusActionPlanId;
 
   public NewAddressReportedService(CaseService caseService, EventLogger eventLogger) {
     this.caseService = caseService;
@@ -46,7 +53,19 @@ public class NewAddressReportedService {
     Case skeletonCase = new Case();
     skeletonCase.setSkeleton(true);
     skeletonCase.setCaseId(UUID.fromString(collectionCase.getId()));
-    skeletonCase.setCollectionExerciseId(collectionCase.getCollectionExerciseId());
+
+    if (StringUtils.isEmpty(collectionCase.getCaseType())) {
+      skeletonCase.setCaseType(collectionCase.getAddress().getAddressType());
+    } else {
+      skeletonCase.setCaseType(collectionCase.getCaseType());
+    }
+
+    if (StringUtils.isEmpty(collectionCase.getCollectionExerciseId())) {
+      skeletonCase.setCollectionExerciseId(censusCollectionExerciseId);
+    } else {
+      skeletonCase.setCollectionExerciseId(collectionCase.getCollectionExerciseId());
+    }
+
     skeletonCase.setAddressLine1(collectionCase.getAddress().getAddressLine1());
     skeletonCase.setAddressLine2(collectionCase.getAddress().getAddressLine2());
     skeletonCase.setAddressLine3(collectionCase.getAddress().getAddressLine3());
@@ -55,38 +74,28 @@ public class NewAddressReportedService {
     skeletonCase.setLatitude(collectionCase.getAddress().getLatitude());
     skeletonCase.setLongitude(collectionCase.getAddress().getLongitude());
     skeletonCase.setUprn(collectionCase.getAddress().getUprn());
-    skeletonCase.setEstabUprn(collectionCase.getAddress().getEstabUprn());
     skeletonCase.setEstabType(collectionCase.getAddress().getEstabType());
     skeletonCase.setRegion(collectionCase.getAddress().getRegion());
-    skeletonCase.setActionPlanId(collectionCase.getActionPlanId()); // This is essential
-    skeletonCase.setTreatmentCode(collectionCase.getTreatmentCode()); // This is essential
     skeletonCase.setAddressLevel(collectionCase.getAddress().getAddressLevel());
-    skeletonCase.setAbpCode(collectionCase.getAddress().getApbCode());
-    skeletonCase.setCaseType(collectionCase.getCaseType());
     skeletonCase.setAddressType(collectionCase.getAddress().getAddressType());
     skeletonCase.setEstabType(collectionCase.getAddress().getEstabType());
     skeletonCase.setOrganisationName(collectionCase.getAddress().getOrganisationName());
-    skeletonCase.setOa(collectionCase.getOa());
-    skeletonCase.setLsoa(collectionCase.getLsoa());
-    skeletonCase.setMsoa(collectionCase.getMsoa());
-    skeletonCase.setLad(collectionCase.getLad());
-    skeletonCase.setHtcWillingness(collectionCase.getHtcWillingness());
-    skeletonCase.setHtcDigital(collectionCase.getHtcDigital());
     skeletonCase.setFieldCoordinatorId(collectionCase.getFieldCoordinatorId());
     skeletonCase.setFieldOfficerId(collectionCase.getFieldOfficerId());
     skeletonCase.setCeExpectedCapacity(collectionCase.getCeExpectedCapacity());
-    skeletonCase.setCeActualResponses(collectionCase.getCeActualResponses());
-    skeletonCase.setHandDelivery(collectionCase.isHandDelivery());
 
+    skeletonCase.setActionPlanId(censusActionPlanId);
     skeletonCase.setSurvey("CENSUS");
+    skeletonCase.setHandDelivery(false);
     skeletonCase.setRefusalReceived(false);
     skeletonCase.setReceiptReceived(false);
     skeletonCase.setAddressInvalid(false);
+    skeletonCase.setCeActualResponses(0);
+
     return skeletonCase;
   }
 
   // https://collaborate2.ons.gov.uk/confluence/display/SDC/Handle+New+Address+Reported+Events
-  // Only a small number of mandatory fields to create a skeleton case
   private void checkManadatoryFieldsPresent(CollectionCase newCollectionCase) {
 
     if (StringUtils.isEmpty(newCollectionCase.getId())) {
