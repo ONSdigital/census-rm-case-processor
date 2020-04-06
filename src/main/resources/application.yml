@@ -85,5 +85,7 @@ logging:
 # them to the list.
 directdeliverytreatmentcodes: CE_LDIEE
 
-# Skeleton cases need to know the collection exercise id, this is the universal collection exercise id from now on
-collectionexerciseid: 34d7f3bb-91c9-45d0-bb2d-90afce4fc790
+# Skeleton cases need to know the collection exercise id and action_plan_id
+censusconfig:
+  collectionexerciseid: 34d7f3bb-91c9-45d0-bb2d-90afce4fc790
+  actionplanid: c4415287-0e37-447b-9c3d-1a011c9fa3db

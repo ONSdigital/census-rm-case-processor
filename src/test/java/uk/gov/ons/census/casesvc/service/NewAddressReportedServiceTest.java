@@ -35,6 +35,8 @@ public class NewAddressReportedServiceTest {
   @Mock CaseService caseService;
   @Mock EventLogger eventLogger;
 
+  private String EXPECTED_ACTION_PLAN_ID = UUID.randomUUID().toString();
+
   @Test
   public void testCreatingSkeletonCaseWithAllEventFields() {
     // given
@@ -62,6 +64,8 @@ public class NewAddressReportedServiceTest {
     newAddressEvent.setEvent(eventDTO);
 
     Case casetoEmit = new Case();
+    ReflectionTestUtils.setField(underTest, "censusActionPlanId", EXPECTED_ACTION_PLAN_ID);
+
     when(caseService.saveNewCaseAndStampCaseRef(any(Case.class))).thenReturn(casetoEmit);
     OffsetDateTime expectedDateTime = OffsetDateTime.now();
 
@@ -92,7 +96,7 @@ public class NewAddressReportedServiceTest {
   @Test
   public void testRequiredFieldsSetIfNotOnEvent() {
     String collectionExerciseId = UUID.randomUUID().toString();
-    ReflectionTestUtils.setField(underTest, "collectionExerciseId", collectionExerciseId);
+    ReflectionTestUtils.setField(underTest, "censusCollectionExerciseId", collectionExerciseId);
 
     ResponseManagementEvent responseManagementEvent = getMinimalValidNewAddress();
     underTest.processNewAddress(responseManagementEvent, OffsetDateTime.now());
@@ -229,8 +233,9 @@ public class NewAddressReportedServiceTest {
     expectedCase.setFieldCoordinatorId(collectionCase.getFieldCoordinatorId());
     expectedCase.setFieldOfficerId(collectionCase.getFieldOfficerId());
     expectedCase.setCeExpectedCapacity(collectionCase.getCeExpectedCapacity());
-    expectedCase.setSurvey("CENSUS");
 
+    expectedCase.setActionPlanId(EXPECTED_ACTION_PLAN_ID);
+    expectedCase.setSurvey("CENSUS");
     expectedCase.setHandDelivery(false);
     expectedCase.setRefusalReceived(false);
     expectedCase.setReceiptReceived(false);

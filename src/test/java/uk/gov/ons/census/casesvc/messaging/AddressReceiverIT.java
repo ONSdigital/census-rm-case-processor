@@ -65,8 +65,11 @@ public class AddressReceiverIT {
   @Value("${queueconfig.rh-case-queue}")
   private String rhCaseQueue;
 
-  @Value("${collectionexerciseid}")
-  private String collectionExerciseId;
+  @Value("${censusconfig.collectionexerciseid}")
+  private String censuscollectionExerciseId;
+
+  @Value("${censusconfig.actionplanid}")
+  private String censusActionPlanId;
 
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
   @Autowired private CaseRepository caseRepository;
@@ -220,7 +223,8 @@ public class AddressReceiverIT {
     assertThat(actualPayloadCase.isSkeleton()).isTrue().as("Is Skeleton Case");
 
     Case actualCase = caseRepository.findById(UUID.fromString(collectionCase.getId())).get();
-    assertThat(actualCase.getCollectionExerciseId()).isEqualTo(collectionExerciseId);
+    assertThat(actualCase.getCollectionExerciseId()).isEqualTo(censuscollectionExerciseId);
+    assertThat(actualCase.getActionPlanId()).isEqualTo(censusActionPlanId);
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
     assertThat(actualCase.getCaseType()).isEqualTo("HH");
     assertThat(actualCase.isSkeleton()).isTrue().as("Is Skeleton Case In DB");

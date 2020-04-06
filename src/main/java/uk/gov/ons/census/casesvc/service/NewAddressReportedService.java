@@ -17,8 +17,11 @@ public class NewAddressReportedService {
   private final CaseService caseService;
   private final EventLogger eventLogger;
 
-  @Value("${collectionexerciseid}")
-  private String collectionExerciseId;
+  @Value("${censusconfig.collectionexerciseid}")
+  private String censusCollectionExerciseId;
+
+  @Value("${censusconfig.actionplanid}")
+  private String censusActionPlanId;
 
   public NewAddressReportedService(CaseService caseService, EventLogger eventLogger) {
     this.caseService = caseService;
@@ -58,7 +61,7 @@ public class NewAddressReportedService {
     }
 
     if (StringUtils.isEmpty(collectionCase.getCollectionExerciseId())) {
-      skeletonCase.setCollectionExerciseId(collectionExerciseId);
+      skeletonCase.setCollectionExerciseId(censusCollectionExerciseId);
     } else {
       skeletonCase.setCollectionExerciseId(collectionCase.getCollectionExerciseId());
     }
@@ -81,6 +84,7 @@ public class NewAddressReportedService {
     skeletonCase.setFieldOfficerId(collectionCase.getFieldOfficerId());
     skeletonCase.setCeExpectedCapacity(collectionCase.getCeExpectedCapacity());
 
+    skeletonCase.setActionPlanId(censusActionPlanId);
     skeletonCase.setSurvey("CENSUS");
     skeletonCase.setHandDelivery(false);
     skeletonCase.setRefusalReceived(false);
