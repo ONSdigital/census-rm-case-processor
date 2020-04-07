@@ -133,4 +133,46 @@ public class UndeliveredMailReceiverTest {
     verify(eventLogger, never()).logCaseEvent(any(), any(), any(), any(), any(), any(), any());
     verify(caseService, never()).getCaseByCaseRef(anyInt());
   }
+
+  @Test
+  public void testUpdateMessageNotSentForReceiptedRefusalInvalidNiCeCases() {
+    ResponseManagementEvent event = new ResponseManagementEvent();
+    event.setEvent(new EventDTO());
+    event.getEvent().setDateTime(OffsetDateTime.now());
+    event.getEvent().setType(EventTypeDTO.UNDELIVERED_MAIL_REPORTED);
+    event.setPayload(new PayloadDTO());
+    event.getPayload().setFulfilmentInformation(new FulfilmentInformation());
+    event.getPayload().getFulfilmentInformation().setCaseRef(Long.toString(TEST_CASE_REF));
+
+    Case caze = new Case();
+    caze.setReceiptReceived(true);
+    UacQidLink uacQidLink = new UacQidLink();
+    uacQidLink.setCaze(caze);
+
+    UacService uacService = mock(UacService.class);
+    CaseService caseService = mock(CaseService.class);
+    EventLogger eventLogger = mock(EventLogger.class);
+    UndeliveredMailReceiver underTest =
+        new UndeliveredMailReceiver(uacService, caseService, eventLogger);
+    Message<ResponseManagementEvent> message = constructMessageWithValidTimeStamp(event);
+
+    // Given
+    when(caseService.getCaseByCaseRef(eq(TEST_CASE_REF))).thenReturn(caze);
+
+    // When
+    underTest.receiveMessage(message);
+    caze.setReceiptReceived(false);
+    caze.setRefusalReceived(true);
+    underTest.receiveMessage(message);
+    caze.setRefusalReceived(false);
+    caze.setAddressInvalid(true);
+    underTest.receiveMessage(message);
+    caze.setAddressInvalid(false);
+    caze.setRegion("N123456");
+    caze.setCaseType("CE");
+    underTest.receiveMessage(message);
+
+    // Then
+    verify(caseService, never()).saveCaseAndEmitCaseUpdatedEvent(any());
+  }
 }

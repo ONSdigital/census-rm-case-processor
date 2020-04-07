@@ -52,8 +52,13 @@ public class UndeliveredMailReceiver {
               Long.parseLong(event.getPayload().getFulfilmentInformation().getCaseRef()));
     }
 
-    caseService.saveCaseAndEmitCaseUpdatedEvent(
-        caze, buildMetadata(event.getEvent().getType(), ActionInstructionType.UPDATE));
+    if (!caze.isRefusalReceived()
+        || !caze.isAddressInvalid()
+        || !caze.isReceiptReceived()
+        || (!caze.getRegion().startsWith("N") && !caze.getAddressType().equals("CE"))) {
+      caseService.saveCaseAndEmitCaseUpdatedEvent(
+          caze, buildMetadata(event.getEvent().getType(), ActionInstructionType.UPDATE));
+    }
 
     if (uacQidLink != null) {
       eventLogger.logUacQidEvent(
