@@ -107,14 +107,14 @@ public class QuestionnaireTypeHelper {
   }
 
   private static boolean isSpgCaseType(String caseType) {
-    return caseType.startsWith(CASE_TYPE_SPG);
+    return caseType.equals(CASE_TYPE_SPG);
   }
 
   private static boolean isHouseholdCaseType(String caseType) {
-    return caseType.startsWith(CASE_TYPE_HOUSEHOLD);
+    return caseType.equals(CASE_TYPE_HOUSEHOLD);
   }
 
   private static boolean isCeCaseType(String caseType) {
-    return caseType.startsWith(CASE_TYPE_CE);
+    return caseType.equals(CASE_TYPE_CE);
   }
 }
