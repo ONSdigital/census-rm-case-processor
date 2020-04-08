@@ -12,6 +12,7 @@ import static uk.gov.ons.census.casesvc.testutil.MessageConstructor.constructMes
 import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
 import java.time.OffsetDateTime;
+import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.messaging.Message;
@@ -32,6 +33,7 @@ import uk.gov.ons.census.casesvc.utility.MsgDateHelper;
 
 public class UndeliveredMailReceiverTest {
   private static final long TEST_CASE_REF = 1234567890L;
+  private EasyRandom easyRandom = new EasyRandom();
 
   @Test
   public void testReceiveMessageWithCaseRef() {
@@ -43,7 +45,10 @@ public class UndeliveredMailReceiverTest {
     event.getPayload().setFulfilmentInformation(new FulfilmentInformation());
     event.getPayload().getFulfilmentInformation().setCaseRef(Long.toString(TEST_CASE_REF));
 
-    Case caze = new Case();
+    Case caze = easyRandom.nextObject(Case.class);
+    caze.setAddressInvalid(false);
+    caze.setRefusalReceived(false);
+    caze.setReceiptReceived(false);
 
     UacService uacService = mock(UacService.class);
     CaseService caseService = mock(CaseService.class);
@@ -93,7 +98,10 @@ public class UndeliveredMailReceiverTest {
     event.getPayload().setFulfilmentInformation(new FulfilmentInformation());
     event.getPayload().getFulfilmentInformation().setQuestionnaireId("76543");
 
-    Case caze = new Case();
+    Case caze = easyRandom.nextObject(Case.class);
+    caze.setAddressInvalid(false);
+    caze.setRefusalReceived(false);
+    caze.setReceiptReceived(false);
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setCaze(caze);
 
@@ -145,7 +153,6 @@ public class UndeliveredMailReceiverTest {
     event.getPayload().getFulfilmentInformation().setCaseRef(Long.toString(TEST_CASE_REF));
 
     Case caze = new Case();
-    caze.setReceiptReceived(true);
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setCaze(caze);
 
@@ -160,6 +167,7 @@ public class UndeliveredMailReceiverTest {
     when(caseService.getCaseByCaseRef(eq(TEST_CASE_REF))).thenReturn(caze);
 
     // When
+    caze.setReceiptReceived(true);
     underTest.receiveMessage(message);
     caze.setReceiptReceived(false);
     caze.setRefusalReceived(true);

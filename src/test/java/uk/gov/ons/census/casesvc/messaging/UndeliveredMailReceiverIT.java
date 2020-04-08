@@ -82,6 +82,9 @@ public class UndeliveredMailReceiverIT {
     caze.setUacQidLinks(null);
     caze.setEvents(null);
     caze.setSurvey("CENSUS");
+    caze.setAddressInvalid(false);
+    caze.setRefusalReceived(false);
+    caze.setReceiptReceived(false);
     caze = caseRepository.saveAndFlush(caze);
 
     UacQidLink uacQidLink = new UacQidLink();
@@ -142,6 +145,9 @@ public class UndeliveredMailReceiverIT {
     caze.setUacQidLinks(null);
     caze.setEvents(null);
     caze.setSurvey("CENSUS");
+    caze.setAddressInvalid(false);
+    caze.setRefusalReceived(false);
+    caze.setReceiptReceived(false);
     caseRepository.saveAndFlush(caze);
 
     ResponseManagementEvent event = new ResponseManagementEvent();
