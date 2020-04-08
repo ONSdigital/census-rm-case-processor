@@ -173,6 +173,6 @@ public class UndeliveredMailReceiverTest {
     underTest.receiveMessage(message);
 
     // Then
-    verify(caseService, never()).saveCaseAndEmitCaseUpdatedEvent(any());
+    verify(caseService, never()).saveCaseAndEmitCaseUpdatedEvent(any(), any());
   }
 }
