@@ -52,8 +52,10 @@ public class UndeliveredMailReceiver {
               Long.parseLong(event.getPayload().getFulfilmentInformation().getCaseRef()));
     }
 
-    caseService.saveCaseAndEmitCaseUpdatedEvent(
-        caze, buildMetadata(event.getEvent().getType(), ActionInstructionType.UPDATE));
+    if (shouldEmitCaseUpdated(caze)) {
+      caseService.saveCaseAndEmitCaseUpdatedEvent(
+          caze, buildMetadata(event.getEvent().getType(), ActionInstructionType.UPDATE));
+    }
 
     if (uacQidLink != null) {
       eventLogger.logUacQidEvent(
@@ -74,5 +76,12 @@ public class UndeliveredMailReceiver {
           convertObjectToJson(event.getPayload().getFulfilmentInformation()),
           messageTimestamp);
     }
+  }
+
+  private boolean shouldEmitCaseUpdated(Case caze) {
+    return !caze.isRefusalReceived()
+        && !caze.isAddressInvalid()
+        && !caze.isReceiptReceived()
+        && (!caze.getRegion().startsWith("N") && !caze.getAddressType().equals("CE"));
   }
 }

@@ -71,6 +71,9 @@ public class SurveyLaunchedReceiverIT {
     caze.setCaseId(TEST_CASE_ID);
     caze.setUacQidLinks(null);
     caze.setEvents(null);
+    caze.setAddressInvalid(false);
+    caze.setRefusalReceived(false);
+    caze.setReceiptReceived(false);
     caze = caseRepository.saveAndFlush(caze);
 
     UacQidLink uacQidLink = new UacQidLink();
