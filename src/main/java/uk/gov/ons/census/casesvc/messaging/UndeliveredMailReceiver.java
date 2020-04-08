@@ -53,9 +53,9 @@ public class UndeliveredMailReceiver {
     }
 
     if (!caze.isRefusalReceived()
-        && !caze.isAddressInvalid()
-        && !caze.isReceiptReceived()
-        && (!caze.getRegion().startsWith("N") && !caze.getAddressType().equals("CE"))) {
+        || !caze.isAddressInvalid()
+        || !caze.isReceiptReceived()
+        || (!caze.getRegion().startsWith("N") && !caze.getAddressType().equals("CE"))) {
       caseService.saveCaseAndEmitCaseUpdatedEvent(
           caze, buildMetadata(event.getEvent().getType(), ActionInstructionType.UPDATE));
     }
