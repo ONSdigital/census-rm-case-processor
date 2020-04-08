@@ -42,6 +42,8 @@ public class EventServiceTest {
     CreateCaseSample createCaseSample = new CreateCaseSample();
     Case caze = new Case();
     caze.setTreatmentCode("HH_LF2R3BE");
+    caze.setRegion("E1000");
+    caze.setCaseType("HH");
     when(caseService.saveCaseSample(createCaseSample)).thenReturn(caze);
     UacQidLink uacQidLink = new UacQidLink();
     when(uacService.buildUacQidLink(caze, 1)).thenReturn(uacQidLink);
@@ -76,6 +78,8 @@ public class EventServiceTest {
     CreateCaseSample createCaseSample = new CreateCaseSample();
     Case caze = new Case();
     caze.setTreatmentCode("HH_QF2R1W");
+    caze.setRegion("W1000");
+    caze.setCaseType("HH");
     when(caseService.saveCaseSample(createCaseSample)).thenReturn(caze);
     UacQidLink uacQidLink = new UacQidLink();
     UacQidLink secondUacQidLink = new UacQidLink();

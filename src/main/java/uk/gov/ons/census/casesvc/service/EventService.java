@@ -34,7 +34,7 @@ public class EventService {
     Case caze = caseService.saveCaseSample(createCaseSample);
     int questionnaireType =
         QuestionnaireTypeHelper.calculateQuestionnaireType(
-            caze.getTreatmentCode(), caze.getAddressLevel());
+            caze.getCaseType(), caze.getRegion(), caze.getAddressLevel());
     UacQidLink uacQidLink = uacService.buildUacQidLink(caze, questionnaireType);
     uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
     caseService.saveCaseAndEmitCaseCreatedEvent(caze);

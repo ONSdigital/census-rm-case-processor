@@ -9,6 +9,16 @@ import java.util.Set;
 public class QuestionnaireTypeHelper {
   private static final Logger log = LoggerFactory.getLogger(QuestionnaireTypeHelper.class);
 
+  private static final String ADDRESS_LEVEL_ESTAB = "E";
+
+  private static final String COUNTRY_CODE_ENGLAND = "E";
+  private static final String COUNTRY_CODE_WALES = "W";
+  private static final String COUNTRY_CODE_NORTHERN_IRELAND = "N";
+
+  private static final String CASE_TYPE_HOUSEHOLD = "HH";
+  private static final String CASE_TYPE_SPG = "SPG";
+  private static final String CASE_TYPE_CE = "CE";
+
   private static final String UNEXPECTED_CASE_TYPE_ERROR = "Unexpected Case Type";
   private static final String HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_ENGLAND = "21";
   private static final String HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_WALES_ENGLISH = "22";
@@ -38,48 +48,49 @@ public class QuestionnaireTypeHelper {
               CCS_POSTBACK_CONTINUATION_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES,
               CCS_POSTBACK_CONTINUATION_QUESTIONNAIRE_FOR_WALES_WELSH));
 
-  public static int calculateQuestionnaireType(String treatmentCode, String addressLevel) {
-    String country = treatmentCode.substring(treatmentCode.length() - 1);
-    if (!country.equals("E") && !country.equals("W") && !country.equals("N")) {
+  public static int calculateQuestionnaireType(
+      String caseType, String region, String addressLevel) {
+    String country = region.substring(0, 1);
+    if (!country.equals(COUNTRY_CODE_ENGLAND)
+        && !country.equals(COUNTRY_CODE_WALES)
+        && !country.equals(COUNTRY_CODE_NORTHERN_IRELAND)) {
       throw new IllegalArgumentException(
-          String.format("Unknown Country for treatment code %s", treatmentCode));
+          String.format("Unknown Country for treatment code %s", caseType));
     }
 
-    // TODO Note this is not the final solution for initial contact QIDs but a stop gap so that we
-    // are at least generating valid combinations
-    if (treatmentCode.startsWith("HH") || treatmentCode.startsWith("SPG")) {
+    if (isCeCaseType(caseType) && addressLevel.equals("U")) {
       switch (country) {
-        case "E":
-          return 1;
-        case "W":
-          return 2;
-        case "N":
-          return 4;
-      }
-    } else if (treatmentCode.startsWith("CE") && addressLevel.equals("U")) {
-      switch (country) {
-        case "E":
+        case COUNTRY_CODE_ENGLAND:
           return 21;
-        case "W":
+        case COUNTRY_CODE_WALES:
           return 22;
-        case "N":
+        case COUNTRY_CODE_NORTHERN_IRELAND:
           return 24;
       }
-    } else if (treatmentCode.startsWith("CE") && addressLevel.equals("E")) {
+    } else if (isHouseholdCaseType(caseType) || isSpgCaseType(caseType)) {
       switch (country) {
-        case "E":
+        case COUNTRY_CODE_ENGLAND:
+          return 1;
+        case COUNTRY_CODE_WALES:
+          return 2;
+        case COUNTRY_CODE_NORTHERN_IRELAND:
+          return 4;
+      }
+    } else if (isCE1RequestForEstabCeCase(caseType, addressLevel)) {
+      switch (country) {
+        case COUNTRY_CODE_ENGLAND:
           return 31;
-        case "W":
+        case COUNTRY_CODE_WALES:
           return 32;
-        case "N":
+        case COUNTRY_CODE_NORTHERN_IRELAND:
           return 34;
       }
     } else {
       throw new IllegalArgumentException(
-          String.format("Unexpected Case Type for treatment code %s", treatmentCode));
+          String.format("Unexpected Case Type for treatment code %s", caseType));
     }
 
-    throw new RuntimeException(String.format("Unprocessable treatment code '%s'", treatmentCode));
+    throw new RuntimeException(String.format("Unprocessable treatment code '%s'", caseType));
   }
 
   public static boolean isQuestionnaireWelsh(String treatmentCode) {
@@ -91,8 +102,19 @@ public class QuestionnaireTypeHelper {
     return individualQuestionnaireTypes.contains(questionnaireType);
   }
 
-  public static boolean iscontinuationQuestionnaireTypes(String questionnaireId) {
-    String questionnaireType = questionnaireId.substring(0, 2);
-    return continutationQuestionnaireTypes.contains(questionnaireType);
+  private static boolean isCE1RequestForEstabCeCase(String caseType, String addressLevel) {
+    return isCeCaseType(caseType) && addressLevel.equals(ADDRESS_LEVEL_ESTAB);
+  }
+
+  private static boolean isSpgCaseType(String caseType) {
+    return caseType.equals(CASE_TYPE_SPG);
+  }
+
+  private static boolean isHouseholdCaseType(String caseType) {
+    return caseType.equals(CASE_TYPE_HOUSEHOLD);
+  }
+
+  private static boolean isCeCaseType(String caseType) {
+    return caseType.equals(CASE_TYPE_CE);
   }
 }
