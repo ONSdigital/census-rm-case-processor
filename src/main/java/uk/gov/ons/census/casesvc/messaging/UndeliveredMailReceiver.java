@@ -52,7 +52,7 @@ public class UndeliveredMailReceiver {
               Long.parseLong(event.getPayload().getFulfilmentInformation().getCaseRef()));
     }
 
-    if (isMarkingCaseAsUpdated(caze)) {
+    if (shouldEmitCaseUpdated(caze)) {
       caseService.saveCaseAndEmitCaseUpdatedEvent(
           caze, buildMetadata(event.getEvent().getType(), ActionInstructionType.UPDATE));
     }
@@ -78,7 +78,7 @@ public class UndeliveredMailReceiver {
     }
   }
 
-  private boolean isMarkingCaseAsUpdated(Case caze) {
+  private boolean shouldEmitCaseUpdated(Case caze) {
     return !caze.isRefusalReceived()
         && !caze.isAddressInvalid()
         && !caze.isReceiptReceived()
