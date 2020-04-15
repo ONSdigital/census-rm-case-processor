@@ -270,12 +270,12 @@ public class DataUtils {
 
   public static JsonNode createTestAddressModifiedJson(UUID caseId) {
     ObjectNode collectionCaseNode =
-        objectMapper.createObjectNode().put("id", caseId.toString()).put("ceExpectedResponses", 20);
+        objectMapper.createObjectNode().put("id", caseId.toString()).put("ceExpectedCapacity", 20);
 
     ObjectNode addressNode =
         objectMapper
             .createObjectNode()
-            .put("orgName", "XXXXXXXXXXXXX")
+            .put("organisationName", "XXXXXXXXXXXXX")
             .put("addressLine1", "1a main street")
             .put("addressLine2", "upper upperingham")
             .put("addressLine3", "")
@@ -294,12 +294,12 @@ public class DataUtils {
 
   public static JsonNode createTestAddressTypeChangeJson(UUID caseId) {
     ObjectNode collectionCaseNode =
-        objectMapper.createObjectNode().put("id", caseId.toString()).put("ceExpectedResponses", 20);
+        objectMapper.createObjectNode().put("id", caseId.toString()).put("ceExpectedCapacity", 20);
 
     ObjectNode addressNode =
         objectMapper
             .createObjectNode()
-            .put("orgName", "XXXXXXXXXXXXX")
+            .put("organisationName", "XXXXXXXXXXXXX")
             .put("uprn", "XXXXXXXXXXXXX")
             .put("addressType", "CE")
             .put("estabType", "XXX");
