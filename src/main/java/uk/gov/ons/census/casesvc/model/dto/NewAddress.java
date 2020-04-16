@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 public class NewAddress {
-  UUID sourceCaseID;
+  UUID sourceCaseId;
   CollectionCase collectionCase;
 }
