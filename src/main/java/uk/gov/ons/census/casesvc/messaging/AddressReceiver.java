@@ -71,13 +71,25 @@ public class AddressReceiver {
         break;
 
       case NEW_ADDRESS_REPORTED:
-        newAddressReportedService.processNewAddress(responseManagementEvent, messageTimestamp);
+        newAddressReported(responseManagementEvent, messageTimestamp);
         break;
 
       default:
         // Should never get here
         throw new RuntimeException(
             String.format("Event Type '%s' is invalid on this topic", event.getType()));
+    }
+  }
+
+  private void newAddressReported(
+      ResponseManagementEvent responseManagementEvent, OffsetDateTime messageTimestamp) {
+    if (responseManagementEvent.getPayload().getNewAddress().getSourceCaseId() != null) {
+      newAddressReportedService.processNewAddressFromSourceId(
+          responseManagementEvent,
+          messageTimestamp,
+          responseManagementEvent.getPayload().getNewAddress().getSourceCaseId());
+    } else {
+      newAddressReportedService.processNewAddress(responseManagementEvent, messageTimestamp);
     }
   }
 

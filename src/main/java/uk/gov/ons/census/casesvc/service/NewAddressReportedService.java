@@ -49,6 +49,28 @@ public class NewAddressReportedService {
         messageTimestamp);
   }
 
+  public void processNewAddressFromSourceId(
+      ResponseManagementEvent newAddressEvent, OffsetDateTime messageTimestamp, UUID sourceCaseId) {
+    CollectionCase newCollectionCase =
+        newAddressEvent.getPayload().getNewAddress().getCollectionCase();
+    checkManadatoryFieldsPresent(newCollectionCase);
+
+    Case sourceCase = caseService.getCaseByCaseId(sourceCaseId);
+    Case newAddressFromSourceCase = buildCaseFromSourceCaseAndEvent(newCollectionCase, sourceCase);
+
+    newAddressFromSourceCase = caseService.saveNewCaseAndStampCaseRef(newAddressFromSourceCase);
+    caseService.emitCaseCreatedEvent(newAddressFromSourceCase);
+
+    eventLogger.logCaseEvent(
+        newAddressFromSourceCase,
+        newAddressEvent.getEvent().getDateTime(),
+        "New Address reported",
+        EventType.NEW_ADDRESS_REPORTED,
+        newAddressEvent.getEvent(),
+        JsonHelper.convertObjectToJson(newAddressEvent.getPayload()),
+        messageTimestamp);
+  }
+
   private Case createSkeletonCase(CollectionCase collectionCase) {
     Case skeletonCase = new Case();
     skeletonCase.setSkeleton(true);
@@ -112,6 +134,90 @@ public class NewAddressReportedService {
 
     if (StringUtils.isEmpty(newCollectionCase.getAddress().getRegion())) {
       throw new RuntimeException("missing region in newAddress CollectionCase Address");
+    }
+  }
+
+  private Case buildCaseFromSourceCaseAndEvent(CollectionCase newCollectionCase, Case sourceCase) {
+
+    Case newCase = new Case();
+
+    // Set mandatory fields from the event
+    newCase.setCaseRef(null);
+    newCase.setCaseId(UUID.fromString(newCollectionCase.getId()));
+    newCase.setRegion(newCollectionCase.getAddress().getRegion());
+    newCase.setAddressLevel(newCollectionCase.getAddress().getAddressLevel());
+    newCase.setAddressType(newCollectionCase.getAddress().getAddressType());
+
+    // Set fields that come from source case, unless they are in the event
+    newCase.setAddressLine1(
+        getEventValOverSource(
+            sourceCase.getAddressLine1(), newCollectionCase.getAddress().getAddressLine1()));
+    newCase.setAddressLine2(
+        getEventValOverSource(
+            sourceCase.getAddressLine2(), newCollectionCase.getAddress().getAddressLine2()));
+    newCase.setAddressLine3(
+        getEventValOverSource(
+            sourceCase.getAddressLine3(), newCollectionCase.getAddress().getAddressLine3()));
+    newCase.setTownName(
+        getEventValOverSource(
+            sourceCase.getTownName(), newCollectionCase.getAddress().getTownName()));
+    newCase.setPostcode(
+        getEventValOverSource(
+            sourceCase.getPostcode(), newCollectionCase.getAddress().getPostcode()));
+    newCase.setCollectionExerciseId(
+        getEventValOverSource(
+            sourceCase.getCollectionExerciseId(), newCollectionCase.getCollectionExerciseId()));
+    newCase.setEstabType(
+        getEventValOverSource(
+            sourceCase.getEstabType(), newCollectionCase.getAddress().getEstabType()));
+    newCase.setFieldCoordinatorId(
+        getEventValOverSource(
+            sourceCase.getFieldCoordinatorId(), newCollectionCase.getFieldCoordinatorId()));
+    newCase.setFieldOfficerId(
+        getEventValOverSource(
+            sourceCase.getFieldOfficerId(), newCollectionCase.getFieldOfficerId()));
+
+    // Set fields empty/null/blank unless they come from the event
+    newCase.setOrganisationName(
+        getEventValOverSource(null, newCollectionCase.getAddress().getOrganisationName()));
+    newCase.setLatitude(getEventValOverSource(null, newCollectionCase.getAddress().getLatitude()));
+    newCase.setLongitude(
+        getEventValOverSource(null, newCollectionCase.getAddress().getLongitude()));
+    newCase.setUprn(getEventValOverSource(null, newCollectionCase.getAddress().getUprn()));
+    newCase.setCeExpectedCapacity(
+        getEventValOverSource(null, newCollectionCase.getCeExpectedCapacity()));
+    newCase.setCaseType(getEventValOverSource(null, newCollectionCase.getCaseType()));
+    newCase.setTreatmentCode(getEventValOverSource(null, newCollectionCase.getTreatmentCode()));
+
+    // Fields that do not come on the event but come from source case
+    newCase.setEstabUprn(sourceCase.getEstabUprn());
+    newCase.setAbpCode(sourceCase.getAbpCode());
+    newCase.setHtcDigital(sourceCase.getHtcDigital());
+    newCase.setHtcWillingness(sourceCase.getHtcWillingness());
+    newCase.setLad(sourceCase.getLad());
+    newCase.setLsoa(sourceCase.getLsoa());
+    newCase.setMsoa(sourceCase.getMsoa());
+    newCase.setOa(sourceCase.getOa());
+    newCase.setPrintBatch(sourceCase.getPrintBatch());
+    newCase.setSecretSequenceNumber(sourceCase.getSecretSequenceNumber());
+    newCase.setSurvey(sourceCase.getSurvey());
+
+    // Fields that need to be set
+    newCase.setActionPlanId(censusActionPlanId);
+    newCase.setHandDelivery(false);
+    newCase.setRefusalReceived(false);
+    newCase.setReceiptReceived(false);
+    newCase.setAddressInvalid(false);
+    newCase.setCeActualResponses(0);
+
+    return newCase;
+  }
+
+  private <T> T getEventValOverSource(T baseValue, T eventValue) {
+    if (eventValue != null) {
+      return eventValue;
+    } else {
+      return baseValue;
     }
   }
 }
