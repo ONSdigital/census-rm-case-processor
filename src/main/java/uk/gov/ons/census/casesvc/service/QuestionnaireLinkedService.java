@@ -11,9 +11,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.UacDTO;
-import uk.gov.ons.census.casesvc.model.dto.UnlinkedCase;
 import uk.gov.ons.census.casesvc.model.entity.Case;
-import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
@@ -47,8 +45,8 @@ public class QuestionnaireLinkedService {
     String questionnaireId = uac.getQuestionnaireId();
     UacQidLink uacQidLink = uacService.findByQid(questionnaireId);
 
-    logErrorIfQidIsLinkedToAnotherCase(uac, uacQidLink, uac.getCaseId());
-//    logUnlinkedCaseEventAgainstOriginalCaseIfQidIsNowLinkedToNewCase(questionnaireId, uacQidLink, uac.getCaseId());
+    logUnlinkedCaseEventAgainstOriginalCaseIfQidIsNowLinkedToNewCase(
+        questionnaireId, messageTimestamp, questionnaireLinkedEvent, uac, uacQidLink);
 
     Case caze = caseService.getCaseByCaseId(UUID.fromString(uac.getCaseId()));
 
@@ -81,19 +79,24 @@ public class QuestionnaireLinkedService {
         messageTimestamp);
   }
 
-  private void logErrorIfQidIsLinkedToAnotherCase(
-      UacDTO uac, UacQidLink uacQidLink, String newLinkedCaseId) {
+  private void logUnlinkedCaseEventAgainstOriginalCaseIfQidIsNowLinkedToNewCase(
+      String questionnaireId,
+      OffsetDateTime messageTimestamp,
+      ResponseManagementEvent questionnaireLinkedEvent,
+      UacDTO uac,
+      UacQidLink uacQidLink) {
     if (uacQidLink.getCaze() != null
         && !uacQidLink.getCaze().getCaseId().equals(UUID.fromString(uac.getCaseId()))) {
-      log.with("qid", uacQidLink.getQid())
-          .with("previous_case_id", uacQidLink.getCaze().getCaseId())
-          .with("new_case_id", newLinkedCaseId)
-          .error(
-              "Received QID link for QID that was previously linked to a different case, re-linking to new case");
+      String eventDescription =
+          String.format("Questionnaire unlinked from case with QID %s", questionnaireId);
+      eventLogger.logCaseEvent(
+          uacQidLink.getCaze(),
+          questionnaireLinkedEvent.getEvent().getDateTime(),
+          eventDescription,
+          EventType.QUESTIONNAIRE_UNLINKED,
+          questionnaireLinkedEvent.getEvent(),
+          convertObjectToJson(uac),
+          messageTimestamp);
     }
   }
-
-  private void logUnlinkedCaseEventAgainstOriginalCaseIfQidIsNowLinkedToNewCase(
-
-  )
 }
