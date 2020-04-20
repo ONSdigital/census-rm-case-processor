@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.UacDTO;
+import uk.gov.ons.census.casesvc.model.dto.UnlinkedCase;
 import uk.gov.ons.census.casesvc.model.entity.Case;
+import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
@@ -46,6 +48,7 @@ public class QuestionnaireLinkedService {
     UacQidLink uacQidLink = uacService.findByQid(questionnaireId);
 
     logErrorIfQidIsLinkedToAnotherCase(uac, uacQidLink, uac.getCaseId());
+//    logUnlinkedCaseEventAgainstOriginalCaseIfQidIsNowLinkedToNewCase(questionnaireId, uacQidLink, uac.getCaseId());
 
     Case caze = caseService.getCaseByCaseId(UUID.fromString(uac.getCaseId()));
 
@@ -89,4 +92,8 @@ public class QuestionnaireLinkedService {
               "Received QID link for QID that was previously linked to a different case, re-linking to new case");
     }
   }
+
+  private void logUnlinkedCaseEventAgainstOriginalCaseIfQidIsNowLinkedToNewCase(
+
+  )
 }
