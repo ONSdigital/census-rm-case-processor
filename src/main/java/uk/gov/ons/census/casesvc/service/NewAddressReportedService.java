@@ -200,7 +200,6 @@ public class NewAddressReportedService {
     newCase.setMsoa(sourceCase.getMsoa());
     newCase.setOa(sourceCase.getOa());
     newCase.setPrintBatch(sourceCase.getPrintBatch());
-    newCase.setSecretSequenceNumber(sourceCase.getSecretSequenceNumber());
     newCase.setSurvey(sourceCase.getSurvey());
 
     // Fields that need to be set
