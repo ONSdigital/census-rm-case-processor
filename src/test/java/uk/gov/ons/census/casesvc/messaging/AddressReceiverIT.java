@@ -265,7 +265,7 @@ public class AddressReceiverIT {
 
     NewAddress newAddress = new NewAddress();
     newAddress.setCollectionCase(collectionCase);
-    newAddress.setSourceCaseId(sourceCase.getCaseId());
+    newAddress.setSourceCaseId(sourceCase.getCaseId().toString());
 
     EventDTO eventDTO = new EventDTO();
     eventDTO.setType(NEW_ADDRESS_REPORTED);
@@ -375,7 +375,7 @@ public class AddressReceiverIT {
 
     NewAddress newAddress = new NewAddress();
     newAddress.setCollectionCase(collectionCase);
-    newAddress.setSourceCaseId(sourceCase.getCaseId());
+    newAddress.setSourceCaseId(sourceCase.getCaseId().toString());
 
     EventDTO eventDTO = new EventDTO();
     eventDTO.setType(NEW_ADDRESS_REPORTED);

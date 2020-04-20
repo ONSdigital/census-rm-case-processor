@@ -56,13 +56,13 @@ public class NewAddressReportedService {
     checkManadatoryFieldsPresent(newCollectionCase);
 
     Case sourceCase = caseService.getCaseByCaseId(sourceCaseId);
-    Case newAddressFromSourceCase = buildCaseFromSourceCaseAndEvent(newCollectionCase, sourceCase);
+    Case newCaseFromSourceCase = buildCaseFromSourceCaseAndEvent(newCollectionCase, sourceCase);
 
-    newAddressFromSourceCase = caseService.saveNewCaseAndStampCaseRef(newAddressFromSourceCase);
-    caseService.emitCaseCreatedEvent(newAddressFromSourceCase);
+    newCaseFromSourceCase = caseService.saveNewCaseAndStampCaseRef(newCaseFromSourceCase);
+    caseService.emitCaseCreatedEvent(newCaseFromSourceCase);
 
     eventLogger.logCaseEvent(
-        newAddressFromSourceCase,
+        newCaseFromSourceCase,
         newAddressEvent.getEvent().getDateTime(),
         "New Address reported",
         EventType.NEW_ADDRESS_REPORTED,
@@ -113,6 +113,7 @@ public class NewAddressReportedService {
     skeletonCase.setReceiptReceived(false);
     skeletonCase.setAddressInvalid(false);
     skeletonCase.setCeActualResponses(0);
+    skeletonCase.setCreatedDateTime(OffsetDateTime.now());
 
     return skeletonCase;
   }
@@ -209,6 +210,7 @@ public class NewAddressReportedService {
     newCase.setReceiptReceived(false);
     newCase.setAddressInvalid(false);
     newCase.setCeActualResponses(0);
+    newCase.setCreatedDateTime(OffsetDateTime.now());
 
     return newCase;
   }

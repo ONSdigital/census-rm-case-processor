@@ -78,6 +78,7 @@ public class NewAddressReportedServiceTest {
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
     verify(caseService).saveNewCaseAndStampCaseRef(caseArgumentCaptor.capture());
     Case actualCase = caseArgumentCaptor.getValue();
+    actualCase.setCreatedDateTime(expectedCase.getCreatedDateTime());
     assertThat(actualCase).isEqualToComparingFieldByFieldRecursively(expectedCase);
 
     verify(caseService).emitCaseCreatedEvent(casetoEmit);
