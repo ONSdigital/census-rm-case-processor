@@ -345,7 +345,7 @@ public class QuestionnaireLinkedServiceTest {
 
     verify(eventLogger)
         .logCaseEvent(
-            any(Case.class),
+            eq(testCase),
             any(OffsetDateTime.class),
             eq("Questionnaire unlinked from case with QID " + TEST_HI_QID),
             eq(EventType.QUESTIONNAIRE_UNLINKED),
