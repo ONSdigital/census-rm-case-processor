@@ -19,6 +19,7 @@ import org.springframework.messaging.Message;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
+import uk.gov.ons.census.casesvc.model.dto.NewAddress;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -64,7 +65,12 @@ public class AddressReceiverTest {
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
     EventDTO event = new EventDTO();
     event.setType(NEW_ADDRESS_REPORTED);
+    NewAddress newAddress = new NewAddress();
+    newAddress.setSourceCaseId(null);
+    PayloadDTO payload = new PayloadDTO();
+    payload.setNewAddress(newAddress);
     responseManagementEvent.setEvent(event);
+    responseManagementEvent.setPayload(payload);
     Message<ResponseManagementEvent> message =
         constructMessageWithValidTimeStamp(responseManagementEvent);
     OffsetDateTime expectedDateTime = MsgDateHelper.getMsgTimeStamp(message);
@@ -73,6 +79,30 @@ public class AddressReceiverTest {
 
     verify(newAddressReportedService)
         .processNewAddress(eq(responseManagementEvent), eq(expectedDateTime));
+  }
+
+  @Test
+  public void testNewAddressReportedServiceCalledWithSourceCaseId() {
+    ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
+    EventDTO event = new EventDTO();
+    event.setType(NEW_ADDRESS_REPORTED);
+    NewAddress newAddress = new NewAddress();
+    newAddress.setSourceCaseId(UUID.randomUUID().toString());
+    PayloadDTO payload = new PayloadDTO();
+    payload.setNewAddress(newAddress);
+    responseManagementEvent.setEvent(event);
+    responseManagementEvent.setPayload(payload);
+    Message<ResponseManagementEvent> message =
+        constructMessageWithValidTimeStamp(responseManagementEvent);
+    OffsetDateTime expectedDateTime = MsgDateHelper.getMsgTimeStamp(message);
+
+    underTest.receiveMessage(message);
+
+    verify(newAddressReportedService)
+        .processNewAddressFromSourceId(
+            eq(responseManagementEvent),
+            eq(expectedDateTime),
+            eq(UUID.fromString(newAddress.getSourceCaseId())));
   }
 
   @Test

@@ -78,6 +78,7 @@ public class NewAddressReportedServiceTest {
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
     verify(caseService).saveNewCaseAndStampCaseRef(caseArgumentCaptor.capture());
     Case actualCase = caseArgumentCaptor.getValue();
+    actualCase.setCreatedDateTime(expectedCase.getCreatedDateTime());
     assertThat(actualCase).isEqualToComparingFieldByFieldRecursively(expectedCase);
 
     verify(caseService).emitCaseCreatedEvent(casetoEmit);
@@ -184,6 +185,79 @@ public class NewAddressReportedServiceTest {
       assertThat(e.getMessage()).isEqualTo("missing region in newAddress CollectionCase Address");
       throw e;
     }
+  }
+
+  @Test
+  public void testNewAddressFromSourceCaseWithMinimalEventFields() {
+    EasyRandom easyRandom = new EasyRandom();
+    Case sourceCase = easyRandom.nextObject(Case.class);
+    sourceCase.setCaseId(UUID.randomUUID());
+    ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
+    OffsetDateTime timeNow = OffsetDateTime.now();
+
+    when(caseService.getCaseByCaseId(any())).thenReturn(sourceCase);
+
+    underTest.processNewAddressFromSourceId(newAddressEvent, timeNow, sourceCase.getCaseId());
+
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseService).saveNewCaseAndStampCaseRef(caseArgumentCaptor.capture());
+    Case newCase = caseArgumentCaptor.getAllValues().get(0);
+
+    CollectionCase newAddressCollectionCase =
+        newAddressEvent.getPayload().getNewAddress().getCollectionCase();
+
+    assertThat(newCase.getAddressLine1()).isEqualTo(sourceCase.getAddressLine1());
+    assertThat(newCase.getAddressLine2()).isEqualTo(sourceCase.getAddressLine2());
+    assertThat(newCase.getAddressLine3()).isEqualTo(sourceCase.getAddressLine3());
+
+    assertThat(newCase.getCaseId().toString()).isEqualTo(newAddressCollectionCase.getId());
+    assertThat(newCase.getAddressType())
+        .isEqualTo(newAddressCollectionCase.getAddress().getAddressType());
+
+    assertThat(newCase.getLatitude()).isNull();
+
+    assertThat(newCase.getEstabUprn()).isEqualTo(sourceCase.getEstabUprn());
+  }
+
+  @Test
+  public void testNewAddressFromSourceCaseWithProvidedEventFields() {
+    EasyRandom easyRandom = new EasyRandom();
+    Case sourceCase = easyRandom.nextObject(Case.class);
+    sourceCase.setCaseId(UUID.randomUUID());
+    ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
+    newAddressEvent
+        .getPayload()
+        .getNewAddress()
+        .getCollectionCase()
+        .getAddress()
+        .setAddressLine1("666");
+    newAddressEvent
+        .getPayload()
+        .getNewAddress()
+        .getCollectionCase()
+        .getAddress()
+        .setLatitude("51.47");
+    OffsetDateTime timeNow = OffsetDateTime.now();
+
+    when(caseService.getCaseByCaseId(any())).thenReturn(sourceCase);
+
+    underTest.processNewAddressFromSourceId(newAddressEvent, timeNow, sourceCase.getCaseId());
+
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseService).saveNewCaseAndStampCaseRef(caseArgumentCaptor.capture());
+    Case newCase = caseArgumentCaptor.getAllValues().get(0);
+
+    CollectionCase newAddressCollectionCase =
+        newAddressEvent.getPayload().getNewAddress().getCollectionCase();
+
+    assertThat(newCase.getAddressLine1())
+        .isEqualTo(newAddressCollectionCase.getAddress().getAddressLine1());
+    assertThat(newCase.getCaseId().toString()).isEqualTo(newAddressCollectionCase.getId());
+    assertThat(newCase.getAddressType())
+        .isEqualTo(newAddressCollectionCase.getAddress().getAddressType());
+    assertThat(newCase.getLatitude())
+        .isEqualTo(newAddressCollectionCase.getAddress().getLatitude());
+    assertThat(newCase.getEstabUprn()).isEqualTo(sourceCase.getEstabUprn());
   }
 
   private ResponseManagementEvent getMinimalValidNewAddress() {

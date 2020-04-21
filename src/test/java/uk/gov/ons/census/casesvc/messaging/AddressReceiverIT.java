@@ -237,6 +237,215 @@ public class AddressReceiverIT {
     assertThat(event.getEventType()).isEqualTo(EventType.NEW_ADDRESS_REPORTED);
   }
 
+  @Test
+  public void testNewAddressCreatedFromBasicEventAndSourceCase()
+      throws InterruptedException, IOException {
+    // GIVEN
+    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
+
+    EasyRandom easyRandom = new EasyRandom();
+    Case sourceCase = easyRandom.nextObject(Case.class);
+    sourceCase.setReceiptReceived(false);
+    sourceCase.setSurvey("CENSUS");
+    sourceCase.setUacQidLinks(null);
+    sourceCase.setEvents(null);
+    sourceCase.setCaseType("HH");
+    sourceCase.setAddressLevel("U");
+    sourceCase.setCollectionExerciseId(censuscollectionExerciseId);
+    sourceCase = caseRepository.saveAndFlush(sourceCase);
+
+    Address address = new Address();
+    address.setAddressLevel("E");
+    address.setAddressType("HH");
+    address.setRegion("W");
+
+    CollectionCase collectionCase = new CollectionCase();
+    collectionCase.setId(UUID.randomUUID().toString());
+    collectionCase.setAddress(address);
+
+    NewAddress newAddress = new NewAddress();
+    newAddress.setCollectionCase(collectionCase);
+    newAddress.setSourceCaseId(sourceCase.getCaseId().toString());
+
+    EventDTO eventDTO = new EventDTO();
+    eventDTO.setType(NEW_ADDRESS_REPORTED);
+    eventDTO.setDateTime(OffsetDateTime.now());
+
+    ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
+    responseManagementEvent.setEvent(eventDTO);
+
+    PayloadDTO payloadDTO = new PayloadDTO();
+    payloadDTO.setNewAddress(newAddress);
+    responseManagementEvent.setPayload(payloadDTO);
+
+    // WHEN
+    rabbitQueueHelper.sendMessage(addressReceiver, responseManagementEvent);
+
+    // THEN
+    ResponseManagementEvent actualResponseManagementEvent =
+        rabbitQueueHelper.checkExpectedMessageReceived(outboundQueue);
+
+    assertThat(actualResponseManagementEvent.getEvent().getType())
+        .isEqualTo(EventTypeDTO.CASE_CREATED);
+    CollectionCase actualPayloadCase =
+        actualResponseManagementEvent.getPayload().getCollectionCase();
+    assertThat(actualPayloadCase.getId()).isEqualTo(collectionCase.getId());
+
+    Case actualCase = caseRepository.findById(UUID.fromString(collectionCase.getId())).get();
+    assertThat(actualCase.getCollectionExerciseId()).isEqualTo(censuscollectionExerciseId);
+    assertThat(actualCase.getActionPlanId()).isEqualTo(censusActionPlanId);
+    assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
+    assertThat(actualCase.getCaseType()).isNull();
+    assertThat(actualCase.isSkeleton()).isFalse();
+
+    assertThat(actualCase.getAddressLine1()).isEqualTo(sourceCase.getAddressLine1());
+    assertThat(actualCase.getAddressLine2()).isEqualTo(sourceCase.getAddressLine2());
+    assertThat(actualCase.getAddressLine3()).isEqualTo(sourceCase.getAddressLine3());
+    assertThat(actualCase.getPostcode()).isEqualTo(sourceCase.getPostcode());
+    assertThat(actualCase.getTownName()).isEqualTo(sourceCase.getTownName());
+    assertThat(actualCase.getCollectionExerciseId())
+        .isEqualTo(sourceCase.getCollectionExerciseId());
+    assertThat(actualCase.getEstabType()).isEqualTo(sourceCase.getEstabType());
+    assertThat(actualCase.getFieldCoordinatorId()).isEqualTo(sourceCase.getFieldCoordinatorId());
+    assertThat(actualCase.getFieldOfficerId()).isEqualTo(sourceCase.getFieldOfficerId());
+
+    assertThat(actualCase.getOrganisationName()).isNull();
+    assertThat(actualCase.getLatitude()).isNull();
+    assertThat(actualCase.getLongitude()).isNull();
+    assertThat(actualCase.getUprn()).isNull();
+    assertThat(actualCase.getCaseType()).isNull();
+    assertThat(actualCase.getTreatmentCode()).isNull();
+
+    assertThat(actualCase.getEstabUprn()).isEqualTo(sourceCase.getEstabUprn());
+
+    assertThat(actualCase.isReceiptReceived()).isFalse();
+    assertThat(actualCase.isRefusalReceived()).isFalse();
+    assertThat(actualCase.isAddressInvalid()).isFalse();
+    assertThat(actualCase.isHandDelivery()).isFalse();
+
+    // check database for log eventDTO
+    List<Event> events = eventRepository.findAll();
+    assertThat(events.size()).isEqualTo(1);
+    Event event = events.get(0);
+    assertThat(event.getEventDescription()).isEqualTo("New Address reported");
+    assertThat(event.getEventType()).isEqualTo(EventType.NEW_ADDRESS_REPORTED);
+  }
+
+  @Test
+  public void testNewAddressCreatedFromEventWithDetailsAndSourceCase()
+      throws InterruptedException, IOException {
+    // GIVEN
+    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
+
+    EasyRandom easyRandom = new EasyRandom();
+    Case sourceCase = easyRandom.nextObject(Case.class);
+    sourceCase.setReceiptReceived(false);
+    sourceCase.setSurvey("CENSUS");
+    sourceCase.setUacQidLinks(null);
+    sourceCase.setEvents(null);
+    sourceCase.setCaseType("HH");
+    sourceCase.setAddressLevel("U");
+    sourceCase.setCollectionExerciseId(censuscollectionExerciseId);
+    sourceCase = caseRepository.saveAndFlush(sourceCase);
+
+    Address address = new Address();
+    address.setAddressLevel("E");
+    address.setAddressType("HH");
+    address.setRegion("W");
+
+    address.setAddressLine1("123");
+    address.setAddressLine2("Fake Street");
+    address.setAddressLine3("Made up district");
+    address.setTownName("Nowheresville");
+    address.setPostcode("AB12 3CD");
+    address.setEstabType("HH");
+    address.setOrganisationName("Super Org");
+    address.setLatitude("12.34");
+    address.setLongitude("56.78");
+    address.setUprn("uprn01");
+
+    CollectionCase collectionCase = new CollectionCase();
+    collectionCase.setId(UUID.randomUUID().toString());
+    collectionCase.setAddress(address);
+    collectionCase.setFieldCoordinatorId("1234");
+    collectionCase.setFieldOfficerId("5678");
+    collectionCase.setCeExpectedCapacity(1);
+    collectionCase.setCaseType("SPG");
+    collectionCase.setTreatmentCode("TREAT");
+
+    NewAddress newAddress = new NewAddress();
+    newAddress.setCollectionCase(collectionCase);
+    newAddress.setSourceCaseId(sourceCase.getCaseId().toString());
+
+    EventDTO eventDTO = new EventDTO();
+    eventDTO.setType(NEW_ADDRESS_REPORTED);
+    eventDTO.setDateTime(OffsetDateTime.now());
+
+    ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
+    responseManagementEvent.setEvent(eventDTO);
+
+    PayloadDTO payloadDTO = new PayloadDTO();
+    payloadDTO.setNewAddress(newAddress);
+    responseManagementEvent.setPayload(payloadDTO);
+
+    // WHEN
+    rabbitQueueHelper.sendMessage(addressReceiver, responseManagementEvent);
+
+    // THEN
+    ResponseManagementEvent actualResponseManagementEvent =
+        rabbitQueueHelper.checkExpectedMessageReceived(outboundQueue);
+
+    assertThat(actualResponseManagementEvent.getEvent().getType())
+        .isEqualTo(EventTypeDTO.CASE_CREATED);
+    CollectionCase actualPayloadCase =
+        actualResponseManagementEvent.getPayload().getCollectionCase();
+    assertThat(actualPayloadCase.getId()).isEqualTo(collectionCase.getId());
+
+    Case actualCase = caseRepository.findById(UUID.fromString(collectionCase.getId())).get();
+    assertThat(actualCase.getCollectionExerciseId()).isEqualTo(censuscollectionExerciseId);
+    assertThat(actualCase.getActionPlanId()).isEqualTo(censusActionPlanId);
+    assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
+    assertThat(actualCase.getCaseType()).isEqualTo(collectionCase.getCaseType());
+    assertThat(actualCase.isSkeleton()).isFalse();
+
+    assertThat(actualCase.getAddressLine1())
+        .isEqualTo(collectionCase.getAddress().getAddressLine1());
+    assertThat(actualCase.getAddressLine2())
+        .isEqualTo(collectionCase.getAddress().getAddressLine2());
+    assertThat(actualCase.getAddressLine3())
+        .isEqualTo(collectionCase.getAddress().getAddressLine3());
+    assertThat(actualCase.getPostcode()).isEqualTo(collectionCase.getAddress().getPostcode());
+    assertThat(actualCase.getTownName()).isEqualTo(collectionCase.getAddress().getTownName());
+    assertThat(actualCase.getCollectionExerciseId())
+        .isEqualTo(sourceCase.getCollectionExerciseId());
+    assertThat(actualCase.getEstabType()).isEqualTo(collectionCase.getAddress().getEstabType());
+    assertThat(actualCase.getFieldCoordinatorId())
+        .isEqualTo(collectionCase.getFieldCoordinatorId());
+    assertThat(actualCase.getFieldOfficerId()).isEqualTo(collectionCase.getFieldOfficerId());
+
+    assertThat(actualCase.getOrganisationName())
+        .isEqualTo(collectionCase.getAddress().getOrganisationName());
+    assertThat(actualCase.getLatitude()).isEqualTo(collectionCase.getAddress().getLatitude());
+    assertThat(actualCase.getLongitude()).isEqualTo(collectionCase.getAddress().getLongitude());
+    assertThat(actualCase.getUprn()).isEqualTo(collectionCase.getAddress().getUprn());
+    assertThat(actualCase.getCaseType()).isEqualTo(collectionCase.getCaseType());
+    assertThat(actualCase.getTreatmentCode()).isEqualTo(collectionCase.getTreatmentCode());
+
+    assertThat(actualCase.getEstabUprn()).isEqualTo(sourceCase.getEstabUprn());
+
+    assertThat(actualCase.isReceiptReceived()).isFalse();
+    assertThat(actualCase.isRefusalReceived()).isFalse();
+    assertThat(actualCase.isAddressInvalid()).isFalse();
+    assertThat(actualCase.isHandDelivery()).isFalse();
+
+    // check database for log eventDTO
+    List<Event> events = eventRepository.findAll();
+    assertThat(events.size()).isEqualTo(1);
+    Event event = events.get(0);
+    assertThat(event.getEventDescription()).isEqualTo("New Address reported");
+    assertThat(event.getEventType()).isEqualTo(EventType.NEW_ADDRESS_REPORTED);
+  }
+
   public void testEventTypeLoggedOnly(
       PayloadDTO payload,
       String expectedEventPayloadJson,
