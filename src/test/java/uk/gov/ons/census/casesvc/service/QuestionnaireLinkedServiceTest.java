@@ -342,6 +342,17 @@ public class QuestionnaireLinkedServiceTest {
             eq(managementEvent.getEvent()),
             anyString(),
             eq(messageTimestamp));
+
+    verify(eventLogger)
+        .logCaseEvent(
+            eq(testCase),
+            any(OffsetDateTime.class),
+            eq("Questionnaire unlinked from case with QID " + TEST_HI_QID),
+            eq(EventType.QUESTIONNAIRE_UNLINKED),
+            eq(managementEvent.getEvent()),
+            anyString(),
+            eq(messageTimestamp));
+
     verifyNoMoreInteractions(eventLogger);
   }
 
