@@ -72,7 +72,6 @@ public class CaseService {
     Case caze = mapperFacade.map(createCaseSample, Case.class);
     caze.setCaseType(createCaseSample.getAddressType());
     caze.setCaseId(UUID.randomUUID());
-    caze.setCreatedDateTime(OffsetDateTime.now());
     caze.setReceiptReceived(false);
     caze.setSurvey(CENSUS_SURVEY);
     caze.setCeActualResponses(0);
@@ -97,7 +96,6 @@ public class CaseService {
     caze.setCaseId(UUID.fromString(caseId));
     caze.setActionPlanId(actionPlanId);
     caze.setCollectionExerciseId(collectionExerciseId);
-    caze.setCreatedDateTime(OffsetDateTime.now());
     caze.setRefusalReceived(isRefused);
     caze.setAddressInvalid(isInvalidAddress);
     caze.setSurvey(CCS_SURVEY);
@@ -142,10 +140,6 @@ public class CaseService {
     rabbitTemplate.convertAndSend(
         outboundExchange, CASE_UPDATE_ROUTING_KEY, responseManagementEvent);
     return responseManagementEvent.getPayload();
-  }
-
-  public void saveCaseAndEmitCaseUpdatedEvent(Case caze) {
-    saveCaseAndEmitCaseUpdatedEvent(caze, null);
   }
 
   public void saveCaseAndEmitCaseUpdatedEvent(Case caze, Metadata metadata) {
@@ -238,7 +232,6 @@ public class CaseService {
     Case individualResponseCase = new Case();
 
     individualResponseCase.setCaseId(caseId);
-    individualResponseCase.setCreatedDateTime(OffsetDateTime.now());
     individualResponseCase.setAddressType(parentCase.getAddressType());
     individualResponseCase.setCaseType(HOUSEHOLD_INDIVIDUAL_RESPONSE_CASE_TYPE);
     individualResponseCase.setCollectionExerciseId(parentCase.getCollectionExerciseId());
