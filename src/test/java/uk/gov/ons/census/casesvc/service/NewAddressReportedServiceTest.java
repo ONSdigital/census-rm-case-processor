@@ -1,10 +1,11 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -17,13 +18,17 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
+import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.Address;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
+import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
+import uk.gov.ons.census.casesvc.model.dto.Metadata;
 import uk.gov.ons.census.casesvc.model.dto.NewAddress;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
+import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.utility.JsonHelper;
 
@@ -194,8 +199,10 @@ public class NewAddressReportedServiceTest {
     sourceCase.setCaseId(UUID.randomUUID());
     ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
     OffsetDateTime timeNow = OffsetDateTime.now();
+    newAddressEvent.getEvent().setChannel("NOT FIELD");
 
     when(caseService.getCaseByCaseId(any())).thenReturn(sourceCase);
+    when(caseService.saveNewCaseAndStampCaseRef(any())).then(returnsFirstArg());
 
     underTest.processNewAddressFromSourceId(newAddressEvent, timeNow, sourceCase.getCaseId());
 
@@ -239,7 +246,10 @@ public class NewAddressReportedServiceTest {
         .setLatitude("51.47");
     OffsetDateTime timeNow = OffsetDateTime.now();
 
+    newAddressEvent.getEvent().setChannel("NOT FIELD");
+
     when(caseService.getCaseByCaseId(any())).thenReturn(sourceCase);
+    when(caseService.saveNewCaseAndStampCaseRef(any())).then(returnsFirstArg());
 
     underTest.processNewAddressFromSourceId(newAddressEvent, timeNow, sourceCase.getCaseId());
 
@@ -258,6 +268,144 @@ public class NewAddressReportedServiceTest {
     assertThat(newCase.getLatitude())
         .isEqualTo(newAddressCollectionCase.getAddress().getLatitude());
     assertThat(newCase.getEstabUprn()).isEqualTo(sourceCase.getEstabUprn());
+
+    verify(caseService).saveCaseAndEmitCaseCreatedEvent(newCase, null);
+  }
+
+  @Test
+  public void testMetaDataCreatedAndSentForNewCaseInRightConditions() {
+    //Given
+    EasyRandom easyRandom = new EasyRandom();
+    Case sourceCase = easyRandom.nextObject(Case.class);
+    sourceCase.setCaseId(UUID.randomUUID());
+    ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
+    CollectionCase collectionCase =
+        newAddressEvent.getPayload().getNewAddress().getCollectionCase();
+    collectionCase.getAddress().setAddressLine1("666");
+    collectionCase.getAddress().setLatitude("51.47");
+
+    collectionCase.setCaseType("SPG");
+    collectionCase.setFieldCoordinatorId("0123435");
+    collectionCase.setFieldOfficerId("2342345");
+
+    newAddressEvent.getEvent().setChannel("FIELD");
+
+    OffsetDateTime timeNow = OffsetDateTime.now();
+
+    when(caseService.getCaseByCaseId(any())).thenReturn(sourceCase);
+    when(caseService.saveNewCaseAndStampCaseRef(any())).then(returnsFirstArg());
+
+    //When
+    underTest.processNewAddressFromSourceId(newAddressEvent, timeNow, sourceCase.getCaseId());
+
+    //Then
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseService).saveNewCaseAndStampCaseRef(caseArgumentCaptor.capture());
+    Case newCase = caseArgumentCaptor.getAllValues().get(0);
+
+    CollectionCase newAddressCollectionCase =
+        newAddressEvent.getPayload().getNewAddress().getCollectionCase();
+
+    assertThat(newCase.getAddressLine1())
+        .isEqualTo(newAddressCollectionCase.getAddress().getAddressLine1());
+    assertThat(newCase.getCaseId().toString()).isEqualTo(newAddressCollectionCase.getId());
+    assertThat(newCase.getAddressType())
+        .isEqualTo(newAddressCollectionCase.getAddress().getAddressType());
+    assertThat(newCase.getLatitude())
+        .isEqualTo(newAddressCollectionCase.getAddress().getLatitude());
+    assertThat(newCase.getEstabUprn()).isEqualTo(sourceCase.getEstabUprn());
+
+    ArgumentCaptor<Metadata> metadataArgumentCaptor = ArgumentCaptor.forClass(Metadata.class);
+
+    verify(caseService)
+        .saveCaseAndEmitCaseCreatedEvent(
+            caseArgumentCaptor.capture(), metadataArgumentCaptor.capture());
+
+    assertThat(caseArgumentCaptor.getValue().getCaseId().toString()).isEqualTo(newAddressCollectionCase.getId());
+    
+    Metadata actualMetadata = metadataArgumentCaptor.getValue();
+    assertThat(actualMetadata.getCauseEventType()).isEqualTo(EventTypeDTO.NEW_ADDRESS_REPORTED);
+    assertThat(actualMetadata.getFieldDecision()).isEqualTo(ActionInstructionType.CREATE);
+  }
+
+  @Test
+  public void testNoMetaDataWhenCaseTypeNotCEorSPG() {
+    //Given
+    EasyRandom easyRandom = new EasyRandom();
+    Case sourceCase = easyRandom.nextObject(Case.class);
+    sourceCase.setCaseId(UUID.randomUUID());
+    ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
+    CollectionCase collectionCase =
+            newAddressEvent.getPayload().getNewAddress().getCollectionCase();
+    collectionCase.getAddress().setAddressLine1("666");
+    collectionCase.setCaseType("HH");
+    collectionCase.setFieldCoordinatorId("0123435");
+    collectionCase.setFieldOfficerId("2342345");
+
+    newAddressEvent.getEvent().setChannel("FIELD");
+
+    when(caseService.getCaseByCaseId(any())).thenReturn(sourceCase);
+    when(caseService.saveNewCaseAndStampCaseRef(any())).then(returnsFirstArg());
+    OffsetDateTime timeNow = OffsetDateTime.now();
+
+    //When
+    underTest.processNewAddressFromSourceId(newAddressEvent, timeNow, sourceCase.getCaseId());
+
+    verify(caseService).saveCaseAndEmitCaseCreatedEvent(any(), eq(null));
+  }
+
+  @Test
+  public void testNoMetaDataWhenNoFieldOfficerId() {
+    //Given
+    EasyRandom easyRandom = new EasyRandom();
+    Case sourceCase = easyRandom.nextObject(Case.class);
+    sourceCase.setCaseId(UUID.randomUUID());
+    sourceCase.setFieldOfficerId(null);
+    ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
+    CollectionCase collectionCase =
+            newAddressEvent.getPayload().getNewAddress().getCollectionCase();
+    collectionCase.getAddress().setAddressLine1("666");
+    collectionCase.setCaseType("SPG");
+    collectionCase.setFieldCoordinatorId("0123435");
+    collectionCase.setFieldOfficerId(null);
+
+    newAddressEvent.getEvent().setChannel("FIELD");
+
+    when(caseService.getCaseByCaseId(any())).thenReturn(sourceCase);
+    when(caseService.saveNewCaseAndStampCaseRef(any())).then(returnsFirstArg());
+    OffsetDateTime timeNow = OffsetDateTime.now();
+
+    //When
+    underTest.processNewAddressFromSourceId(newAddressEvent, timeNow, sourceCase.getCaseId());
+
+    verify(caseService).saveCaseAndEmitCaseCreatedEvent(any(), eq(null));
+  }
+
+  @Test
+  public void testNoMetaDataWhenNoFieldCordId() {
+    //Given
+    EasyRandom easyRandom = new EasyRandom();
+    Case sourceCase = easyRandom.nextObject(Case.class);
+    sourceCase.setCaseId(UUID.randomUUID());
+    sourceCase.setFieldOfficerId(null);
+    ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
+    CollectionCase collectionCase =
+            newAddressEvent.getPayload().getNewAddress().getCollectionCase();
+    collectionCase.getAddress().setAddressLine1("666");
+    collectionCase.setCaseType("SPG");
+    collectionCase.setFieldCoordinatorId(null);
+    collectionCase.setFieldOfficerId("0123435");
+
+    newAddressEvent.getEvent().setChannel("FIELD");
+
+    when(caseService.getCaseByCaseId(any())).thenReturn(sourceCase);
+    when(caseService.saveNewCaseAndStampCaseRef(any())).then(returnsFirstArg());
+    OffsetDateTime timeNow = OffsetDateTime.now();
+
+    //When
+    underTest.processNewAddressFromSourceId(newAddressEvent, timeNow, sourceCase.getCaseId());
+
+    verify(caseService).saveCaseAndEmitCaseCreatedEvent(any(), eq(null));
   }
 
   private ResponseManagementEvent getMinimalValidNewAddress() {
