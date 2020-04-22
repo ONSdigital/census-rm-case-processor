@@ -53,10 +53,6 @@ public class UacService {
     this.caseService = caseService;
   }
 
-  public UacQidLink saveUacQidLink(UacQidLink uacQidLink) {
-    return uacQidLinkRepository.save(uacQidLink);
-  }
-
   public UacQidLink buildUacQidLink(Case caze, int questionnaireType) {
     return buildUacQidLink(caze, questionnaireType, null);
   }
