@@ -195,6 +195,7 @@ public class NewAddressReportedServiceTest {
     EasyRandom easyRandom = new EasyRandom();
     Case sourceCase = easyRandom.nextObject(Case.class);
     sourceCase.setCaseId(UUID.randomUUID());
+    sourceCase.getMetadata().setSecureEstablishment(true);
     ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
     OffsetDateTime timeNow = OffsetDateTime.now();
     newAddressEvent.getEvent().setChannel("NOT FIELD");
@@ -211,6 +212,7 @@ public class NewAddressReportedServiceTest {
     CollectionCase newAddressCollectionCase =
         newAddressEvent.getPayload().getNewAddress().getCollectionCase();
 
+    assertThat(newCase.isSkeleton()).isTrue();
     assertThat(newCase.getAddressLine1()).isEqualTo(sourceCase.getAddressLine1());
     assertThat(newCase.getAddressLine2()).isEqualTo(sourceCase.getAddressLine2());
     assertThat(newCase.getAddressLine3()).isEqualTo(sourceCase.getAddressLine3());
@@ -222,6 +224,7 @@ public class NewAddressReportedServiceTest {
     assertThat(newCase.getLatitude()).isNull();
 
     assertThat(newCase.getEstabUprn()).isEqualTo(sourceCase.getEstabUprn());
+    assertThat(newCase.getMetadata().getSecureEstablishment()).isTrue();
   }
 
   @Test
@@ -229,6 +232,7 @@ public class NewAddressReportedServiceTest {
     EasyRandom easyRandom = new EasyRandom();
     Case sourceCase = easyRandom.nextObject(Case.class);
     sourceCase.setCaseId(UUID.randomUUID());
+    sourceCase.getMetadata().setSecureEstablishment(false);
     ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
     newAddressEvent
         .getPayload()
@@ -258,6 +262,7 @@ public class NewAddressReportedServiceTest {
     CollectionCase newAddressCollectionCase =
         newAddressEvent.getPayload().getNewAddress().getCollectionCase();
 
+    assertThat(newCase.isSkeleton()).isTrue();
     assertThat(newCase.getAddressLine1())
         .isEqualTo(newAddressCollectionCase.getAddress().getAddressLine1());
     assertThat(newCase.getCaseId().toString()).isEqualTo(newAddressCollectionCase.getId());
@@ -266,6 +271,7 @@ public class NewAddressReportedServiceTest {
     assertThat(newCase.getLatitude())
         .isEqualTo(newAddressCollectionCase.getAddress().getLatitude());
     assertThat(newCase.getEstabUprn()).isEqualTo(sourceCase.getEstabUprn());
+    assertThat(newCase.getMetadata().getSecureEstablishment()).isFalse();
 
     verify(caseService).saveCaseAndEmitCaseCreatedEvent(newCase, null);
   }

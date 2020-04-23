@@ -252,6 +252,7 @@ public class AddressReceiverIT {
     sourceCase.setCaseType("HH");
     sourceCase.setAddressLevel("U");
     sourceCase.setCollectionExerciseId(censuscollectionExerciseId);
+    sourceCase.getMetadata().setSecureEstablishment(true);
     sourceCase = caseRepository.saveAndFlush(sourceCase);
 
     Address address = new Address();
@@ -295,7 +296,7 @@ public class AddressReceiverIT {
     assertThat(actualCase.getCollectionExerciseId()).isEqualTo(censuscollectionExerciseId);
     assertThat(actualCase.getActionPlanId()).isEqualTo(censusActionPlanId);
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
-    assertThat(actualCase.isSkeleton()).isFalse();
+    assertThat(actualCase.isSkeleton()).isTrue();
     assertThat(actualCase.getCaseType()).isEqualTo(collectionCase.getAddress().getAddressType());
     assertThat(actualCase.getAddressLine1()).isEqualTo(sourceCase.getAddressLine1());
     assertThat(actualCase.getAddressLine2()).isEqualTo(sourceCase.getAddressLine2());
@@ -315,6 +316,7 @@ public class AddressReceiverIT {
     assertThat(actualCase.getTreatmentCode()).isNull();
 
     assertThat(actualCase.getEstabUprn()).isEqualTo(sourceCase.getEstabUprn());
+    assertThat(actualCase.getMetadata().getSecureEstablishment()).isTrue();
 
     assertThat(actualCase.isReceiptReceived()).isFalse();
     assertThat(actualCase.isRefusalReceived()).isFalse();
@@ -344,6 +346,7 @@ public class AddressReceiverIT {
     sourceCase.setCaseType("HH");
     sourceCase.setAddressLevel("U");
     sourceCase.setCollectionExerciseId(censuscollectionExerciseId);
+    sourceCase.getMetadata().setSecureEstablishment(false);
     sourceCase = caseRepository.saveAndFlush(sourceCase);
 
     Address address = new Address();
@@ -405,7 +408,7 @@ public class AddressReceiverIT {
     assertThat(actualCase.getActionPlanId()).isEqualTo(censusActionPlanId);
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
     assertThat(actualCase.getCaseType()).isEqualTo(collectionCase.getCaseType());
-    assertThat(actualCase.isSkeleton()).isFalse();
+    assertThat(actualCase.isSkeleton()).isTrue();
 
     assertThat(actualCase.getAddressLine1())
         .isEqualTo(collectionCase.getAddress().getAddressLine1());
@@ -431,6 +434,7 @@ public class AddressReceiverIT {
     assertThat(actualCase.getTreatmentCode()).isEqualTo(collectionCase.getTreatmentCode());
 
     assertThat(actualCase.getEstabUprn()).isEqualTo(sourceCase.getEstabUprn());
+    assertThat(actualCase.getMetadata().getSecureEstablishment()).isFalse();
 
     assertThat(actualCase.isReceiptReceived()).isFalse();
     assertThat(actualCase.isRefusalReceived()).isFalse();

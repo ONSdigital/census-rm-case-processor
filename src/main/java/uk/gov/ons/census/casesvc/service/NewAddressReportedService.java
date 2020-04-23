@@ -14,11 +14,13 @@ import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.Metadata;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
+import uk.gov.ons.census.casesvc.model.entity.CaseMetadata;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.utility.JsonHelper;
 
 @Component
 public class NewAddressReportedService {
+
   private final CaseService caseService;
   private final EventLogger eventLogger;
 
@@ -83,15 +85,23 @@ public class NewAddressReportedService {
   private Metadata getMetaDataToCreateFieldCaseIfConditionsMet(
       Case caze, ResponseManagementEvent newAddressEvent) {
 
-    if (!caze.getCaseType().equals("SPG") && !caze.getCaseType().equals("CE")) return null;
+    if (!caze.getCaseType().equals("SPG") && !caze.getCaseType().equals("CE")) {
+      return null;
+    }
 
-    if (!newAddressEvent.getEvent().getChannel().equals("FIELD")) return null;
+    if (!newAddressEvent.getEvent().getChannel().equals("FIELD")) {
+      return null;
+    }
 
     if (newAddressEvent.getPayload().getNewAddress().getCollectionCase().getFieldCoordinatorId()
-        == null) return null;
+        == null) {
+      return null;
+    }
 
     if (newAddressEvent.getPayload().getNewAddress().getCollectionCase().getFieldOfficerId()
-        == null) return null;
+        == null) {
+      return null;
+    }
 
     return buildMetadata(EventTypeDTO.NEW_ADDRESS_REPORTED, ActionInstructionType.CREATE);
   }
@@ -227,9 +237,11 @@ public class NewAddressReportedService {
     newCase.setOa(sourceCase.getOa());
     newCase.setPrintBatch(sourceCase.getPrintBatch());
     newCase.setSurvey(sourceCase.getSurvey());
+    newCase.setMetadata(metadataFromSourceCase(sourceCase.getMetadata()));
 
     // Fields that need to be set
     newCase.setActionPlanId(censusActionPlanId);
+    newCase.setSkeleton(true);
     newCase.setHandDelivery(false);
     newCase.setRefusalReceived(false);
     newCase.setReceiptReceived(false);
@@ -245,5 +257,11 @@ public class NewAddressReportedService {
     } else {
       return baseValue;
     }
+  }
+
+  private CaseMetadata metadataFromSourceCase(CaseMetadata sourceMetadata) {
+    CaseMetadata newCaseMetadata = new CaseMetadata();
+    newCaseMetadata.setSecureEstablishment(sourceMetadata.getSecureEstablishment());
+    return newCaseMetadata;
   }
 }
