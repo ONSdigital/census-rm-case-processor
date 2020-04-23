@@ -1,12 +1,17 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
+
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
+import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
+import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
+import uk.gov.ons.census.casesvc.model.dto.Metadata;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
@@ -59,7 +64,11 @@ public class NewAddressReportedService {
     Case newCaseFromSourceCase = buildCaseFromSourceCaseAndEvent(newCollectionCase, sourceCase);
 
     newCaseFromSourceCase = caseService.saveNewCaseAndStampCaseRef(newCaseFromSourceCase);
-    caseService.emitCaseCreatedEvent(newCaseFromSourceCase);
+
+    Metadata metadata =
+        getMetaDataToCreateFieldCaseIfConditionsMet(newCaseFromSourceCase, newAddressEvent);
+
+    caseService.saveCaseAndEmitCaseCreatedEvent(newCaseFromSourceCase, metadata);
 
     eventLogger.logCaseEvent(
         newCaseFromSourceCase,
@@ -69,6 +78,22 @@ public class NewAddressReportedService {
         newAddressEvent.getEvent(),
         JsonHelper.convertObjectToJson(newAddressEvent.getPayload()),
         messageTimestamp);
+  }
+
+  private Metadata getMetaDataToCreateFieldCaseIfConditionsMet(
+      Case caze, ResponseManagementEvent newAddressEvent) {
+
+    if (!caze.getCaseType().equals("SPG") && !caze.getCaseType().equals("CE")) return null;
+
+    if (!newAddressEvent.getEvent().getChannel().equals("FIELD")) return null;
+
+    if (newAddressEvent.getPayload().getNewAddress().getCollectionCase().getFieldCoordinatorId()
+        == null) return null;
+
+    if (newAddressEvent.getPayload().getNewAddress().getCollectionCase().getFieldOfficerId()
+        == null) return null;
+
+    return buildMetadata(EventTypeDTO.NEW_ADDRESS_REPORTED, ActionInstructionType.CREATE);
   }
 
   private Case createSkeletonCase(CollectionCase collectionCase) {
@@ -186,7 +211,9 @@ public class NewAddressReportedService {
     newCase.setUprn(getEventValOverSource(null, newCollectionCase.getAddress().getUprn()));
     newCase.setCeExpectedCapacity(
         getEventValOverSource(null, newCollectionCase.getCeExpectedCapacity()));
-    newCase.setCaseType(getEventValOverSource(null, newCollectionCase.getCaseType()));
+    newCase.setCaseType(
+        getEventValOverSource(
+            newCollectionCase.getAddress().getAddressType(), newCollectionCase.getCaseType()));
     newCase.setTreatmentCode(getEventValOverSource(null, newCollectionCase.getTreatmentCode()));
 
     // Fields that do not come on the event but come from source case

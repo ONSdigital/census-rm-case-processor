@@ -295,9 +295,8 @@ public class AddressReceiverIT {
     assertThat(actualCase.getCollectionExerciseId()).isEqualTo(censuscollectionExerciseId);
     assertThat(actualCase.getActionPlanId()).isEqualTo(censusActionPlanId);
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
-    assertThat(actualCase.getCaseType()).isNull();
     assertThat(actualCase.isSkeleton()).isFalse();
-
+    assertThat(actualCase.getCaseType()).isEqualTo(collectionCase.getAddress().getAddressType());
     assertThat(actualCase.getAddressLine1()).isEqualTo(sourceCase.getAddressLine1());
     assertThat(actualCase.getAddressLine2()).isEqualTo(sourceCase.getAddressLine2());
     assertThat(actualCase.getAddressLine3()).isEqualTo(sourceCase.getAddressLine3());
@@ -313,7 +312,6 @@ public class AddressReceiverIT {
     assertThat(actualCase.getLatitude()).isNull();
     assertThat(actualCase.getLongitude()).isNull();
     assertThat(actualCase.getUprn()).isNull();
-    assertThat(actualCase.getCaseType()).isNull();
     assertThat(actualCase.getTreatmentCode()).isNull();
 
     assertThat(actualCase.getEstabUprn()).isEqualTo(sourceCase.getEstabUprn());
@@ -380,6 +378,7 @@ public class AddressReceiverIT {
     EventDTO eventDTO = new EventDTO();
     eventDTO.setType(NEW_ADDRESS_REPORTED);
     eventDTO.setDateTime(OffsetDateTime.now());
+    eventDTO.setChannel("FIELD");
 
     ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
     responseManagementEvent.setEvent(eventDTO);
