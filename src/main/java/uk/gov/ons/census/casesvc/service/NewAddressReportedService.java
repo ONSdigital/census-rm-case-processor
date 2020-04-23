@@ -138,7 +138,6 @@ public class NewAddressReportedService {
     skeletonCase.setReceiptReceived(false);
     skeletonCase.setAddressInvalid(false);
     skeletonCase.setCeActualResponses(0);
-    skeletonCase.setCreatedDateTime(OffsetDateTime.now());
 
     return skeletonCase;
   }
@@ -236,7 +235,6 @@ public class NewAddressReportedService {
     newCase.setReceiptReceived(false);
     newCase.setAddressInvalid(false);
     newCase.setCeActualResponses(0);
-    newCase.setCreatedDateTime(OffsetDateTime.now());
 
     return newCase;
   }

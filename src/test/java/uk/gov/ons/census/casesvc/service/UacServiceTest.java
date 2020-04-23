@@ -8,7 +8,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.generateRandomUacQidLink;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.generateUacCreatedEvent;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 
@@ -48,23 +47,6 @@ public class UacServiceTest {
   @Mock EventLogger eventLogger;
 
   @InjectMocks UacService underTest;
-
-  @Test
-  public void testSaveUacQidLink() {
-    UacQidLink expectedUacQidLink = generateRandomUacQidLink();
-
-    // Given
-    when(uacQidLinkRepository.save(any(UacQidLink.class))).then(obj -> obj.getArgument(0));
-
-    // When
-    underTest.saveUacQidLink(expectedUacQidLink);
-
-    // Then
-    ArgumentCaptor<UacQidLink> caseArgumentCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    verify(uacQidLinkRepository).save(caseArgumentCaptor.capture());
-    UacQidLink actualUacQidLink = caseArgumentCaptor.getValue();
-    assertThat(actualUacQidLink).isEqualTo(expectedUacQidLink);
-  }
 
   @Test
   public void testSaveUacQidLinkEnglandHousehold() {

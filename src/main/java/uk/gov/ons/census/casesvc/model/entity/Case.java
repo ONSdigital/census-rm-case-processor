@@ -101,6 +101,7 @@ public class Case {
   private String survey;
 
   @Column(columnDefinition = "timestamp with time zone")
+  @CreationTimestamp
   private OffsetDateTime createdDateTime;
 
   @OneToMany(mappedBy = "caze")

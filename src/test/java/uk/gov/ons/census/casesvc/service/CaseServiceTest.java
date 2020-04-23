@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.service.CaseService.CASE_UPDATE_ROUTING_KEY;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 
-import java.time.OffsetDateTime;
 import java.util.*;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
@@ -408,8 +407,6 @@ public class CaseServiceTest {
     assertThat(actualChildCase.getCaseId()).isEqualTo(childCaseId);
     assertThat(actualChildCase.getUacQidLinks()).isNull();
     assertThat(actualChildCase.getEvents()).isNull();
-    assertThat(actualChildCase.getCreatedDateTime())
-        .isBetween(OffsetDateTime.now().minusSeconds(10), OffsetDateTime.now());
     assertThat(actualChildCase.getCollectionExerciseId())
         .isEqualTo(parentCase.getCollectionExerciseId());
     assertThat(actualChildCase.getActionPlanId()).isEqualTo(parentCase.getActionPlanId());
