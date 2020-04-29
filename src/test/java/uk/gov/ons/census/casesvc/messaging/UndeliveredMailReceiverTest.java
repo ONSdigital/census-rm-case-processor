@@ -167,20 +167,70 @@ public class UndeliveredMailReceiverTest {
     when(caseService.getCaseByCaseRef(eq(TEST_CASE_REF))).thenReturn(caze);
 
     // When
+
+    // Scenario 1 - receipt received
     caze.setReceiptReceived(true);
     underTest.receiveMessage(message);
     caze.setReceiptReceived(false);
+
+    // Scenario 2 - refusal received
     caze.setRefusalReceived(true);
     underTest.receiveMessage(message);
     caze.setRefusalReceived(false);
+
+    // Scenario 3 - invalid address
     caze.setAddressInvalid(true);
     underTest.receiveMessage(message);
     caze.setAddressInvalid(false);
+
+    // Scenario 4 - NI CE
     caze.setRegion("N123456");
     caze.setCaseType("CE");
     underTest.receiveMessage(message);
 
     // Then
     verify(caseService, never()).saveCaseAndEmitCaseUpdatedEvent(any(), any());
+  }
+
+  @Test
+  public void testUpdateMessageSentForNonNiCeCases() {
+    ResponseManagementEvent event = new ResponseManagementEvent();
+    event.setEvent(new EventDTO());
+    event.getEvent().setDateTime(OffsetDateTime.now());
+    event.getEvent().setType(EventTypeDTO.UNDELIVERED_MAIL_REPORTED);
+    event.setPayload(new PayloadDTO());
+    event.getPayload().setFulfilmentInformation(new FulfilmentInformation());
+    event.getPayload().getFulfilmentInformation().setCaseRef(Long.toString(TEST_CASE_REF));
+
+    Case caze = new Case();
+    UacQidLink uacQidLink = new UacQidLink();
+    uacQidLink.setCaze(caze);
+
+    UacService uacService = mock(UacService.class);
+    CaseService caseService = mock(CaseService.class);
+    EventLogger eventLogger = mock(EventLogger.class);
+    UndeliveredMailReceiver underTest =
+        new UndeliveredMailReceiver(uacService, caseService, eventLogger);
+    Message<ResponseManagementEvent> message = constructMessageWithValidTimeStamp(event);
+
+    // Given
+    when(caseService.getCaseByCaseRef(eq(TEST_CASE_REF))).thenReturn(caze);
+
+    // When
+    caze.setReceiptReceived(false);
+    caze.setRefusalReceived(false);
+    caze.setAddressInvalid(false);
+    caze.setRegion("E123456");
+    caze.setCaseType("CE");
+    underTest.receiveMessage(message);
+
+    // Then
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    Metadata expectedMetadata =
+        buildMetadata(EventTypeDTO.UNDELIVERED_MAIL_REPORTED, ActionInstructionType.UPDATE);
+    verify(caseService)
+        .saveCaseAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture(), eq(expectedMetadata));
+    Case actualCase = caseArgumentCaptor.getValue();
+    assertThat(actualCase).isEqualTo(caze);
   }
 }

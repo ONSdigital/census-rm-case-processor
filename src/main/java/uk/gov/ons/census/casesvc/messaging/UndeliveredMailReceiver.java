@@ -82,6 +82,6 @@ public class UndeliveredMailReceiver {
     return !caze.isRefusalReceived()
         && !caze.isAddressInvalid()
         && !caze.isReceiptReceived()
-        && (!caze.getRegion().startsWith("N") && !caze.getAddressType().equals("CE"));
+        && !(caze.getRegion().startsWith("N") && caze.getCaseType().equals("CE"));
   }
 }
