@@ -221,10 +221,11 @@ public class NewAddressReportedServiceTest {
     assertThat(newCase.getAddressType())
         .isEqualTo(newAddressCollectionCase.getAddress().getAddressType());
 
-    assertThat(newCase.getLatitude()).isNull();
-
     assertThat(newCase.getEstabUprn()).isEqualTo(sourceCase.getEstabUprn());
     assertThat(newCase.getMetadata().getSecureEstablishment()).isTrue();
+
+    assertThat(newCase.getLongitude()).isEqualTo(sourceCase.getLongitude());
+    assertThat(newCase.getLatitude()).isEqualTo(sourceCase.getLatitude());
   }
 
   @Test
@@ -246,6 +247,13 @@ public class NewAddressReportedServiceTest {
         .getCollectionCase()
         .getAddress()
         .setLatitude("51.47");
+    newAddressEvent
+        .getPayload()
+        .getNewAddress()
+        .getCollectionCase()
+        .getAddress()
+        .setLongitude("1.34");
+
     OffsetDateTime timeNow = OffsetDateTime.now();
 
     newAddressEvent.getEvent().setChannel("NOT FIELD");
@@ -270,6 +278,8 @@ public class NewAddressReportedServiceTest {
         .isEqualTo(newAddressCollectionCase.getAddress().getAddressType());
     assertThat(newCase.getLatitude())
         .isEqualTo(newAddressCollectionCase.getAddress().getLatitude());
+    assertThat(newCase.getLongitude())
+        .isEqualTo(newAddressCollectionCase.getAddress().getLongitude());
     assertThat(newCase.getEstabUprn()).isEqualTo(sourceCase.getEstabUprn());
     assertThat(newCase.getMetadata().getSecureEstablishment()).isFalse();
 

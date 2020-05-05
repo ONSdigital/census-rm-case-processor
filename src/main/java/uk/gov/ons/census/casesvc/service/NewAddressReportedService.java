@@ -215,9 +215,12 @@ public class NewAddressReportedService {
     // Set fields empty/null/blank unless they come from the event
     newCase.setOrganisationName(
         getEventValOverSource(null, newCollectionCase.getAddress().getOrganisationName()));
-    newCase.setLatitude(getEventValOverSource(null, newCollectionCase.getAddress().getLatitude()));
+    newCase.setLatitude(
+        getEventValOverSource(
+            sourceCase.getLatitude(), newCollectionCase.getAddress().getLatitude()));
     newCase.setLongitude(
-        getEventValOverSource(null, newCollectionCase.getAddress().getLongitude()));
+        getEventValOverSource(
+            sourceCase.getLongitude(), newCollectionCase.getAddress().getLongitude()));
     newCase.setUprn(getEventValOverSource(null, newCollectionCase.getAddress().getUprn()));
     newCase.setCeExpectedCapacity(
         getEventValOverSource(null, newCollectionCase.getCeExpectedCapacity()));
