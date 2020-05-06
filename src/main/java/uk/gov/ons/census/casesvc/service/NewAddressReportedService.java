@@ -212,11 +212,11 @@ public class NewAddressReportedService {
         getEventValOverSource(
             sourceCase.getFieldOfficerId(), newCollectionCase.getFieldOfficerId()));
     newCase.setLatitude(
-            getEventValOverSource(
-                    sourceCase.getLatitude(), newCollectionCase.getAddress().getLatitude()));
+        getEventValOverSource(
+            sourceCase.getLatitude(), newCollectionCase.getAddress().getLatitude()));
     newCase.setLongitude(
-            getEventValOverSource(
-                    sourceCase.getLongitude(), newCollectionCase.getAddress().getLongitude()));
+        getEventValOverSource(
+            sourceCase.getLongitude(), newCollectionCase.getAddress().getLongitude()));
 
     // Set fields empty/null/blank unless they come from the event
     newCase.setOrganisationName(
