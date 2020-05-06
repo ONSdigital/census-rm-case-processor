@@ -1,5 +1,6 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static net.logstash.logback.encoder.org.apache.commons.lang.StringUtils.isEmpty;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.isIndividualQuestionnaireType;
 
@@ -17,6 +18,7 @@ import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
 @Service
 public class QuestionnaireLinkedService {
+
   private static final Logger log = LoggerFactory.getLogger(QuestionnaireLinkedService.class);
   private static final String QUESTIONNAIRE_LINKED = "Questionnaire Linked";
 
@@ -50,10 +52,25 @@ public class QuestionnaireLinkedService {
 
     Case caze = caseService.getCaseByCaseId(UUID.fromString(uac.getCaseId()));
 
-    if (isIndividualQuestionnaireType(questionnaireId) && caze.getCaseType().equals("HH")) {
-      caze = caseService.prepareIndividualResponseCaseFromParentCase(caze, UUID.randomUUID());
+    if (checkRequiredFieldsForIndividualHI(
+        questionnaireId, caze.getCaseType(), uac.getIndividualCaseId())) {
+      caze =
+          caseService.prepareIndividualResponseCaseFromParentCase(
+              caze, UUID.fromString(uac.getIndividualCaseId()));
       caze = caseService.saveNewCaseAndStampCaseRef(caze);
       caseService.emitCaseCreatedEvent(caze);
+    } else if (checkIfIndQIDAndIndCaseIdPresentButCaseTypeNotHH(
+        questionnaireId, caze.getCaseType(), uac.getIndividualCaseId())) {
+      throw new IllegalArgumentException(
+          String.format(
+              "CaseType on '%s' not HH where QID is individual on PQ link request where individualCaseId provided",
+              caze.getCaseId()));
+    } else if (checkIfIndQidAndCaseTypeHHButIndCaseIdNotPresent(
+        questionnaireId, caze.getCaseType(), uac.getIndividualCaseId())) {
+      throw new IllegalArgumentException(
+          String.format(
+              "No individualCaseId present on PQ link request where QID is individual and caseType for '%s' is HH",
+              caze.getCaseId()));
     }
 
     uacQidLink.setCaze(caze);
@@ -96,6 +113,39 @@ public class QuestionnaireLinkedService {
           questionnaireLinkedEvent.getEvent(),
           convertObjectToJson(uac),
           messageTimestamp);
+    }
+  }
+
+  private boolean checkRequiredFieldsForIndividualHI(
+      String questionnaireId, String caseType, String individualCaseId) {
+    if (isIndividualQuestionnaireType(questionnaireId)
+        && caseType.equals("HH")
+        && individualCaseId != null) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  private boolean checkIfIndQIDAndIndCaseIdPresentButCaseTypeNotHH(
+      String questionnaireId, String caseType, String individualCaseId) {
+    if (isIndividualQuestionnaireType(questionnaireId)
+        && !caseType.equals("HH")
+        && individualCaseId != null) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  private boolean checkIfIndQidAndCaseTypeHHButIndCaseIdNotPresent(
+      String questionnaireId, String caseType, String individualCaseId) {
+    if (isIndividualQuestionnaireType(questionnaireId)
+        && caseType.equals("HH")
+        && isEmpty(individualCaseId)) {
+      return true;
+    } else {
+      return false;
     }
   }
 }
