@@ -323,8 +323,6 @@ public class QuestionnaireLinkedReceiverIT {
     CollectionCase actualCollectionCase = responseManagementEvent.getPayload().getCollectionCase();
     assertThat(actualCollectionCase.getCaseType()).isEqualTo("HI");
 
-    //    String expectedHICaseId = actualCollectionCase.getId();
-
     // Check Uac updated message sent and contains expected data
     responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(outboundUacQueue);
     assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
