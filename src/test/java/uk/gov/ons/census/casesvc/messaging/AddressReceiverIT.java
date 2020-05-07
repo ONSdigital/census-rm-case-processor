@@ -310,8 +310,8 @@ public class AddressReceiverIT {
     assertThat(actualCase.getFieldOfficerId()).isEqualTo(sourceCase.getFieldOfficerId());
 
     assertThat(actualCase.getOrganisationName()).isNull();
-    assertThat(actualCase.getLatitude()).isNull();
-    assertThat(actualCase.getLongitude()).isNull();
+    assertThat(actualCase.getLatitude()).isEqualTo(sourceCase.getLatitude());
+    assertThat(actualCase.getLongitude()).isEqualTo(sourceCase.getLongitude());
     assertThat(actualCase.getUprn()).isNull();
     assertThat(actualCase.getTreatmentCode()).isNull();
 
