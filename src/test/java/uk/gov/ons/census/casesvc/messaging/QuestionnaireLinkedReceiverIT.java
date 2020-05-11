@@ -144,7 +144,7 @@ public class QuestionnaireLinkedReceiverIT {
     assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
     assertThat(actualUacQidLink.isActive()).isTrue();
 
-    validateEvents(eventRepository.findAll(), expectedQuestionnaireId, 2, true);
+    validateEvents(eventRepository.findAll(), expectedQuestionnaireId, 2, false);
   }
 
   @Test
@@ -205,7 +205,7 @@ public class QuestionnaireLinkedReceiverIT {
     UacQidLink actualUacQidLink = uacQidLinks.get(0);
     assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
 
-    validateEvents(eventRepository.findAll(), expectedQuestionnaireId, 2, true);
+    validateEvents(eventRepository.findAll(), expectedQuestionnaireId, 2, false);
   }
 
   @Test
@@ -275,7 +275,7 @@ public class QuestionnaireLinkedReceiverIT {
     UacQidLink actualUacQidLink = uacQidLinks.get(0);
     assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
 
-    validateEvents(eventRepository.findAll(), expectedQuestionnaireId, 2, true);
+    validateEvents(eventRepository.findAll(), expectedQuestionnaireId, 2, false);
   }
 
   @Test
