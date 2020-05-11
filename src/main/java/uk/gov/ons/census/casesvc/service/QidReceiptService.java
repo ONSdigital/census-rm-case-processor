@@ -10,6 +10,7 @@ import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.ResponseDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
+import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
@@ -72,6 +73,15 @@ public class QidReceiptService {
       ResponseManagementEvent unreceiptEvent,
       OffsetDateTime messageTimestamp,
       UacQidLink uacQidLink) {
+    if (!uacQidLink.isActive() && hasEqReceipt(uacQidLink)) {
+
+      log.with("qid", uacQidLink.getQid())
+          .with("tx_id", unreceiptEvent.getEvent().getTransactionId())
+          .with("channel", unreceiptEvent.getEvent().getChannel())
+          .warn("Unreceipt received for QID which was already receipted via EQ");
+      return;
+    }
+
     ResponseDTO receiptPayload = unreceiptEvent.getPayload().getResponse();
     uacQidLink.setActive(false);
     uacQidLink.setBlankQuestionnaire(true);
@@ -98,5 +108,20 @@ public class QidReceiptService {
         unreceiptEvent.getEvent(),
         convertObjectToJson(receiptPayload),
         messageTimestamp);
+  }
+
+  private boolean hasEqReceipt(UacQidLink uacQidLink) {
+    if (uacQidLink.getEvents() == null) {
+      return false;
+    }
+
+    for (Event event : uacQidLink.getEvents()) {
+      if (event.getEventType() == EventType.RESPONSE_RECEIVED
+          && event.getEventChannel().equalsIgnoreCase("EQ")) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }

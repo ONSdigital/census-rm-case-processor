@@ -6,6 +6,8 @@ import static uk.gov.ons.census.casesvc.service.QidReceiptService.QID_RECEIPTED;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.*;
 
 import java.time.OffsetDateTime;
+import java.util.LinkedList;
+import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -16,6 +18,7 @@ import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.ResponseDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
+import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
@@ -174,5 +177,31 @@ public class QidReceiptServiceTest {
         .isEqualToIgnoringGivenFields(uacQidLink, "blankQuestionnaire", "active");
     assertThat(actualUacQidLink.isBlankQuestionnaire()).isTrue();
     assertThat(actualUacQidLink.isActive()).isFalse();
+  }
+
+  @Test
+  public void testUnreceiptForEqReceiptedIsIgnored() {
+
+    ResponseManagementEvent managementEvent = getTestResponseManagementReceiptEventUnreceipt();
+    managementEvent.getPayload().getResponse().setQuestionnaireId(TEST_NON_CCS_QID_ID);
+    UacQidLink uacQidLink = generateRandomUacQidLink();
+    uacQidLink.setQid(TEST_NON_CCS_QID_ID);
+    uacQidLink.setBlankQuestionnaire(true);
+    uacQidLink.setCaze(null);
+    uacQidLink.setActive(false);
+    List<Event> events = new LinkedList<>();
+    Event eqReceiptEvent = new Event();
+    eqReceiptEvent.setEventChannel("EQ");
+    eqReceiptEvent.setEventType(EventType.RESPONSE_RECEIVED);
+    events.add(eqReceiptEvent);
+    uacQidLink.setEvents(events);
+
+    // When
+    underTest.processUnreceipt(managementEvent, OffsetDateTime.now(), uacQidLink);
+
+    // Then
+    verifyZeroInteractions(caseReceiptService);
+    verifyZeroInteractions(blankQuestionnaireService);
+    verifyZeroInteractions(eventLogger);
   }
 }
