@@ -391,6 +391,7 @@ public class ReceiptReceiverIT {
       UacDTO uac = new UacDTO();
       uac.setCaseId(caseId);
       uac.setQuestionnaireId(expectedQuestionnaireId);
+      uac.setIndividualCaseId(null);
       managementEvent.getPayload().setUac(uac);
 
       qidLinkingMsgs[i] =

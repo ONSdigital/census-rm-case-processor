@@ -48,7 +48,9 @@ import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @RunWith(SpringJUnit4ClassRunner.class)
 public class QuestionnaireLinkedReceiverIT {
+
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
+  private static final UUID TEST_INDIVIDUAL_CASE_ID = UUID.randomUUID();
   private static final EasyRandom easyRandom = new EasyRandom();
   private static final String QUESTIONNAIRE_LINKED_CHANNEL = "FIELD";
   private static final String QUESTIONNAIRE_LINKED_SOURCE = "FIELDWORK_GATEWAY";
@@ -142,7 +144,7 @@ public class QuestionnaireLinkedReceiverIT {
     assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
     assertThat(actualUacQidLink.isActive()).isTrue();
 
-    validateEvents(eventRepository.findAll(), expectedQuestionnaireId, 2);
+    validateEvents(eventRepository.findAll(), expectedQuestionnaireId, 2, false);
   }
 
   @Test
@@ -203,7 +205,7 @@ public class QuestionnaireLinkedReceiverIT {
     UacQidLink actualUacQidLink = uacQidLinks.get(0);
     assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
 
-    validateEvents(eventRepository.findAll(), expectedQuestionnaireId, 2);
+    validateEvents(eventRepository.findAll(), expectedQuestionnaireId, 2, false);
   }
 
   @Test
@@ -273,7 +275,7 @@ public class QuestionnaireLinkedReceiverIT {
     UacQidLink actualUacQidLink = uacQidLinks.get(0);
     assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
 
-    validateEvents(eventRepository.findAll(), expectedQuestionnaireId, 2);
+    validateEvents(eventRepository.findAll(), expectedQuestionnaireId, 2, false);
   }
 
   @Test
@@ -305,6 +307,7 @@ public class QuestionnaireLinkedReceiverIT {
     UacDTO uac = new UacDTO();
     uac.setCaseId(TEST_CASE_ID.toString());
     uac.setQuestionnaireId(expectedQuestionnaireId);
+    uac.setIndividualCaseId(TEST_INDIVIDUAL_CASE_ID.toString());
     managementEvent.getPayload().setUac(uac);
 
     // WHEN
@@ -320,19 +323,17 @@ public class QuestionnaireLinkedReceiverIT {
     CollectionCase actualCollectionCase = responseManagementEvent.getPayload().getCollectionCase();
     assertThat(actualCollectionCase.getCaseType()).isEqualTo("HI");
 
-    String expectedHICaseId = actualCollectionCase.getId();
-
     // Check Uac updated message sent and contains expected data
     responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(outboundUacQueue);
     assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
     UacDTO actualUac = responseManagementEvent.getPayload().getUac();
     assertThat(actualUac.getQuestionnaireId()).isEqualTo(expectedQuestionnaireId);
-    assertThat(actualUac.getCaseId()).isEqualTo(expectedHICaseId);
+    assertThat(actualUac.getCaseId()).isEqualTo(TEST_INDIVIDUAL_CASE_ID.toString());
     assertThat(actualUac.getActive()).isTrue();
 
     // Check database HI Case created as expected
     Case actualHHCase = caseRepository.findById(TEST_CASE_ID).get();
-    Case actualHICase = caseRepository.findById(UUID.fromString(expectedHICaseId)).get();
+    Case actualHICase = caseRepository.findById(TEST_INDIVIDUAL_CASE_ID).get();
     assertThat(actualHICase.getCaseType()).isEqualTo("HI");
     assertThat(actualHICase.getUprn()).isEqualTo(actualHHCase.getUprn());
     assertThat(actualHICase.getEstabUprn()).isEqualTo(actualHHCase.getEstabUprn());
@@ -346,7 +347,7 @@ public class QuestionnaireLinkedReceiverIT {
 
     List<Event> events = eventRepository.findAll(new Sort(ASC, "rmEventProcessed"));
 
-    validateEvents(events, expectedQuestionnaireId, 2);
+    validateEvents(events, expectedQuestionnaireId, 2, true);
   }
 
   @Test
@@ -397,7 +398,7 @@ public class QuestionnaireLinkedReceiverIT {
 
     List<Event> events = eventRepository.findAll(new Sort(ASC, "rmEventProcessed"));
 
-    validateEvents(events, expectedQuestionnaireId, 2);
+    validateEvents(events, expectedQuestionnaireId, 2, false);
   }
 
   @Test
@@ -448,7 +449,7 @@ public class QuestionnaireLinkedReceiverIT {
 
     List<Event> events = eventRepository.findAll(new Sort(ASC, "rmEventProcessed"));
 
-    validateEvents(events, expectedQuestionnaireId, 2);
+    validateEvents(events, expectedQuestionnaireId, 2, false);
   }
 
   @Test
@@ -507,7 +508,7 @@ public class QuestionnaireLinkedReceiverIT {
     assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
     assertThat(actualUacQidLink.isActive()).isFalse();
 
-    validateEvents(eventRepository.findAll(), expectedQuestionnaireId, 1);
+    validateEvents(eventRepository.findAll(), expectedQuestionnaireId, 1, false);
   }
 
   @Test
@@ -565,11 +566,14 @@ public class QuestionnaireLinkedReceiverIT {
     assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
     assertThat(actualUacQidLink.isActive()).isFalse();
 
-    validateEvents(eventRepository.findAll(), expectedQuestionnaireId, 1);
+    validateEvents(eventRepository.findAll(), expectedQuestionnaireId, 1, false);
   }
 
   private void validateEvents(
-      List<Event> events, String expectedQuestionnaireId, int execptedEventCount)
+      List<Event> events,
+      String expectedQuestionnaireId,
+      int execptedEventCount,
+      boolean individualCaseIdExpected)
       throws JSONException {
     assertThat(events.size()).as("Event Count").isEqualTo(execptedEventCount);
 
@@ -586,9 +590,12 @@ public class QuestionnaireLinkedReceiverIT {
     assertThat(event.getEventDescription()).isEqualTo("Questionnaire Linked");
 
     JSONObject payload = new JSONObject(event.getEventPayload());
-    assertThat(payload.length()).isEqualTo(2);
     assertThat(payload.getString("caseId")).isEqualTo(TEST_CASE_ID.toString());
     assertThat(payload.getString("questionnaireId")).isEqualTo(expectedQuestionnaireId);
+    if (individualCaseIdExpected) {
+      assertThat(payload.getString("individualCaseId"))
+          .isEqualTo(TEST_INDIVIDUAL_CASE_ID.toString());
+    }
   }
 
   private ResponseManagementEvent sendMessageAndExpectInboundMessage(

@@ -28,6 +28,7 @@ public class QuestionnaireLinkedServiceTest {
 
   private final UUID TEST_CASE_ID_1 = UUID.randomUUID();
   private final UUID TEST_CASE_ID_2 = UUID.randomUUID();
+  private final UUID TEST_INDIVIDUAL_CASE_ID = UUID.randomUUID();
   private final String TEST_HH_QID = "0112345678901234";
   private final String TEST_HI_QID = "2112345678901234";
   private final String TEST_NON_CCS_QID_ID = "1234567890123456";
@@ -169,6 +170,7 @@ public class QuestionnaireLinkedServiceTest {
     UacDTO uac = managementEvent.getPayload().getUac();
     uac.setCaseId(TEST_CASE_ID_1.toString());
     uac.setQuestionnaireId(TEST_HI_QID);
+    uac.setIndividualCaseId(TEST_INDIVIDUAL_CASE_ID.toString());
 
     Case testHHCase = getRandomCase();
     testHHCase.setCaseId(TEST_CASE_ID_1);
@@ -177,7 +179,7 @@ public class QuestionnaireLinkedServiceTest {
     testHHCase.setCaseType("HH");
 
     Case testHICase = getRandomCaseWithUacQidLinks(1);
-    testHICase.setCaseId(TEST_CASE_ID_2);
+    testHICase.setCaseId(TEST_INDIVIDUAL_CASE_ID);
     testHHCase.setReceiptReceived(false);
     testHICase.setSurvey("CENSUS");
 
@@ -210,7 +212,7 @@ public class QuestionnaireLinkedServiceTest {
     ArgumentCaptor<Case> caseCaptor = ArgumentCaptor.forClass(Case.class);
     inOrder.verify(caseService).emitCaseCreatedEvent(caseCaptor.capture());
     Case actualCase = caseCaptor.getValue();
-    assertThat(actualCase.getCaseId()).isEqualTo(TEST_CASE_ID_2);
+    assertThat(actualCase.getCaseId()).isEqualTo(TEST_INDIVIDUAL_CASE_ID);
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
     verifyNoMoreInteractions(caseService);
 
@@ -236,83 +238,23 @@ public class QuestionnaireLinkedServiceTest {
   }
 
   @Test
-  public void testQuestionnaireLinkedForCEWithNoHICaseCreated() {
-    // GIVEN
-    ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
-
-    UacDTO uac = managementEvent.getPayload().getUac();
-    uac.setCaseId(TEST_CASE_ID_1.toString());
-    uac.setQuestionnaireId(TEST_HI_QID);
-
-    Case testHHCase = getRandomCase();
-    testHHCase.setCaseId(TEST_CASE_ID_1);
-    testHHCase.setReceiptReceived(false);
-    testHHCase.setSurvey("CENSUS");
-    testHHCase.setCaseType("CE");
-
-    Case testHICase = getRandomCaseWithUacQidLinks(1);
-    testHICase.setCaseId(TEST_CASE_ID_2);
-    testHHCase.setReceiptReceived(false);
-    testHICase.setSurvey("CENSUS");
-
-    UacQidLink testHIUacQidLink = testHICase.getUacQidLinks().get(0);
-    testHIUacQidLink.setQid(TEST_HI_QID);
-    testHIUacQidLink.setActive(true);
-    testHIUacQidLink.setCaze(null);
-    testHIUacQidLink.setCcsCase(false);
-    OffsetDateTime messageTimestamp = OffsetDateTime.now();
-
-    when(uacService.findByQid(TEST_HI_QID)).thenReturn(testHIUacQidLink);
-    when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testHHCase);
-
-    // WHEN
-    underTest.processQuestionnaireLinked(managementEvent, messageTimestamp);
-
-    // THEN
-    InOrder inOrder = inOrder(uacService, caseService, eventLogger);
-    inOrder.verify(uacService).findByQid(TEST_HI_QID);
-    inOrder.verify(caseService).getCaseByCaseId(TEST_CASE_ID_1);
-    verifyNoMoreInteractions(caseService);
-
-    ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
-    inOrder.verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
-    UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
-    assertThat(actualUacQidLink.getCaze()).isEqualTo(testHHCase);
-    assertThat(actualUacQidLink.isCcsCase()).isFalse();
-    assertThat(actualUacQidLink.getCaze().getSurvey()).isEqualTo("CENSUS");
-    verifyNoMoreInteractions(uacService);
-
-    verify(eventLogger)
-        .logUacQidEvent(
-            eq(testHIUacQidLink),
-            any(OffsetDateTime.class),
-            eq("Questionnaire Linked"),
-            eq(EventType.QUESTIONNAIRE_LINKED),
-            eq(managementEvent.getEvent()),
-            anyString(),
-            eq(messageTimestamp));
-
-    verifyNoMoreInteractions(eventLogger);
-  }
-
-  @Test
   public void testQidAlreadyLinkedToDifferentCaseCanBeReLinked() {
     // Given
     ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
     UacDTO uac = managementEvent.getPayload().getUac();
     uac.setCaseId(TEST_CASE_ID_1.toString());
-    uac.setQuestionnaireId(TEST_HI_QID);
+    uac.setQuestionnaireId(TEST_HH_QID);
 
     Case testCase = getRandomCase();
     testCase.setCaseId(UUID.randomUUID());
 
     UacQidLink uacQidLink = new UacQidLink();
-    uacQidLink.setQid(TEST_HI_QID);
+    uacQidLink.setQid(TEST_HH_QID);
     uacQidLink.setCaze(testCase);
 
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
-    when(uacService.findByQid(TEST_HI_QID)).thenReturn(uacQidLink);
+    when(uacService.findByQid(TEST_HH_QID)).thenReturn(uacQidLink);
     when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testCase);
 
     // When
@@ -347,7 +289,7 @@ public class QuestionnaireLinkedServiceTest {
         .logCaseEvent(
             eq(testCase),
             any(OffsetDateTime.class),
-            eq("Questionnaire unlinked from case with QID " + TEST_HI_QID),
+            eq("Questionnaire unlinked from case with QID " + TEST_HH_QID),
             eq(EventType.QUESTIONNAIRE_UNLINKED),
             eq(managementEvent.getEvent()),
             anyString(),
@@ -364,6 +306,7 @@ public class QuestionnaireLinkedServiceTest {
     UacDTO uac = managementEvent.getPayload().getUac();
     uac.setCaseId(TEST_CASE_ID_1.toString());
     uac.setQuestionnaireId(TEST_HI_QID);
+    uac.setIndividualCaseId(TEST_INDIVIDUAL_CASE_ID.toString());
 
     Case testHHCase = getRandomCase();
     testHHCase.setCaseId(TEST_CASE_ID_1);
@@ -580,5 +523,81 @@ public class QuestionnaireLinkedServiceTest {
     verify(blankQuestionnaireService)
         .handleBlankQuestionnaire(
             eq(testCase), eq(testUacQidLink), eq(EventTypeDTO.QUESTIONNAIRE_LINKED));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testErrorOnIndQIDAndIndCaseIdProvidedButCaseTypeNotHH() {
+    ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
+
+    UacDTO uac = managementEvent.getPayload().getUac();
+    uac.setCaseId(TEST_CASE_ID_1.toString());
+    uac.setQuestionnaireId(TEST_HI_QID);
+    uac.setIndividualCaseId(TEST_INDIVIDUAL_CASE_ID.toString());
+
+    Case testCase = getRandomCase();
+    testCase.setCaseId(TEST_CASE_ID_1);
+    testCase.setReceiptReceived(false);
+    testCase.setSurvey("CENSUS");
+    testCase.setCaseType("CE");
+
+    UacQidLink testUacQidLink = new UacQidLink();
+    testUacQidLink.setActive(true);
+    testUacQidLink.setQid(TEST_HI_QID);
+    testUacQidLink.setCaze(null);
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+    testUacQidLink.setCcsCase(false);
+
+    when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testCase);
+    when(uacService.findByQid(TEST_HI_QID)).thenReturn(testUacQidLink);
+
+    String expectedErrorMessage =
+        String.format(
+            "CaseType on '%s' not HH where QID is individual on PQ link request where individualCaseId provided",
+            TEST_CASE_ID_1);
+
+    try {
+      underTest.processQuestionnaireLinked(managementEvent, messageTimestamp);
+    } catch (IllegalArgumentException e) {
+      assertThat(e.getMessage()).isEqualTo(expectedErrorMessage);
+      throw e;
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testErrorOnIndQIDAndCaseTypeHHButNoIndCaseIdProvided() {
+    ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
+
+    UacDTO uac = managementEvent.getPayload().getUac();
+    uac.setCaseId(TEST_CASE_ID_1.toString());
+    uac.setQuestionnaireId(TEST_HI_QID);
+    uac.setIndividualCaseId(null);
+
+    Case testCase = getRandomCase();
+    testCase.setCaseId(TEST_CASE_ID_1);
+    testCase.setReceiptReceived(false);
+    testCase.setSurvey("CENSUS");
+    testCase.setCaseType("HH");
+
+    UacQidLink testUacQidLink = new UacQidLink();
+    testUacQidLink.setActive(true);
+    testUacQidLink.setQid(TEST_HI_QID);
+    testUacQidLink.setCaze(null);
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+    testUacQidLink.setCcsCase(false);
+
+    when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testCase);
+    when(uacService.findByQid(TEST_HI_QID)).thenReturn(testUacQidLink);
+
+    String expectedErrorMessage =
+        String.format(
+            "No individualCaseId present on PQ link request where QID is individual and caseType for '%s' is HH",
+            TEST_CASE_ID_1);
+
+    try {
+      underTest.processQuestionnaireLinked(managementEvent, messageTimestamp);
+    } catch (IllegalArgumentException e) {
+      assertThat(e.getMessage()).isEqualTo(expectedErrorMessage);
+      throw e;
+    }
   }
 }
