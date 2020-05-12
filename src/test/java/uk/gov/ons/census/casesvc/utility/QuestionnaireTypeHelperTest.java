@@ -73,7 +73,7 @@ public class QuestionnaireTypeHelperTest {
 
     // When
     boolean actualQuestionnaireWelshResult =
-            QuestionnaireTypeHelper.isQuestionnaireWelsh("SPG_QABCW");
+        QuestionnaireTypeHelper.isQuestionnaireWelsh("SPG_QABCW");
 
     // Then
     assertTrue(actualQuestionnaireWelshResult);

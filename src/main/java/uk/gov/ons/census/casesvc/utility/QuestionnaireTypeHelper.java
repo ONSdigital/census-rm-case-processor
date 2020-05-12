@@ -94,7 +94,8 @@ public class QuestionnaireTypeHelper {
   }
 
   public static boolean isQuestionnaireWelsh(String treatmentCode) {
-    return ((treatmentCode.startsWith("HH_Q") || treatmentCode.startsWith("SPG_Q")) && treatmentCode.endsWith("W"));
+    return ((treatmentCode.startsWith("HH_Q") || treatmentCode.startsWith("SPG_Q"))
+        && treatmentCode.endsWith("W"));
   }
 
   public static boolean isIndividualQuestionnaireType(String questionnaireId) {
