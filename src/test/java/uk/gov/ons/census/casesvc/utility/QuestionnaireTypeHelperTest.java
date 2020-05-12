@@ -2,6 +2,7 @@ package uk.gov.ons.census.casesvc.utility;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -64,6 +65,18 @@ public class QuestionnaireTypeHelperTest {
 
     // Then
     assertEquals(2, actualQuestionnaireType);
+  }
+
+  @Test
+  public void testIsQuestionnaireWelshSPG() {
+    // Given
+
+    // When
+    boolean actualQuestionnaireWelshResult =
+            QuestionnaireTypeHelper.isQuestionnaireWelsh("SPG_QABCW");
+
+    // Then
+    assertTrue(actualQuestionnaireWelshResult);
   }
 
   @Test
