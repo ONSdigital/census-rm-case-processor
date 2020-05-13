@@ -401,6 +401,27 @@ public class CaseServiceTest {
         underTest.prepareIndividualResponseCaseFromParentCase(parentCase, childCaseId);
 
     // Then
+    assertChildCaseIsCorrect(parentCase, childCaseId, actualChildCase);
+  }
+
+  @Test
+  public void checkIndividualCaseCreatedCorrectlyFromSkeleton() {
+    // Given
+    EasyRandom easyRandom = new EasyRandom();
+    Case parentCase = easyRandom.nextObject(Case.class);
+    UUID childCaseId = UUID.randomUUID();
+
+    parentCase.setSkeleton(true);
+
+    // When
+    Case actualChildCase =
+        underTest.prepareIndividualResponseCaseFromParentCase(parentCase, childCaseId);
+
+    // Then
+    assertChildCaseIsCorrect(parentCase, childCaseId, actualChildCase);
+  }
+
+  private void assertChildCaseIsCorrect(Case parentCase, UUID childCaseId, Case actualChildCase) {
     assertThat(actualChildCase.getCaseRef()).isNotEqualTo(parentCase.getCaseRef());
     assertThat(UUID.fromString(actualChildCase.getCaseId().toString()))
         .isNotEqualTo(parentCase.getCaseId());
@@ -439,6 +460,7 @@ public class CaseServiceTest {
     assertThat(actualChildCase.getTreatmentCode()).isNull();
     assertThat(actualChildCase.getCeExpectedCapacity()).isNull();
     assertThat(actualChildCase.getAddressLevel()).isEqualTo(parentCase.getAddressLevel());
+    assertThat(actualChildCase.isSkeleton()).isEqualTo(parentCase.isSkeleton());
   }
 
   @Test
