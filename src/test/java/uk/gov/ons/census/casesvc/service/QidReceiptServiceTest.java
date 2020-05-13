@@ -200,6 +200,7 @@ public class QidReceiptServiceTest {
     underTest.processUnreceipt(managementEvent, OffsetDateTime.now(), uacQidLink);
 
     // Then
+    verifyZeroInteractions(uacService);
     verifyZeroInteractions(caseReceiptService);
     verifyZeroInteractions(blankQuestionnaireService);
     verifyZeroInteractions(eventLogger);
