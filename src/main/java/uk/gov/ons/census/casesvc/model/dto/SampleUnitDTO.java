@@ -1,6 +1,5 @@
 package uk.gov.ons.census.casesvc.model.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
