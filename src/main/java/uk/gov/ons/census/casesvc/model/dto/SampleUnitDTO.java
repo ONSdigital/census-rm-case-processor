@@ -17,9 +17,9 @@ public class SampleUnitDTO {
   private String latitude;
   private String longitude;
 
-  @JsonProperty("fieldcoordinatorId")
+  @JsonProperty("fieldCoordinatorId")
   private String fieldCoordinatorId;
 
-  @JsonProperty("fieldofficerId")
+  @JsonProperty("fieldOfficerId")
   private String fieldOfficerId;
 }
