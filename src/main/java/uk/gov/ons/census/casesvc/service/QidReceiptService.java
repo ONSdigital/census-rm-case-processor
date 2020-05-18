@@ -50,7 +50,7 @@ public class QidReceiptService {
     Case caze = uacQidLink.getCaze();
 
     if (caze != null) {
-      caseReceiptService.receiptCase(uacQidLink, receiptEvent.getEvent().getType());
+      caseReceiptService.receiptCase(uacQidLink, receiptEvent.getEvent());
     } else {
       log.with("qid", receiptPayload.getQuestionnaireId())
           .with("tx_id", receiptEvent.getEvent().getTransactionId())
