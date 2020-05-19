@@ -73,31 +73,35 @@ public class QidReceiptService {
       ResponseManagementEvent unreceiptEvent,
       OffsetDateTime messageTimestamp,
       UacQidLink uacQidLink) {
+
+    ResponseDTO receiptPayload = unreceiptEvent.getPayload().getResponse();
+
     if (!uacQidLink.isActive() && hasEqReceipt(uacQidLink)) {
+      // If we have an EQ receipt for this QID then we must have a response for the case so we do
+      // not want to action the unreceipt, we just log it
 
       log.with("qid", uacQidLink.getQid())
           .with("tx_id", unreceiptEvent.getEvent().getTransactionId())
           .with("channel", unreceiptEvent.getEvent().getChannel())
           .warn("Unreceipt received for QID which was already receipted via EQ");
-      return;
-    }
-
-    ResponseDTO receiptPayload = unreceiptEvent.getPayload().getResponse();
-    uacQidLink.setActive(false);
-    uacQidLink.setBlankQuestionnaire(true);
-
-    uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
-
-    Case caze = uacQidLink.getCaze();
-
-    if (caze != null) {
-      blankQuestionnaireService.handleBlankQuestionnaire(
-          caze, uacQidLink, unreceiptEvent.getEvent().getType());
     } else {
-      log.with("qid", receiptPayload.getQuestionnaireId())
-          .with("tx_id", unreceiptEvent.getEvent().getTransactionId())
-          .with("channel", unreceiptEvent.getEvent().getChannel())
-          .warn("Unreceipt received for unaddressed UAC/QID pair not yet linked to a case");
+
+      uacQidLink.setActive(false);
+      uacQidLink.setBlankQuestionnaire(true);
+
+      uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
+
+      Case caze = uacQidLink.getCaze();
+
+      if (caze != null) {
+        blankQuestionnaireService.handleBlankQuestionnaire(
+            caze, uacQidLink, unreceiptEvent.getEvent().getType());
+      } else {
+        log.with("qid", receiptPayload.getQuestionnaireId())
+            .with("tx_id", unreceiptEvent.getEvent().getTransactionId())
+            .with("channel", unreceiptEvent.getEvent().getChannel())
+            .warn("Unreceipt received for unaddressed UAC/QID pair not yet linked to a case");
+      }
     }
 
     eventLogger.logUacQidEvent(
