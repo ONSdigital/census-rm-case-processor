@@ -203,6 +203,5 @@ public class QidReceiptServiceTest {
     verifyZeroInteractions(uacService);
     verifyZeroInteractions(caseReceiptService);
     verifyZeroInteractions(blankQuestionnaireService);
-    verifyZeroInteractions(eventLogger);
   }
 }
