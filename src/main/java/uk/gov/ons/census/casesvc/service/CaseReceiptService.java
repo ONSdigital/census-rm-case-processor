@@ -13,6 +13,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
+import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
@@ -26,6 +27,7 @@ public class CaseReceiptService {
   private static final String IND = "I";
   private static final String CE1 = "C";
   private static final String CONT = "Cont";
+  private static final String EQ_EVENT_CHANNEL = "EQ";
 
   private Map<Key, UpdateAndEmitCaseRule> rules = new HashMap<>();
 
@@ -53,10 +55,12 @@ public class CaseReceiptService {
     rules.put(new Key("SPG", "U", CONT), new NoActionRequired());
   }
 
-  public void receiptCase(UacQidLink uacQidLink, EventTypeDTO causeEventType) {
+  public void receiptCase(UacQidLink uacQidLink, EventDTO causeEvent) {
     Case caze = uacQidLink.getCaze();
 
-    if (caze.isReceiptReceived() || uacQidLink.isBlankQuestionnaire()) return;
+    if (caze.isReceiptReceived()
+        || (uacQidLink.isBlankQuestionnaire() && !causeEvent.getChannel().equals(EQ_EVENT_CHANNEL)))
+      return;
 
     Key ruleKey = makeRulesKey(caze, uacQidLink);
 
@@ -65,7 +69,7 @@ public class CaseReceiptService {
     }
 
     UpdateAndEmitCaseRule rule = rules.get(ruleKey);
-    rule.run(caze, causeEventType);
+    rule.run(caze, causeEvent.getType());
   }
 
   private Key makeRulesKey(Case caze, UacQidLink uacQidLink) {

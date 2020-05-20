@@ -26,7 +26,9 @@ import org.hibernate.annotations.TypeDefs;
 @Table(
     indexes = {
       @Index(name = "event_type_idx", columnList = "event_type"),
-      @Index(name = "rm_event_processed_idx", columnList = "rm_event_processed")
+      @Index(name = "rm_event_processed_idx", columnList = "rm_event_processed"),
+      @Index(name = "event_uac_qid_link_id", columnList = "uac_qid_link_id"),
+      @Index(name = "event_caze_case_id", columnList = "caze_case_id")
     })
 public class Event {
   @Id private UUID id;
