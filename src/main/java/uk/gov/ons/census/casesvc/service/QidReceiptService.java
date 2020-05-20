@@ -86,22 +86,7 @@ public class QidReceiptService {
           .warn("Unreceipt received for QID which was already receipted via EQ");
     } else {
 
-      uacQidLink.setActive(false);
-      uacQidLink.setBlankQuestionnaire(true);
-
-      uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
-
-      Case caze = uacQidLink.getCaze();
-
-      if (caze != null) {
-        blankQuestionnaireService.handleBlankQuestionnaire(
-            caze, uacQidLink, unreceiptEvent.getEvent().getType());
-      } else {
-        log.with("qid", receiptPayload.getQuestionnaireId())
-            .with("tx_id", unreceiptEvent.getEvent().getTransactionId())
-            .with("channel", unreceiptEvent.getEvent().getChannel())
-            .warn("Unreceipt received for unaddressed UAC/QID pair not yet linked to a case");
-      }
+      handleBlankQuestionnaire(unreceiptEvent, uacQidLink, receiptPayload);
     }
 
     eventLogger.logUacQidEvent(
@@ -112,6 +97,26 @@ public class QidReceiptService {
         unreceiptEvent.getEvent(),
         convertObjectToJson(receiptPayload),
         messageTimestamp);
+  }
+
+  private void handleBlankQuestionnaire(
+      ResponseManagementEvent unreceiptEvent, UacQidLink uacQidLink, ResponseDTO receiptPayload) {
+    uacQidLink.setActive(false);
+    uacQidLink.setBlankQuestionnaire(true);
+
+    uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
+
+    Case caze = uacQidLink.getCaze();
+
+    if (caze != null) {
+      blankQuestionnaireService.handleBlankQuestionnaire(
+          caze, uacQidLink, unreceiptEvent.getEvent().getType());
+    } else {
+      log.with("qid", receiptPayload.getQuestionnaireId())
+          .with("tx_id", unreceiptEvent.getEvent().getTransactionId())
+          .with("channel", unreceiptEvent.getEvent().getChannel())
+          .warn("Unreceipt received for unaddressed UAC/QID pair not yet linked to a case");
+    }
   }
 
   private boolean hasEqReceipt(UacQidLink uacQidLink) {
