@@ -74,7 +74,7 @@ public class QuestionnaireLinkedService {
         blankQuestionnaireService.handleBlankQuestionnaire(
             caze, uacQidLink, questionnaireLinkedEvent.getEvent().getType());
       } else {
-        caseReceiptService.receiptCase(uacQidLink, questionnaireLinkedEvent.getEvent().getType());
+        caseReceiptService.receiptCase(uacQidLink, questionnaireLinkedEvent.getEvent());
       }
     }
 

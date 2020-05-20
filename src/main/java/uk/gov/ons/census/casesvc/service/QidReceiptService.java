@@ -10,6 +10,7 @@ import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.ResponseDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
+import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
@@ -50,7 +51,7 @@ public class QidReceiptService {
     Case caze = uacQidLink.getCaze();
 
     if (caze != null) {
-      caseReceiptService.receiptCase(uacQidLink, receiptEvent.getEvent().getType());
+      caseReceiptService.receiptCase(uacQidLink, receiptEvent.getEvent());
     } else {
       log.with("qid", receiptPayload.getQuestionnaireId())
           .with("tx_id", receiptEvent.getEvent().getTransactionId())
@@ -72,7 +73,34 @@ public class QidReceiptService {
       ResponseManagementEvent unreceiptEvent,
       OffsetDateTime messageTimestamp,
       UacQidLink uacQidLink) {
+
     ResponseDTO receiptPayload = unreceiptEvent.getPayload().getResponse();
+
+    if (!uacQidLink.isActive() && hasEqReceipt(uacQidLink)) {
+      // If we have an EQ receipt for this QID then we must have a response for the case so we do
+      // not want to action the unreceipt, we just log it
+
+      log.with("qid", uacQidLink.getQid())
+          .with("tx_id", unreceiptEvent.getEvent().getTransactionId())
+          .with("channel", unreceiptEvent.getEvent().getChannel())
+          .warn("Unreceipt received for QID which was already receipted via EQ");
+    } else {
+
+      handleBlankQuestionnaire(unreceiptEvent, uacQidLink, receiptPayload);
+    }
+
+    eventLogger.logUacQidEvent(
+        uacQidLink,
+        unreceiptEvent.getEvent().getDateTime(),
+        BLANK_QUESTIONNAIRE_RECEIVED,
+        EventType.RESPONSE_RECEIVED,
+        unreceiptEvent.getEvent(),
+        convertObjectToJson(receiptPayload),
+        messageTimestamp);
+  }
+
+  private void handleBlankQuestionnaire(
+      ResponseManagementEvent unreceiptEvent, UacQidLink uacQidLink, ResponseDTO receiptPayload) {
     uacQidLink.setActive(false);
     uacQidLink.setBlankQuestionnaire(true);
 
@@ -89,14 +117,20 @@ public class QidReceiptService {
           .with("channel", unreceiptEvent.getEvent().getChannel())
           .warn("Unreceipt received for unaddressed UAC/QID pair not yet linked to a case");
     }
+  }
 
-    eventLogger.logUacQidEvent(
-        uacQidLink,
-        unreceiptEvent.getEvent().getDateTime(),
-        BLANK_QUESTIONNAIRE_RECEIVED,
-        EventType.RESPONSE_RECEIVED,
-        unreceiptEvent.getEvent(),
-        convertObjectToJson(receiptPayload),
-        messageTimestamp);
+  private boolean hasEqReceipt(UacQidLink uacQidLink) {
+    if (uacQidLink.getEvents() == null) {
+      return false;
+    }
+
+    for (Event event : uacQidLink.getEvents()) {
+      if (event.getEventType() == EventType.RESPONSE_RECEIVED
+          && event.getEventChannel().equalsIgnoreCase("EQ")) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }
