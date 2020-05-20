@@ -75,6 +75,9 @@ public class MessageConsumerConfig {
   @Value("${queueconfig.ccs-property-listed-queue}")
   private String ccsPropertyListedQueue;
 
+  @Value("${queueconfig.fulfilment-confirmed-queue}")
+  private String fulfilmentConfirmedQueue;
+
   public MessageConsumerConfig(
       ExceptionManagerClient exceptionManagerClient,
       RabbitTemplate rabbitTemplate,
@@ -141,6 +144,11 @@ public class MessageConsumerConfig {
 
   @Bean
   public MessageChannel ccsPropertyListedInputChannel() {
+    return new DirectChannel();
+  }
+
+  @Bean
+  public MessageChannel fulfilmentConfirmedInputChannel() {
     return new DirectChannel();
   }
 
@@ -253,6 +261,15 @@ public class MessageConsumerConfig {
   }
 
   @Bean
+  AmqpInboundChannelAdapter fulfilmentConfirmedInbound(
+      @Qualifier("fulfilmentConfirmedContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("fulfilmentConfirmedInputChannel") MessageChannel channel) {
+    AmqpInboundChannelAdapter adapter = new AmqpInboundChannelAdapter(listenerContainer);
+    adapter.setOutputChannel(channel);
+    return adapter;
+  }
+
+  @Bean
   public SimpleMessageListenerContainer sampleContainer() {
     return setupListenerContainer(inboundQueue, CreateCaseSample.class);
   }
@@ -310,6 +327,11 @@ public class MessageConsumerConfig {
   @Bean
   public SimpleMessageListenerContainer ccsPropertyListedContainer() {
     return setupListenerContainer(ccsPropertyListedQueue, ResponseManagementEvent.class);
+  }
+
+  @Bean
+  public SimpleMessageListenerContainer fulfilmentConfirmedContainer() {
+    return setupListenerContainer(fulfilmentConfirmedQueue, ResponseManagementEvent.class);
   }
 
   private SimpleMessageListenerContainer setupListenerContainer(
