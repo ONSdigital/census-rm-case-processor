@@ -117,6 +117,16 @@
       }
     },
     {
+      "name": "case.fulfilmentConfirmed",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "delayedRedeliveryExchange",
+        "x-dead-letter-routing-key": "case.fulfilmentConfirmed"
+      }
+    },
+    {
       "name": "case.sample.inbound",
       "vhost": "/",
       "durable": true,
@@ -265,6 +275,14 @@
       "destination": "case.fulfilments",
       "destination_type": "queue",
       "routing_key": "event.fulfilment.request",
+      "arguments": {}
+    },
+    {
+      "source": "events",
+      "vhost": "/",
+      "destination": "case.fulfilmentConfirmed",
+      "destination_type": "queue",
+      "routing_key": "event.fulfilment.confirmation",
       "arguments": {}
     },
     {
