@@ -353,6 +353,12 @@ public class MessageConsumerConfig {
           @Override
           public Map<String, Object> toHeadersFromRequest(MessageProperties source) {
             Map<String, Object> headers = new HashMap<>();
+
+            /* We strip EVERYTHING out of the headers and put the content type back in because we
+             * don't want the __TYPE__ to be processed by Spring Boot, which would cause
+             * ClassNotFoundException because the type which was sent doesn't match the type we
+             * want to receive. This is an ugly workaround, but it works.
+             */
             headers.put("contentType", "application/json");
             return headers;
           }
