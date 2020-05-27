@@ -14,7 +14,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
-import org.springframework.amqp.rabbit.listener.exception.ListenerExecutionFailedException;
+import org.springframework.amqp.rabbit.support.ListenerExecutionFailedException;
 import uk.gov.ons.census.casesvc.client.ExceptionManagerClient;
 import uk.gov.ons.census.casesvc.model.dto.ExceptionReportResponse;
 import uk.gov.ons.census.casesvc.model.dto.SkippedMessage;
