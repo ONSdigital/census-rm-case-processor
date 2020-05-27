@@ -30,9 +30,6 @@ public class NewAddressReportedService {
   @Value("${censusconfig.actionplanid}")
   private String censusActionPlanId;
 
-  @Value("${censusconfig.refusalreceived}")
-  private String refusalReceived;
-
   public NewAddressReportedService(CaseService caseService, EventLogger eventLogger) {
     this.caseService = caseService;
     this.eventLogger = eventLogger;
@@ -147,7 +144,7 @@ public class NewAddressReportedService {
     skeletonCase.setActionPlanId(censusActionPlanId);
     skeletonCase.setSurvey("CENSUS");
     skeletonCase.setHandDelivery(false);
-    skeletonCase.setRefusalReceived(refusalReceived);
+    skeletonCase.setRefusalReceived(null);
     skeletonCase.setReceiptReceived(false);
     skeletonCase.setAddressInvalid(false);
     skeletonCase.setCeActualResponses(0);
@@ -249,7 +246,7 @@ public class NewAddressReportedService {
     newCase.setActionPlanId(censusActionPlanId);
     newCase.setSkeleton(true);
     newCase.setHandDelivery(false);
-    newCase.setRefusalReceived(refusalReceived);
+    newCase.setRefusalReceived(null);
     newCase.setReceiptReceived(false);
     newCase.setAddressInvalid(false);
     newCase.setCeActualResponses(0);

@@ -180,7 +180,6 @@ public class FulfilmentRequestReceiverIT {
     caze.setCaseId(TEST_CASE_ID);
     caze.setUacQidLinks(null);
     caze.setEvents(null);
-    caze.setRefusalReceived(RefusalType.HARD_REFUSAL.toString());
     Case parentCase = caseRepository.saveAndFlush(caze);
 
     ResponseManagementEvent managementEvent = getTestResponseManagementFulfilmentRequestedEvent();
@@ -240,7 +239,7 @@ public class FulfilmentRequestReceiverIT {
     assertThat(actualChildCase.getAddressType()).isEqualTo(actualParentCase.getAddressType());
     assertThat(actualChildCase.getCaseType()).isEqualTo("HI");
     assertThat(actualChildCase.isReceiptReceived()).isEqualTo(false);
-    assertThat(actualChildCase.getRefusalReceived()).isEqualTo(RefusalType.HARD_REFUSAL.toString());
+    assertThat(actualChildCase.getRefusalReceived()).isNull();
 
     assertThat(actualChildCase.getHtcWillingness()).isNull();
     assertThat(actualChildCase.getTreatmentCode()).isNull();
@@ -257,7 +256,6 @@ public class FulfilmentRequestReceiverIT {
     caze.setCaseId(TEST_CASE_ID);
     caze.setUacQidLinks(null);
     caze.setEvents(null);
-    caze.setRefusalReceived(RefusalType.HARD_REFUSAL.toString());
     Case parentCase = caseRepository.saveAndFlush(caze);
 
     ResponseManagementEvent managementEvent = getTestResponseManagementFulfilmentRequestedEvent();
@@ -343,7 +341,7 @@ public class FulfilmentRequestReceiverIT {
     assertThat(actualChildCase.getAddressType()).isEqualTo(actualParentCase.getAddressType());
     assertThat(actualChildCase.getCaseType()).isEqualTo("HI");
     assertThat(actualChildCase.isReceiptReceived()).isEqualTo(false);
-    assertThat(actualChildCase.getRefusalReceived()).isEqualTo(RefusalType.HARD_REFUSAL.toString());
+    assertThat(actualChildCase.getRefusalReceived()).isNull();
 
     assertThat(actualChildCase.getHtcWillingness()).isNull();
     assertThat(actualChildCase.getTreatmentCode()).isNull();
@@ -360,7 +358,6 @@ public class FulfilmentRequestReceiverIT {
     caze.setCaseId(TEST_CASE_ID);
     caze.setUacQidLinks(null);
     caze.setEvents(null);
-    caze.setRefusalReceived(RefusalType.HARD_REFUSAL.toString());
     Case parentCase = caseRepository.saveAndFlush(caze);
 
     ResponseManagementEvent managementEvent = getTestResponseManagementFulfilmentRequestedEvent();
@@ -417,7 +414,7 @@ public class FulfilmentRequestReceiverIT {
     assertThat(actualChildCase.getAddressType()).isEqualTo(actualParentCase.getAddressType());
     assertThat(actualChildCase.getCaseType()).isEqualTo("HI");
     assertThat(actualChildCase.isReceiptReceived()).isEqualTo(false);
-    assertThat(actualChildCase.getRefusalReceived()).isEqualTo(RefusalType.HARD_REFUSAL.toString());
+    assertThat(actualChildCase.getRefusalReceived()).isNull();
 
     assertThat(actualChildCase.getHtcWillingness()).isNull();
     assertThat(actualChildCase.getTreatmentCode()).isNull();

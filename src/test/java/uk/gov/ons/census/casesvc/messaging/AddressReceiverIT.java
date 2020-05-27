@@ -320,7 +320,7 @@ public class AddressReceiverIT {
     assertThat(actualCase.getMetadata().getSecureEstablishment()).isTrue();
 
     assertThat(actualCase.isReceiptReceived()).isFalse();
-    assertThat(actualCase.getRefusalReceived()).isEmpty();
+    assertThat(actualCase.getRefusalReceived()).isNull();
     assertThat(actualCase.isAddressInvalid()).isFalse();
     assertThat(actualCase.isHandDelivery()).isFalse();
 
@@ -439,7 +439,7 @@ public class AddressReceiverIT {
     assertThat(actualCase.getMetadata().getSecureEstablishment()).isFalse();
 
     assertThat(actualCase.isReceiptReceived()).isFalse();
-    assertThat(actualCase.getRefusalReceived()).isEmpty();
+    assertThat(actualCase.getRefusalReceived()).isNull();
     assertThat(actualCase.isAddressInvalid()).isFalse();
     assertThat(actualCase.isHandDelivery()).isFalse();
 
