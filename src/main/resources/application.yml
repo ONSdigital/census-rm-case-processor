@@ -44,6 +44,7 @@ queueconfig:
   address-inbound-queue: case.addressQueue
   undelivered-mail-queue: case.undeliveredMailQueue
   ccs-property-listed-queue: case.ccsPropertyListedQueue
+  fulfilment-confirmed-queue: case.fulfilmentConfirmed
   consumers: 50
   retry-attempts: 3
   retry-delay: 1000 #milliseconds
