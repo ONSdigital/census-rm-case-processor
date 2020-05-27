@@ -345,7 +345,7 @@ public class QuestionnaireLinkedReceiverIT {
     assertThat(actualUacQidLink.getQid()).isEqualTo(expectedQuestionnaireId);
     assertThat(actualHICase.getCaseRef()).isEqualTo(actualUacQidLink.getCaze().getCaseRef());
 
-    List<Event> events = eventRepository.findAll(new Sort(ASC, "rmEventProcessed"));
+    List<Event> events = eventRepository.findAll(Sort.by(ASC, "rmEventProcessed"));
 
     validateEvents(events, expectedQuestionnaireId, 2, true);
   }
@@ -396,7 +396,7 @@ public class QuestionnaireLinkedReceiverIT {
     assertThat(actualUacQidLink.getQid()).isEqualTo(expectedQuestionnaireId);
     assertThat(actualHHCase.getCaseRef()).isEqualTo(actualUacQidLink.getCaze().getCaseRef());
 
-    List<Event> events = eventRepository.findAll(new Sort(ASC, "rmEventProcessed"));
+    List<Event> events = eventRepository.findAll(Sort.by(ASC, "rmEventProcessed"));
 
     validateEvents(events, expectedQuestionnaireId, 2, false);
   }
@@ -447,7 +447,7 @@ public class QuestionnaireLinkedReceiverIT {
     assertThat(actualUacQidLink.getQid()).isEqualTo(expectedQuestionnaireId);
     assertThat(actualHHCase.getCaseRef()).isEqualTo(actualUacQidLink.getCaze().getCaseRef());
 
-    List<Event> events = eventRepository.findAll(new Sort(ASC, "rmEventProcessed"));
+    List<Event> events = eventRepository.findAll(Sort.by(ASC, "rmEventProcessed"));
 
     validateEvents(events, expectedQuestionnaireId, 2, false);
   }
