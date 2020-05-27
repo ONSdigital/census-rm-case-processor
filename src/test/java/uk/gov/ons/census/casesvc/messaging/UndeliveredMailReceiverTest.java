@@ -17,13 +17,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.messaging.Message;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
-import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
-import uk.gov.ons.census.casesvc.model.dto.EventDTO;
-import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
-import uk.gov.ons.census.casesvc.model.dto.FulfilmentInformation;
-import uk.gov.ons.census.casesvc.model.dto.Metadata;
-import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
-import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
+import uk.gov.ons.census.casesvc.model.dto.*;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
@@ -47,7 +41,7 @@ public class UndeliveredMailReceiverTest {
 
     Case caze = easyRandom.nextObject(Case.class);
     caze.setAddressInvalid(false);
-    caze.setRefusalReceived(false);
+    caze.setRefusalReceived(null);
     caze.setReceiptReceived(false);
 
     UacService uacService = mock(UacService.class);
@@ -100,7 +94,7 @@ public class UndeliveredMailReceiverTest {
 
     Case caze = easyRandom.nextObject(Case.class);
     caze.setAddressInvalid(false);
-    caze.setRefusalReceived(false);
+    caze.setRefusalReceived(null);
     caze.setReceiptReceived(false);
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setCaze(caze);
@@ -174,9 +168,9 @@ public class UndeliveredMailReceiverTest {
     caze.setReceiptReceived(false);
 
     // Scenario 2 - refusal received
-    caze.setRefusalReceived(true);
+    caze.setRefusalReceived(RefusalType.HARD_REFUSAL.toString());
     underTest.receiveMessage(message);
-    caze.setRefusalReceived(false);
+    caze.setRefusalReceived(null);
 
     // Scenario 3 - invalid address
     caze.setAddressInvalid(true);
@@ -218,7 +212,7 @@ public class UndeliveredMailReceiverTest {
 
     // When
     caze.setReceiptReceived(false);
-    caze.setRefusalReceived(false);
+    caze.setRefusalReceived(null);
     caze.setAddressInvalid(false);
     caze.setRegion("E123456");
     caze.setCaseType("CE");

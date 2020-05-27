@@ -90,7 +90,7 @@ public class CaseService {
   }
 
   public Case createCCSCase(
-      String caseId, SampleUnitDTO sampleUnit, boolean isRefused, boolean isInvalidAddress) {
+      String caseId, SampleUnitDTO sampleUnit, String isRefused, boolean isInvalidAddress) {
     Case caze = mapperFacade.map(sampleUnit, Case.class);
     caze.setCaseType(sampleUnit.getAddressType());
     caze.setCaseId(UUID.fromString(caseId));
@@ -217,7 +217,7 @@ public class CaseService {
     collectionCase.setCeExpectedCapacity(caze.getCeExpectedCapacity());
     collectionCase.setCeActualResponses(caze.getCeActualResponses());
     collectionCase.setReceiptReceived(caze.isReceiptReceived());
-    collectionCase.setRefusalReceived(caze.isRefusalReceived());
+    collectionCase.setRefusalReceived(caze.getRefusalReceived());
     collectionCase.setAddressInvalid(caze.isAddressInvalid());
     collectionCase.setHandDelivery(caze.isHandDelivery());
     collectionCase.setSkeleton(caze.isSkeleton());

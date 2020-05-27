@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
+import uk.gov.ons.census.casesvc.model.dto.RefusalType;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 
@@ -122,7 +123,7 @@ public class FulfilmentRequestServiceTest {
     parentCase.setEvents(new ArrayList<>());
     parentCase.setCreatedDateTime(OffsetDateTime.now().minusDays(1));
     parentCase.setReceiptReceived(true);
-    parentCase.setRefusalReceived(true);
+    parentCase.setRefusalReceived(RefusalType.HARD_REFUSAL.toString());
     parentCase.setAddressType("HH");
 
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
@@ -177,7 +178,7 @@ public class FulfilmentRequestServiceTest {
     parentCase.setEvents(new ArrayList<>());
     parentCase.setCreatedDateTime(OffsetDateTime.now().minusDays(1));
     parentCase.setReceiptReceived(true);
-    parentCase.setRefusalReceived(true);
+    parentCase.setRefusalReceived(RefusalType.HARD_REFUSAL.toString());
     parentCase.setAddressType("HH");
 
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();

@@ -25,11 +25,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
-import uk.gov.ons.census.casesvc.model.dto.EventDTO;
-import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
-import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
-import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
+import uk.gov.ons.census.casesvc.model.dto.*;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
@@ -79,7 +75,7 @@ public class RefusalReceiverIT {
 
     Case caze = getRandomCase();
     caze.setCaseId(TEST_CASE_ID);
-    caze.setRefusalReceived(false);
+    caze.setRefusalReceived(RefusalType.HARD_REFUSAL.toString());
     caze.setSurvey("CENSUS");
     caze.setUacQidLinks(null);
     caze.setEvents(null);
@@ -114,7 +110,7 @@ public class RefusalReceiverIT {
 
     Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
-    assertThat(actualCase.isRefusalReceived()).isTrue();
+    assertThat(actualCase.getRefusalReceived()).isNotEmpty();
     assertThat(actualCase.getLastUpdated()).isNotEqualTo(cazeCreatedTime);
 
     // check the metadata is included with field CANCEL decision

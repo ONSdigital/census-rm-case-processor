@@ -8,10 +8,7 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
-import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
-import uk.gov.ons.census.casesvc.model.dto.Metadata;
-import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
-import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
+import uk.gov.ons.census.casesvc.model.dto.*;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 
@@ -34,6 +31,12 @@ public class RefusalService {
   public void processRefusal(
       ResponseManagementEvent refusalEvent, OffsetDateTime messageTimestamp) {
     RefusalDTO refusal = refusalEvent.getPayload().getRefusal();
+
+    if ((refusal.getType() != RefusalType.EXTRAORDINARY_REFUSAL)
+        && (refusal.getType() != RefusalType.HARD_REFUSAL)) {
+      throw new RuntimeException("Unexpected refusal type " + refusal.getType());
+    }
+
     Case refusedCase =
         caseService.getCaseByCaseId(UUID.fromString(refusal.getCollectionCase().getId()));
 
@@ -43,7 +46,7 @@ public class RefusalService {
       return;
     }
 
-    refusedCase.setRefusalReceived(true);
+    refusedCase.setRefusalReceived(refusal.getType().toString());
     caseService.saveCaseAndEmitCaseUpdatedEvent(refusedCase, buildMetadataForRefusal(refusalEvent));
 
     logRefusalCaseEvent(refusalEvent, refusedCase, messageTimestamp, REFUSAL_RECEIVED);

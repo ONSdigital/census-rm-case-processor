@@ -6,12 +6,9 @@ import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 import java.time.OffsetDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
-import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
-import uk.gov.ons.census.casesvc.model.dto.CCSPropertyDTO;
-import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
-import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
-import uk.gov.ons.census.casesvc.model.dto.UacDTO;
+import uk.gov.ons.census.casesvc.model.dto.*;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
@@ -40,15 +37,23 @@ public class CCSPropertyListedService {
   public void processCCSPropertyListed(
       ResponseManagementEvent ccsPropertyListedEvent, OffsetDateTime messageTimestamp) {
     CCSPropertyDTO ccsProperty = ccsPropertyListedEvent.getPayload().getCcsProperty();
-    boolean isRefused = ccsProperty.getRefusal() != null;
     boolean isInvalidAddress = ccsProperty.getInvalidAddress() != null;
     boolean hasOneOrMoreQids = ccsProperty.getUac() != null;
+    String refusal = null;
+
+    if (ccsProperty.getRefusal() != null) {
+      if ((ccsProperty.getRefusal().getType() != RefusalType.EXTRAORDINARY_REFUSAL)
+          && (ccsProperty.getRefusal().getType() != RefusalType.HARD_REFUSAL)) {
+        throw new RuntimeException("Unexpected refusal type" + ccsProperty.getRefusal().getType());
+      }
+      refusal = ccsProperty.getRefusal().getType().toString();
+    }
 
     Case caze =
         caseService.createCCSCase(
             ccsProperty.getCollectionCase().getId(),
             ccsProperty.getSampleUnit(),
-            isRefused,
+            refusal,
             isInvalidAddress);
 
     // always generate a new uac-qid pair even if linking existing pair, this is in case field
@@ -77,7 +82,7 @@ public class CCSPropertyListedService {
   }
 
   private void sendActiveCCSCaseToField(Case caze) {
-    if (!caze.isRefusalReceived() && !caze.isAddressInvalid()) {
+    if (StringUtils.isEmpty(caze.getRefusalReceived()) && !caze.isAddressInvalid()) {
       caseService.saveCaseAndEmitCaseCreatedEvent(
           caze, buildMetadata(EventTypeDTO.CCS_ADDRESS_LISTED, ActionInstructionType.CREATE));
     }

@@ -22,6 +22,7 @@ import org.junit.runners.Parameterized;
 import org.mockito.ArgumentCaptor;
 import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.Metadata;
+import uk.gov.ons.census.casesvc.model.dto.RefusalType;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
@@ -131,7 +132,7 @@ public class BlankQuestionnaireServiceTest {
     caze.setCaseType(caseType);
     caze.setAddressLevel(addressLevel);
     caze.setCaseId(UUID.randomUUID());
-    caze.setRefusalReceived(false);
+    caze.setRefusalReceived(null);
     caze.setAddressInvalid(false);
     caze.setReceiptReceived(false);
 
@@ -213,7 +214,7 @@ public class BlankQuestionnaireServiceTest {
     caze.setCaseType(caseType);
     caze.setAddressLevel(addressLevel);
     caze.setCaseId(UUID.randomUUID());
-    caze.setRefusalReceived(false);
+    caze.setRefusalReceived(null);
     caze.setAddressInvalid(false);
     caze.setReceiptReceived(true);
 
@@ -272,7 +273,7 @@ public class BlankQuestionnaireServiceTest {
     caze.setCaseType(caseType);
     caze.setAddressLevel(addressLevel);
     caze.setCaseId(UUID.randomUUID());
-    caze.setRefusalReceived(true);
+    caze.setRefusalReceived(RefusalType.HARD_REFUSAL.toString());
     caze.setAddressInvalid(false);
 
     UacQidLink uacQidLink = new UacQidLink();
@@ -327,7 +328,7 @@ public class BlankQuestionnaireServiceTest {
     caze.setCaseType(caseType);
     caze.setAddressLevel(addressLevel);
     caze.setCaseId(UUID.randomUUID());
-    caze.setRefusalReceived(false);
+    caze.setRefusalReceived(null);
     caze.setAddressInvalid(true);
 
     UacQidLink uacQidLink = new UacQidLink();
