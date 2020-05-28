@@ -493,7 +493,7 @@ public class AddressReceiverIT {
     assertThat(actualCase.isAddressInvalid()).isFalse();
 
     // Event logged is as expected
-    List<Event> events = eventRepository.findAll(new Sort(ASC, "rmEventProcessed"));
+    List<Event> events = eventRepository.findAll(Sort.by(ASC, "rmEventProcessed"));
     assertThat(events.size()).isEqualTo(1);
     Event event = events.get(0);
     assertThat(event.getEventChannel()).isEqualTo("Test channel");
