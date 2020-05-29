@@ -33,9 +33,10 @@ public class RefusalServiceTest {
   @InjectMocks RefusalService underTest;
 
   @Test
-  public void testRefusalForCase() {
+  public void testExtraordinaryRefusalForCase() {
     // GIVEN
-    ResponseManagementEvent managementEvent = getTestResponseManagementRefusalEvent();
+    ResponseManagementEvent managementEvent =
+        getTestResponseManagementRefusalEvent(RefusalType.EXTRAORDINARY_REFUSAL);
     CollectionCase collectionCase = managementEvent.getPayload().getRefusal().getCollectionCase();
     collectionCase.setId(TEST_CASE_ID.toString());
     collectionCase.setRefusalReceived(null);
@@ -63,7 +64,8 @@ public class RefusalServiceTest {
     Metadata metadata = metadataArgumentCaptor.getValue();
     verifyNoMoreInteractions(caseService);
 
-    assertThat(actualCase.getRefusalReceived()).isNotEmpty();
+    assertThat(actualCase.getRefusalReceived())
+        .isEqualTo(RefusalType.EXTRAORDINARY_REFUSAL.toString());
     assertThat(metadata.getCauseEventType()).isEqualTo(EventTypeDTO.REFUSAL_RECEIVED);
     assertThat(metadata.getFieldDecision()).isEqualTo(ActionInstructionType.CANCEL);
     inOrder
@@ -82,7 +84,8 @@ public class RefusalServiceTest {
   @Test
   public void testHardRefusalCase() {
     // GIVEN
-    ResponseManagementEvent managementEvent = getTestResponseManagementRefusalEvent();
+    ResponseManagementEvent managementEvent =
+        getTestResponseManagementRefusalEvent(RefusalType.HARD_REFUSAL);
     CollectionCase collectionCase = managementEvent.getPayload().getRefusal().getCollectionCase();
     collectionCase.setId(TEST_CASE_ID.toString());
     collectionCase.setRefusalReceived(RefusalType.HARD_REFUSAL.toString());
@@ -129,7 +132,7 @@ public class RefusalServiceTest {
   @Test(expected = RuntimeException.class)
   public void testThrowsRefusalError() {
     // GIVEN
-    ResponseManagementEvent managementEvent = getTestResponseManagementRefusalEvent();
+    ResponseManagementEvent managementEvent = getTestResponseManagementRefusalEvent(null);
     managementEvent.getPayload().getRefusal().setType(null);
 
     // WHEN
@@ -144,7 +147,8 @@ public class RefusalServiceTest {
   @Test
   public void testRefusalNotFromFieldForEstabAddressLevelCaseIsLoggedWithoutRefusingTheCase() {
     // GIVEN
-    ResponseManagementEvent managementEvent = getTestResponseManagementRefusalEvent();
+    ResponseManagementEvent managementEvent =
+        getTestResponseManagementRefusalEvent(RefusalType.HARD_REFUSAL);
     managementEvent.getEvent().setChannel("NOT FROM FIELD");
     managementEvent.getPayload().getRefusal().getCollectionCase().setId(TEST_CASE_ID.toString());
 
@@ -173,5 +177,38 @@ public class RefusalServiceTest {
     // verify we do not try to update the case in any way
     verify(caseService, times(1)).getCaseByCaseId(any(UUID.class));
     verifyNoMoreInteractions(caseService);
+  }
+
+  @Test
+  public void testHardRefusalAgainstAlreadyExtraordinaryRefusedCaseJustRecordsEvent() {
+    // GIVEN
+    ResponseManagementEvent managementEvent =
+        getTestResponseManagementRefusalEvent(RefusalType.HARD_REFUSAL);
+    CollectionCase collectionCase = managementEvent.getPayload().getRefusal().getCollectionCase();
+    collectionCase.setId(TEST_CASE_ID.toString());
+    collectionCase.setRefusalReceived(RefusalType.HARD_REFUSAL.toString());
+    Case testCase = getRandomCase();
+    testCase.setRefusalReceived(RefusalType.EXTRAORDINARY_REFUSAL.toString());
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+
+    when(caseService.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);
+
+    // WHEN
+    underTest.processRefusal(managementEvent, messageTimestamp);
+
+    // THEN
+
+    verify(caseService).getCaseByCaseId(TEST_CASE_ID);
+    verifyNoMoreInteractions(caseService);
+
+    verify(eventLogger, times(1))
+        .logCaseEvent(
+            eq(testCase),
+            any(OffsetDateTime.class),
+            eq("Hard Refusal Received for case already marked Extraordinary refused"),
+            eq(EventType.REFUSAL_RECEIVED),
+            eq(managementEvent.getEvent()),
+            anyString(),
+            eq(messageTimestamp));
   }
 }
