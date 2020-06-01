@@ -34,11 +34,6 @@ public class RefusalService {
       ResponseManagementEvent refusalEvent, OffsetDateTime messageTimestamp) {
     RefusalDTO refusalDto = refusalEvent.getPayload().getRefusal();
 
-    if ((refusalDto.getType() != RefusalType.EXTRAORDINARY_REFUSAL)
-        && (refusalDto.getType() != RefusalType.HARD_REFUSAL)) {
-      throw new RuntimeException("Unexpected refusal type " + refusalDto.getType());
-    }
-
     Case refusedCase =
         caseService.getCaseByCaseId(UUID.fromString(refusalDto.getCollectionCase().getId()));
 

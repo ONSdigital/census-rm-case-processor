@@ -129,21 +129,6 @@ public class RefusalServiceTest {
     verifyNoMoreInteractions(eventLogger);
   }
 
-  @Test(expected = RuntimeException.class)
-  public void testThrowsRefusalError() {
-    // GIVEN
-    ResponseManagementEvent managementEvent = getTestResponseManagementRefusalEvent(null);
-    managementEvent.getPayload().getRefusal().setType(null);
-
-    // WHEN
-    try {
-      underTest.processRefusal(managementEvent, OffsetDateTime.now());
-    } catch (RuntimeException e) {
-      assertThat(e.getMessage()).isEqualTo("Unexpected refusal type null");
-      throw e;
-    }
-  }
-
   @Test
   public void testRefusalNotFromFieldForEstabAddressLevelCaseIsLoggedWithoutRefusingTheCase() {
     // GIVEN
