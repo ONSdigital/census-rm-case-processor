@@ -48,7 +48,6 @@ queueconfig:
   consumers: 50
   retry-attempts: 3
   retry-delay: 1000 #milliseconds
-  quarantine-exchange: quarantineExchange
 
 ccsconfig:
   action-plan-id: 38a48608-1c2a-4c2b-b7bc-cb52fcbb4927
