@@ -6,6 +6,8 @@ import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
@@ -19,6 +21,7 @@ import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 
+@Service
 public class FieldCaseUpdatedService {
 
   private final CaseRepository caseRepository;

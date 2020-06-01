@@ -78,7 +78,7 @@ public class MessageConsumerConfig {
   @Value("${queueconfig.fulfilment-confirmed-queue}")
   private String fulfilmentConfirmedQueue;
 
-  @Value("${queueconfig.field-case-updated-queue")
+  @Value("${queueconfig.field-case-updated-queue}")
   private String fieldCaseUpdatedQueue;
 
   public MessageConsumerConfig(
