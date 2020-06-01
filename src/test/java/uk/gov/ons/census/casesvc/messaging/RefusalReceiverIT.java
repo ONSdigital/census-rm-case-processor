@@ -85,7 +85,8 @@ public class RefusalReceiverIT {
     OffsetDateTime cazeCreatedTime =
         caseRepository.findById(TEST_CASE_ID).get().getCreatedDateTime();
 
-    ResponseManagementEvent managementEvent = getTestResponseManagementRefusalEvent(RefusalType.HARD_REFUSAL);
+    ResponseManagementEvent managementEvent =
+        getTestResponseManagementRefusalEvent(RefusalType.HARD_REFUSAL);
     managementEvent.getEvent().setTransactionId(UUID.randomUUID());
     RefusalDTO expectedRefusal = managementEvent.getPayload().getRefusal();
     expectedRefusal.getCollectionCase().setId(TEST_CASE_ID.toString());
@@ -133,10 +134,12 @@ public class RefusalReceiverIT {
 
   @Test
   public void testCaseAlreadySetToExtraordinaryNotUpdatedByAHardRefusal()
-          throws InterruptedException, IOException {
-  // As per https://collaborate2.ons.gov.uk/confluence/pages/viewpage.action?spaceKey=SDC&title=Refusal+status+changes+and+Non+Compliance
-  // If a case has already been marked as Extraordinary Refusal and we receive a Hard Refusal for it we will not update the case, or emit
-  //  Just record the event.
+      throws InterruptedException, IOException {
+    // As per
+    // https://collaborate2.ons.gov.uk/confluence/pages/viewpage.action?spaceKey=SDC&title=Refusal+status+changes+and+Non+Compliance
+    // If a case has already been marked as Extraordinary Refusal and we receive a Hard Refusal for
+    // it we will not update the case, or emit
+    //  Just record the event.
 
     // GIVEN
     BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
@@ -151,9 +154,10 @@ public class RefusalReceiverIT {
     caseRepository.saveAndFlush(caze);
 
     OffsetDateTime cazeCreatedTime =
-            caseRepository.findById(TEST_CASE_ID).get().getCreatedDateTime();
+        caseRepository.findById(TEST_CASE_ID).get().getCreatedDateTime();
 
-    ResponseManagementEvent managementEvent = getTestResponseManagementRefusalEvent(RefusalType.HARD_REFUSAL);
+    ResponseManagementEvent managementEvent =
+        getTestResponseManagementRefusalEvent(RefusalType.HARD_REFUSAL);
     managementEvent.getEvent().setTransactionId(UUID.randomUUID());
 
     RefusalDTO refusalDTO = managementEvent.getPayload().getRefusal();
@@ -161,9 +165,9 @@ public class RefusalReceiverIT {
 
     String json = convertObjectToJson(managementEvent);
     Message message =
-            MessageBuilder.withBody(json.getBytes())
-                    .setContentType(MessageProperties.CONTENT_TYPE_JSON)
-                    .build();
+        MessageBuilder.withBody(json.getBytes())
+            .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+            .build();
 
     // WHEN
     rabbitQueueHelper.sendMessage(inboundQueue, message);
@@ -173,18 +177,19 @@ public class RefusalReceiverIT {
 
     Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
-    assertThat(actualCase.getRefusalReceived()).isEqualTo(RefusalType.EXTRAORDINARY_REFUSAL.toString());
+    assertThat(actualCase.getRefusalReceived())
+        .isEqualTo(RefusalType.EXTRAORDINARY_REFUSAL.toString());
     assertThat(actualCase.getLastUpdated()).isNotEqualTo(cazeCreatedTime);
 
     List<Event> events = eventRepository.findAll();
     assertThat(events.size()).isEqualTo(1);
 
     RefusalDTO actualRefusal =
-            convertJsonToObject(events.get(0).getEventPayload(), RefusalDTO.class);
+        convertJsonToObject(events.get(0).getEventPayload(), RefusalDTO.class);
     assertThat(actualRefusal.getType()).isEqualTo(RefusalType.HARD_REFUSAL);
     assertThat(actualRefusal.getReport()).isEqualTo(refusalDTO.getReport());
     assertThat(actualRefusal.getAgentId()).isEqualTo(refusalDTO.getAgentId());
     assertThat(actualRefusal.getCollectionCase().getId())
-            .isEqualTo(refusalDTO.getCollectionCase().getId());
+        .isEqualTo(refusalDTO.getCollectionCase().getId());
   }
 }

@@ -57,6 +57,7 @@ public class RefusalService {
       ResponseManagementEvent refusalEvent,
       OffsetDateTime messageTimestamp,
       RefusalDTO refusalDto) {
+
     if (isEstabLevelAddressAndChannelIsNotField(refusedCase.getAddressLevel(), refusalEvent)) {
       logRefusalCaseEvent(
           refusalEvent, refusedCase, messageTimestamp, ESTAB_INDIVIDUAL_REFUSAL_RECEIVED);

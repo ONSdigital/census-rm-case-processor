@@ -169,7 +169,8 @@ public class DataUtils {
     return managementEvent;
   }
 
-  public static ResponseManagementEvent getTestResponseManagementRefusalEvent(RefusalType refusalType) {
+  public static ResponseManagementEvent getTestResponseManagementRefusalEvent(
+      RefusalType refusalType) {
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
 
     EventDTO event = managementEvent.getEvent();
