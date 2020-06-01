@@ -6,18 +6,13 @@ import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
-import uk.gov.ons.census.casesvc.model.dto.EventDTO;
-import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.Metadata;
-import uk.gov.ons.census.casesvc.model.dto.ResponseDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
-import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 
@@ -30,30 +25,32 @@ public class FieldCaseUpdatedService {
   private static final String CE_CASE_TYPE = "CE";
   private static final String FIELD_CASE_UPDATED_DESCRIPTION = "Field case update received";
 
-  public FieldCaseUpdatedService(CaseRepository caseRepository, EventLogger eventLogger,
-      CaseService caseService) {
+  public FieldCaseUpdatedService(
+      CaseRepository caseRepository, EventLogger eventLogger, CaseService caseService) {
     this.caseRepository = caseRepository;
     this.eventLogger = eventLogger;
     this.caseService = caseService;
   }
 
-  public void processFieldCaseUpdatedEvent(ResponseManagementEvent responseManagementEvent,
-      OffsetDateTime messageTimestamp) {
+  public void processFieldCaseUpdatedEvent(
+      ResponseManagementEvent responseManagementEvent, OffsetDateTime messageTimestamp) {
 
-    CollectionCase fieldCaseUpdatedPayload = responseManagementEvent.getPayload()
-        .getCollectionCase();
+    CollectionCase fieldCaseUpdatedPayload =
+        responseManagementEvent.getPayload().getCollectionCase();
 
     Case caze = getCaseAndLockIt(UUID.fromString(fieldCaseUpdatedPayload.getId()));
 
     if (!caze.getCaseType().equals(CE_CASE_TYPE)) {
-      throw new IllegalArgumentException(String
-          .format("Updating expected response count for %s failed as CaseType not CE",
+      throw new IllegalArgumentException(
+          String.format(
+              "Updating expected response count for %s failed as CaseType not CE",
               caze.getCaseId().toString()));
     }
 
     caze.setCeExpectedCapacity(fieldCaseUpdatedPayload.getCeExpectedCapacity());
 
-    eventLogger.logCaseEvent(caze,
+    eventLogger.logCaseEvent(
+        caze,
         responseManagementEvent.getEvent().getDateTime(),
         FIELD_CASE_UPDATED_DESCRIPTION,
         EventType.FIELD_CASE_UPDATED,
@@ -61,9 +58,8 @@ public class FieldCaseUpdatedService {
         convertObjectToJson(fieldCaseUpdatedPayload),
         messageTimestamp);
 
-    caseService.saveCaseAndEmitCaseUpdatedEvent(caze,
-        buildMetadataForFieldCaseUpdated(caze, responseManagementEvent));
-
+    caseService.saveCaseAndEmitCaseUpdatedEvent(
+        caze, buildMetadataForFieldCaseUpdated(caze, responseManagementEvent));
   }
 
   private Case getCaseAndLockIt(UUID caseId) {
@@ -78,14 +74,13 @@ public class FieldCaseUpdatedService {
     return oCase.get();
   }
 
-  private Metadata buildMetadataForFieldCaseUpdated(Case caze,
-      ResponseManagementEvent fieldCaseUpdatedPayload) {
-    if (fieldCaseUpdatedPayload.getPayload().getCollectionCase().getCeExpectedCapacity() <= caze
-        .getCeActualResponses()) {
-      return buildMetadata(fieldCaseUpdatedPayload.getEvent().getType(),
-          ActionInstructionType.CANCEL);
+  private Metadata buildMetadataForFieldCaseUpdated(
+      Case caze, ResponseManagementEvent fieldCaseUpdatedPayload) {
+    if (fieldCaseUpdatedPayload.getPayload().getCollectionCase().getCeExpectedCapacity()
+        <= caze.getCeActualResponses()) {
+      return buildMetadata(
+          fieldCaseUpdatedPayload.getEvent().getType(), ActionInstructionType.CANCEL);
     }
     return buildMetadata(fieldCaseUpdatedPayload.getEvent().getType(), null);
   }
 }
-

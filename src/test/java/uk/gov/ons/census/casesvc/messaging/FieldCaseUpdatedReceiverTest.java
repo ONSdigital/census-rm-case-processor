@@ -1,5 +1,12 @@
 package uk.gov.ons.census.casesvc.messaging;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementFieldUpdatedEvent;
+import static uk.gov.ons.census.casesvc.testutil.MessageConstructor.constructMessageWithValidTimeStamp;
+
+import java.time.OffsetDateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -11,22 +18,12 @@ import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.service.FieldCaseUpdatedService;
 import uk.gov.ons.census.casesvc.utility.MsgDateHelper;
 
-import java.time.OffsetDateTime;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementFieldUpdatedEvent;
-import static uk.gov.ons.census.casesvc.testutil.MessageConstructor.constructMessageWithValidTimeStamp;
-
 @RunWith(MockitoJUnitRunner.class)
 public class FieldCaseUpdatedReceiverTest {
 
-  @Mock
-  FieldCaseUpdatedService fieldCaseUpdatedService;
+  @Mock FieldCaseUpdatedService fieldCaseUpdatedService;
 
-  @InjectMocks
-  FieldCaseUpdatedReceiver underTest;
+  @InjectMocks FieldCaseUpdatedReceiver underTest;
 
   @Test
   public void testFieldCaseUpdatedReceiver() {
@@ -37,13 +34,18 @@ public class FieldCaseUpdatedReceiverTest {
 
     underTest.receiveMessage(message);
 
-//    // THEN
+    //    // THEN
     ArgumentCaptor<ResponseManagementEvent> managementEventArgumentCaptor =
-            ArgumentCaptor.forClass(ResponseManagementEvent.class);
+        ArgumentCaptor.forClass(ResponseManagementEvent.class);
     verify(fieldCaseUpdatedService)
-            .processFieldCaseUpdatedEvent(managementEventArgumentCaptor.capture(), eq(expectedDate));
+        .processFieldCaseUpdatedEvent(managementEventArgumentCaptor.capture(), eq(expectedDate));
 
-    Integer expectedCapacity = managementEventArgumentCaptor.getValue().getPayload().getCollectionCase().getCeExpectedCapacity();
+    Integer expectedCapacity =
+        managementEventArgumentCaptor
+            .getValue()
+            .getPayload()
+            .getCollectionCase()
+            .getCeExpectedCapacity();
     assertThat(expectedCapacity).isEqualTo(5);
   }
 }

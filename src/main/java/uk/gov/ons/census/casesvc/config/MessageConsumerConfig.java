@@ -153,7 +153,9 @@ public class MessageConsumerConfig {
   }
 
   @Bean
-  public MessageChannel fieldCaseUpdatedInputChannel() { return new DirectChannel(); }
+  public MessageChannel fieldCaseUpdatedInputChannel() {
+    return new DirectChannel();
+  }
 
   @Bean
   public AmqpInboundChannelAdapter inboundSamples(

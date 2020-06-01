@@ -113,14 +113,13 @@ public class DataUtils {
     return managementEvent;
   }
 
-public static ResponseManagementEvent getTestResponseManagementFieldUpdatedEvent() {
+  public static ResponseManagementEvent getTestResponseManagementFieldUpdatedEvent() {
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
 
     EventDTO event = managementEvent.getEvent();
     event.setType(EventTypeDTO.FIELD_CASE_UPDATED);
     event.setSource("FIELDWORK_GATEWAY");
     event.setChannel("FIELD");
-
 
     PayloadDTO payload = managementEvent.getPayload();
     payload.setUac(null);
@@ -132,6 +131,7 @@ public static ResponseManagementEvent getTestResponseManagementFieldUpdatedEvent
 
     return managementEvent;
   }
+
   public static ResponseManagementEvent getTestResponseManagementReceiptEventUnreceipt() {
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
 

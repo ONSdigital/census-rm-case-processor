@@ -3,7 +3,6 @@ package uk.gov.ons.census.casesvc.messaging;
 import static uk.gov.ons.census.casesvc.utility.MsgDateHelper.getMsgTimeStamp;
 
 import java.time.OffsetDateTime;
-
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
@@ -27,5 +26,4 @@ public class FieldCaseUpdatedReceiver {
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
     fieldCaseUpdatedService.processFieldCaseUpdatedEvent(message.getPayload(), messageTimestamp);
   }
-
 }
