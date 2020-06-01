@@ -78,6 +78,9 @@ public class MessageConsumerConfig {
   @Value("${queueconfig.fulfilment-confirmed-queue}")
   private String fulfilmentConfirmedQueue;
 
+  @Value("${queueconfig.field-case-updated-queue")
+  private String fieldCaseUpdatedQueue;
+
   public MessageConsumerConfig(
       ExceptionManagerClient exceptionManagerClient, ConnectionFactory connectionFactory) {
     this.exceptionManagerClient = exceptionManagerClient;
@@ -148,6 +151,9 @@ public class MessageConsumerConfig {
   public MessageChannel fulfilmentConfirmedInputChannel() {
     return new DirectChannel();
   }
+
+  @Bean
+  public MessageChannel fieldCaseUpdatedInputChannel() { return new DirectChannel(); }
 
   @Bean
   public AmqpInboundChannelAdapter inboundSamples(
@@ -241,6 +247,13 @@ public class MessageConsumerConfig {
   }
 
   @Bean
+  AmqpInboundChannelAdapter fieldCaseUpdatedInbound(
+      @Qualifier("fieldCaseUpdatedContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("fieldCaseUpdatedInputChannel") MessageChannel channel) {
+    return makeAdapter(listenerContainer, channel);
+  }
+
+  @Bean
   public SimpleMessageListenerContainer sampleContainer() {
     return setupListenerContainer(inboundQueue, CreateCaseSample.class);
   }
@@ -303,6 +316,11 @@ public class MessageConsumerConfig {
   @Bean
   public SimpleMessageListenerContainer fulfilmentConfirmedContainer() {
     return setupListenerContainer(fulfilmentConfirmedQueue, ResponseManagementEvent.class);
+  }
+
+  @Bean
+  public SimpleMessageListenerContainer fieldCaseUpdatedContainer() {
+    return setupListenerContainer(fieldCaseUpdatedQueue, ResponseManagementEvent.class);
   }
 
   private SimpleMessageListenerContainer setupListenerContainer(
