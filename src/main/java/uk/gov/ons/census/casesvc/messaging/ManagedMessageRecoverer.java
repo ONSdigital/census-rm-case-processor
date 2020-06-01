@@ -10,8 +10,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessageDeliveryMode;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.retry.MessageRecoverer;
 import org.springframework.amqp.rabbit.support.ListenerExecutionFailedException;
 import uk.gov.ons.census.casesvc.client.ExceptionManagerClient;
@@ -41,24 +39,18 @@ public class ManagedMessageRecoverer implements MessageRecoverer {
   private final boolean logStackTraces;
   private final String serviceName;
   private final String queueName;
-  private final String quarantineExchangeName;
-  private final RabbitTemplate rabbitTemplate;
 
   public ManagedMessageRecoverer(
       ExceptionManagerClient exceptionManagerClient,
       Class expectedMessageType,
       boolean logStackTraces,
       String serviceName,
-      String queueName,
-      String quarantineExchangeName,
-      RabbitTemplate rabbitTemplate) {
+      String queueName) {
     this.exceptionManagerClient = exceptionManagerClient;
     this.expectedMessageType = expectedMessageType;
     this.logStackTraces = logStackTraces;
     this.serviceName = serviceName;
     this.queueName = queueName;
-    this.quarantineExchangeName = quarantineExchangeName;
-    this.rabbitTemplate = rabbitTemplate;
   }
 
   @Override
@@ -126,7 +118,7 @@ public class ManagedMessageRecoverer implements MessageRecoverer {
 
     boolean result = false;
 
-    // Make damn certain that we have a copy of the message before skipping it
+    // Make certain that we have a copy of the message before quarantining it
     try {
       SkippedMessage skippedMessage = new SkippedMessage();
       skippedMessage.setMessageHash(messageHash);
@@ -150,18 +142,13 @@ public class ManagedMessageRecoverer implements MessageRecoverer {
     } catch (Exception exceptionManagerClientException) {
       log.with("message_hash", messageHash)
           .warn(
-              "Unable to store a copy of the message. Will NOT be skipping",
+              "Unable to store a copy of the message. Will NOT be quarantining",
               exceptionManagerClientException);
     }
 
-    // Check if OK and the message is stored... then we can go ahead and quarantine
+    // If the quarantined message is persisted OK then we can ACK the message
     if (result) {
-      log.with("message_hash", messageHash).warn("Skipping message");
-
-      // At this point message is not persistent, we need it to be persistent
-      message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
-      // Send the bad message to the quarantine queue
-      rabbitTemplate.send(quarantineExchangeName, queueName, message);
+      log.with("message_hash", messageHash).warn("Quarantined message");
     }
 
     return result;
