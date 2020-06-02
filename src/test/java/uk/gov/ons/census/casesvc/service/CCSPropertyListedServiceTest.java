@@ -155,12 +155,12 @@ public class CCSPropertyListedServiceTest {
     Case expectedCase =
         getExpectedCCSCase(
             managementEvent.getPayload().getCcsProperty().getCollectionCase().getId());
-    expectedCase.setRefusalReceived(RefusalType.HARD_REFUSAL.toString());
+    expectedCase.setRefusalReceived(RefusalType.HARD_REFUSAL);
 
     when(caseService.createCCSCase(
             expectedCase.getCaseId().toString(),
             managementEvent.getPayload().getCcsProperty().getSampleUnit(),
-            RefusalType.HARD_REFUSAL.toString(),
+            RefusalType.HARD_REFUSAL,
             false))
         .thenReturn(expectedCase);
 
@@ -175,7 +175,7 @@ public class CCSPropertyListedServiceTest {
         .createCCSCase(
             expectedCase.getCaseId().toString(),
             managementEvent.getPayload().getCcsProperty().getSampleUnit(),
-            RefusalType.HARD_REFUSAL.toString(),
+            RefusalType.HARD_REFUSAL,
             false);
 
     checkCorrectEventLogging(inOrder, expectedCase, managementEvent, messageTimestamp);

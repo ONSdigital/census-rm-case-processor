@@ -64,8 +64,7 @@ public class RefusalServiceTest {
     Metadata metadata = metadataArgumentCaptor.getValue();
     verifyNoMoreInteractions(caseService);
 
-    assertThat(actualCase.getRefusalReceived())
-        .isEqualTo(RefusalType.EXTRAORDINARY_REFUSAL.toString());
+    assertThat(actualCase.getRefusalReceived()).isEqualTo(RefusalType.EXTRAORDINARY_REFUSAL);
     assertThat(metadata.getCauseEventType()).isEqualTo(EventTypeDTO.REFUSAL_RECEIVED);
     assertThat(metadata.getFieldDecision()).isEqualTo(ActionInstructionType.CANCEL);
     inOrder
@@ -88,7 +87,7 @@ public class RefusalServiceTest {
         getTestResponseManagementRefusalEvent(RefusalType.HARD_REFUSAL);
     CollectionCase collectionCase = managementEvent.getPayload().getRefusal().getCollectionCase();
     collectionCase.setId(TEST_CASE_ID.toString());
-    collectionCase.setRefusalReceived(RefusalType.HARD_REFUSAL.toString());
+    collectionCase.setRefusalReceived(RefusalType.HARD_REFUSAL);
     Case testCase = getRandomCase();
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
@@ -113,7 +112,7 @@ public class RefusalServiceTest {
     Metadata metadata = metadataArgumentCaptor.getValue();
     verifyNoMoreInteractions(caseService);
 
-    assertThat(actualCase.getRefusalReceived()).isEqualTo(RefusalType.HARD_REFUSAL.toString());
+    assertThat(actualCase.getRefusalReceived()).isEqualTo(RefusalType.HARD_REFUSAL);
     assertThat(metadata.getCauseEventType()).isEqualTo(EventTypeDTO.REFUSAL_RECEIVED);
     assertThat(metadata.getFieldDecision()).isEqualTo(ActionInstructionType.CANCEL);
     inOrder
@@ -186,9 +185,9 @@ public class RefusalServiceTest {
         getTestResponseManagementRefusalEvent(RefusalType.HARD_REFUSAL);
     CollectionCase collectionCase = managementEvent.getPayload().getRefusal().getCollectionCase();
     collectionCase.setId(TEST_CASE_ID.toString());
-    collectionCase.setRefusalReceived(RefusalType.HARD_REFUSAL.toString());
+    collectionCase.setRefusalReceived(RefusalType.HARD_REFUSAL);
     Case testCase = getRandomCase();
-    testCase.setRefusalReceived(RefusalType.EXTRAORDINARY_REFUSAL.toString());
+    testCase.setRefusalReceived(RefusalType.EXTRAORDINARY_REFUSAL);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     when(caseService.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);

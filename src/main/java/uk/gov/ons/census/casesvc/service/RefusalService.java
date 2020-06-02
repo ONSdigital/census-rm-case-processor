@@ -42,17 +42,17 @@ public class RefusalService {
     Case refusedCase =
         caseService.getCaseByCaseId(UUID.fromString(refusalDto.getCollectionCase().getId()));
 
-    if (justLogRefusalIfConditionsMets(refusedCase, refusalEvent, messageTimestamp, refusalDto)) {
+    if (justLogRefusalIfConditionsMet(refusedCase, refusalEvent, messageTimestamp, refusalDto)) {
       return;
     }
 
-    refusedCase.setRefusalReceived(refusalDto.getType().toString());
+    refusedCase.setRefusalReceived(refusalDto.getType());
     caseService.saveCaseAndEmitCaseUpdatedEvent(refusedCase, buildMetadataForRefusal(refusalEvent));
 
     logRefusalCaseEvent(refusalEvent, refusedCase, messageTimestamp, REFUSAL_RECEIVED);
   }
 
-  private boolean justLogRefusalIfConditionsMets(
+  private boolean justLogRefusalIfConditionsMet(
       Case refusedCase,
       ResponseManagementEvent refusalEvent,
       OffsetDateTime messageTimestamp,
@@ -66,7 +66,7 @@ public class RefusalService {
 
     if (refusalDto.getType() == RefusalType.HARD_REFUSAL
         && refusedCase.getRefusalReceived() != null
-        && refusedCase.getRefusalReceived().equals(RefusalType.EXTRAORDINARY_REFUSAL.toString())) {
+        && refusedCase.getRefusalReceived().equals(RefusalType.EXTRAORDINARY_REFUSAL)) {
       logRefusalCaseEvent(
           refusalEvent,
           refusedCase,

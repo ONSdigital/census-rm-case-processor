@@ -123,7 +123,7 @@ public class FulfilmentRequestServiceTest {
     parentCase.setEvents(new ArrayList<>());
     parentCase.setCreatedDateTime(OffsetDateTime.now().minusDays(1));
     parentCase.setReceiptReceived(true);
-    parentCase.setRefusalReceived(RefusalType.HARD_REFUSAL.toString());
+    parentCase.setRefusalReceived(RefusalType.HARD_REFUSAL);
     parentCase.setAddressType("HH");
 
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
@@ -178,7 +178,7 @@ public class FulfilmentRequestServiceTest {
     parentCase.setEvents(new ArrayList<>());
     parentCase.setCreatedDateTime(OffsetDateTime.now().minusDays(1));
     parentCase.setReceiptReceived(true);
-    parentCase.setRefusalReceived(RefusalType.HARD_REFUSAL.toString());
+    parentCase.setRefusalReceived(RefusalType.HARD_REFUSAL);
     parentCase.setAddressType("HH");
 
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();

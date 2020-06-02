@@ -13,7 +13,6 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.Metadata;
@@ -153,7 +152,7 @@ public class BlankQuestionnaireService {
     @Override
     public void run(Case caze, EventTypeDTO causeEventType) {
       Metadata metadata = null;
-      if (StringUtils.isEmpty(caze.getRefusalReceived()) && !caze.isAddressInvalid()) {
+      if (caze.getRefusalReceived() == null && !caze.isAddressInvalid()) {
         // Only send to fieldwork if the case is not refused or address invalid
         metadata = buildMetadata(causeEventType, ActionInstructionType.UPDATE, true);
       }

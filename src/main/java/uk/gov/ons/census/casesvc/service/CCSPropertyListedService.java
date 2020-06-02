@@ -6,7 +6,6 @@ import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 import java.time.OffsetDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.*;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -39,14 +38,14 @@ public class CCSPropertyListedService {
     CCSPropertyDTO ccsProperty = ccsPropertyListedEvent.getPayload().getCcsProperty();
     boolean isInvalidAddress = ccsProperty.getInvalidAddress() != null;
     boolean hasOneOrMoreQids = ccsProperty.getUac() != null;
-    String refusal = null;
+    RefusalType refusal = null;
 
     if (ccsProperty.getRefusal() != null) {
       if ((ccsProperty.getRefusal().getType() != RefusalType.EXTRAORDINARY_REFUSAL)
           && (ccsProperty.getRefusal().getType() != RefusalType.HARD_REFUSAL)) {
         throw new RuntimeException("Unexpected refusal type" + ccsProperty.getRefusal().getType());
       }
-      refusal = ccsProperty.getRefusal().getType().toString();
+      refusal = ccsProperty.getRefusal().getType();
     }
 
     Case caze =
@@ -82,7 +81,7 @@ public class CCSPropertyListedService {
   }
 
   private void sendActiveCCSCaseToField(Case caze) {
-    if (StringUtils.isEmpty(caze.getRefusalReceived()) && !caze.isAddressInvalid()) {
+    if (caze.getRefusalReceived() == null && !caze.isAddressInvalid()) {
       caseService.saveCaseAndEmitCaseCreatedEvent(
           caze, buildMetadata(EventTypeDTO.CCS_ADDRESS_LISTED, ActionInstructionType.CREATE));
     }

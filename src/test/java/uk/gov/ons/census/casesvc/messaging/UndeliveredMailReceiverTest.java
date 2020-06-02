@@ -168,7 +168,7 @@ public class UndeliveredMailReceiverTest {
     caze.setReceiptReceived(false);
 
     // Scenario 2 - refusal received
-    caze.setRefusalReceived(RefusalType.HARD_REFUSAL.toString());
+    caze.setRefusalReceived(RefusalType.HARD_REFUSAL);
     underTest.receiveMessage(message);
     caze.setRefusalReceived(null);
 

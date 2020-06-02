@@ -273,7 +273,7 @@ public class BlankQuestionnaireServiceTest {
     caze.setCaseType(caseType);
     caze.setAddressLevel(addressLevel);
     caze.setCaseId(UUID.randomUUID());
-    caze.setRefusalReceived(RefusalType.HARD_REFUSAL.toString());
+    caze.setRefusalReceived(RefusalType.HARD_REFUSAL);
     caze.setAddressInvalid(false);
 
     UacQidLink uacQidLink = new UacQidLink();

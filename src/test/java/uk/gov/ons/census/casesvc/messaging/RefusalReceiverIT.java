@@ -111,7 +111,7 @@ public class RefusalReceiverIT {
 
     Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
-    assertThat(actualCase.getRefusalReceived()).isEqualTo(RefusalType.HARD_REFUSAL.toString());
+    assertThat(actualCase.getRefusalReceived()).isEqualTo(RefusalType.HARD_REFUSAL);
     assertThat(actualCase.getLastUpdated()).isNotEqualTo(cazeCreatedTime);
 
     // check the metadata is included with field CANCEL decision
@@ -146,7 +146,7 @@ public class RefusalReceiverIT {
 
     Case caze = getRandomCase();
     caze.setCaseId(TEST_CASE_ID);
-    caze.setRefusalReceived(RefusalType.EXTRAORDINARY_REFUSAL.toString());
+    caze.setRefusalReceived(RefusalType.EXTRAORDINARY_REFUSAL);
     caze.setSurvey("CENSUS");
     caze.setUacQidLinks(null);
     caze.setEvents(null);
@@ -177,8 +177,7 @@ public class RefusalReceiverIT {
 
     Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
-    assertThat(actualCase.getRefusalReceived())
-        .isEqualTo(RefusalType.EXTRAORDINARY_REFUSAL.toString());
+    assertThat(actualCase.getRefusalReceived()).isEqualTo(RefusalType.EXTRAORDINARY_REFUSAL);
     assertThat(actualCase.getLastUpdated()).isNotEqualTo(cazeCreatedTime);
 
     List<Event> events = eventRepository.findAll();
