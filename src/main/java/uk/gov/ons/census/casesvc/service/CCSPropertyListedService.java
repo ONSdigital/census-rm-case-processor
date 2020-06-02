@@ -41,11 +41,15 @@ public class CCSPropertyListedService {
     RefusalType refusal = null;
 
     if (ccsProperty.getRefusal() != null) {
+<<<<<<< HEAD
       if ((ccsProperty.getRefusal().getType() != RefusalType.EXTRAORDINARY_REFUSAL)
           && (ccsProperty.getRefusal().getType() != RefusalType.HARD_REFUSAL)) {
         throw new RuntimeException("Unexpected refusal type" + ccsProperty.getRefusal().getType());
       }
       refusal = ccsProperty.getRefusal().getType();
+=======
+      refusal = ccsProperty.getRefusal().getType().toString();
+>>>>>>> 4a3515dd8c6ef64e6a1fb1aaac6f6a0846e4ed75
     }
 
     Case caze =
