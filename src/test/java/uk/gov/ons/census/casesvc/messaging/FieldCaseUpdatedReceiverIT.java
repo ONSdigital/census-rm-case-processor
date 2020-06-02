@@ -28,6 +28,7 @@ import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
+import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 
 @ContextConfiguration
@@ -42,6 +43,7 @@ public class FieldCaseUpdatedReceiverIT {
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
   @Autowired private CaseRepository caseRepository;
   @Autowired private EventRepository eventRepository;
+  @Autowired private UacQidLinkRepository uacQidLinkRepository;
 
   @Value("${queueconfig.case-updated-queue}")
   private String caseUpdatedQueueName;
@@ -55,6 +57,7 @@ public class FieldCaseUpdatedReceiverIT {
     rabbitQueueHelper.purgeQueue(caseUpdatedQueueName);
     rabbitQueueHelper.purgeQueue(inboundQueue);
     eventRepository.deleteAllInBatch();
+    uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
   }
 
