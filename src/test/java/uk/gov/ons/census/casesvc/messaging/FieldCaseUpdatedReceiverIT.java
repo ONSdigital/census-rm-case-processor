@@ -52,7 +52,6 @@ public class FieldCaseUpdatedReceiverIT {
   private String inboundQueue;
 
   @Before
-  @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(caseUpdatedQueueName);
     rabbitQueueHelper.purgeQueue(inboundQueue);
@@ -159,7 +158,7 @@ public class FieldCaseUpdatedReceiverIT {
     assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID.toString());
     assertThat(actualCollectionCase.getCeExpectedCapacity()).isEqualTo(6);
 
-    // check the metadata is included with field CANCEL decision
+    // check the metadata does NOT have a CANCEL decision
     assertThat(responseManagementEvent.getPayload().getMetadata().getFieldDecision()).isNull();
     assertThat(responseManagementEvent.getPayload().getMetadata().getCauseEventType())
         .isEqualTo(EventTypeDTO.FIELD_CASE_UPDATED);
