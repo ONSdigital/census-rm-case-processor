@@ -33,7 +33,7 @@ import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 @ContextConfiguration
 @ActiveProfiles("test")
 @SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @RunWith(SpringJUnit4ClassRunner.class)
 public class FieldCaseUpdatedReceiverIT {
 
