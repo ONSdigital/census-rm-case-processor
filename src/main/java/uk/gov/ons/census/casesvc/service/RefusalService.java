@@ -61,7 +61,7 @@ public class RefusalService {
 
     if (refusalDto.getType() == RefusalType.HARD_REFUSAL
         && refusedCase.getRefusalReceived() != null
-        && refusedCase.getRefusalReceived().equals(RefusalType.EXTRAORDINARY_REFUSAL)) {
+        && refusedCase.getRefusalReceived() == RefusalType.EXTRAORDINARY_REFUSAL) {
       logRefusalCaseEvent(
           refusalEvent,
           refusedCase,

@@ -89,6 +89,7 @@ public class RefusalServiceTest {
     collectionCase.setId(TEST_CASE_ID.toString());
     collectionCase.setRefusalReceived(RefusalType.HARD_REFUSAL);
     Case testCase = getRandomCase();
+    testCase.setRefusalReceived(null);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     when(caseService.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);
