@@ -78,7 +78,7 @@ public class FieldCaseUpdatedReceiverIT {
     caze.setCeActualResponses(5);
     caze.setCeExpectedCapacity(8);
     caze.setAddressInvalid(false);
-    caze.setRefusalReceived(false);
+    caze.setRefusalReceived(null);
     caze.setSkeleton(false);
     caze = caseRepository.saveAndFlush(caze);
 
