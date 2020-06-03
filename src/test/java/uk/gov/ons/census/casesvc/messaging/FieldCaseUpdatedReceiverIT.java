@@ -62,7 +62,6 @@ public class FieldCaseUpdatedReceiverIT {
   }
 
   @Test
-  @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
   public void testCeExpectedCapacityUpdated() throws IOException, InterruptedException {
     BlockingQueue<String> caseUpdatedQueue = rabbitQueueHelper.listen(caseUpdatedQueueName);
 
@@ -123,7 +122,6 @@ public class FieldCaseUpdatedReceiverIT {
   }
 
   @Test
-  @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
   public void testCeExpectedCapacityUpdatedAndNoCancelSent()
       throws IOException, InterruptedException {
     BlockingQueue<String> fieldOutboundQueue = rabbitQueueHelper.listen(caseUpdatedQueueName);
