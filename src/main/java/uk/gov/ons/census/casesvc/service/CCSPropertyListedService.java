@@ -41,8 +41,8 @@ public class CCSPropertyListedService {
     RefusalType refusal = null;
 
     if (ccsProperty.getRefusal() != null) {
-      if ((ccsProperty.getRefusal().getType() != RefusalType.EXTRAORDINARY_REFUSAL)
-          && (ccsProperty.getRefusal().getType() != RefusalType.HARD_REFUSAL)) {
+      if (ccsProperty.getRefusal().getType() != RefusalType.EXTRAORDINARY_REFUSAL
+          && ccsProperty.getRefusal().getType() != RefusalType.HARD_REFUSAL) {
         throw new RuntimeException("Unexpected refusal type" + ccsProperty.getRefusal().getType());
       }
       refusal = ccsProperty.getRefusal().getType();
