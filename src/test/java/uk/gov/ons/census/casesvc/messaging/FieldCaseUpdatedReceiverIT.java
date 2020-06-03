@@ -62,6 +62,7 @@ public class FieldCaseUpdatedReceiverIT {
   }
 
   @Test
+  @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
   public void testCeExpectedCapacityUpdated() throws IOException, InterruptedException {
     BlockingQueue<String> caseUpdatedQueue = rabbitQueueHelper.listen(caseUpdatedQueueName);
 
@@ -76,12 +77,15 @@ public class FieldCaseUpdatedReceiverIT {
     caze.setAddressLevel("E");
     caze.setCeActualResponses(5);
     caze.setCeExpectedCapacity(8);
+    caze.setAddressInvalid(false);
+    caze.setRefusalReceived(false);
+    caze.setSkeleton(false);
     caze = caseRepository.saveAndFlush(caze);
 
     ResponseManagementEvent managementEvent = getTestResponseManagementFieldUpdatedEvent();
     managementEvent.getEvent().setTransactionId(UUID.randomUUID());
     managementEvent.getPayload().getCollectionCase().setId(TEST_CASE_ID.toString());
-    managementEvent.getPayload().getCollectionCase().setCeExpectedCapacity(5);
+    managementEvent.getPayload().getCollectionCase().setCeExpectedCapacity(2);
 
     String json = convertObjectToJson(managementEvent);
     Message message =
@@ -99,7 +103,7 @@ public class FieldCaseUpdatedReceiverIT {
         rabbitQueueHelper.checkExpectedMessageReceived(caseUpdatedQueue);
     CollectionCase actualCollectionCase = responseManagementEvent.getPayload().getCollectionCase();
     assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID.toString());
-    assertThat(actualCollectionCase.getCeExpectedCapacity()).isEqualTo(5);
+    assertThat(actualCollectionCase.getCeExpectedCapacity()).isEqualTo(2);
 
     // check the metadata is included with field CANCEL decision
     assertThat(responseManagementEvent.getPayload().getMetadata().getFieldDecision())
@@ -109,7 +113,7 @@ public class FieldCaseUpdatedReceiverIT {
 
     Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
-    assertThat(actualCase.getCeExpectedCapacity()).isEqualTo(5);
+    assertThat(actualCase.getCeExpectedCapacity()).isEqualTo(2);
 
     // check database for log eventDTO
     List<Event> events = eventRepository.findAll();
@@ -119,6 +123,7 @@ public class FieldCaseUpdatedReceiverIT {
   }
 
   @Test
+  @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
   public void testCeExpectedCapacityUpdatedAndNoCancelSent()
       throws IOException, InterruptedException {
     BlockingQueue<String> fieldOutboundQueue = rabbitQueueHelper.listen(caseUpdatedQueueName);
