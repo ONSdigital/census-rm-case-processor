@@ -27,14 +27,15 @@ public class FieldCaseUpdatedReceiverTest {
 
   @Test
   public void testFieldCaseUpdatedReceiver() {
-
+    // Given
     ResponseManagementEvent managementEvent = getTestResponseManagementFieldUpdatedEvent();
     Message<ResponseManagementEvent> message = constructMessageWithValidTimeStamp(managementEvent);
     OffsetDateTime expectedDate = MsgDateHelper.getMsgTimeStamp(message);
 
+    // When
     underTest.receiveMessage(message);
 
-    //    // THEN
+    // Then
     ArgumentCaptor<ResponseManagementEvent> managementEventArgumentCaptor =
         ArgumentCaptor.forClass(ResponseManagementEvent.class);
     verify(fieldCaseUpdatedService)

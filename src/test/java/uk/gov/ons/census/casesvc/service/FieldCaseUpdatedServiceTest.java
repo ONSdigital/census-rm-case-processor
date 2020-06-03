@@ -36,6 +36,7 @@ public class FieldCaseUpdatedServiceTest {
   @Test
   public void testProcessFieldCaseUpdatedEventHappyPath() {
 
+    // Given
     ResponseManagementEvent managementEvent = getTestResponseManagementFieldUpdatedEvent();
 
     CollectionCase collectionCase = managementEvent.getPayload().getCollectionCase();
@@ -51,6 +52,7 @@ public class FieldCaseUpdatedServiceTest {
     when(caseRepository.getCaseAndLockByCaseId(UUID.fromString(collectionCase.getId())))
         .thenReturn(java.util.Optional.of(testCase));
 
+    // When
     underTest.processFieldCaseUpdatedEvent(managementEvent, messageTimestamp);
 
     // Then
@@ -77,7 +79,7 @@ public class FieldCaseUpdatedServiceTest {
 
   @Test
   public void testProcessFieldCaseUpdatedEventNoCancelSent() {
-
+    // Given
     ResponseManagementEvent managementEvent = getTestResponseManagementFieldUpdatedEvent();
 
     CollectionCase collectionCase = managementEvent.getPayload().getCollectionCase();
@@ -93,6 +95,7 @@ public class FieldCaseUpdatedServiceTest {
     when(caseRepository.getCaseAndLockByCaseId(UUID.fromString(collectionCase.getId())))
         .thenReturn(java.util.Optional.of(testCase));
 
+    // When
     underTest.processFieldCaseUpdatedEvent(managementEvent, messageTimestamp);
 
     // Then

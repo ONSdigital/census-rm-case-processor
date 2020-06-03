@@ -1,6 +1,7 @@
 package uk.gov.ons.census.casesvc.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.annotation.DirtiesContext.MethodMode.AFTER_METHOD;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementFieldUpdatedEvent;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
@@ -59,9 +60,10 @@ public class FieldCaseUpdatedReceiverIT {
     caseRepository.deleteAllInBatch();
   }
 
+  @DirtiesContext(methodMode = AFTER_METHOD)
   @Test
   public void testCeExpectedCapacityUpdated() throws IOException, InterruptedException {
-    BlockingQueue<String> fieldOutboundQueue = rabbitQueueHelper.listen(caseUpdatedQueueName);
+    BlockingQueue<String> caseUpdatedQueue = rabbitQueueHelper.listen(caseUpdatedQueueName);
 
     EasyRandom easyRandom = new EasyRandom();
     Case caze = easyRandom.nextObject(Case.class);
@@ -94,7 +96,7 @@ public class FieldCaseUpdatedReceiverIT {
 
     // check messages sent
     ResponseManagementEvent responseManagementEvent =
-        rabbitQueueHelper.checkExpectedMessageReceived(fieldOutboundQueue);
+        rabbitQueueHelper.checkExpectedMessageReceived(caseUpdatedQueue);
     CollectionCase actualCollectionCase = responseManagementEvent.getPayload().getCollectionCase();
     assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID.toString());
     assertThat(actualCollectionCase.getCeExpectedCapacity()).isEqualTo(5);
@@ -116,6 +118,7 @@ public class FieldCaseUpdatedReceiverIT {
     assertThat(event.getEventDescription()).isEqualTo("Field case update received");
   }
 
+  @DirtiesContext(methodMode = AFTER_METHOD)
   @Test
   public void testCeExpectedCapacityUpdatedAndNoCancelSent()
       throws IOException, InterruptedException {
