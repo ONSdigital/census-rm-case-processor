@@ -37,12 +37,7 @@ public class FieldCaseUpdatedService {
     CollectionCase fieldCaseUpdatedPayload =
         responseManagementEvent.getPayload().getCollectionCase();
 
-    Case caze =
-        caseService.getCaseAndLockIt(
-            UUID.fromString(fieldCaseUpdatedPayload.getId()),
-            String.format(
-                "Failed to get row for field case updates, row is probably locked and this should resolve itself: %s",
-                fieldCaseUpdatedPayload.getId()));
+    Case caze = caseService.getCaseAndLockIt(UUID.fromString(fieldCaseUpdatedPayload.getId()));
 
     if (!caze.getCaseType().equals(CE_CASE_TYPE)) {
       throw new IllegalArgumentException(

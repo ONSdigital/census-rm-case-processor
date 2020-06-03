@@ -54,8 +54,7 @@ public class FieldCaseUpdatedServiceTest {
     testCase.setCeActualResponses(8);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
-    when(caseService.getCaseAndLockIt(eq(TEST_CASE_ID), eq(EXCEPTION_MESSAGE)))
-        .thenReturn(testCase);
+    when(caseService.getCaseAndLockIt(eq(TEST_CASE_ID))).thenReturn(testCase);
 
     // When
     underTest.processFieldCaseUpdatedEvent(managementEvent, messageTimestamp);
@@ -64,7 +63,7 @@ public class FieldCaseUpdatedServiceTest {
 
     InOrder inOrder = Mockito.inOrder(caseRepository, eventLogger, caseService);
 
-    inOrder.verify(caseService).getCaseAndLockIt(any(UUID.class), any(String.class));
+    inOrder.verify(caseService).getCaseAndLockIt(any(UUID.class));
 
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
     ArgumentCaptor<Metadata> metadataArgumentCaptor = ArgumentCaptor.forClass(Metadata.class);
@@ -97,8 +96,7 @@ public class FieldCaseUpdatedServiceTest {
     testCase.setCeActualResponses(3);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
-    when(caseService.getCaseAndLockIt(eq(TEST_CASE_ID), eq(EXCEPTION_MESSAGE)))
-        .thenReturn(testCase);
+    when(caseService.getCaseAndLockIt(eq(TEST_CASE_ID))).thenReturn(testCase);
 
     // When
     underTest.processFieldCaseUpdatedEvent(managementEvent, messageTimestamp);
@@ -107,7 +105,7 @@ public class FieldCaseUpdatedServiceTest {
 
     InOrder inOrder = Mockito.inOrder(caseRepository, eventLogger, caseService);
 
-    inOrder.verify(caseService).getCaseAndLockIt(any(UUID.class), any(String.class));
+    inOrder.verify(caseService).getCaseAndLockIt(any(UUID.class));
 
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
     ArgumentCaptor<Metadata> metadataArgumentCaptor = ArgumentCaptor.forClass(Metadata.class);
@@ -138,8 +136,7 @@ public class FieldCaseUpdatedServiceTest {
     testCase.setCaseType("HH");
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
-    when(caseService.getCaseAndLockIt(eq(TEST_CASE_ID), eq(EXCEPTION_MESSAGE)))
-        .thenReturn(testCase);
+    when(caseService.getCaseAndLockIt(eq(TEST_CASE_ID))).thenReturn(testCase);
 
     String expectedErrorMessage =
         String.format(

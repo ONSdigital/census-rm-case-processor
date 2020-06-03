@@ -111,7 +111,7 @@ public class CaseReceiptServiceTest {
     uacQidLink.setQid(qid);
     uacQidLink.setCaze(caze);
 
-    when(caseService.getCaseAndLockIt(any(), any())).thenReturn(caze);
+    when(caseService.getCaseAndLockIt(any())).thenReturn(caze);
 
     try {
       underTest.receiptCase(uacQidLink, getReceiptEventDTO());
@@ -141,7 +141,7 @@ public class CaseReceiptServiceTest {
     assertThat(actualCase.isReceiptReceived()).as("Case Receipted").isEqualTo(expectReceipt);
 
     if (expectIncrement) {
-      verify(caseService).getCaseAndLockIt(eq(caze.getCaseId()), anyString());
+      verify(caseService).getCaseAndLockIt(eq(caze.getCaseId()));
       assertThat(actualCase.getCeActualResponses()).isEqualTo(1);
     }
 

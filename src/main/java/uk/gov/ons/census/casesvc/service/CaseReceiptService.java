@@ -80,12 +80,7 @@ public class CaseReceiptService {
   }
 
   private Case getCaseAndLockIt(UUID caseId) {
-    Case caze =
-        caseService.getCaseAndLockIt(
-            caseId,
-            String.format(
-                "Failed to get row to increment responses, row is probably locked and this should resolve itself: %s",
-                caseId));
+    Case caze = caseService.getCaseAndLockIt(caseId);
     return caze;
   }
 

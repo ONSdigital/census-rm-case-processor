@@ -338,11 +338,12 @@ public class CaseServiceTest {
   public void testGetAndLockCaseErrors() {
     when(caseRepository.getCaseAndLockByCaseId(TEST_UUID)).thenReturn(Optional.empty());
 
-    String expectedErrorMessage = String.format("Case ID '%s' not present", TEST_UUID);
+    String expectedErrorMessage =
+        String.format("Could not lock row for update on case: %s", TEST_UUID);
 
     try {
       // WHEN
-      underTest.getCaseAndLockIt(TEST_UUID, expectedErrorMessage);
+      underTest.getCaseAndLockIt(TEST_UUID);
     } catch (RuntimeException re) {
       // THEN
       assertThat(re.getMessage()).isEqualTo(expectedErrorMessage);

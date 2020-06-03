@@ -142,11 +142,12 @@ public class CaseService {
     return responseManagementEvent.getPayload();
   }
 
-  public Case getCaseAndLockIt(UUID caseId, String exceptionMessage) {
+  public Case getCaseAndLockIt(UUID caseId) {
     Optional<Case> oCase = caseRepository.getCaseAndLockByCaseId(caseId);
 
     if (!oCase.isPresent()) {
-      throw new RuntimeException(exceptionMessage);
+      throw new RuntimeException(
+          String.format("Could not lock row for update on case: %s", caseId));
     }
 
     return oCase.get();
