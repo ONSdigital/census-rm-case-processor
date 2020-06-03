@@ -22,12 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
-import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
-import uk.gov.ons.census.casesvc.model.dto.InvalidAddress;
-import uk.gov.ons.census.casesvc.model.dto.Metadata;
-import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
-import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
-import uk.gov.ons.census.casesvc.model.dto.UacDTO;
+import uk.gov.ons.census.casesvc.model.dto.*;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
@@ -65,7 +60,7 @@ public class CCSPropertyListedServiceTest {
     when(caseService.createCCSCase(
             managementEvent.getPayload().getCcsProperty().getCollectionCase().getId(),
             managementEvent.getPayload().getCcsProperty().getSampleUnit(),
-            false,
+            null,
             false))
         .thenReturn(expectedCase);
 
@@ -126,7 +121,7 @@ public class CCSPropertyListedServiceTest {
     when(caseService.createCCSCase(
             expectedCase.getCaseId().toString(),
             managementEvent.getPayload().getCcsProperty().getSampleUnit(),
-            false,
+            null,
             false))
         .thenReturn(expectedCase);
 
@@ -154,17 +149,18 @@ public class CCSPropertyListedServiceTest {
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     RefusalDTO refusalDto = new RefusalDTO();
+    refusalDto.setType(RefusalType.HARD_REFUSAL);
     managementEvent.getPayload().getCcsProperty().setRefusal(refusalDto);
 
     Case expectedCase =
         getExpectedCCSCase(
             managementEvent.getPayload().getCcsProperty().getCollectionCase().getId());
-    expectedCase.setRefusalReceived(true);
+    expectedCase.setRefusalReceived(RefusalType.HARD_REFUSAL);
 
     when(caseService.createCCSCase(
             expectedCase.getCaseId().toString(),
             managementEvent.getPayload().getCcsProperty().getSampleUnit(),
-            true,
+            RefusalType.HARD_REFUSAL,
             false))
         .thenReturn(expectedCase);
 
@@ -179,7 +175,7 @@ public class CCSPropertyListedServiceTest {
         .createCCSCase(
             expectedCase.getCaseId().toString(),
             managementEvent.getPayload().getCcsProperty().getSampleUnit(),
-            true,
+            RefusalType.HARD_REFUSAL,
             false);
 
     checkCorrectEventLogging(inOrder, expectedCase, managementEvent, messageTimestamp);
@@ -202,7 +198,7 @@ public class CCSPropertyListedServiceTest {
     when(caseService.createCCSCase(
             expectedCase.getCaseId().toString(),
             managementEvent.getPayload().getCcsProperty().getSampleUnit(),
-            false,
+            null,
             true))
         .thenReturn(expectedCase);
 
@@ -218,7 +214,7 @@ public class CCSPropertyListedServiceTest {
     Case caze = new Case();
     caze.setCaseId(UUID.fromString(id));
     caze.setSurvey("CCS");
-    caze.setRefusalReceived(false);
+    caze.setRefusalReceived(null);
     caze.setAddressInvalid(false);
 
     return caze;

@@ -25,11 +25,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
-import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
-import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
-import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
-import uk.gov.ons.census.casesvc.model.dto.UacCreatedDTO;
+import uk.gov.ons.census.casesvc.model.dto.*;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
@@ -166,7 +162,7 @@ public class FulfilmentRequestReceiverIT {
         assertThat(actualUacCreated.getUac()).isEqualTo(uacQidCreated.getUac());
         remainingMatches--;
       } else {
-        fail("Unexpected event loggeed");
+        fail("Unexpected event logged");
       }
     }
 
@@ -243,7 +239,7 @@ public class FulfilmentRequestReceiverIT {
     assertThat(actualChildCase.getAddressType()).isEqualTo(actualParentCase.getAddressType());
     assertThat(actualChildCase.getCaseType()).isEqualTo("HI");
     assertThat(actualChildCase.isReceiptReceived()).isEqualTo(false);
-    assertThat(actualChildCase.isRefusalReceived()).isEqualTo(false);
+    assertThat(actualChildCase.getRefusalReceived()).isNull();
 
     assertThat(actualChildCase.getHtcWillingness()).isNull();
     assertThat(actualChildCase.getTreatmentCode()).isNull();
@@ -345,7 +341,7 @@ public class FulfilmentRequestReceiverIT {
     assertThat(actualChildCase.getAddressType()).isEqualTo(actualParentCase.getAddressType());
     assertThat(actualChildCase.getCaseType()).isEqualTo("HI");
     assertThat(actualChildCase.isReceiptReceived()).isEqualTo(false);
-    assertThat(actualChildCase.isRefusalReceived()).isEqualTo(false);
+    assertThat(actualChildCase.getRefusalReceived()).isNull();
 
     assertThat(actualChildCase.getHtcWillingness()).isNull();
     assertThat(actualChildCase.getTreatmentCode()).isNull();
@@ -418,7 +414,7 @@ public class FulfilmentRequestReceiverIT {
     assertThat(actualChildCase.getAddressType()).isEqualTo(actualParentCase.getAddressType());
     assertThat(actualChildCase.getCaseType()).isEqualTo("HI");
     assertThat(actualChildCase.isReceiptReceived()).isEqualTo(false);
-    assertThat(actualChildCase.isRefusalReceived()).isEqualTo(false);
+    assertThat(actualChildCase.getRefusalReceived()).isNull();
 
     assertThat(actualChildCase.getHtcWillingness()).isNull();
     assertThat(actualChildCase.getTreatmentCode()).isNull();

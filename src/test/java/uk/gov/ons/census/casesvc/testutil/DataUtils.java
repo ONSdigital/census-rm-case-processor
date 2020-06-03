@@ -180,7 +180,8 @@ public class DataUtils {
     return managementEvent;
   }
 
-  public static ResponseManagementEvent getTestResponseManagementRefusalEvent() {
+  public static ResponseManagementEvent getTestResponseManagementRefusalEvent(
+      RefusalType refusalType) {
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
 
     EventDTO event = managementEvent.getEvent();
@@ -195,7 +196,7 @@ public class DataUtils {
     payload.setPrintCaseSelected(null);
 
     RefusalDTO refusal = payload.getRefusal();
-    refusal.setType(RefusalType.HARD_REFUSAL);
+    refusal.setType(refusalType);
 
     return managementEvent;
   }

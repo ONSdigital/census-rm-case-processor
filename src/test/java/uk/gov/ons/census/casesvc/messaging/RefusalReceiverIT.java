@@ -25,11 +25,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
-import uk.gov.ons.census.casesvc.model.dto.EventDTO;
-import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
-import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
-import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
+import uk.gov.ons.census.casesvc.model.dto.*;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
@@ -72,14 +68,14 @@ public class RefusalReceiverIT {
   }
 
   @Test
-  public void testRefusalEmitsMessageAndLogsEventForCase()
+  public void testHardRefusalEmitsMessageAndLogsEventForCase()
       throws InterruptedException, IOException {
     // GIVEN
     BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
 
     Case caze = getRandomCase();
     caze.setCaseId(TEST_CASE_ID);
-    caze.setRefusalReceived(false);
+    caze.setRefusalReceived(null);
     caze.setSurvey("CENSUS");
     caze.setUacQidLinks(null);
     caze.setEvents(null);
@@ -89,7 +85,8 @@ public class RefusalReceiverIT {
     OffsetDateTime cazeCreatedTime =
         caseRepository.findById(TEST_CASE_ID).get().getCreatedDateTime();
 
-    ResponseManagementEvent managementEvent = getTestResponseManagementRefusalEvent();
+    ResponseManagementEvent managementEvent =
+        getTestResponseManagementRefusalEvent(RefusalType.HARD_REFUSAL);
     managementEvent.getEvent().setTransactionId(UUID.randomUUID());
     RefusalDTO expectedRefusal = managementEvent.getPayload().getRefusal();
     expectedRefusal.getCollectionCase().setId(TEST_CASE_ID.toString());
@@ -114,7 +111,7 @@ public class RefusalReceiverIT {
 
     Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
     assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
-    assertThat(actualCase.isRefusalReceived()).isTrue();
+    assertThat(actualCase.getRefusalReceived()).isEqualTo(RefusalType.HARD_REFUSAL);
     assertThat(actualCase.getLastUpdated()).isNotEqualTo(cazeCreatedTime);
 
     // check the metadata is included with field CANCEL decision
@@ -133,5 +130,65 @@ public class RefusalReceiverIT {
     assertThat(actualRefusal.getAgentId()).isEqualTo(expectedRefusal.getAgentId());
     assertThat(actualRefusal.getCollectionCase().getId())
         .isEqualTo(expectedRefusal.getCollectionCase().getId());
+  }
+
+  @Test
+  public void testCaseAlreadySetToExtraordinaryNotUpdatedByAHardRefusal()
+      throws InterruptedException, IOException {
+    // As per
+    // https://collaborate2.ons.gov.uk/confluence/pages/viewpage.action?spaceKey=SDC&title=Refusal+status+changes+and+Non+Compliance
+    // If a case has already been marked as Extraordinary Refusal and we receive a Hard Refusal for
+    // it we will not update the case, or emit
+    //  Just record the event.
+
+    // GIVEN
+    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhCaseQueue);
+
+    Case caze = getRandomCase();
+    caze.setCaseId(TEST_CASE_ID);
+    caze.setRefusalReceived(RefusalType.EXTRAORDINARY_REFUSAL);
+    caze.setSurvey("CENSUS");
+    caze.setUacQidLinks(null);
+    caze.setEvents(null);
+    caze.setAddressLevel("U");
+    caseRepository.saveAndFlush(caze);
+
+    OffsetDateTime cazeCreatedTime =
+        caseRepository.findById(TEST_CASE_ID).get().getCreatedDateTime();
+
+    ResponseManagementEvent managementEvent =
+        getTestResponseManagementRefusalEvent(RefusalType.HARD_REFUSAL);
+    managementEvent.getEvent().setTransactionId(UUID.randomUUID());
+
+    RefusalDTO refusalDTO = managementEvent.getPayload().getRefusal();
+    refusalDTO.getCollectionCase().setId(TEST_CASE_ID.toString());
+
+    String json = convertObjectToJson(managementEvent);
+    Message message =
+        MessageBuilder.withBody(json.getBytes())
+            .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+            .build();
+
+    // WHEN
+    rabbitQueueHelper.sendMessage(inboundQueue, message);
+
+    // THEN
+    rabbitQueueHelper.checkMessageIsNotReceived(outboundQueue, 5);
+
+    Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
+    assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
+    assertThat(actualCase.getRefusalReceived()).isEqualTo(RefusalType.EXTRAORDINARY_REFUSAL);
+    assertThat(actualCase.getLastUpdated()).isNotEqualTo(cazeCreatedTime);
+
+    List<Event> events = eventRepository.findAll();
+    assertThat(events.size()).isEqualTo(1);
+
+    RefusalDTO actualRefusal =
+        convertJsonToObject(events.get(0).getEventPayload(), RefusalDTO.class);
+    assertThat(actualRefusal.getType()).isEqualTo(RefusalType.HARD_REFUSAL);
+    assertThat(actualRefusal.getReport()).isEqualTo(refusalDTO.getReport());
+    assertThat(actualRefusal.getAgentId()).isEqualTo(refusalDTO.getAgentId());
+    assertThat(actualRefusal.getCollectionCase().getId())
+        .isEqualTo(refusalDTO.getCollectionCase().getId());
   }
 }

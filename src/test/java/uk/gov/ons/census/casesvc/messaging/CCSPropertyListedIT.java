@@ -172,7 +172,7 @@ public class CCSPropertyListedIT {
 
     Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
     assertThat(actualCase.getSurvey()).isEqualTo("CCS");
-    assertThat(actualCase.isRefusalReceived()).isTrue();
+    assertThat(actualCase.getRefusalReceived()).isEqualTo(RefusalType.HARD_REFUSAL);
 
     List<UacQidLink> actualUacQidLinks = uacQidLinkRepository.findAll();
     assertThat(actualUacQidLinks.size()).isEqualTo(1);

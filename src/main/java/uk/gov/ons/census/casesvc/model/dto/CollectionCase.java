@@ -17,7 +17,7 @@ public class CollectionCase {
   private Address address;
   private OffsetDateTime actionableFrom;
   private Boolean receiptReceived;
-  private Boolean refusalReceived;
+  private RefusalType refusalReceived;
 
   // Below this line is extra data potentially needed by Action Scheduler - can be ignored by RH
   private String actionPlanId;

@@ -23,14 +23,7 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
-import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
-import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
-import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
-import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
-import uk.gov.ons.census.casesvc.model.dto.Metadata;
-import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
-import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
-import uk.gov.ons.census.casesvc.model.dto.SampleUnitDTO;
+import uk.gov.ons.census.casesvc.model.dto.*;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.CaseMetadata;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
@@ -212,13 +205,13 @@ public class CaseServiceTest {
             });
 
     // When
-    Case actualCase = underTest.createCCSCase(caseId, sampleUnit, false, false);
+    Case actualCase = underTest.createCCSCase(caseId, sampleUnit, null, false);
 
     // Then
     verify(mapperFacade).map(sampleUnit, Case.class);
     assertThat(actualCase.getSurvey()).isEqualTo("CCS");
     assertThat(actualCase.getCaseId()).isEqualTo(UUID.fromString(caseId));
-    assertThat(actualCase.isRefusalReceived()).isFalse();
+    assertThat(actualCase.getRefusalReceived()).isNull();
     assertThat(actualCase.getActionPlanId()).isEqualTo(TEST_ACTION_PLAN_ID.toString());
     assertThat(actualCase.getCollectionExerciseId())
         .isEqualTo(TEST_COLLECTION_EXERCISE_ID.toString());
@@ -245,13 +238,13 @@ public class CaseServiceTest {
             });
 
     // When
-    Case actualCase = underTest.createCCSCase(caseId, sampleUnit, true, false);
+    Case actualCase = underTest.createCCSCase(caseId, sampleUnit, RefusalType.HARD_REFUSAL, false);
 
     // Then
     verify(mapperFacade).map(sampleUnit, Case.class);
     assertThat(actualCase.getSurvey()).isEqualTo("CCS");
     assertThat(actualCase.getCaseId()).isEqualTo(UUID.fromString(caseId));
-    assertThat(actualCase.isRefusalReceived()).isTrue();
+    assertThat(actualCase.getRefusalReceived()).isEqualTo(RefusalType.HARD_REFUSAL);
     assertThat(actualCase.getActionPlanId()).isEqualTo(TEST_ACTION_PLAN_ID.toString());
     assertThat(actualCase.getCollectionExerciseId())
         .isEqualTo(TEST_COLLECTION_EXERCISE_ID.toString());
@@ -449,7 +442,7 @@ public class CaseServiceTest {
         .isEqualTo(parentCase.getCollectionExerciseId());
     assertThat(actualChildCase.getActionPlanId()).isEqualTo(parentCase.getActionPlanId());
     assertThat(actualChildCase.isReceiptReceived()).isFalse();
-    assertThat(actualChildCase.isRefusalReceived()).isFalse();
+    assertThat(actualChildCase.getRefusalReceived()).isNull();
     assertThat(actualChildCase.getUprn()).isEqualTo(parentCase.getUprn());
     assertThat(actualChildCase.getEstabUprn()).isEqualTo(parentCase.getEstabUprn());
     assertThat(actualChildCase.getAddressType()).isEqualTo(parentCase.getAddressType());
