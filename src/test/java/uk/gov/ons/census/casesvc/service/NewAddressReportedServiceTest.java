@@ -474,7 +474,7 @@ public class NewAddressReportedServiceTest {
     expectedCase.setActionPlanId(EXPECTED_ACTION_PLAN_ID);
     expectedCase.setSurvey("CENSUS");
     expectedCase.setHandDelivery(false);
-    expectedCase.setRefusalReceived(false);
+    expectedCase.setRefusalReceived(null);
     expectedCase.setReceiptReceived(false);
     expectedCase.setAddressInvalid(false);
     expectedCase.setSkeleton(true);

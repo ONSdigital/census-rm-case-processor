@@ -83,7 +83,7 @@ public class UndeliveredMailReceiverIT {
     caze.setEvents(null);
     caze.setSurvey("CENSUS");
     caze.setAddressInvalid(false);
-    caze.setRefusalReceived(false);
+    caze.setRefusalReceived(null);
     caze.setReceiptReceived(false);
     caze = caseRepository.saveAndFlush(caze);
 
@@ -146,7 +146,7 @@ public class UndeliveredMailReceiverIT {
     caze.setEvents(null);
     caze.setSurvey("CENSUS");
     caze.setAddressInvalid(false);
-    caze.setRefusalReceived(false);
+    caze.setRefusalReceived(null);
     caze.setReceiptReceived(false);
     caseRepository.saveAndFlush(caze);
 

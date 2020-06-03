@@ -8,10 +8,7 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
-import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
-import uk.gov.ons.census.casesvc.model.dto.Metadata;
-import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
-import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
+import uk.gov.ons.census.casesvc.model.dto.*;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 
@@ -21,6 +18,8 @@ public class RefusalService {
   private static final String REFUSAL_RECEIVED = "Refusal Received";
   private static final String ESTAB_INDIVIDUAL_REFUSAL_RECEIVED =
       "Refusal received for individual on Estab";
+  private static final String HARD_REFUSAL_FOR_ALREADY_EXTRAORDINARY_REFUSED_CASE =
+      "Hard Refusal Received for case already marked Extraordinary refused";
   private static final String ESTAB_ADDRESS_LEVEL = "E";
 
   private final CaseService caseService;
@@ -33,20 +32,45 @@ public class RefusalService {
 
   public void processRefusal(
       ResponseManagementEvent refusalEvent, OffsetDateTime messageTimestamp) {
-    RefusalDTO refusal = refusalEvent.getPayload().getRefusal();
+    RefusalDTO refusalDto = refusalEvent.getPayload().getRefusal();
+
     Case refusedCase =
-        caseService.getCaseByCaseId(UUID.fromString(refusal.getCollectionCase().getId()));
+        caseService.getCaseByCaseId(UUID.fromString(refusalDto.getCollectionCase().getId()));
+
+    if (justLogRefusalIfConditionsMet(refusedCase, refusalEvent, messageTimestamp, refusalDto)) {
+      return;
+    }
+
+    refusedCase.setRefusalReceived(refusalDto.getType());
+    caseService.saveCaseAndEmitCaseUpdatedEvent(refusedCase, buildMetadataForRefusal(refusalEvent));
+
+    logRefusalCaseEvent(refusalEvent, refusedCase, messageTimestamp, REFUSAL_RECEIVED);
+  }
+
+  private boolean justLogRefusalIfConditionsMet(
+      Case refusedCase,
+      ResponseManagementEvent refusalEvent,
+      OffsetDateTime messageTimestamp,
+      RefusalDTO refusalDto) {
 
     if (isEstabLevelAddressAndChannelIsNotField(refusedCase.getAddressLevel(), refusalEvent)) {
       logRefusalCaseEvent(
           refusalEvent, refusedCase, messageTimestamp, ESTAB_INDIVIDUAL_REFUSAL_RECEIVED);
-      return;
+      return true;
     }
 
-    refusedCase.setRefusalReceived(true);
-    caseService.saveCaseAndEmitCaseUpdatedEvent(refusedCase, buildMetadataForRefusal(refusalEvent));
+    if (refusalDto.getType() == RefusalType.HARD_REFUSAL
+        && refusedCase.getRefusalReceived() != null
+        && refusedCase.getRefusalReceived() == RefusalType.EXTRAORDINARY_REFUSAL) {
+      logRefusalCaseEvent(
+          refusalEvent,
+          refusedCase,
+          messageTimestamp,
+          HARD_REFUSAL_FOR_ALREADY_EXTRAORDINARY_REFUSED_CASE);
+      return true;
+    }
 
-    logRefusalCaseEvent(refusalEvent, refusedCase, messageTimestamp, REFUSAL_RECEIVED);
+    return false;
   }
 
   private Metadata buildMetadataForRefusal(ResponseManagementEvent event) {

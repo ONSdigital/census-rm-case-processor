@@ -144,7 +144,7 @@ public class NewAddressReportedService {
     skeletonCase.setActionPlanId(censusActionPlanId);
     skeletonCase.setSurvey("CENSUS");
     skeletonCase.setHandDelivery(false);
-    skeletonCase.setRefusalReceived(false);
+    skeletonCase.setRefusalReceived(null);
     skeletonCase.setReceiptReceived(false);
     skeletonCase.setAddressInvalid(false);
     skeletonCase.setCeActualResponses(0);
@@ -246,7 +246,7 @@ public class NewAddressReportedService {
     newCase.setActionPlanId(censusActionPlanId);
     newCase.setSkeleton(true);
     newCase.setHandDelivery(false);
-    newCase.setRefusalReceived(false);
+    newCase.setRefusalReceived(null);
     newCase.setReceiptReceived(false);
     newCase.setAddressInvalid(false);
     newCase.setCeActualResponses(0);

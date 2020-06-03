@@ -251,6 +251,7 @@ public class AddressReceiverIT {
     sourceCase.setEvents(null);
     sourceCase.setCaseType("HH");
     sourceCase.setAddressLevel("U");
+    sourceCase.setRefusalReceived(null);
     sourceCase.setCollectionExerciseId(censuscollectionExerciseId);
     sourceCase.getMetadata().setSecureEstablishment(true);
     sourceCase = caseRepository.saveAndFlush(sourceCase);
@@ -319,7 +320,7 @@ public class AddressReceiverIT {
     assertThat(actualCase.getMetadata().getSecureEstablishment()).isTrue();
 
     assertThat(actualCase.isReceiptReceived()).isFalse();
-    assertThat(actualCase.isRefusalReceived()).isFalse();
+    assertThat(actualCase.getRefusalReceived()).isNull();
     assertThat(actualCase.isAddressInvalid()).isFalse();
     assertThat(actualCase.isHandDelivery()).isFalse();
 
@@ -347,6 +348,7 @@ public class AddressReceiverIT {
     sourceCase.setAddressLevel("U");
     sourceCase.setCollectionExerciseId(censuscollectionExerciseId);
     sourceCase.getMetadata().setSecureEstablishment(false);
+    sourceCase.setRefusalReceived(null);
     sourceCase = caseRepository.saveAndFlush(sourceCase);
 
     Address address = new Address();
@@ -437,7 +439,7 @@ public class AddressReceiverIT {
     assertThat(actualCase.getMetadata().getSecureEstablishment()).isFalse();
 
     assertThat(actualCase.isReceiptReceived()).isFalse();
-    assertThat(actualCase.isRefusalReceived()).isFalse();
+    assertThat(actualCase.getRefusalReceived()).isNull();
     assertThat(actualCase.isAddressInvalid()).isFalse();
     assertThat(actualCase.isHandDelivery()).isFalse();
 

@@ -152,7 +152,7 @@ public class BlankQuestionnaireService {
     @Override
     public void run(Case caze, EventTypeDTO causeEventType) {
       Metadata metadata = null;
-      if (!caze.isRefusalReceived() && !caze.isAddressInvalid()) {
+      if (caze.getRefusalReceived() == null && !caze.isAddressInvalid()) {
         // Only send to fieldwork if the case is not refused or address invalid
         metadata = buildMetadata(causeEventType, ActionInstructionType.UPDATE, true);
       }

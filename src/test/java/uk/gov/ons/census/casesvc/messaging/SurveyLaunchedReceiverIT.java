@@ -72,7 +72,7 @@ public class SurveyLaunchedReceiverIT {
     caze.setUacQidLinks(null);
     caze.setEvents(null);
     caze.setAddressInvalid(false);
-    caze.setRefusalReceived(false);
+    caze.setRefusalReceived(null);
     caze.setReceiptReceived(false);
     caze = caseRepository.saveAndFlush(caze);
 
