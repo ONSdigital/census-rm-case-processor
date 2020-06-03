@@ -62,7 +62,7 @@ public class FieldCaseUpdatedReceiverIT {
   }
 
   @Test
-  public void testCeExpectedCapacityUpdated() throws IOException, InterruptedException {  
+  public void testCeExpectedCapacityUpdated() throws IOException, InterruptedException {
     BlockingQueue<String> caseUpdatedQueue = rabbitQueueHelper.listen(caseUpdatedQueueName);
 
     EasyRandom easyRandom = new EasyRandom();
