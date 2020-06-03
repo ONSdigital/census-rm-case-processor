@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import org.jeasy.random.EasyRandom;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,16 +54,6 @@ public class FieldCaseUpdatedReceiverIT {
   @Before
   @Transactional
   public void setUp() {
-    rabbitQueueHelper.purgeQueue(caseUpdatedQueueName);
-    rabbitQueueHelper.purgeQueue(inboundQueue);
-    eventRepository.deleteAllInBatch();
-    uacQidLinkRepository.deleteAllInBatch();
-    caseRepository.deleteAllInBatch();
-  }
-
-  @After
-  @Transactional
-  public void tearDown() {
     rabbitQueueHelper.purgeQueue(caseUpdatedQueueName);
     rabbitQueueHelper.purgeQueue(inboundQueue);
     eventRepository.deleteAllInBatch();
