@@ -79,7 +79,7 @@ public class UndeliveredMailReceiver {
   }
 
   private boolean shouldEmitCaseUpdated(Case caze) {
-    return StringUtils.isEmpty(caze.getRefusalReceived())
+    return caze.getRefusalReceived() == null
         && !caze.isAddressInvalid()
         && !caze.isReceiptReceived()
         && !(caze.getRegion().startsWith("N") && caze.getCaseType().equals("CE"));
