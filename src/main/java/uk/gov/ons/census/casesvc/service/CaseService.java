@@ -142,6 +142,16 @@ public class CaseService {
     return responseManagementEvent.getPayload();
   }
 
+  public Case getCaseAndLockIt(UUID caseId, String exceptionMessage) {
+    Optional<Case> oCase = caseRepository.getCaseAndLockByCaseId(caseId);
+
+    if (!oCase.isPresent()) {
+      throw new RuntimeException(exceptionMessage);
+    }
+
+    return oCase.get();
+  }
+
   public void saveCaseAndEmitCaseUpdatedEvent(Case caze, Metadata metadata) {
     caseRepository.saveAndFlush(caze);
 

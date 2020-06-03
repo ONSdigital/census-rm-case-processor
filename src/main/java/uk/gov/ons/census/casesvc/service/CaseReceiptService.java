@@ -5,7 +5,6 @@ import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import lombok.AllArgsConstructor;
@@ -21,6 +20,7 @@ import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 
 @Component
 public class CaseReceiptService {
+
   private final CaseService caseService;
   private final CaseRepository caseRepository;
   private static final String HH = "H";
@@ -59,8 +59,10 @@ public class CaseReceiptService {
     Case caze = uacQidLink.getCaze();
 
     if (caze.isReceiptReceived()
-        || (uacQidLink.isBlankQuestionnaire() && !causeEvent.getChannel().equals(EQ_EVENT_CHANNEL)))
+        || (uacQidLink.isBlankQuestionnaire()
+            && !causeEvent.getChannel().equals(EQ_EVENT_CHANNEL))) {
       return;
+    }
 
     Key ruleKey = makeRulesKey(caze, uacQidLink);
 
@@ -78,15 +80,13 @@ public class CaseReceiptService {
   }
 
   private Case getCaseAndLockIt(UUID caseId) {
-    Optional<Case> oCase = caseRepository.getCaseAndLockByCaseId(caseId);
-
-    if (!oCase.isPresent()) {
-      throw new RuntimeException(
-          "Failed to get row to increment responses, row is probably locked and this should resolve itself: "
-              + caseId);
-    }
-
-    return oCase.get();
+    Case caze =
+        caseService.getCaseAndLockIt(
+            caseId,
+            String.format(
+                "Failed to get row to increment responses, row is probably locked and this should resolve itself: %s",
+                caseId));
+    return caze;
   }
 
   Function<Case, Case> incrementNoReceipt =
@@ -107,17 +107,20 @@ public class CaseReceiptService {
   @EqualsAndHashCode
   @ToString
   private class Key {
+
     private String caseType;
     private String addressLevel;
     private String formType;
   }
 
   private interface UpdateAndEmitCaseRule {
+
     void run(Case caze, EventTypeDTO causeEventType);
   }
 
   @AllArgsConstructor
   private class Rule implements UpdateAndEmitCaseRule {
+
     private Function<Case, Case> functionToExecute;
     private ActionInstructionType fieldInstruction;
 
@@ -129,6 +132,7 @@ public class CaseReceiptService {
   }
 
   private class CeUnitRule implements UpdateAndEmitCaseRule {
+
     public void run(Case caze, EventTypeDTO causeEventType) {
       ActionInstructionType fieldInstruction = ActionInstructionType.UPDATE;
 
@@ -145,6 +149,7 @@ public class CaseReceiptService {
   }
 
   private class NoActionRequired implements UpdateAndEmitCaseRule {
+
     @Override
     public void run(Case caze, EventTypeDTO causeEventType) {
       // No Updating, saving or emitting required

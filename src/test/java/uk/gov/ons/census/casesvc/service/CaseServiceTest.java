@@ -335,6 +335,22 @@ public class CaseServiceTest {
   }
 
   @Test(expected = RuntimeException.class)
+  public void testGetAndLockCaseErrors() {
+    when(caseRepository.getCaseAndLockByCaseId(TEST_UUID)).thenReturn(Optional.empty());
+
+    String expectedErrorMessage = String.format("Case ID '%s' not present", TEST_UUID);
+
+    try {
+      // WHEN
+      underTest.getCaseAndLockIt(TEST_UUID, expectedErrorMessage);
+    } catch (RuntimeException re) {
+      // THEN
+      assertThat(re.getMessage()).isEqualTo(expectedErrorMessage);
+      throw re;
+    }
+  }
+
+  @Test(expected = RuntimeException.class)
   public void testCaseIdNotFound() {
     when(caseRepository.findById(TEST_UUID)).thenReturn(Optional.empty());
 

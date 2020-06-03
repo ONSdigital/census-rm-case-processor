@@ -2,6 +2,7 @@ package uk.gov.ons.census.casesvc.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementFieldUpdatedEvent;
@@ -22,6 +23,10 @@ import uk.gov.ons.census.casesvc.utility.MetadataHelper;
 public class FieldCaseUpdatedServiceTest {
 
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
+  private static final String EXCEPTION_MESSAGE =
+      String.format(
+          "Failed to get row for field case updates, row is probably locked and this should resolve itself: %s",
+          TEST_CASE_ID);
 
   @Mock private CaseService caseService;
 
@@ -49,8 +54,8 @@ public class FieldCaseUpdatedServiceTest {
     testCase.setCeActualResponses(8);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
-    when(caseRepository.getCaseAndLockByCaseId(UUID.fromString(collectionCase.getId())))
-        .thenReturn(java.util.Optional.of(testCase));
+    when(caseService.getCaseAndLockIt(eq(TEST_CASE_ID), eq(EXCEPTION_MESSAGE)))
+        .thenReturn(testCase);
 
     // When
     underTest.processFieldCaseUpdatedEvent(managementEvent, messageTimestamp);
@@ -59,7 +64,7 @@ public class FieldCaseUpdatedServiceTest {
 
     InOrder inOrder = Mockito.inOrder(caseRepository, eventLogger, caseService);
 
-    inOrder.verify(caseRepository).getCaseAndLockByCaseId(any(UUID.class));
+    inOrder.verify(caseService).getCaseAndLockIt(any(UUID.class), any(String.class));
 
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
     ArgumentCaptor<Metadata> metadataArgumentCaptor = ArgumentCaptor.forClass(Metadata.class);
@@ -92,8 +97,8 @@ public class FieldCaseUpdatedServiceTest {
     testCase.setCeActualResponses(3);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
-    when(caseRepository.getCaseAndLockByCaseId(UUID.fromString(collectionCase.getId())))
-        .thenReturn(java.util.Optional.of(testCase));
+    when(caseService.getCaseAndLockIt(eq(TEST_CASE_ID), eq(EXCEPTION_MESSAGE)))
+        .thenReturn(testCase);
 
     // When
     underTest.processFieldCaseUpdatedEvent(managementEvent, messageTimestamp);
@@ -102,7 +107,7 @@ public class FieldCaseUpdatedServiceTest {
 
     InOrder inOrder = Mockito.inOrder(caseRepository, eventLogger, caseService);
 
-    inOrder.verify(caseRepository).getCaseAndLockByCaseId(any(UUID.class));
+    inOrder.verify(caseService).getCaseAndLockIt(any(UUID.class), any(String.class));
 
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
     ArgumentCaptor<Metadata> metadataArgumentCaptor = ArgumentCaptor.forClass(Metadata.class);
@@ -133,8 +138,8 @@ public class FieldCaseUpdatedServiceTest {
     testCase.setCaseType("HH");
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
-    when(caseRepository.getCaseAndLockByCaseId(UUID.fromString(collectionCase.getId())))
-        .thenReturn(java.util.Optional.of(testCase));
+    when(caseService.getCaseAndLockIt(eq(TEST_CASE_ID), eq(EXCEPTION_MESSAGE)))
+        .thenReturn(testCase);
 
     String expectedErrorMessage =
         String.format(
@@ -143,31 +148,6 @@ public class FieldCaseUpdatedServiceTest {
     try {
       underTest.processFieldCaseUpdatedEvent(managementEvent, messageTimestamp);
     } catch (IllegalArgumentException e) {
-      assertThat(e.getMessage()).isEqualTo(expectedErrorMessage);
-      throw e;
-    }
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testProcessFieldCaseUpdatedEventWithWrongCaseId() {
-
-    ResponseManagementEvent managementEvent = getTestResponseManagementFieldUpdatedEvent();
-
-    CollectionCase collectionCase = managementEvent.getPayload().getCollectionCase();
-    collectionCase.setId(TEST_CASE_ID.toString());
-
-    Case testCase = getRandomCase();
-    testCase.setCaseId(UUID.randomUUID());
-    testCase.setCaseType("HH");
-    OffsetDateTime messageTimestamp = OffsetDateTime.now();
-
-    String expectedErrorMessage =
-        "Failed to get row for field case updates, row is probably locked and this should resolve itself: "
-            + TEST_CASE_ID;
-
-    try {
-      underTest.processFieldCaseUpdatedEvent(managementEvent, messageTimestamp);
-    } catch (RuntimeException e) {
       assertThat(e.getMessage()).isEqualTo(expectedErrorMessage);
       throw e;
     }

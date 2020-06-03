@@ -4,7 +4,6 @@ import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
 import java.time.OffsetDateTime;
-import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
@@ -38,7 +37,12 @@ public class FieldCaseUpdatedService {
     CollectionCase fieldCaseUpdatedPayload =
         responseManagementEvent.getPayload().getCollectionCase();
 
-    Case caze = getCaseAndLockIt(UUID.fromString(fieldCaseUpdatedPayload.getId()));
+    Case caze =
+        caseService.getCaseAndLockIt(
+            UUID.fromString(fieldCaseUpdatedPayload.getId()),
+            String.format(
+                "Failed to get row for field case updates, row is probably locked and this should resolve itself: %s",
+                fieldCaseUpdatedPayload.getId()));
 
     if (!caze.getCaseType().equals(CE_CASE_TYPE)) {
       throw new IllegalArgumentException(
@@ -60,18 +64,6 @@ public class FieldCaseUpdatedService {
 
     caseService.saveCaseAndEmitCaseUpdatedEvent(
         caze, buildMetadataForFieldCaseUpdated(caze, responseManagementEvent));
-  }
-
-  private Case getCaseAndLockIt(UUID caseId) {
-    Optional<Case> oCase = caseRepository.getCaseAndLockByCaseId(caseId);
-
-    if (!oCase.isPresent()) {
-      throw new RuntimeException(
-          "Failed to get row for field case updates, row is probably locked and this should resolve itself: "
-              + caseId);
-    }
-
-    return oCase.get();
   }
 
   private Metadata buildMetadataForFieldCaseUpdated(

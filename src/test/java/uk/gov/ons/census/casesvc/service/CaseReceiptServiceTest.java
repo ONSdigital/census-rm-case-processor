@@ -9,7 +9,6 @@ import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.RESPONSE_RECEIVED
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -112,7 +111,7 @@ public class CaseReceiptServiceTest {
     uacQidLink.setQid(qid);
     uacQidLink.setCaze(caze);
 
-    when(caseRepository.getCaseAndLockByCaseId(any())).thenReturn(Optional.of(caze));
+    when(caseService.getCaseAndLockIt(any(), any())).thenReturn(caze);
 
     try {
       underTest.receiptCase(uacQidLink, getReceiptEventDTO());
@@ -142,7 +141,7 @@ public class CaseReceiptServiceTest {
     assertThat(actualCase.isReceiptReceived()).as("Case Receipted").isEqualTo(expectReceipt);
 
     if (expectIncrement) {
-      verify(caseRepository).getCaseAndLockByCaseId(caze.getCaseId());
+      verify(caseService).getCaseAndLockIt(eq(caze.getCaseId()), anyString());
       assertThat(actualCase.getCeActualResponses()).isEqualTo(1);
     }
 
