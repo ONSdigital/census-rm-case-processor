@@ -22,6 +22,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.model.dto.*;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -52,7 +53,7 @@ public class FieldCaseUpdatedReceiverIT {
   private String inboundQueue;
 
   @Before
-  @Transactional
+  @Transactional(isolation = Isolation.REPEATABLE_READ)
   public void setUp() {
     rabbitQueueHelper.purgeQueue(caseUpdatedQueueName);
     rabbitQueueHelper.purgeQueue(inboundQueue);
@@ -79,7 +80,7 @@ public class FieldCaseUpdatedReceiverIT {
     caze.setAddressInvalid(false);
     caze.setRefusalReceived(null);
     caze.setSkeleton(false);
-    caze = caseRepository.saveAndFlush(caze);
+    caseRepository.saveAndFlush(caze);
 
     ResponseManagementEvent managementEvent = getTestResponseManagementFieldUpdatedEvent();
     managementEvent.getEvent().setTransactionId(UUID.randomUUID());
@@ -137,7 +138,7 @@ public class FieldCaseUpdatedReceiverIT {
     caze.setAddressLevel("E");
     caze.setCeActualResponses(5);
     caze.setCeExpectedCapacity(8);
-    caze = caseRepository.saveAndFlush(caze);
+    caseRepository.saveAndFlush(caze);
 
     ResponseManagementEvent managementEvent = getTestResponseManagementFieldUpdatedEvent();
     managementEvent.getEvent().setTransactionId(UUID.randomUUID());
