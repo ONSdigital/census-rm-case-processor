@@ -82,8 +82,6 @@ public class FieldCaseUpdatedReceiverIT {
       throws IOException, InterruptedException {
     BlockingQueue<String> fieldOutboundQueue = rabbitQueueHelper.listen(caseUpdatedQueueName);
 
-
-
     ResponseManagementEvent managementEvent = getTestResponseManagementFieldUpdatedEvent();
     managementEvent.getEvent().setTransactionId(UUID.randomUUID());
     managementEvent.getPayload().getCollectionCase().setId(TEST_CASE_ID.toString());
