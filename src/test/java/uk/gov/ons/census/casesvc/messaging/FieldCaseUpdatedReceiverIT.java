@@ -59,12 +59,6 @@ public class FieldCaseUpdatedReceiverIT {
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
-  }
-
-  @Test
-  public void testNoCancelSentWhenCeExpectedCapacityUpdated()
-      throws IOException, InterruptedException {
-    BlockingQueue<String> fieldOutboundQueue = rabbitQueueHelper.listen(caseUpdatedQueueName);
 
     EasyRandom easyRandom = new EasyRandom();
     Case caze = easyRandom.nextObject(Case.class);
@@ -77,7 +71,18 @@ public class FieldCaseUpdatedReceiverIT {
     caze.setAddressLevel("E");
     caze.setCeActualResponses(5);
     caze.setCeExpectedCapacity(8);
+    caze.setAddressInvalid(false);
+    caze.setRefusalReceived(null);
+    caze.setSkeleton(false);
     caseRepository.saveAndFlush(caze);
+  }
+
+  @Test
+  public void testNoCancelSentWhenCeExpectedCapacityUpdated()
+      throws IOException, InterruptedException {
+    BlockingQueue<String> fieldOutboundQueue = rabbitQueueHelper.listen(caseUpdatedQueueName);
+
+
 
     ResponseManagementEvent managementEvent = getTestResponseManagementFieldUpdatedEvent();
     managementEvent.getEvent().setTransactionId(UUID.randomUUID());
@@ -121,22 +126,6 @@ public class FieldCaseUpdatedReceiverIT {
   @Test
   public void testCeExpectedCapacityUpdated() throws IOException, InterruptedException {
     BlockingQueue<String> caseUpdatedQueue = rabbitQueueHelper.listen(caseUpdatedQueueName);
-
-    EasyRandom easyRandom = new EasyRandom();
-    Case caze = easyRandom.nextObject(Case.class);
-    caze.setCaseId(TEST_CASE_ID);
-    caze.setReceiptReceived(false);
-    caze.setSurvey("CENSUS");
-    caze.setUacQidLinks(null);
-    caze.setEvents(null);
-    caze.setCaseType("CE");
-    caze.setAddressLevel("E");
-    caze.setCeActualResponses(5);
-    caze.setCeExpectedCapacity(8);
-    caze.setAddressInvalid(false);
-    caze.setRefusalReceived(null);
-    caze.setSkeleton(false);
-    caseRepository.saveAndFlush(caze);
 
     ResponseManagementEvent managementEvent = getTestResponseManagementFieldUpdatedEvent();
     managementEvent.getEvent().setTransactionId(UUID.randomUUID());
