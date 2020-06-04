@@ -93,6 +93,8 @@ public class FieldCaseUpdatedReceiverIT {
             .setContentType(MessageProperties.CONTENT_TYPE_JSON)
             .build();
 
+    Thread.sleep(2000);
+
     // WHEN
     rabbitQueueHelper.sendMessage(inboundQueue, message);
 
@@ -135,6 +137,8 @@ public class FieldCaseUpdatedReceiverIT {
         MessageBuilder.withBody(json.getBytes())
             .setContentType(MessageProperties.CONTENT_TYPE_JSON)
             .build();
+
+    Thread.sleep(2000);
 
     // WHEN
     rabbitQueueHelper.sendMessage(inboundQueue, message);
