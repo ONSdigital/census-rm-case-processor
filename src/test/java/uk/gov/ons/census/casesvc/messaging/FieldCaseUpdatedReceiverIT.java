@@ -22,7 +22,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.model.dto.*;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
@@ -52,7 +51,6 @@ public class FieldCaseUpdatedReceiverIT {
   private String inboundQueue;
 
   @Before
-  @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(caseUpdatedQueueName);
     rabbitQueueHelper.purgeQueue(inboundQueue);
