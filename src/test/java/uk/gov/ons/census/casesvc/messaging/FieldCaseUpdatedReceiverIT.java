@@ -62,7 +62,7 @@ public class FieldCaseUpdatedReceiverIT {
   }
 
   @Test
-  public void testCeExpectedCapacityUpdatedAndNoCancelSent()
+  public void testNoCancelSentWhenCeExpectedCapacityUpdated()
       throws IOException, InterruptedException {
     BlockingQueue<String> fieldOutboundQueue = rabbitQueueHelper.listen(caseUpdatedQueueName);
 
