@@ -108,7 +108,7 @@ public class TransactionsIT {
       uacQidLinkRepository.saveAndFlush(uacQidLink);
 
       // Poll Queue, expected message to be there
-      rabbitQueueHelper.checkExpectedMessageReceived(rhUacQueueSpy);
+      rhUacQueueSpy.checkExpectedMessageReceived();
 
       // check Log Events
       assertThat(eventRepository.findAll().size()).isEqualTo(1);
@@ -157,7 +157,7 @@ public class TransactionsIT {
       uacQidLinkRepository.saveAndFlush(uacQidLink);
 
       // Poll Queue, expected message to be there
-      rabbitQueueHelper.checkExpectedMessageReceived(rhUacQueueSpy);
+      rhUacQueueSpy.checkExpectedMessageReceived();
 
       // check Log Events
       assertThat(eventRepository.findAll().size()).isEqualTo(1);

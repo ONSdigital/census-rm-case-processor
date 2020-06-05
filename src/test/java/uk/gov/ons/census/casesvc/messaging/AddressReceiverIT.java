@@ -126,7 +126,7 @@ public class AddressReceiverIT {
 
       // check the emitted eventDTO
       ResponseManagementEvent responseManagementEvent =
-          rabbitQueueHelper.checkExpectedMessageReceived(rhCaseQueueSpy);
+          rhCaseQueueSpy.checkExpectedMessageReceived();
 
       assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_UPDATED);
       CollectionCase actualPayloadCase = responseManagementEvent.getPayload().getCollectionCase();
@@ -210,7 +210,7 @@ public class AddressReceiverIT {
 
       // THEN
       ResponseManagementEvent actualResponseManagementEvent =
-          rabbitQueueHelper.checkExpectedMessageReceived(rhCaseQueueSpy);
+          rhCaseQueueSpy.checkExpectedMessageReceived();
 
       assertThat(actualResponseManagementEvent.getEvent().getType())
           .isEqualTo(EventTypeDTO.CASE_CREATED);
@@ -281,7 +281,7 @@ public class AddressReceiverIT {
 
       // THEN
       ResponseManagementEvent actualResponseManagementEvent =
-          rabbitQueueHelper.checkExpectedMessageReceived(rhCaseQueueSpy);
+          rhCaseQueueSpy.checkExpectedMessageReceived();
 
       assertThat(actualResponseManagementEvent.getEvent().getType())
           .isEqualTo(EventTypeDTO.CASE_CREATED);
@@ -392,7 +392,7 @@ public class AddressReceiverIT {
 
       // THEN
       ResponseManagementEvent actualResponseManagementEvent =
-          rabbitQueueHelper.checkExpectedMessageReceived(rhCaseQueueSpy);
+          rhCaseQueueSpy.checkExpectedMessageReceived();
 
       assertThat(actualResponseManagementEvent.getEvent().getType())
           .isEqualTo(EventTypeDTO.CASE_CREATED);
@@ -480,7 +480,7 @@ public class AddressReceiverIT {
       rabbitQueueHelper.sendMessage(addressReceiver, message);
 
       // Check no message emitted
-      rabbitQueueHelper.checkMessageIsNotReceived(rhCaseQueueSpy, 3);
+      rhCaseQueueSpy.checkMessageIsNotReceived(3);
 
       // Check case not changed
       Optional<Case> actualCaseOpt = caseRepository.findById(caze.getCaseId());

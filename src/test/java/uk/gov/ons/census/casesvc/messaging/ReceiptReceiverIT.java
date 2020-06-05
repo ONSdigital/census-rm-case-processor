@@ -129,7 +129,7 @@ public class ReceiptReceiverIT {
 
       // check messages sent
       ResponseManagementEvent responseManagementEvent =
-          rabbitQueueHelper.checkExpectedMessageReceived(rhCaseQueueSpy);
+          rhCaseQueueSpy.checkExpectedMessageReceived();
       CollectionCase actualCollectionCase =
           responseManagementEvent.getPayload().getCollectionCase();
       assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID.toString());
@@ -145,7 +145,7 @@ public class ReceiptReceiverIT {
       assertThat(metaData.getCauseEventType()).isEqualTo(RESPONSE_RECEIVED);
       assertThat(metaData.getFieldDecision()).isEqualTo(ActionInstructionType.CANCEL);
 
-      responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(rhUacQueueSpy);
+      responseManagementEvent = rhUacQueueSpy.checkExpectedMessageReceived();
       assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
       UacDTO actualUacDTOObject = responseManagementEvent.getPayload().getUac();
       assertThat(actualUacDTOObject.getUac()).isEqualTo(TEST_UAC);
@@ -220,7 +220,7 @@ public class ReceiptReceiverIT {
 
       // check messages sent
       ResponseManagementEvent responseManagementEvent =
-          rabbitQueueHelper.checkExpectedMessageReceived(rhCaseQueueSpy);
+          rhCaseQueueSpy.checkExpectedMessageReceived();
       CollectionCase actualCollectionCase =
           responseManagementEvent.getPayload().getCollectionCase();
       assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID.toString());
@@ -236,7 +236,7 @@ public class ReceiptReceiverIT {
       assertThat(metaData.getCauseEventType()).isEqualTo(RESPONSE_RECEIVED);
       assertThat(metaData.getFieldDecision()).isEqualTo(ActionInstructionType.UPDATE);
 
-      responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(rhUacQueueSpy);
+      responseManagementEvent = rhUacQueueSpy.checkExpectedMessageReceived();
       assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
       UacDTO actualUacDTOObject = responseManagementEvent.getPayload().getUac();
       assertThat(actualUacDTOObject.getUac()).isEqualTo(TEST_UAC);
@@ -340,8 +340,7 @@ public class ReceiptReceiverIT {
   private void checkExpectedResponsesEmitted(
       List<Integer> expectedActualResponses, QueueSpy queueSpy, String caseId) throws IOException {
 
-    List<Integer> actualResponsesList =
-        rabbitQueueHelper.collectAllActualResponseCountsForCaseId(queueSpy.getQueue(), caseId);
+    List<Integer> actualResponsesList = queueSpy.collectAllActualResponseCountsForCaseId(caseId);
 
     assertThat(actualResponsesList).hasSameElementsAs(expectedActualResponses);
   }
@@ -357,8 +356,6 @@ public class ReceiptReceiverIT {
       if (actualCase.getCeActualResponses() >= expectedActualResponses) {
         return actualCase;
       }
-
-      System.out.println("Current Actual Count: " + actualCase.getCeActualResponses());
 
       Thread.sleep(1000);
     }

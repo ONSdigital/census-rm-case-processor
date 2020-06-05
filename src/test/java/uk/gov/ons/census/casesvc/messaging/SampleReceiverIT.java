@@ -89,18 +89,16 @@ public class SampleReceiverIT {
 
       // THEN
       ResponseManagementEvent responseManagementEvent =
-          rabbitQueueHelper.checkExpectedMessageReceived(rhCaseQueueSpy);
+          rhCaseQueueSpy.checkExpectedMessageReceived();
       assertEquals(EventTypeDTO.CASE_CREATED, responseManagementEvent.getEvent().getType());
 
-      responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(rhUacQueueSpy);
+      responseManagementEvent = rhUacQueueSpy.checkExpectedMessageReceived();
       assertEquals(EventTypeDTO.UAC_UPDATED, responseManagementEvent.getEvent().getType());
 
       List<EventTypeDTO> eventTypesSeenDTO = new LinkedList<>();
-      responseManagementEvent =
-          rabbitQueueHelper.checkExpectedMessageReceived(actionSchedulerQueueSpy);
+      responseManagementEvent = actionSchedulerQueueSpy.checkExpectedMessageReceived();
       eventTypesSeenDTO.add(responseManagementEvent.getEvent().getType());
-      responseManagementEvent =
-          rabbitQueueHelper.checkExpectedMessageReceived(actionSchedulerQueueSpy);
+      responseManagementEvent = actionSchedulerQueueSpy.checkExpectedMessageReceived();
       eventTypesSeenDTO.add(responseManagementEvent.getEvent().getType());
 
       assertThat(

@@ -75,8 +75,7 @@ public class UacCreatedEventReceiverIT {
 
       // Then
       // Check the UAC Updated event is emitted
-      ResponseManagementEvent uacUpdatedEvent =
-          rabbitQueueHelper.checkExpectedMessageReceived(rhUacQueueSpy);
+      ResponseManagementEvent uacUpdatedEvent = rhUacQueueSpy.checkExpectedMessageReceived();
       assertEquals(
           uacCreatedEvent.getPayload().getUacQidCreated().getCaseId().toString(),
           uacUpdatedEvent.getPayload().getUac().getCaseId());

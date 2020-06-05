@@ -88,7 +88,7 @@ public class CCSPropertyListedIT {
       rabbitQueueHelper.sendMessage(ccsPropertyListedQueue, responseManagementEvent);
 
       // Then
-      ResponseManagementEvent ccsToFwmt = rabbitQueueHelper.checkExpectedMessageReceived(queueSpy);
+      ResponseManagementEvent ccsToFwmt = queueSpy.checkExpectedMessageReceived();
       assertThat(ccsToFwmt.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_CREATED);
       assertThat(ccsToFwmt.getPayload().getCollectionCase().getId())
           .isEqualTo(TEST_CASE_ID.toString());
@@ -132,7 +132,7 @@ public class CCSPropertyListedIT {
       rabbitQueueHelper.sendMessage(ccsPropertyListedQueue, responseManagementEvent);
 
       // Then
-      rabbitQueueHelper.checkMessageIsNotReceived(queueSpy, 5);
+      queueSpy.checkMessageIsNotReceived(5);
 
       Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
       assertThat(actualCase.getSurvey()).isEqualTo("CCS");
@@ -167,7 +167,7 @@ public class CCSPropertyListedIT {
       rabbitQueueHelper.sendMessage(ccsPropertyListedQueue, responseManagementEvent);
 
       // Then
-      rabbitQueueHelper.checkMessageIsNotReceived(queueSpy, 5);
+      queueSpy.checkMessageIsNotReceived(5);
 
       Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
       assertThat(actualCase.getSurvey()).isEqualTo("CCS");
@@ -197,7 +197,7 @@ public class CCSPropertyListedIT {
       rabbitQueueHelper.sendMessage(ccsPropertyListedQueue, responseManagementEvent);
 
       // Then
-      rabbitQueueHelper.checkMessageIsNotReceived(queueSpy, 5);
+      queueSpy.checkMessageIsNotReceived(5);
 
       Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
       assertThat(actualCase.getSurvey()).isEqualTo("CCS");

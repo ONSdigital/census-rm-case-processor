@@ -190,7 +190,7 @@ public class QuestionnaireLinkedReceiverIT {
       assertThat(actualUac.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
 
       // Check Case updated message not sent
-      rabbitQueueHelper.checkMessageIsNotReceived(rhCaseQueueSpy, 5);
+      rhCaseQueueSpy.checkMessageIsNotReceived(5);
 
       // Check database that Case is still receipted and has response received set
       Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
@@ -257,7 +257,7 @@ public class QuestionnaireLinkedReceiverIT {
       assertThat(actualUac.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
 
       // Check Case updated message sent and contains expected data
-      responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(rhCaseQueueSpy);
+      responseManagementEvent = rhCaseQueueSpy.checkExpectedMessageReceived();
       assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_UPDATED);
       CollectionCase actualCollectionCase =
           responseManagementEvent.getPayload().getCollectionCase();
@@ -324,7 +324,7 @@ public class QuestionnaireLinkedReceiverIT {
       assertThat(actualCollectionCase.getCaseType()).isEqualTo("HI");
 
       // Check Uac updated message sent and contains expected data
-      responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(rhUacQueueSpy);
+      responseManagementEvent = rhUacQueueSpy.checkExpectedMessageReceived();
       assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
       UacDTO actualUac = responseManagementEvent.getPayload().getUac();
       assertThat(actualUac.getQuestionnaireId()).isEqualTo(expectedQuestionnaireId);
@@ -604,14 +604,14 @@ public class QuestionnaireLinkedReceiverIT {
       throws IOException, InterruptedException {
     sendMessage(sendQueue, createUacQid);
 
-    return rabbitQueueHelper.checkExpectedMessageReceived(queueSpy);
+    return queueSpy.checkExpectedMessageReceived();
   }
 
   private void sendMessageAndDoNotExpectInboundMessage(
       String sendQueue, Object createUacQid, QueueSpy queueSpy) throws InterruptedException {
     sendMessage(sendQueue, createUacQid);
 
-    rabbitQueueHelper.checkMessageIsNotReceived(queueSpy, 5);
+    queueSpy.checkMessageIsNotReceived(5);
   }
 
   private void sendMessage(String sendQueue, Object createUacQid) {

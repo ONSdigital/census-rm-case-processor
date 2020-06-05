@@ -199,7 +199,7 @@ public class FulfilmentRequestReceiverIT {
 
       // THEN
       ResponseManagementEvent responseManagementEvent =
-          rabbitQueueHelper.checkExpectedMessageReceived(rhCaseQueueSpy);
+          rhCaseQueueSpy.checkExpectedMessageReceived();
       assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_CREATED);
       assertThat(
               responseManagementEvent.getPayload().getCollectionCase().getAddress().getEstabUprn())
@@ -281,7 +281,7 @@ public class FulfilmentRequestReceiverIT {
 
       // THEN
       ResponseManagementEvent responseManagementEvent =
-          rabbitQueueHelper.checkExpectedMessageReceived(rhCaseQueueSpy);
+          rhCaseQueueSpy.checkExpectedMessageReceived();
       assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_CREATED);
       assertThat(
               responseManagementEvent.getPayload().getCollectionCase().getAddress().getEstabUprn())
@@ -375,7 +375,7 @@ public class FulfilmentRequestReceiverIT {
 
       // THEN
       ResponseManagementEvent responseManagementEvent =
-          rabbitQueueHelper.checkExpectedMessageReceived(rhCaseQueueSpy);
+          rhCaseQueueSpy.checkExpectedMessageReceived();
       assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_CREATED);
       assertThat(
               responseManagementEvent.getPayload().getCollectionCase().getAddress().getEstabUprn())

@@ -107,7 +107,7 @@ public class UndeliveredMailReceiverIT {
 
       // check the emitted eventDTO
       ResponseManagementEvent responseManagementEvent =
-          rabbitQueueHelper.checkExpectedMessageReceived(actionQueueSpy);
+          actionQueueSpy.checkExpectedMessageReceived();
 
       assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_UPDATED);
       assertThat(responseManagementEvent.getPayload().getMetadata().getFieldDecision())
@@ -163,7 +163,7 @@ public class UndeliveredMailReceiverIT {
 
       // check the emitted eventDTO
       ResponseManagementEvent responseManagementEvent =
-          rabbitQueueHelper.checkExpectedMessageReceived(actionQueueSpy);
+          actionQueueSpy.checkExpectedMessageReceived();
 
       assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_UPDATED);
       assertThat(responseManagementEvent.getPayload().getMetadata().getFieldDecision())

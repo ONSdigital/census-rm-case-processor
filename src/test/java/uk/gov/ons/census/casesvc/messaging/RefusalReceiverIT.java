@@ -97,7 +97,7 @@ public class RefusalReceiverIT {
 
       // THEN
       ResponseManagementEvent responseManagementEvent =
-          rabbitQueueHelper.checkExpectedMessageReceived(rhCaseQueueSpy);
+          rhCaseQueueSpy.checkExpectedMessageReceived();
 
       EventDTO eventDTO = responseManagementEvent.getEvent();
       assertThat(eventDTO.getType()).isEqualTo(EventTypeDTO.CASE_UPDATED);
@@ -168,7 +168,7 @@ public class RefusalReceiverIT {
       rabbitQueueHelper.sendMessage(inboundQueue, message);
 
       // THEN
-      rabbitQueueHelper.checkMessageIsNotReceived(rhCaseQueueSpy, 5);
+      rhCaseQueueSpy.checkMessageIsNotReceived(5);
 
       Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
       assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
