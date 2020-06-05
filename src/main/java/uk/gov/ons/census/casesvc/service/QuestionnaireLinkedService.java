@@ -1,6 +1,5 @@
 package uk.gov.ons.census.casesvc.service;
 
-import static org.springframework.util.StringUtils.isEmpty;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.isIndividualQuestionnaireType;
 
@@ -52,18 +51,18 @@ public class QuestionnaireLinkedService {
 
     Case caze = caseService.getCaseByCaseId(UUID.fromString(uac.getCaseId()));
 
-    if (checkRequiredFieldsForIndividualHI(
-        questionnaireId, caze.getCaseType(), uac.getIndividualCaseId())) {
-      caze =
-          caseService.prepareIndividualResponseCaseFromParentCase(
-              caze, UUID.fromString(uac.getIndividualCaseId()));
+    if (checkRequiredFieldsForIndividualHI(questionnaireId, caze.getCaseType())) {
+      UUID individualCaseId;
+      if (uac.getIndividualCaseId() == null) {
+        individualCaseId = UUID.randomUUID();
+      } else {
+        individualCaseId = UUID.fromString(uac.getIndividualCaseId());
+      }
+      caze = caseService.prepareIndividualResponseCaseFromParentCase(caze, individualCaseId);
       caze = caseService.saveNewCaseAndStampCaseRef(caze);
       caseService.emitCaseCreatedEvent(caze);
     } else {
       throwIllegalArgumentExceptionIfIndQIDAndIndCaseIdPresentButCaseTypeNotHH(
-          caze, questionnaireId, uac.getIndividualCaseId());
-
-      throwIllegalArgumentExceptionIfIndQidAndCaseTypeHHButIndCaseIdNotPresent(
           caze, questionnaireId, uac.getIndividualCaseId());
     }
 
@@ -110,11 +109,8 @@ public class QuestionnaireLinkedService {
     }
   }
 
-  private boolean checkRequiredFieldsForIndividualHI(
-      String questionnaireId, String caseType, String individualCaseId) {
-    return (isIndividualQuestionnaireType(questionnaireId)
-        && caseType.equals("HH")
-        && individualCaseId != null);
+  private boolean checkRequiredFieldsForIndividualHI(String questionnaireId, String caseType) {
+    return (isIndividualQuestionnaireType(questionnaireId) && caseType.equals("HH"));
   }
 
   private void throwIllegalArgumentExceptionIfIndQIDAndIndCaseIdPresentButCaseTypeNotHH(
@@ -125,18 +121,6 @@ public class QuestionnaireLinkedService {
       throw new IllegalArgumentException(
           String.format(
               "CaseType on '%s' not HH where QID is individual on PQ link request where individualCaseId provided",
-              caze.getCaseId()));
-    }
-  }
-
-  private void throwIllegalArgumentExceptionIfIndQidAndCaseTypeHHButIndCaseIdNotPresent(
-      Case caze, String questionnaireId, String individualCaseId) {
-    if (isIndividualQuestionnaireType(questionnaireId)
-        && caze.getCaseType().equals("HH")
-        && isEmpty(individualCaseId)) {
-      throw new IllegalArgumentException(
-          String.format(
-              "No individualCaseId present on PQ link request where QID is individual and caseType for '%s' is HH",
               caze.getCaseId()));
     }
   }
