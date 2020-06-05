@@ -4,10 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementFieldUpdatedEvent;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.BlockingQueue;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,7 +16,6 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -29,12 +26,12 @@ import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
+import uk.gov.ons.census.casesvc.testutil.QueueSpy;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 
 @ContextConfiguration
 @ActiveProfiles("test")
 @SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @RunWith(SpringJUnit4ClassRunner.class)
 public class FieldCaseUpdatedReceiverIT {
 
@@ -78,92 +75,93 @@ public class FieldCaseUpdatedReceiverIT {
   }
 
   @Test
-  @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
-  public void testNoCancelSentWhenCeExpectedCapacityUpdated()
-      throws IOException, InterruptedException {
-    BlockingQueue<String> fieldOutboundQueue = rabbitQueueHelper.listen(caseUpdatedQueueName);
+  public void testNoCancelSentWhenCeExpectedCapacityUpdated() throws Exception {
+    try (QueueSpy fieldOutboundQueue = rabbitQueueHelper.listen(caseUpdatedQueueName)) {
 
-    ResponseManagementEvent managementEvent = getTestResponseManagementFieldUpdatedEvent();
-    managementEvent.getEvent().setTransactionId(UUID.randomUUID());
-    managementEvent.getPayload().getCollectionCase().setId(TEST_CASE_ID.toString());
-    managementEvent.getPayload().getCollectionCase().setCeExpectedCapacity(6);
+      ResponseManagementEvent managementEvent = getTestResponseManagementFieldUpdatedEvent();
+      managementEvent.getEvent().setTransactionId(UUID.randomUUID());
+      managementEvent.getPayload().getCollectionCase().setId(TEST_CASE_ID.toString());
+      managementEvent.getPayload().getCollectionCase().setCeExpectedCapacity(6);
 
-    String json = convertObjectToJson(managementEvent);
-    Message message =
-        MessageBuilder.withBody(json.getBytes())
-            .setContentType(MessageProperties.CONTENT_TYPE_JSON)
-            .build();
+      String json = convertObjectToJson(managementEvent);
+      Message message =
+          MessageBuilder.withBody(json.getBytes())
+              .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+              .build();
 
-    // WHEN
-    rabbitQueueHelper.sendMessage(inboundQueue, message);
+      // WHEN
+      rabbitQueueHelper.sendMessage(inboundQueue, message);
 
-    // THEN
+      // THEN
 
-    // check messages sent
-    ResponseManagementEvent responseManagementEvent =
-        rabbitQueueHelper.checkExpectedMessageReceived(fieldOutboundQueue);
-    CollectionCase actualCollectionCase = responseManagementEvent.getPayload().getCollectionCase();
-    assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID.toString());
-    assertThat(actualCollectionCase.getCeExpectedCapacity()).isEqualTo(6);
+      // check messages sent
+      ResponseManagementEvent responseManagementEvent =
+          fieldOutboundQueue.checkExpectedMessageReceived();
+      CollectionCase actualCollectionCase =
+          responseManagementEvent.getPayload().getCollectionCase();
+      assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID.toString());
+      assertThat(actualCollectionCase.getCeExpectedCapacity()).isEqualTo(6);
 
-    // check the metadata does NOT have a CANCEL decision
-    assertThat(responseManagementEvent.getPayload().getMetadata().getFieldDecision()).isNull();
-    assertThat(responseManagementEvent.getPayload().getMetadata().getCauseEventType())
-        .isEqualTo(EventTypeDTO.FIELD_CASE_UPDATED);
+      // check the metadata does NOT have a CANCEL decision
+      assertThat(responseManagementEvent.getPayload().getMetadata().getFieldDecision()).isNull();
+      assertThat(responseManagementEvent.getPayload().getMetadata().getCauseEventType())
+          .isEqualTo(EventTypeDTO.FIELD_CASE_UPDATED);
 
-    Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
-    assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
-    assertThat(actualCase.getCeExpectedCapacity()).isEqualTo(6);
+      Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
+      assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
+      assertThat(actualCase.getCeExpectedCapacity()).isEqualTo(6);
 
-    // check database for log eventDTO
-    List<Event> events = eventRepository.findAll();
-    assertThat(events.size()).isEqualTo(1);
-    Event event = events.get(0);
-    assertThat(event.getEventDescription()).isEqualTo("Field case update received");
+      // check database for log eventDTO
+      List<Event> events = eventRepository.findAll();
+      assertThat(events.size()).isEqualTo(1);
+      Event event = events.get(0);
+      assertThat(event.getEventDescription()).isEqualTo("Field case update received");
+    }
   }
 
   @Test
-  @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
-  public void testCeExpectedCapacityUpdated() throws IOException, InterruptedException {
-    BlockingQueue<String> caseUpdatedQueue = rabbitQueueHelper.listen(caseUpdatedQueueName);
+  public void testCeExpectedCapacityUpdated() throws Exception {
+    try (QueueSpy fieldOutboundQueue = rabbitQueueHelper.listen(caseUpdatedQueueName)) {
 
-    ResponseManagementEvent managementEvent = getTestResponseManagementFieldUpdatedEvent();
-    managementEvent.getEvent().setTransactionId(UUID.randomUUID());
-    managementEvent.getPayload().getCollectionCase().setId(TEST_CASE_ID.toString());
-    managementEvent.getPayload().getCollectionCase().setCeExpectedCapacity(2);
+      ResponseManagementEvent managementEvent = getTestResponseManagementFieldUpdatedEvent();
+      managementEvent.getEvent().setTransactionId(UUID.randomUUID());
+      managementEvent.getPayload().getCollectionCase().setId(TEST_CASE_ID.toString());
+      managementEvent.getPayload().getCollectionCase().setCeExpectedCapacity(2);
 
-    String json = convertObjectToJson(managementEvent);
-    Message message =
-        MessageBuilder.withBody(json.getBytes())
-            .setContentType(MessageProperties.CONTENT_TYPE_JSON)
-            .build();
+      String json = convertObjectToJson(managementEvent);
+      Message message =
+          MessageBuilder.withBody(json.getBytes())
+              .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+              .build();
 
-    // WHEN
-    rabbitQueueHelper.sendMessage(inboundQueue, message);
+      // WHEN
+      rabbitQueueHelper.sendMessage(inboundQueue, message);
 
-    // THEN
+      // THEN
 
-    // check messages sent
-    ResponseManagementEvent responseManagementEvent =
-        rabbitQueueHelper.checkExpectedMessageReceived(caseUpdatedQueue);
-    CollectionCase actualCollectionCase = responseManagementEvent.getPayload().getCollectionCase();
-    assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID.toString());
-    assertThat(actualCollectionCase.getCeExpectedCapacity()).isEqualTo(2);
+      // check messages sent
+      ResponseManagementEvent responseManagementEvent =
+          fieldOutboundQueue.checkExpectedMessageReceived();
+      CollectionCase actualCollectionCase =
+          responseManagementEvent.getPayload().getCollectionCase();
+      assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID.toString());
+      assertThat(actualCollectionCase.getCeExpectedCapacity()).isEqualTo(2);
 
-    // check the metadata is included with field CANCEL decision
-    assertThat(responseManagementEvent.getPayload().getMetadata().getFieldDecision())
-        .isEqualTo(ActionInstructionType.CANCEL);
-    assertThat(responseManagementEvent.getPayload().getMetadata().getCauseEventType())
-        .isEqualTo(EventTypeDTO.FIELD_CASE_UPDATED);
+      // check the metadata is included with field CANCEL decision
+      assertThat(responseManagementEvent.getPayload().getMetadata().getFieldDecision())
+          .isEqualTo(ActionInstructionType.CANCEL);
+      assertThat(responseManagementEvent.getPayload().getMetadata().getCauseEventType())
+          .isEqualTo(EventTypeDTO.FIELD_CASE_UPDATED);
 
-    Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
-    assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
-    assertThat(actualCase.getCeExpectedCapacity()).isEqualTo(2);
+      Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
+      assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
+      assertThat(actualCase.getCeExpectedCapacity()).isEqualTo(2);
 
-    // check database for log eventDTO
-    List<Event> events = eventRepository.findAll();
-    assertThat(events.size()).isEqualTo(1);
-    Event event = events.get(0);
-    assertThat(event.getEventDescription()).isEqualTo("Field case update received");
+      // check database for log eventDTO
+      List<Event> events = eventRepository.findAll();
+      assertThat(events.size()).isEqualTo(1);
+      Event event = events.get(0);
+      assertThat(event.getEventDescription()).isEqualTo("Field case update received");
+    }
   }
 }
