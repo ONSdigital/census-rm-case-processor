@@ -7,14 +7,12 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,7 +20,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -36,12 +33,12 @@ import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
+import uk.gov.ons.census.casesvc.testutil.QueueSpy;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 
 @ContextConfiguration
 @ActiveProfiles("test")
 @SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @RunWith(SpringJUnit4ClassRunner.class)
 public class SampleReceiverIT {
 
@@ -75,52 +72,53 @@ public class SampleReceiverIT {
   }
 
   @Test
-  public void testHappyPath() throws InterruptedException, IOException {
-    // GIVEN
-    BlockingQueue<String> rhCaseMessages = rabbitQueueHelper.listen(rhCaseQueue);
-    BlockingQueue<String> rhUacMessages = rabbitQueueHelper.listen(rhUacQueue);
-    BlockingQueue<String> actionMessages = rabbitQueueHelper.listen(actionSchedulerQueue);
+  public void testHappyPath() throws Exception {
+    try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue);
+        QueueSpy rhUacQueueSpy = rabbitQueueHelper.listen(rhUacQueue);
+        QueueSpy actionSchedulerQueueSpy = rabbitQueueHelper.listen(actionSchedulerQueue)) {
+      // GIVEN
+      CreateCaseSample createCaseSample = new CreateCaseSample();
+      createCaseSample.setAddressType("HH");
+      createCaseSample.setPostcode("ABC123");
+      createCaseSample.setRegion("E12000009");
+      createCaseSample.setTreatmentCode("HH_LF3R2E");
+      createCaseSample.setCeExpectedCapacity(null);
+      createCaseSample.setSecureEstablishment(0);
+      // WHEN
+      rabbitQueueHelper.sendMessage(inboundQueue, createCaseSample);
 
-    CreateCaseSample createCaseSample = new CreateCaseSample();
-    createCaseSample.setAddressType("HH");
-    createCaseSample.setPostcode("ABC123");
-    createCaseSample.setRegion("E12000009");
-    createCaseSample.setTreatmentCode("HH_LF3R2E");
-    createCaseSample.setCeExpectedCapacity(null);
-    createCaseSample.setSecureEstablishment(0);
-    // WHEN
-    rabbitQueueHelper.sendMessage(inboundQueue, createCaseSample);
+      // THEN
+      ResponseManagementEvent responseManagementEvent =
+          rhCaseQueueSpy.checkExpectedMessageReceived();
+      assertEquals(EventTypeDTO.CASE_CREATED, responseManagementEvent.getEvent().getType());
 
-    // THEN
-    ResponseManagementEvent responseManagementEvent =
-        rabbitQueueHelper.checkExpectedMessageReceived(rhCaseMessages);
-    assertEquals(EventTypeDTO.CASE_CREATED, responseManagementEvent.getEvent().getType());
+      responseManagementEvent = rhUacQueueSpy.checkExpectedMessageReceived();
+      assertEquals(EventTypeDTO.UAC_UPDATED, responseManagementEvent.getEvent().getType());
 
-    responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(rhUacMessages);
-    assertEquals(EventTypeDTO.UAC_UPDATED, responseManagementEvent.getEvent().getType());
+      List<EventTypeDTO> eventTypesSeenDTO = new LinkedList<>();
+      responseManagementEvent = actionSchedulerQueueSpy.checkExpectedMessageReceived();
+      eventTypesSeenDTO.add(responseManagementEvent.getEvent().getType());
+      responseManagementEvent = actionSchedulerQueueSpy.checkExpectedMessageReceived();
+      eventTypesSeenDTO.add(responseManagementEvent.getEvent().getType());
 
-    List<EventTypeDTO> eventTypesSeenDTO = new LinkedList<>();
-    responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(actionMessages);
-    eventTypesSeenDTO.add(responseManagementEvent.getEvent().getType());
-    responseManagementEvent = rabbitQueueHelper.checkExpectedMessageReceived(actionMessages);
-    eventTypesSeenDTO.add(responseManagementEvent.getEvent().getType());
+      assertThat(
+          eventTypesSeenDTO,
+          containsInAnyOrder(EventTypeDTO.CASE_CREATED, EventTypeDTO.UAC_UPDATED));
 
-    assertThat(
-        eventTypesSeenDTO, containsInAnyOrder(EventTypeDTO.CASE_CREATED, EventTypeDTO.UAC_UPDATED));
+      List<Case> caseList = caseRepository.findAll();
+      assertEquals(1, caseList.size());
+      assertEquals("ABC123", caseList.get(0).getPostcode());
+      assertNull(caseList.get(0).getCeExpectedCapacity());
 
-    List<Case> caseList = caseRepository.findAll();
-    assertEquals(1, caseList.size());
-    assertEquals("ABC123", caseList.get(0).getPostcode());
-    assertNull(caseList.get(0).getCeExpectedCapacity());
+      List<Event> eventList = eventRepository.findAll();
+      assertThat(eventList.size()).isEqualTo(1);
+      Event actualEvent = eventList.get(0);
 
-    List<Event> eventList = eventRepository.findAll();
-    assertThat(eventList.size()).isEqualTo(1);
-    Event actualEvent = eventList.get(0);
+      CreateCaseSample actualcreateCaseSample =
+          new ObjectMapper().readValue(actualEvent.getEventPayload(), CreateCaseSample.class);
 
-    CreateCaseSample actualcreateCaseSample =
-        new ObjectMapper().readValue(actualEvent.getEventPayload(), CreateCaseSample.class);
-
-    assertThat(actualcreateCaseSample).isEqualTo(createCaseSample);
+      assertThat(actualcreateCaseSample).isEqualTo(createCaseSample);
+    }
   }
 
   @Test

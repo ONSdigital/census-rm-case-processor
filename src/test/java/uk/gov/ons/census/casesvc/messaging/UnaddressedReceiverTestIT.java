@@ -3,16 +3,13 @@ package uk.gov.ons.census.casesvc.messaging;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
-import java.io.IOException;
 import java.util.UUID;
-import java.util.concurrent.BlockingQueue;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -22,13 +19,13 @@ import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
+import uk.gov.ons.census.casesvc.testutil.QueueSpy;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 
 @ContextConfiguration
 @ActiveProfiles("test")
 @SpringBootTest
 @RunWith(SpringJUnit4ClassRunner.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class UnaddressedReceiverTestIT {
   @Value("${queueconfig.unaddressed-inbound-queue}")
   private String unaddressedQueue;
@@ -50,20 +47,22 @@ public class UnaddressedReceiverTestIT {
   }
 
   @Test
-  public void testHappyPath() throws IOException, InterruptedException {
-    // GIVEN
-    BlockingQueue<String> queue = rabbitQueueHelper.listen(rhUacQueue);
-    CreateUacQid createUacQid = new CreateUacQid();
-    createUacQid.setQuestionnaireType("21");
-    createUacQid.setBatchId(UUID.randomUUID());
+  public void testHappyPath() throws Exception {
+    try (QueueSpy rhUacQueueSpy = rabbitQueueHelper.listen(rhUacQueue)) {
+      // GIVEN
+      CreateUacQid createUacQid = new CreateUacQid();
+      createUacQid.setQuestionnaireType("21");
+      createUacQid.setBatchId(UUID.randomUUID());
 
-    // WHEN
-    rabbitQueueHelper.sendMessage(unaddressedQueue, createUacQid);
+      // WHEN
+      rabbitQueueHelper.sendMessage(unaddressedQueue, createUacQid);
 
-    // THEN
-    ResponseManagementEvent responseManagementEvent =
-        rabbitQueueHelper.checkExpectedMessageReceived(queue);
-    assertEquals(EventTypeDTO.UAC_UPDATED, responseManagementEvent.getEvent().getType());
-    assertThat(responseManagementEvent.getPayload().getUac().getQuestionnaireId()).startsWith("21");
+      // THEN
+      ResponseManagementEvent responseManagementEvent =
+          rhUacQueueSpy.checkExpectedMessageReceived();
+      assertEquals(EventTypeDTO.UAC_UPDATED, responseManagementEvent.getEvent().getType());
+      assertThat(responseManagementEvent.getPayload().getUac().getQuestionnaireId())
+          .startsWith("21");
+    }
   }
 }
