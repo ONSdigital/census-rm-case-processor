@@ -89,10 +89,10 @@ public class FieldCaseUpdatedReceiverIT {
               .setContentType(MessageProperties.CONTENT_TYPE_JSON)
               .build();
 
-      // WHEN
+      // When
       rabbitQueueHelper.sendMessage(inboundQueue, message);
 
-      // THEN
+      // Then
 
       // check messages sent
       ResponseManagementEvent responseManagementEvent =
@@ -134,10 +134,10 @@ public class FieldCaseUpdatedReceiverIT {
               .setContentType(MessageProperties.CONTENT_TYPE_JSON)
               .build();
 
-      // WHEN
+      // When
       rabbitQueueHelper.sendMessage(inboundQueue, message);
 
-      // THEN
+      // Then
 
       // check messages sent
       ResponseManagementEvent responseManagementEvent =
