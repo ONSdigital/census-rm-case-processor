@@ -12,5 +12,6 @@ public class RefusalDTO {
   private RefusalType type;
   private String report;
   private String agentId;
+  private String callId;
   private CollectionCase collectionCase;
 }
