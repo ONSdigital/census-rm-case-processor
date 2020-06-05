@@ -123,6 +123,7 @@ public class RefusalReceiverIT {
       assertThat(actualRefusal.getType()).isEqualTo(expectedRefusal.getType());
       assertThat(actualRefusal.getReport()).isEqualTo(expectedRefusal.getReport());
       assertThat(actualRefusal.getAgentId()).isEqualTo(expectedRefusal.getAgentId());
+      assertThat(actualRefusal.getCallId()).isEqualTo(expectedRefusal.getCallId());
       assertThat(actualRefusal.getCollectionCase().getId())
           .isEqualTo(expectedRefusal.getCollectionCase().getId());
     }
@@ -182,6 +183,7 @@ public class RefusalReceiverIT {
       assertThat(actualRefusal.getType()).isEqualTo(RefusalType.HARD_REFUSAL);
       assertThat(actualRefusal.getReport()).isEqualTo(refusalDTO.getReport());
       assertThat(actualRefusal.getAgentId()).isEqualTo(refusalDTO.getAgentId());
+      assertThat(actualRefusal.getCallId()).isEqualTo(refusalDTO.getCallId());
       assertThat(actualRefusal.getCollectionCase().getId())
           .isEqualTo(refusalDTO.getCollectionCase().getId());
     }
