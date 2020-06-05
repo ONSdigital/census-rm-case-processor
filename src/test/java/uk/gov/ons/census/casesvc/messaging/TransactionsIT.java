@@ -6,9 +6,7 @@ import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManage
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementReceiptEvent;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
-import java.io.IOException;
 import java.util.UUID;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
@@ -20,7 +18,6 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -32,12 +29,12 @@ import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
+import uk.gov.ons.census.casesvc.testutil.QueueSpy;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 
 @ContextConfiguration
 @ActiveProfiles("nologging")
 @SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @RunWith(SpringJUnit4ClassRunner.class)
 public class TransactionsIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
@@ -71,97 +68,99 @@ public class TransactionsIT {
   }
 
   @Test
-  public void testReceiptTransactionality() throws InterruptedException, IOException {
-    // no cases on the database
-    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhUacQueue);
+  public void testReceiptTransactionality() throws Exception {
+    try (QueueSpy rhUacQueueSpy = rabbitQueueHelper.listen(rhUacQueue)) {
+      // GIVEN
 
-    // WHEN
-    ResponseManagementEvent managementEvent = getTestResponseManagementReceiptEvent();
-    managementEvent.getPayload().getResponse().setQuestionnaireId(TEST_QID);
-    managementEvent.getEvent().setTransactionId(UUID.randomUUID());
+      // WHEN
+      ResponseManagementEvent managementEvent = getTestResponseManagementReceiptEvent();
+      managementEvent.getPayload().getResponse().setQuestionnaireId(TEST_QID);
+      managementEvent.getEvent().setTransactionId(UUID.randomUUID());
 
-    String json = convertObjectToJson(managementEvent);
-    Message message =
-        MessageBuilder.withBody(json.getBytes())
-            .setContentType(MessageProperties.CONTENT_TYPE_JSON)
-            .build();
-    rabbitQueueHelper.sendMessage(receiptInboundQueue, message);
+      String json = convertObjectToJson(managementEvent);
+      Message message =
+          MessageBuilder.withBody(json.getBytes())
+              .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+              .build();
+      rabbitQueueHelper.sendMessage(receiptInboundQueue, message);
 
-    // Poll Queue, expected failure
-    String actualMessage = outboundQueue.poll(5, TimeUnit.SECONDS);
-    assertNull(actualMessage);
+      // Poll Queue, expected failure
+      String actualMessage = rhUacQueueSpy.getQueue().poll(5, TimeUnit.SECONDS);
+      assertNull(actualMessage);
 
-    // Log events empty
-    assertThat(eventRepository.findAll().size()).isEqualTo(0);
+      // Log events empty
+      assertThat(eventRepository.findAll().size()).isEqualTo(0);
 
-    // Save case and UacQidLink
-    Case caze = easyRandom.nextObject(Case.class);
-    caze.setCaseId(TEST_CASE_ID);
-    caze.setUacQidLinks(null);
-    caze.setEvents(null);
-    caze.setCaseType("HH");
-    caze.setAddressLevel("U");
-    caze = caseRepository.saveAndFlush(caze);
+      // Save case and UacQidLink
+      Case caze = easyRandom.nextObject(Case.class);
+      caze.setCaseId(TEST_CASE_ID);
+      caze.setUacQidLinks(null);
+      caze.setEvents(null);
+      caze.setCaseType("HH");
+      caze.setAddressLevel("U");
+      caze = caseRepository.saveAndFlush(caze);
 
-    UacQidLink uacQidLink = new UacQidLink();
-    uacQidLink.setId(UUID.randomUUID());
-    uacQidLink.setCaze(caze);
-    uacQidLink.setQid(TEST_QID);
-    uacQidLink.setUac(TEST_UAC);
-    uacQidLinkRepository.saveAndFlush(uacQidLink);
+      UacQidLink uacQidLink = new UacQidLink();
+      uacQidLink.setId(UUID.randomUUID());
+      uacQidLink.setCaze(caze);
+      uacQidLink.setQid(TEST_QID);
+      uacQidLink.setUac(TEST_UAC);
+      uacQidLinkRepository.saveAndFlush(uacQidLink);
 
-    // Poll Queue, expected message to be there
-    rabbitQueueHelper.checkExpectedMessageReceived(outboundQueue);
+      // Poll Queue, expected message to be there
+      rhUacQueueSpy.checkExpectedMessageReceived();
 
-    // check Log Events
-    assertThat(eventRepository.findAll().size()).isEqualTo(1);
+      // check Log Events
+      assertThat(eventRepository.findAll().size()).isEqualTo(1);
+    }
   }
 
   @Test
-  public void testQuestionnaireLinkedTransactionality() throws InterruptedException, IOException {
-    // no cases on the database
-    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(rhUacQueue);
+  public void testQuestionnaireLinkedTransactionality() throws Exception {
+    try (QueueSpy rhUacQueueSpy = rabbitQueueHelper.listen(rhUacQueue)) {
+      // GIVEN
 
-    // WHEN
-    ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
-    managementEvent.getEvent().setTransactionId(UUID.randomUUID());
-    UacDTO uac = managementEvent.getPayload().getUac();
-    uac.setCaseId(TEST_CASE_ID.toString());
-    uac.setQuestionnaireId(TEST_QID);
+      // WHEN
+      ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
+      managementEvent.getEvent().setTransactionId(UUID.randomUUID());
+      UacDTO uac = managementEvent.getPayload().getUac();
+      uac.setCaseId(TEST_CASE_ID.toString());
+      uac.setQuestionnaireId(TEST_QID);
 
-    String json = convertObjectToJson(managementEvent);
-    Message message =
-        MessageBuilder.withBody(json.getBytes())
-            .setContentType(MessageProperties.CONTENT_TYPE_JSON)
-            .build();
-    rabbitQueueHelper.sendMessage(questionnaireLinkedInboundQueue, message);
+      String json = convertObjectToJson(managementEvent);
+      Message message =
+          MessageBuilder.withBody(json.getBytes())
+              .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+              .build();
+      rabbitQueueHelper.sendMessage(questionnaireLinkedInboundQueue, message);
 
-    // Poll Queue, expected failure
-    String actualMessage = outboundQueue.poll(5, TimeUnit.SECONDS);
-    assertNull(actualMessage);
+      // Poll Queue, expected failure
+      String actualMessage = rhUacQueueSpy.getQueue().poll(5, TimeUnit.SECONDS);
+      assertNull(actualMessage);
 
-    // Log events empty
-    assertThat(eventRepository.findAll().size()).isEqualTo(0);
+      // Log events empty
+      assertThat(eventRepository.findAll().size()).isEqualTo(0);
 
-    // Save case
-    Case caze = easyRandom.nextObject(Case.class);
-    caze.setCaseId(TEST_CASE_ID);
-    caze.setUacQidLinks(null);
-    caze.setEvents(null);
-    caze.setCaseType("HH");
-    caze.setAddressLevel("U");
-    caseRepository.saveAndFlush(caze);
+      // Save case
+      Case caze = easyRandom.nextObject(Case.class);
+      caze.setCaseId(TEST_CASE_ID);
+      caze.setUacQidLinks(null);
+      caze.setEvents(null);
+      caze.setCaseType("HH");
+      caze.setAddressLevel("U");
+      caseRepository.saveAndFlush(caze);
 
-    UacQidLink uacQidLink = new UacQidLink();
-    uacQidLink.setId(UUID.randomUUID());
-    uacQidLink.setQid(TEST_QID);
-    uacQidLink.setUac(TEST_UAC);
-    uacQidLinkRepository.saveAndFlush(uacQidLink);
+      UacQidLink uacQidLink = new UacQidLink();
+      uacQidLink.setId(UUID.randomUUID());
+      uacQidLink.setQid(TEST_QID);
+      uacQidLink.setUac(TEST_UAC);
+      uacQidLinkRepository.saveAndFlush(uacQidLink);
 
-    // Poll Queue, expected message to be there
-    rabbitQueueHelper.checkExpectedMessageReceived(outboundQueue);
+      // Poll Queue, expected message to be there
+      rhUacQueueSpy.checkExpectedMessageReceived();
 
-    // check Log Events
-    assertThat(eventRepository.findAll().size()).isEqualTo(1);
+      // check Log Events
+      assertThat(eventRepository.findAll().size()).isEqualTo(1);
+    }
   }
 }
