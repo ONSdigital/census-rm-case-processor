@@ -8,7 +8,6 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.BlockingQueue;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,6 +38,7 @@ import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
+import uk.gov.ons.census.casesvc.testutil.QueueSpy;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 
 @ContextConfiguration
@@ -79,138 +79,138 @@ public class CCSPropertyListedIT {
   }
 
   @Test
-  public void testCCSSubmittedToFieldIT() throws IOException, InterruptedException {
-    // GIVEN
-    BlockingQueue<String> caseUpdatedQueue = rabbitQueueHelper.listen(caseUpdatedQueueName);
-    ResponseManagementEvent responseManagementEvent = getResponseManagementEvent();
+  public void testCCSSubmittedToFieldIT() throws Exception {
+    try (QueueSpy queueSpy = rabbitQueueHelper.listen(caseUpdatedQueueName)) {
+      // GIVEN
+      ResponseManagementEvent responseManagementEvent = getResponseManagementEvent();
 
-    // When
-    rabbitQueueHelper.sendMessage(ccsPropertyListedQueue, responseManagementEvent);
+      // When
+      rabbitQueueHelper.sendMessage(ccsPropertyListedQueue, responseManagementEvent);
 
-    // Then
-    ResponseManagementEvent ccsToFwmt =
-        rabbitQueueHelper.checkExpectedMessageReceived(caseUpdatedQueue);
-    assertThat(ccsToFwmt.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_CREATED);
-    assertThat(ccsToFwmt.getPayload().getCollectionCase().getId())
-        .isEqualTo(TEST_CASE_ID.toString());
-    assertThat(ccsToFwmt.getPayload().getMetadata().getFieldDecision())
-        .isEqualTo(ActionInstructionType.CREATE);
-    assertThat(ccsToFwmt.getPayload().getMetadata().getCauseEventType())
-        .isEqualTo(EventTypeDTO.CCS_ADDRESS_LISTED);
+      // Then
+      ResponseManagementEvent ccsToFwmt = rabbitQueueHelper.checkExpectedMessageReceived(queueSpy);
+      assertThat(ccsToFwmt.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_CREATED);
+      assertThat(ccsToFwmt.getPayload().getCollectionCase().getId())
+          .isEqualTo(TEST_CASE_ID.toString());
+      assertThat(ccsToFwmt.getPayload().getMetadata().getFieldDecision())
+          .isEqualTo(ActionInstructionType.CREATE);
+      assertThat(ccsToFwmt.getPayload().getMetadata().getCauseEventType())
+          .isEqualTo(EventTypeDTO.CCS_ADDRESS_LISTED);
 
-    Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
-    assertThat(actualCase.getSurvey()).isEqualTo("CCS");
+      Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
+      assertThat(actualCase.getSurvey()).isEqualTo("CCS");
 
-    List<UacQidLink> actualUacQidLinks = uacQidLinkRepository.findAll();
-    assertThat(actualUacQidLinks.size()).isEqualTo(1);
-    testCheckUacQidLinks(
-        actualUacQidLinks.get(0), CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
+      List<UacQidLink> actualUacQidLinks = uacQidLinkRepository.findAll();
+      assertThat(actualUacQidLinks.size()).isEqualTo(1);
+      testCheckUacQidLinks(
+          actualUacQidLinks.get(0), CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
 
-    validateEvents(
-        eventRepository.findAll(), responseManagementEvent.getPayload().getCcsProperty());
+      validateEvents(
+          eventRepository.findAll(), responseManagementEvent.getPayload().getCcsProperty());
+    }
   }
 
   @Test
-  public void testCCSListedEventWithQidsSet() throws InterruptedException, IOException {
-    // GIVEN
-    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(caseUpdatedQueueName);
+  public void testCCSListedEventWithQidsSet() throws Exception {
+    try (QueueSpy queueSpy = rabbitQueueHelper.listen(caseUpdatedQueueName)) {
+      // GIVEN
+      createUnlinkedUacQid(TEST_QID_1);
+      createUnlinkedUacQid(TEST_QID_2);
 
-    createUnlinkedUacQid(TEST_QID_1);
-    createUnlinkedUacQid(TEST_QID_2);
+      List<UacDTO> qids = new ArrayList<>();
+      UacDTO firstQid = new UacDTO();
+      firstQid.setQuestionnaireId(TEST_QID_1);
+      qids.add(firstQid);
+      UacDTO secondQid = new UacDTO();
+      secondQid.setQuestionnaireId(TEST_QID_2);
+      qids.add(secondQid);
 
-    List<UacDTO> qids = new ArrayList<>();
-    UacDTO firstQid = new UacDTO();
-    firstQid.setQuestionnaireId(TEST_QID_1);
-    qids.add(firstQid);
-    UacDTO secondQid = new UacDTO();
-    secondQid.setQuestionnaireId(TEST_QID_2);
-    qids.add(secondQid);
+      ResponseManagementEvent responseManagementEvent = getResponseManagementEvent();
+      responseManagementEvent.getPayload().getCcsProperty().setUac(qids);
 
-    ResponseManagementEvent responseManagementEvent = getResponseManagementEvent();
-    responseManagementEvent.getPayload().getCcsProperty().setUac(qids);
+      // When
+      rabbitQueueHelper.sendMessage(ccsPropertyListedQueue, responseManagementEvent);
 
-    // When
-    rabbitQueueHelper.sendMessage(ccsPropertyListedQueue, responseManagementEvent);
+      // Then
+      rabbitQueueHelper.checkMessageIsNotReceived(queueSpy, 5);
 
-    // Then
-    rabbitQueueHelper.checkMessageIsNotReceived(outboundQueue, 5);
+      Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
+      assertThat(actualCase.getSurvey()).isEqualTo("CCS");
 
-    Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
-    assertThat(actualCase.getSurvey()).isEqualTo("CCS");
+      List<UacQidLink> actualUacQidLinks = uacQidLinkRepository.findAll();
+      assertThat(actualUacQidLinks.size()).isEqualTo(3); // Including generated UAC/QID in receiver
+      testCheckUacQidLinks(
+          actualUacQidLinks.get(0), CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
+      testCheckUacQidLinks(
+          actualUacQidLinks.get(1), CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
+      testCheckUacQidLinks(
+          actualUacQidLinks.get(2), CCS_POSTBACK_CONTINUATION_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
 
-    List<UacQidLink> actualUacQidLinks = uacQidLinkRepository.findAll();
-    assertThat(actualUacQidLinks.size()).isEqualTo(3); // Including generated UAC/QID in receiver
-    testCheckUacQidLinks(
-        actualUacQidLinks.get(0), CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
-    testCheckUacQidLinks(
-        actualUacQidLinks.get(1), CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
-    testCheckUacQidLinks(
-        actualUacQidLinks.get(2), CCS_POSTBACK_CONTINUATION_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
-
-    validateEvents(
-        eventRepository.findAll(), responseManagementEvent.getPayload().getCcsProperty());
+      validateEvents(
+          eventRepository.findAll(), responseManagementEvent.getPayload().getCcsProperty());
+    }
   }
 
   @Test
-  public void testCCSListedEventForRefusal() throws IOException, InterruptedException {
-    // GIVEN
-    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(caseUpdatedQueueName);
+  public void testCCSListedEventForRefusal() throws Exception {
+    try (QueueSpy queueSpy = rabbitQueueHelper.listen(caseUpdatedQueueName)) {
+      // GIVEN
+      RefusalDTO refusal = new RefusalDTO();
+      refusal.setType(RefusalType.HARD_REFUSAL);
+      refusal.setAgentId("test agent");
+      refusal.setReport("test report");
 
-    RefusalDTO refusal = new RefusalDTO();
-    refusal.setType(RefusalType.HARD_REFUSAL);
-    refusal.setAgentId("test agent");
-    refusal.setReport("test report");
+      ResponseManagementEvent responseManagementEvent = getResponseManagementEvent();
+      responseManagementEvent.getPayload().getCcsProperty().setRefusal(refusal);
 
-    ResponseManagementEvent responseManagementEvent = getResponseManagementEvent();
-    responseManagementEvent.getPayload().getCcsProperty().setRefusal(refusal);
+      // When
+      rabbitQueueHelper.sendMessage(ccsPropertyListedQueue, responseManagementEvent);
 
-    // When
-    rabbitQueueHelper.sendMessage(ccsPropertyListedQueue, responseManagementEvent);
+      // Then
+      rabbitQueueHelper.checkMessageIsNotReceived(queueSpy, 5);
 
-    // Then
-    rabbitQueueHelper.checkMessageIsNotReceived(outboundQueue, 5);
+      Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
+      assertThat(actualCase.getSurvey()).isEqualTo("CCS");
+      assertThat(actualCase.getRefusalReceived()).isEqualTo(RefusalType.HARD_REFUSAL);
 
-    Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
-    assertThat(actualCase.getSurvey()).isEqualTo("CCS");
-    assertThat(actualCase.getRefusalReceived()).isEqualTo(RefusalType.HARD_REFUSAL);
+      List<UacQidLink> actualUacQidLinks = uacQidLinkRepository.findAll();
+      assertThat(actualUacQidLinks.size()).isEqualTo(1);
+      testCheckUacQidLinks(
+          actualUacQidLinks.get(0), CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
 
-    List<UacQidLink> actualUacQidLinks = uacQidLinkRepository.findAll();
-    assertThat(actualUacQidLinks.size()).isEqualTo(1);
-    testCheckUacQidLinks(
-        actualUacQidLinks.get(0), CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
-
-    validateEvents(
-        eventRepository.findAll(), responseManagementEvent.getPayload().getCcsProperty());
+      validateEvents(
+          eventRepository.findAll(), responseManagementEvent.getPayload().getCcsProperty());
+    }
   }
 
   @Test
-  public void testCCSListedEventForInvalidAddress() throws IOException, InterruptedException {
-    // GIVEN
-    BlockingQueue<String> outboundQueue = rabbitQueueHelper.listen(caseUpdatedQueueName);
+  public void testCCSListedEventForInvalidAddress() throws Exception {
+    try (QueueSpy queueSpy = rabbitQueueHelper.listen(caseUpdatedQueueName)) {
+      // GIVEN
+      InvalidAddress invalidAddress = new InvalidAddress();
+      invalidAddress.setReason("HOUSE DEMOLISHED");
 
-    InvalidAddress invalidAddress = new InvalidAddress();
-    invalidAddress.setReason("HOUSE DEMOLISHED");
+      ResponseManagementEvent responseManagementEvent = getResponseManagementEvent();
+      responseManagementEvent.getPayload().getCcsProperty().setInvalidAddress(invalidAddress);
 
-    ResponseManagementEvent responseManagementEvent = getResponseManagementEvent();
-    responseManagementEvent.getPayload().getCcsProperty().setInvalidAddress(invalidAddress);
+      // When
+      rabbitQueueHelper.sendMessage(ccsPropertyListedQueue, responseManagementEvent);
 
-    // When
-    rabbitQueueHelper.sendMessage(ccsPropertyListedQueue, responseManagementEvent);
+      // Then
+      rabbitQueueHelper.checkMessageIsNotReceived(queueSpy, 5);
 
-    // Then
-    rabbitQueueHelper.checkMessageIsNotReceived(outboundQueue, 5);
+      Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
+      assertThat(actualCase.getSurvey()).isEqualTo("CCS");
+      assertThat(actualCase.isAddressInvalid()).isTrue();
 
-    Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
-    assertThat(actualCase.getSurvey()).isEqualTo("CCS");
-    assertThat(actualCase.isAddressInvalid()).isTrue();
+      List<UacQidLink> actualUacQidLinks = uacQidLinkRepository.findAll();
+      assertThat(actualUacQidLinks.size()).isEqualTo(1);
+      testCheckUacQidLinks(
+          actualUacQidLinks.get(0), CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
 
-    List<UacQidLink> actualUacQidLinks = uacQidLinkRepository.findAll();
-    assertThat(actualUacQidLinks.size()).isEqualTo(1);
-    testCheckUacQidLinks(
-        actualUacQidLinks.get(0), CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
-
-    validateEvents(
-        eventRepository.findAll(), responseManagementEvent.getPayload().getCcsProperty());
+      validateEvents(
+          eventRepository.findAll(), responseManagementEvent.getPayload().getCcsProperty());
+    }
   }
 
   private SampleUnitDTO setUpSampleUnitDTO() {
