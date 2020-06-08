@@ -328,6 +328,23 @@ public class CaseServiceTest {
   }
 
   @Test(expected = RuntimeException.class)
+  public void testGetAndLockCaseErrors() {
+    when(caseRepository.getCaseAndLockByCaseId(TEST_UUID)).thenReturn(Optional.empty());
+
+    String expectedErrorMessage =
+        String.format("Could not lock row for update on case: %s", TEST_UUID);
+
+    try {
+      // WHEN
+      underTest.getCaseAndLockIt(TEST_UUID);
+    } catch (RuntimeException re) {
+      // THEN
+      assertThat(re.getMessage()).isEqualTo(expectedErrorMessage);
+      throw re;
+    }
+  }
+
+  @Test(expected = RuntimeException.class)
   public void testCaseIdNotFound() {
     when(caseRepository.findById(TEST_UUID)).thenReturn(Optional.empty());
 
