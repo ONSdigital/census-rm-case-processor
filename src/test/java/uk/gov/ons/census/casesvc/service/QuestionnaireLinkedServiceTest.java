@@ -563,8 +563,9 @@ public class QuestionnaireLinkedServiceTest {
     }
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void testErrorOnIndQIDAndCaseTypeHHButNoIndCaseIdProvided() {
+  @Test
+  public void testIndQIDAndCaseTypeHHButNoIndCaseIdProvided() {
+    // GIVEN
     ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
 
     UacDTO uac = managementEvent.getPayload().getUac();
@@ -572,32 +573,68 @@ public class QuestionnaireLinkedServiceTest {
     uac.setQuestionnaireId(TEST_HI_QID);
     uac.setIndividualCaseId(null);
 
-    Case testCase = getRandomCase();
-    testCase.setCaseId(TEST_CASE_ID_1);
-    testCase.setReceiptReceived(false);
-    testCase.setSurvey("CENSUS");
-    testCase.setCaseType("HH");
+    Case testHHCase = getRandomCase();
+    testHHCase.setCaseId(TEST_CASE_ID_1);
+    testHHCase.setReceiptReceived(false);
+    testHHCase.setSurvey("CENSUS");
+    testHHCase.setCaseType("HH");
 
-    UacQidLink testUacQidLink = new UacQidLink();
-    testUacQidLink.setActive(true);
-    testUacQidLink.setQid(TEST_HI_QID);
-    testUacQidLink.setCaze(null);
+    Case testHICase = getRandomCaseWithUacQidLinks(1);
+    testHICase.setCaseId(TEST_INDIVIDUAL_CASE_ID);
+    testHHCase.setReceiptReceived(false);
+    testHICase.setSurvey("CENSUS");
+
+    UacQidLink testHIUacQidLink = testHICase.getUacQidLinks().get(0);
+    testHIUacQidLink.setQid(TEST_HI_QID);
+    testHIUacQidLink.setActive(true);
+    testHIUacQidLink.setCaze(null);
+    testHIUacQidLink.setCcsCase(false);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
-    testUacQidLink.setCcsCase(false);
 
-    when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testCase);
-    when(uacService.findByQid(TEST_HI_QID)).thenReturn(testUacQidLink);
+    when(uacService.findByQid(TEST_HI_QID)).thenReturn(testHIUacQidLink);
+    when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testHHCase);
+    when(caseService.prepareIndividualResponseCaseFromParentCase(any(), any()))
+        .thenReturn(testHICase);
+    when(caseService.saveNewCaseAndStampCaseRef(testHICase)).thenReturn(testHICase);
 
-    String expectedErrorMessage =
-        String.format(
-            "No individualCaseId present on PQ link request where QID is individual and caseType for '%s' is HH",
-            TEST_CASE_ID_1);
+    // WHEN
+    underTest.processQuestionnaireLinked(managementEvent, messageTimestamp);
 
-    try {
-      underTest.processQuestionnaireLinked(managementEvent, messageTimestamp);
-    } catch (IllegalArgumentException e) {
-      assertThat(e.getMessage()).isEqualTo(expectedErrorMessage);
-      throw e;
-    }
+    // THEN
+    InOrder inOrder = inOrder(uacService, caseService, eventLogger);
+    inOrder.verify(uacService).findByQid(TEST_HI_QID);
+
+    inOrder.verify(caseService).getCaseByCaseId(TEST_CASE_ID_1);
+    inOrder
+        .verify(caseService)
+        .prepareIndividualResponseCaseFromParentCase(eq(testHHCase), any(UUID.class));
+    inOrder.verify(caseService).saveNewCaseAndStampCaseRef(testHICase);
+
+    ArgumentCaptor<Case> caseCaptor = ArgumentCaptor.forClass(Case.class);
+    inOrder.verify(caseService).emitCaseCreatedEvent(caseCaptor.capture());
+    Case actualCase = caseCaptor.getValue();
+    assertThat(actualCase.getCaseId()).isEqualTo(TEST_INDIVIDUAL_CASE_ID);
+    assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
+    verifyNoMoreInteractions(caseService);
+
+    ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
+    inOrder.verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
+    UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
+    assertThat(actualUacQidLink.getCaze()).isEqualTo(testHICase);
+    assertThat(actualUacQidLink.isCcsCase()).isFalse();
+    assertThat(actualUacQidLink.getCaze().getSurvey()).isEqualTo("CENSUS");
+    verifyNoMoreInteractions(uacService);
+
+    verify(eventLogger)
+        .logUacQidEvent(
+            eq(testHIUacQidLink),
+            any(OffsetDateTime.class),
+            eq("Questionnaire Linked"),
+            eq(EventType.QUESTIONNAIRE_LINKED),
+            eq(managementEvent.getEvent()),
+            anyString(),
+            eq(messageTimestamp));
+
+    verifyNoMoreInteractions(eventLogger);
   }
 }
