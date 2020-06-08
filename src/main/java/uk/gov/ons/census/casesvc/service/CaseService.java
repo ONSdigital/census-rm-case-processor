@@ -225,6 +225,7 @@ public class CaseService {
     collectionCase.setSkeleton(caze.isSkeleton());
     collectionCase.setMetadata(caze.getMetadata());
     collectionCase.setPrintBatch(caze.getPrintBatch());
+    collectionCase.setSurveyLaunched(caze.isSurveyLaunched());
     // Yes. You can add stuff to the bottom of this list if you like.
 
     return collectionCase;

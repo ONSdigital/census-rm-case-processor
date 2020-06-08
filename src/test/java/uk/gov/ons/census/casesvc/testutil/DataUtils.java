@@ -156,8 +156,8 @@ public class DataUtils {
 
     EventDTO event = managementEvent.getEvent();
     event.setType(EventTypeDTO.SURVEY_LAUNCHED);
-    event.setSource("CONTACT_CENTRE_API");
-    event.setChannel("CC");
+    event.setSource("Respondent Home");
+    event.setChannel("RH");
 
     PayloadDTO payload = managementEvent.getPayload();
     payload.setUac(null);

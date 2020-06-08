@@ -32,6 +32,7 @@ import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
+import uk.gov.ons.census.casesvc.testutil.QueueSpy;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 
 @ContextConfiguration
@@ -46,6 +47,9 @@ public class SurveyLaunchedReceiverIT {
 
   @Value("${queueconfig.survey-launched-queue}")
   private String inboundQueue;
+
+  @Value("${queueconfig.rh-case-queue}")
+  private String rhCaseQueue;
 
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
   @Autowired private CaseRepository caseRepository;
@@ -62,48 +66,56 @@ public class SurveyLaunchedReceiverIT {
   }
 
   @Test
-  public void testSurveyLaunchLogsEvent() throws InterruptedException {
+  public void testSurveyLaunchLogsEventSetsFlagAndEmitsCorrectCaseUpdatedEvent() throws Exception {
     // GIVEN
-    EasyRandom easyRandom = new EasyRandom();
-    Case caze = easyRandom.nextObject(Case.class);
-    caze.setCaseId(TEST_CASE_ID);
-    caze.setUacQidLinks(null);
-    caze.setEvents(null);
-    caze.setAddressInvalid(false);
-    caze.setRefusalReceived(null);
-    caze.setReceiptReceived(false);
-    caze = caseRepository.saveAndFlush(caze);
 
-    UacQidLink uacQidLink = new UacQidLink();
-    uacQidLink.setId(UUID.randomUUID());
-    uacQidLink.setCaze(caze);
-    uacQidLink.setQid(TEST_QID);
-    uacQidLink.setUac(TEST_UAC);
-    uacQidLinkRepository.saveAndFlush(uacQidLink);
+    try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
+      Case caze = easyRandom.nextObject(Case.class);
+      caze.setCaseId(TEST_CASE_ID);
+      caze.setUacQidLinks(null);
+      caze.setEvents(null);
+      caze.setAddressInvalid(false);
+      caze.setRefusalReceived(null);
+      caze.setReceiptReceived(false);
+      caze.setSurveyLaunched(false);
+      caze = caseRepository.saveAndFlush(caze);
 
-    ResponseManagementEvent surveyLaunchedEvent = getTestResponseManagementSurveyLaunchedEvent();
-    surveyLaunchedEvent.getPayload().getResponse().setQuestionnaireId(uacQidLink.getQid());
+      UacQidLink uacQidLink = new UacQidLink();
+      uacQidLink.setId(UUID.randomUUID());
+      uacQidLink.setCaze(caze);
+      uacQidLink.setQid(TEST_QID);
+      uacQidLink.setUac(TEST_UAC);
+      uacQidLinkRepository.saveAndFlush(uacQidLink);
 
-    String json = convertObjectToJson(surveyLaunchedEvent);
-    Message message =
-        MessageBuilder.withBody(json.getBytes())
-            .setContentType(MessageProperties.CONTENT_TYPE_JSON)
-            .build();
+      ResponseManagementEvent surveyLaunchedEvent = getTestResponseManagementSurveyLaunchedEvent();
+      surveyLaunchedEvent.getPayload().getResponse().setQuestionnaireId(uacQidLink.getQid());
 
-    // WHEN
-    rabbitQueueHelper.sendMessage(inboundQueue, message);
-    Thread.sleep(1000);
+      String json = convertObjectToJson(surveyLaunchedEvent);
+      Message message =
+          MessageBuilder.withBody(json.getBytes())
+              .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+              .build();
 
-    // THEN
-    List<Event> events = eventRepository.findAll();
-    assertThat(events.size()).isEqualTo(1);
-    Event event = events.get(0);
-    assertThat(event.getEventDescription()).isEqualTo("Survey launched");
-    UacQidLink actualUacQidLink = event.getUacQidLink();
-    assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID);
-    assertThat(actualUacQidLink.getUac()).isEqualTo(TEST_UAC);
-    assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
-    assertThat(actualUacQidLink.isActive()).isFalse();
+      // WHEN
+      rabbitQueueHelper.sendMessage(inboundQueue, message);
+
+      // THEN
+      ResponseManagementEvent caseUpdatedEvent = rhCaseQueueSpy.checkExpectedMessageReceived();
+
+      assertThat(caseUpdatedEvent.getPayload().getCollectionCase().getId())
+          .isEqualTo(TEST_CASE_ID.toString());
+      assertThat(caseUpdatedEvent.getPayload().getCollectionCase().getSurveyLaunched()).isTrue();
+
+      List<Event> events = eventRepository.findAll();
+      assertThat(events.size()).isEqualTo(1);
+      Event event = events.get(0);
+      assertThat(event.getEventDescription()).isEqualTo("Survey launched");
+      UacQidLink actualUacQidLink = event.getUacQidLink();
+      assertThat(actualUacQidLink.getQid()).isEqualTo(TEST_QID);
+      assertThat(actualUacQidLink.getUac()).isEqualTo(TEST_UAC);
+      assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
+      assertThat(actualUacQidLink.isActive()).isFalse();
+    }
   }
 
   @Test

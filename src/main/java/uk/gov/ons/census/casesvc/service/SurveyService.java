@@ -8,16 +8,19 @@ import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
+import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
 @Component
 public class SurveyService {
   private final UacService uacService;
+  private final CaseService caseService;
   private final EventLogger eventLogger;
 
-  public SurveyService(UacService uacService, EventLogger eventLogger) {
+  public SurveyService(UacService uacService, CaseService caseService, EventLogger eventLogger) {
     this.uacService = uacService;
+    this.caseService = caseService;
     this.eventLogger = eventLogger;
   }
 
@@ -29,6 +32,13 @@ public class SurveyService {
 
     UacQidLink surveyLaunchedForQid =
         uacService.findByQid(surveyEvent.getPayload().getResponse().getQuestionnaireId());
+
+    Case caze = surveyLaunchedForQid.getCaze();
+
+    if (caze != null && surveyEvent.getEvent().getChannel().equals("RH")) {
+      caze.setSurveyLaunched(true);
+      caseService.saveCaseAndEmitCaseUpdatedEvent(caze, null);
+    }
 
     eventLogger.logUacQidEvent(
         surveyLaunchedForQid,
