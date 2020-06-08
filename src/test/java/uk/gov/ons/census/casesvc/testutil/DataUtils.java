@@ -17,15 +17,7 @@ import java.util.List;
 import java.util.UUID;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
-import uk.gov.ons.census.casesvc.model.dto.CCSPropertyDTO;
-import uk.gov.ons.census.casesvc.model.dto.EventDTO;
-import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
-import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
-import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
-import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
-import uk.gov.ons.census.casesvc.model.dto.RefusalType;
-import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
-import uk.gov.ons.census.casesvc.model.dto.UacCreatedDTO;
+import uk.gov.ons.census.casesvc.model.dto.*;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 
@@ -115,6 +107,25 @@ public class DataUtils {
     payload.setCollectionCase(null);
     payload.setRefusal(null);
     payload.setPrintCaseSelected(null);
+
+    payload.getResponse().setUnreceipt(false);
+
+    return managementEvent;
+  }
+
+  public static ResponseManagementEvent getTestResponseManagementFieldUpdatedEvent() {
+    ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
+
+    EventDTO event = managementEvent.getEvent();
+    event.setType(EventTypeDTO.FIELD_CASE_UPDATED);
+    event.setSource("FIELDWORK_GATEWAY");
+    event.setChannel("FIELD");
+
+    PayloadDTO payload = managementEvent.getPayload();
+    payload.setUac(null);
+    payload.setRefusal(null);
+    payload.setPrintCaseSelected(null);
+    payload.getCollectionCase().setCeExpectedCapacity(5);
 
     payload.getResponse().setUnreceipt(false);
 

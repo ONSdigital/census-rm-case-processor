@@ -167,6 +167,16 @@
       }
     },
     {
+      "name": "case.field.update",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "delayedRedeliveryExchange",
+        "x-dead-letter-routing-key": "case.field.update"
+      }
+    },
+    {
       "name": "survey.launched",
       "vhost": "/",
       "durable": true,
@@ -307,6 +317,14 @@
       "destination": "Case.Responses",
       "destination_type": "queue",
       "routing_key": "event.response.receipt",
+      "arguments": {}
+    },
+    {
+      "source": "events",
+      "vhost": "/",
+      "destination": "case.field.update",
+      "destination_type": "queue",
+      "routing_key": "event.fieldcase.update",
       "arguments": {}
     },
     {
