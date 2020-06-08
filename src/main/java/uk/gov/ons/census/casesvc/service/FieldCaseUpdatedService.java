@@ -48,6 +48,9 @@ public class FieldCaseUpdatedService {
 
     caze.setCeExpectedCapacity(fieldCaseUpdatedPayload.getCeExpectedCapacity());
 
+    caseService.saveCaseAndEmitCaseUpdatedEvent(
+        caze, buildMetadataForFieldCaseUpdated(caze, responseManagementEvent));
+
     eventLogger.logCaseEvent(
         caze,
         responseManagementEvent.getEvent().getDateTime(),
@@ -56,9 +59,6 @@ public class FieldCaseUpdatedService {
         responseManagementEvent.getEvent(),
         convertObjectToJson(fieldCaseUpdatedPayload),
         messageTimestamp);
-
-    caseService.saveCaseAndEmitCaseUpdatedEvent(
-        caze, buildMetadataForFieldCaseUpdated(caze, responseManagementEvent));
   }
 
   private Metadata buildMetadataForFieldCaseUpdated(
