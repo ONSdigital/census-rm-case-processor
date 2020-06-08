@@ -52,13 +52,13 @@ public class QuestionnaireLinkedService {
     Case caze = caseService.getCaseByCaseId(UUID.fromString(uac.getCaseId()));
 
     if (checkRequiredFieldsForIndividualHI(questionnaireId, caze.getCaseType())) {
-      UUID individualCaseId;
       if (uac.getIndividualCaseId() == null) {
-        individualCaseId = UUID.randomUUID();
+        caze = caseService.prepareIndividualResponseCaseFromParentCase(caze, UUID.randomUUID());
       } else {
-        individualCaseId = UUID.fromString(uac.getIndividualCaseId());
+        caze =
+            caseService.prepareIndividualResponseCaseFromParentCase(
+                caze, UUID.fromString(uac.getIndividualCaseId()));
       }
-      caze = caseService.prepareIndividualResponseCaseFromParentCase(caze, individualCaseId);
       caze = caseService.saveNewCaseAndStampCaseRef(caze);
       caseService.emitCaseCreatedEvent(caze);
     } else {
