@@ -51,6 +51,8 @@ public class QuestionnaireLinkedService {
 
     Case caze = caseService.getCaseByCaseId(UUID.fromString(uac.getCaseId()));
 
+    throwExceptionIfArgumentsInvalid(caze, questionnaireId, uac.getIndividualCaseId());
+
     if (checkRequiredFieldsForIndividualHI(questionnaireId, caze.getCaseType())) {
       if (uac.getIndividualCaseId() == null) {
         caze = caseService.prepareIndividualResponseCaseFromParentCase(caze, UUID.randomUUID());
@@ -61,9 +63,6 @@ public class QuestionnaireLinkedService {
       }
       caze = caseService.saveNewCaseAndStampCaseRef(caze);
       caseService.emitCaseCreatedEvent(caze);
-    } else {
-      throwIllegalArgumentExceptionIfIndQIDAndIndCaseIdPresentButCaseTypeNotHH(
-          caze, questionnaireId, uac.getIndividualCaseId());
     }
 
     uacQidLink.setCaze(caze);
@@ -113,7 +112,7 @@ public class QuestionnaireLinkedService {
     return (isIndividualQuestionnaireType(questionnaireId) && caseType.equals("HH"));
   }
 
-  private void throwIllegalArgumentExceptionIfIndQIDAndIndCaseIdPresentButCaseTypeNotHH(
+  private void throwExceptionIfArgumentsInvalid(
       Case caze, String questionnaireId, String individualCaseId) {
     if (isIndividualQuestionnaireType(questionnaireId)
         && !caze.getCaseType().equals("HH")
