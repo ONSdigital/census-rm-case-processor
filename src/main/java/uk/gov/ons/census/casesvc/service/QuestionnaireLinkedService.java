@@ -51,7 +51,7 @@ public class QuestionnaireLinkedService {
 
     Case caze = caseService.getCaseByCaseId(UUID.fromString(uac.getCaseId()));
 
-    throwExceptionIfArgumentsInvalid(caze, questionnaireId, uac.getIndividualCaseId());
+    checkArgumentsValid(caze, questionnaireId, uac.getIndividualCaseId());
 
     if (checkRequiredFieldsForIndividualHI(questionnaireId, caze.getCaseType())) {
       if (uac.getIndividualCaseId() == null) {
@@ -112,8 +112,7 @@ public class QuestionnaireLinkedService {
     return (isIndividualQuestionnaireType(questionnaireId) && caseType.equals("HH"));
   }
 
-  private void throwExceptionIfArgumentsInvalid(
-      Case caze, String questionnaireId, String individualCaseId) {
+  private void checkArgumentsValid(Case caze, String questionnaireId, String individualCaseId) {
     if (isIndividualQuestionnaireType(questionnaireId)
         && !caze.getCaseType().equals("HH")
         && individualCaseId != null) {
