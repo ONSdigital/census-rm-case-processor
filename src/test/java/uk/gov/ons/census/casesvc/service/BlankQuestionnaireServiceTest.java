@@ -6,7 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.RESPONSE_RECEIVED;
 
@@ -161,8 +161,8 @@ public class BlankQuestionnaireServiceTest {
     underTest.handleBlankQuestionnaire(caze, uacQidLink, RESPONSE_RECEIVED);
 
     if (!expectation.unreceiptCase && !expectation.sendToField) {
-      verifyZeroInteractions(caseService);
-      verifyZeroInteractions(caseRepository);
+      verifyNoInteractions(caseService);
+      verifyNoInteractions(caseRepository);
       return;
     }
 
@@ -190,7 +190,7 @@ public class BlankQuestionnaireServiceTest {
     } catch (RuntimeException rte) {
       assertThat(rte).isInstanceOf(RuntimeException.class);
       assertThat(rte.getMessage()).endsWith(" does not map to any known processing rule");
-      verifyZeroInteractions(caseService);
+      verifyNoInteractions(caseService);
       return;
     }
 
@@ -243,8 +243,8 @@ public class BlankQuestionnaireServiceTest {
     underTest.handleBlankQuestionnaire(caze, uacQidLink, RESPONSE_RECEIVED);
 
     if (!expectation.unreceiptCase && !expectation.sendToField) {
-      verifyZeroInteractions(caseService);
-      verifyZeroInteractions(caseRepository);
+      verifyNoInteractions(caseService);
+      verifyNoInteractions(caseRepository);
       return;
     }
 
@@ -301,8 +301,8 @@ public class BlankQuestionnaireServiceTest {
     underTest.handleBlankQuestionnaire(caze, uacQidLink, RESPONSE_RECEIVED);
 
     if (!expectation.unreceiptCase) {
-      verifyZeroInteractions(caseService);
-      verifyZeroInteractions(caseRepository);
+      verifyNoInteractions(caseService);
+      verifyNoInteractions(caseRepository);
       return;
     }
 
@@ -356,8 +356,8 @@ public class BlankQuestionnaireServiceTest {
     underTest.handleBlankQuestionnaire(caze, uacQidLink, RESPONSE_RECEIVED);
 
     if (!expectation.unreceiptCase) {
-      verifyZeroInteractions(caseService);
-      verifyZeroInteractions(caseRepository);
+      verifyNoInteractions(caseService);
+      verifyNoInteractions(caseRepository);
       return;
     }
 
