@@ -117,8 +117,8 @@ public class CaseReceiptServiceTest {
       underTest.receiptCase(uacQidLink, getReceiptEventDTO());
     } catch (RuntimeException ex) {
       if (expectation.isRunTimeExceptionExpected()) {
-        verifyZeroInteractions(caseService);
-        verifyZeroInteractions(caseRepository);
+        verifyNoInteractions(caseService);
+        verifyNoInteractions(caseRepository);
         return;
       }
 
@@ -126,8 +126,8 @@ public class CaseReceiptServiceTest {
     }
 
     if (!expectReceipt && !expectIncrement) {
-      verifyZeroInteractions(caseService);
-      verifyZeroInteractions(caseRepository);
+      verifyNoInteractions(caseService);
+      verifyNoInteractions(caseRepository);
       return;
     }
 

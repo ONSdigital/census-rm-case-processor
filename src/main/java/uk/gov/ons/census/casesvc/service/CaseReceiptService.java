@@ -42,25 +42,25 @@ public class CaseReceiptService {
      This table is based on: https://collaborate2.ons.gov.uk/confluence/pages/viewpage.action?spaceKey=SDC&title=Receipting
     */
 
-    rules.put(new Key("HH", "U", HH), new Rule(receiptCase, ActionInstructionType.CANCEL));
+    rules.put(new Key("HH", "U", HH), new ReceiptAndCancel());
     rules.put(new Key("HH", "U", CONT), new NoActionRequired());
-    rules.put(new Key("HI", "U", IND), new Rule(receiptCase, null));
-    rules.put(new Key("CE", "E", IND), new Rule(incrementNoReceipt, ActionInstructionType.UPDATE));
-    rules.put(new Key("CE", "E", CE1), new Rule(receiptCase, ActionInstructionType.UPDATE));
+    rules.put(new Key("HI", "U", IND), new ReceiptCase());
+    rules.put(new Key("CE", "E", IND), new IncrementAndUpdate());
+    rules.put(new Key("CE", "E", CE1), new ReceiptAndUpdate());
     rules.put(new Key("CE", "U", IND), new CeUnitRule());
     rules.put(new Key("SPG", "E", HH), new NoActionRequired());
     rules.put(new Key("SPG", "E", IND), new NoActionRequired());
-    rules.put(new Key("SPG", "U", HH), new Rule(receiptCase, ActionInstructionType.CANCEL));
+    rules.put(new Key("SPG", "U", HH), new ReceiptAndCancel());
     rules.put(new Key("SPG", "U", IND), new NoActionRequired());
     rules.put(new Key("SPG", "U", CONT), new NoActionRequired());
+    // TODO Rules for missing combinations or make the default action "NoActionRequired"?
+    //  We need to be able to handle all combinations
   }
 
   public void receiptCase(UacQidLink uacQidLink, EventDTO causeEvent) {
     Case caze = uacQidLink.getCaze();
 
-    if (caze.isReceiptReceived()
-        || (uacQidLink.isBlankQuestionnaire()
-            && !causeEvent.getChannel().equals(EQ_EVENT_CHANNEL))) {
+    if (uacQidLink.isBlankQuestionnaire() && !causeEvent.getChannel().equals(EQ_EVENT_CHANNEL)) {
       return;
     }
 
@@ -113,16 +113,47 @@ public class CaseReceiptService {
     void run(Case caze, EventTypeDTO causeEventType);
   }
 
-  @AllArgsConstructor
-  private class Rule implements UpdateAndEmitCaseRule {
-
-    private Function<Case, Case> functionToExecute;
-    private ActionInstructionType fieldInstruction;
+  private class ReceiptAndCancel implements UpdateAndEmitCaseRule {
 
     public void run(Case caze, EventTypeDTO causeEventType) {
-      Case updatedCase = functionToExecute.apply(caze);
+      if (caze.isReceiptReceived()) {
+        return;
+      }
+      Case updatedCase = receiptCase.apply(caze);
       caseService.saveCaseAndEmitCaseUpdatedEvent(
-          updatedCase, buildMetadata(causeEventType, fieldInstruction));
+          updatedCase, buildMetadata(causeEventType, ActionInstructionType.CANCEL));
+    }
+  }
+
+  private class ReceiptAndUpdate implements UpdateAndEmitCaseRule {
+
+    public void run(Case caze, EventTypeDTO causeEventType) {
+      if (caze.isReceiptReceived()) {
+        return;
+      }
+      Case updatedCase = receiptCase.apply(caze);
+      caseService.saveCaseAndEmitCaseUpdatedEvent(
+          updatedCase, buildMetadata(causeEventType, ActionInstructionType.UPDATE));
+    }
+  }
+
+  private class ReceiptCase implements UpdateAndEmitCaseRule {
+
+    public void run(Case caze, EventTypeDTO causeEventType) {
+      if (caze.isReceiptReceived()) {
+        return;
+      }
+      Case updatedCase = receiptCase.apply(caze);
+      caseService.saveCaseAndEmitCaseUpdatedEvent(updatedCase, buildMetadata(causeEventType, null));
+    }
+  }
+
+  private class IncrementAndUpdate implements UpdateAndEmitCaseRule {
+
+    public void run(Case caze, EventTypeDTO causeEventType) {
+      Case updatedCase = incrementNoReceipt.apply(caze);
+      caseService.saveCaseAndEmitCaseUpdatedEvent(
+          updatedCase, buildMetadata(causeEventType, ActionInstructionType.UPDATE));
     }
   }
 
@@ -133,7 +164,8 @@ public class CaseReceiptService {
 
       Case lockedCase = incrementNoReceipt.apply(caze);
 
-      if (lockedCase.getCeActualResponses() >= lockedCase.getCeExpectedCapacity()) {
+      if (!caze.isReceiptReceived()
+          && lockedCase.getCeActualResponses() >= lockedCase.getCeExpectedCapacity()) {
         lockedCase.setReceiptReceived(true);
         fieldInstruction = ActionInstructionType.CANCEL;
       }
