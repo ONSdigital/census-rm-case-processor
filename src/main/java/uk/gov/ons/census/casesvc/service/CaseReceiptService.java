@@ -6,7 +6,7 @@ import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -21,7 +21,7 @@ import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 @Component
 public class CaseReceiptService {
 
-  private final CaseService caseService;
+  private CaseService caseService;
   private final CaseRepository caseRepository;
   private static final String HH = "H";
   private static final String IND = "I";
@@ -29,7 +29,7 @@ public class CaseReceiptService {
   private static final String CONT = "Cont";
   private static final String EQ_EVENT_CHANNEL = "EQ";
 
-  private Map<Key, UpdateAndEmitCaseRule> rules = new HashMap<>();
+  private Map<Key, BiFunction<Case, EventTypeDTO, Case>> rules = new HashMap<>();
 
   public CaseReceiptService(CaseService caseService, CaseRepository caseRepository) {
     this.caseService = caseService;
@@ -42,17 +42,17 @@ public class CaseReceiptService {
      This table is based on: https://collaborate2.ons.gov.uk/confluence/pages/viewpage.action?spaceKey=SDC&title=Receipting
     */
 
-    rules.put(new Key("HH", "U", HH), new ReceiptAndCancel());
-    rules.put(new Key("HH", "U", CONT), new NoActionRequired());
-    rules.put(new Key("HI", "U", IND), new ReceiptCase());
-    rules.put(new Key("CE", "E", IND), new IncrementAndUpdate());
-    rules.put(new Key("CE", "E", CE1), new ReceiptAndUpdate());
-    rules.put(new Key("CE", "U", IND), new CeUnitRule());
-    rules.put(new Key("SPG", "E", HH), new NoActionRequired());
-    rules.put(new Key("SPG", "E", IND), new NoActionRequired());
-    rules.put(new Key("SPG", "U", HH), new ReceiptAndCancel());
-    rules.put(new Key("SPG", "U", IND), new NoActionRequired());
-    rules.put(new Key("SPG", "U", CONT), new NoActionRequired());
+    rules.put(new Key("HH", "U", HH), receiptAndCancel);
+    rules.put(new Key("HH", "U", CONT), noActionRequired);
+    rules.put(new Key("HI", "U", IND), receiptCase);
+    rules.put(new Key("CE", "E", IND), incrementAndUpdate);
+    rules.put(new Key("CE", "E", CE1), receiptAndUpdate);
+    rules.put(new Key("CE", "U", IND), ceUnitRule);
+    rules.put(new Key("SPG", "E", HH), noActionRequired);
+    rules.put(new Key("SPG", "E", IND), noActionRequired);
+    rules.put(new Key("SPG", "U", HH), receiptAndCancel);
+    rules.put(new Key("SPG", "U", IND), noActionRequired);
+    rules.put(new Key("SPG", "U", CONT), noActionRequired);
     // TODO Rules for missing combinations or make the default action "NoActionRequired"?
     //  We need to be able to handle all combinations
   }
@@ -70,8 +70,7 @@ public class CaseReceiptService {
       throw new RuntimeException(ruleKey.toString() + " does not map to any known processing rule");
     }
 
-    UpdateAndEmitCaseRule rule = rules.get(ruleKey);
-    rule.run(caze, causeEvent.getType());
+    rules.get(ruleKey).apply(caze, causeEvent.getType());
   }
 
   private Key makeRulesKey(Case caze, UacQidLink uacQidLink) {
@@ -80,23 +79,80 @@ public class CaseReceiptService {
   }
 
   private Case getCaseAndLockIt(UUID caseId) {
-    Case caze = caseService.getCaseAndLockIt(caseId);
+    return caseService.getCaseAndLockIt(caseId);
+  }
+
+  private Case incrementNoReceipt(Case caze) {
+    Case lockedCase = getCaseAndLockIt(caze.getCaseId());
+    lockedCase.setCeActualResponses(lockedCase.getCeActualResponses() + 1);
+
+    return lockedCase;
+  }
+
+  private Case receiptCase(Case caze) {
+    caze.setReceiptReceived(true);
     return caze;
   }
 
-  Function<Case, Case> incrementNoReceipt =
-      (caze) -> {
-        Case lockedCase = getCaseAndLockIt(caze.getCaseId());
-        lockedCase.setCeActualResponses(lockedCase.getCeActualResponses() + 1);
-
-        return lockedCase;
-      };
-
-  Function<Case, Case> receiptCase =
-      (caze) -> {
-        caze.setReceiptReceived(true);
+  BiFunction<Case, EventTypeDTO, Case> receiptAndCancel =
+      (caze, causeEventType) -> {
+        if (caze.isReceiptReceived()) {
+          return caze;
+        }
+        Case updatedCase = receiptCase(caze);
+        caseService.saveCaseAndEmitCaseUpdatedEvent(
+            updatedCase, buildMetadata(causeEventType, ActionInstructionType.CANCEL));
         return caze;
       };
+
+  BiFunction<Case, EventTypeDTO, Case> receiptAndUpdate =
+      (caze, causeEventType) -> {
+        if (caze.isReceiptReceived()) {
+          return caze;
+        }
+        Case updatedCase = receiptCase(caze);
+        caseService.saveCaseAndEmitCaseUpdatedEvent(
+            updatedCase, buildMetadata(causeEventType, ActionInstructionType.UPDATE));
+        return caze;
+      };
+
+  BiFunction<Case, EventTypeDTO, Case> receiptCase =
+      (caze, causeEventType) -> {
+        if (caze.isReceiptReceived()) {
+          return caze;
+        }
+        Case updatedCase = receiptCase(caze);
+        caseService.saveCaseAndEmitCaseUpdatedEvent(
+            updatedCase, buildMetadata(causeEventType, null));
+        return caze;
+      };
+
+  BiFunction<Case, EventTypeDTO, Case> incrementAndUpdate =
+      (caze, causeEventType) -> {
+        Case updatedCase = incrementNoReceipt(caze);
+        caseService.saveCaseAndEmitCaseUpdatedEvent(
+            updatedCase, buildMetadata(causeEventType, ActionInstructionType.UPDATE));
+        return caze;
+      };
+
+  BiFunction<Case, EventTypeDTO, Case> ceUnitRule =
+      (caze, causeEventType) -> {
+        ActionInstructionType fieldInstruction = ActionInstructionType.UPDATE;
+
+        Case lockedCase = incrementNoReceipt(caze);
+
+        if (!caze.isReceiptReceived()
+            && lockedCase.getCeActualResponses() >= lockedCase.getCeExpectedCapacity()) {
+          lockedCase.setReceiptReceived(true);
+          fieldInstruction = ActionInstructionType.CANCEL;
+        }
+
+        caseService.saveCaseAndEmitCaseUpdatedEvent(
+            lockedCase, buildMetadata(causeEventType, fieldInstruction));
+        return caze;
+      };
+
+  BiFunction<Case, EventTypeDTO, Case> noActionRequired = (caze, causeEventType) -> caze;
 
   @AllArgsConstructor
   @EqualsAndHashCode
@@ -106,80 +162,5 @@ public class CaseReceiptService {
     private String caseType;
     private String addressLevel;
     private String formType;
-  }
-
-  private interface UpdateAndEmitCaseRule {
-
-    void run(Case caze, EventTypeDTO causeEventType);
-  }
-
-  private class ReceiptAndCancel implements UpdateAndEmitCaseRule {
-
-    public void run(Case caze, EventTypeDTO causeEventType) {
-      if (caze.isReceiptReceived()) {
-        return;
-      }
-      Case updatedCase = receiptCase.apply(caze);
-      caseService.saveCaseAndEmitCaseUpdatedEvent(
-          updatedCase, buildMetadata(causeEventType, ActionInstructionType.CANCEL));
-    }
-  }
-
-  private class ReceiptAndUpdate implements UpdateAndEmitCaseRule {
-
-    public void run(Case caze, EventTypeDTO causeEventType) {
-      if (caze.isReceiptReceived()) {
-        return;
-      }
-      Case updatedCase = receiptCase.apply(caze);
-      caseService.saveCaseAndEmitCaseUpdatedEvent(
-          updatedCase, buildMetadata(causeEventType, ActionInstructionType.UPDATE));
-    }
-  }
-
-  private class ReceiptCase implements UpdateAndEmitCaseRule {
-
-    public void run(Case caze, EventTypeDTO causeEventType) {
-      if (caze.isReceiptReceived()) {
-        return;
-      }
-      Case updatedCase = receiptCase.apply(caze);
-      caseService.saveCaseAndEmitCaseUpdatedEvent(updatedCase, buildMetadata(causeEventType, null));
-    }
-  }
-
-  private class IncrementAndUpdate implements UpdateAndEmitCaseRule {
-
-    public void run(Case caze, EventTypeDTO causeEventType) {
-      Case updatedCase = incrementNoReceipt.apply(caze);
-      caseService.saveCaseAndEmitCaseUpdatedEvent(
-          updatedCase, buildMetadata(causeEventType, ActionInstructionType.UPDATE));
-    }
-  }
-
-  private class CeUnitRule implements UpdateAndEmitCaseRule {
-
-    public void run(Case caze, EventTypeDTO causeEventType) {
-      ActionInstructionType fieldInstruction = ActionInstructionType.UPDATE;
-
-      Case lockedCase = incrementNoReceipt.apply(caze);
-
-      if (!caze.isReceiptReceived()
-          && lockedCase.getCeActualResponses() >= lockedCase.getCeExpectedCapacity()) {
-        lockedCase.setReceiptReceived(true);
-        fieldInstruction = ActionInstructionType.CANCEL;
-      }
-
-      caseService.saveCaseAndEmitCaseUpdatedEvent(
-          lockedCase, buildMetadata(causeEventType, fieldInstruction));
-    }
-  }
-
-  private class NoActionRequired implements UpdateAndEmitCaseRule {
-
-    @Override
-    public void run(Case caze, EventTypeDTO causeEventType) {
-      // No Updating, saving or emitting required
-    }
   }
 }
