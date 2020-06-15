@@ -36,9 +36,7 @@ public class BlankQuestionnaireService {
      This table is based on: https://collaborate2.ons.gov.uk/confluence/display/SDC/Process+Flow+for+Blank+PQs
     */
 
-    rules.put(
-        new BlankQuestionnaireService.Key("HH", "U", HH_FORM_TYPE, true),
-        new BlankQuestionnaireService.NoActionRequired());
+    rules.put(new Key("HH", "U", HH_FORM_TYPE, true), new NoActionRequired());
     rules.put(
         new BlankQuestionnaireService.Key("HH", "U", HH_FORM_TYPE, false),
         new BlankQuestionnaireService.UnreceiptCaseAndSendToField());
