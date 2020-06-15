@@ -570,6 +570,59 @@ public class QuestionnaireLinkedReceiverIT {
     }
   }
 
+  @Test
+  public void testLinkToSPGParentCaseIgnoresPresentIndividualCaseId() throws Exception {
+    try (QueueSpy rhUacQueueSpy = rabbitQueueHelper.listen(rhUacQueue);
+        QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
+      // GIVEN
+      // Create CE (parent) case
+      Case testSPGCase = easyRandom.nextObject(Case.class);
+      testSPGCase.setCaseId(TEST_CASE_ID);
+      testSPGCase.setCaseType("SPG");
+      testSPGCase.setReceiptReceived(false);
+      testSPGCase.setUacQidLinks(null);
+      testSPGCase.setEvents(null);
+      caseRepository.saveAndFlush(testSPGCase);
+
+      // Send unaddressed uac message to create uac/qid unaddressed pair
+      CreateUacQid createUacQid = new CreateUacQid();
+      createUacQid.setQuestionnaireType("21");
+      createUacQid.setBatchId(UUID.randomUUID());
+      sendMessageAndExpectInboundMessage(unaddressedQueue, createUacQid, rhUacQueueSpy);
+
+      // Get generated Questionnaire Id
+      String expectedQuestionnaireId = uacQidLinkRepository.findAll().get(0).getQid();
+
+      ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
+      managementEvent.getEvent().setTransactionId(UUID.randomUUID());
+      UacDTO uac = new UacDTO();
+      uac.setCaseId(TEST_CASE_ID.toString());
+      uac.setQuestionnaireId(expectedQuestionnaireId);
+      uac.setIndividualCaseId(UUID.randomUUID().toString());
+      managementEvent.getPayload().setUac(uac);
+
+      // WHEN
+      // Send questionnaire linked message
+      sendMessageAndDoNotExpectInboundMessage(
+          questionnaireLinkedQueue, managementEvent, rhCaseQueueSpy);
+
+      // THEN
+      Case actualSPGCase = caseRepository.findById(TEST_CASE_ID).get();
+
+      // Check database that SPG Case is linked to UacQidLink
+      List<UacQidLink> uacQidLinks = uacQidLinkRepository.findAll();
+      assertThat(uacQidLinks.size()).isEqualTo(1);
+      UacQidLink actualUacQidLink = uacQidLinks.get(0);
+      assertThat(actualUacQidLink.getQid()).isEqualTo(expectedQuestionnaireId);
+      assertThat(actualUacQidLink.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
+      assertThat(actualSPGCase.getCaseRef()).isEqualTo(actualUacQidLink.getCaze().getCaseRef());
+
+      List<Event> events = eventRepository.findAll(Sort.by(ASC, "rmEventProcessed"));
+
+      validateEvents(events, expectedQuestionnaireId, 2, false);
+    }
+  }
+
   private void validateEvents(
       List<Event> events,
       String expectedQuestionnaireId,
