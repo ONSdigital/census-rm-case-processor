@@ -116,23 +116,6 @@ public class CaseReceiptServiceTest {
     assertThat(metadata.getFieldDecision()).isEqualTo(ActionInstructionType.CANCEL);
   }
 
-  private String getQid(String qidType) {
-    switch (qidType) {
-      case "HH":
-        return HOUSEHOLD_HH_ENGLAND_QID_TYPE;
-      case "Ind":
-        return HOUSEHOLD_INDIVIDUAL_QID_TYPE;
-      case "Cont":
-        return ENGLAND_HOUSEHOLD_CONTINUATION;
-      case "CE1":
-        return ENGLAND_CE_QID;
-      default:
-        fail("Unknown Qid Type: " + qidType);
-    }
-
-    return null;
-  }
-
   private EventDTO getReceiptEventDTO() {
     EventDTO receiptEventDTO = new EventDTO();
     receiptEventDTO.setDateTime(OffsetDateTime.now());

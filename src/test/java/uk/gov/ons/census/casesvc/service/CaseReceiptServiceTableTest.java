@@ -122,7 +122,7 @@ public class CaseReceiptServiceTableTest {
         return;
       }
 
-      fail("Unexepcted exception" + ex.getMessage() + " for " + key.toString());
+      fail("Unexpected exception" + ex.getMessage() + " for " + key.toString());
     }
 
     if (!expectReceipt && !expectIncrement) {
