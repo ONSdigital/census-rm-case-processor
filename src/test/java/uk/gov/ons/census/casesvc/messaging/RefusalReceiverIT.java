@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.model.dto.*;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
+import uk.gov.ons.census.casesvc.model.entity.RefusalType;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
@@ -107,7 +108,7 @@ public class RefusalReceiverIT {
 
       Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
       assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
-      assertThat(actualCase.getRefusalReceived()).isEqualTo(RefusalTypeDTO.HARD_REFUSAL);
+      assertThat(actualCase.getRefusalReceived()).isEqualTo(RefusalType.HARD_REFUSAL);
       assertThat(actualCase.getLastUpdated()).isNotEqualTo(cazeCreatedTime);
 
       // check the metadata is included with field CANCEL decision
@@ -173,7 +174,7 @@ public class RefusalReceiverIT {
 
       Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
       assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
-      assertThat(actualCase.getRefusalReceived()).isEqualTo(RefusalTypeDTO.EXTRAORDINARY_REFUSAL);
+      assertThat(actualCase.getRefusalReceived()).isEqualTo(RefusalType.EXTRAORDINARY_REFUSAL);
       assertThat(actualCase.getLastUpdated()).isNotEqualTo(cazeCreatedTime);
 
       List<Event> events = eventRepository.findAll();
