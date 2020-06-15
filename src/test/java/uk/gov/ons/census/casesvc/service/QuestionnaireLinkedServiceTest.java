@@ -473,7 +473,7 @@ public class QuestionnaireLinkedServiceTest {
     assertThat(actualUacQidLink.getCaze().getSurvey()).isEqualTo("CENSUS");
     verifyNoMoreInteractions(uacService);
 
-    verifyZeroInteractions(caseReceiptService);
+    verifyNoInteractions(caseReceiptService);
   }
 
   @Test
@@ -525,8 +525,8 @@ public class QuestionnaireLinkedServiceTest {
             eq(testCase), eq(testUacQidLink), eq(EventTypeDTO.QUESTIONNAIRE_LINKED));
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void testErrorOnIndQIDAndIndCaseIdProvidedButCaseTypeNotHH() {
+  @Test
+  public void testIndCaseIdIsIgnoredWhenLinkingToCeParentCase() {
     ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
 
     UacDTO uac = managementEvent.getPayload().getUac();
@@ -550,17 +550,36 @@ public class QuestionnaireLinkedServiceTest {
     when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testCase);
     when(uacService.findByQid(TEST_HI_QID)).thenReturn(testUacQidLink);
 
-    String expectedErrorMessage =
-        String.format(
-            "CaseType on '%s' not HH where QID is individual on PQ link request where individualCaseId provided",
-            TEST_CASE_ID_1);
+    // WHEN
+    underTest.processQuestionnaireLinked(managementEvent, messageTimestamp);
 
-    try {
-      underTest.processQuestionnaireLinked(managementEvent, messageTimestamp);
-    } catch (IllegalArgumentException e) {
-      assertThat(e.getMessage()).isEqualTo(expectedErrorMessage);
-      throw e;
-    }
+    // THEN
+    InOrder inOrder = inOrder(uacService, caseService, eventLogger);
+
+    inOrder.verify(uacService).findByQid(anyString());
+
+    inOrder.verify(caseService).getCaseByCaseId(any(UUID.class));
+    verifyNoMoreInteractions(caseService);
+
+    ArgumentCaptor<UacQidLink> uacQidLinkCaptor = ArgumentCaptor.forClass(UacQidLink.class);
+    inOrder.verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLinkCaptor.capture());
+    UacQidLink actualUacQidLink = uacQidLinkCaptor.getValue();
+    assertThat(actualUacQidLink.getQid()).isEqualTo(testUacQidLink.getQid());
+    assertThat(actualUacQidLink.getUac()).isEqualTo(testUacQidLink.getUac());
+    assertThat(actualUacQidLink.isCcsCase()).isFalse();
+    assertThat(actualUacQidLink.getCaze().getSurvey()).isEqualTo("CENSUS");
+    verifyNoMoreInteractions(uacService);
+
+    verify(eventLogger)
+        .logUacQidEvent(
+            eq(testUacQidLink),
+            any(OffsetDateTime.class),
+            eq("Questionnaire Linked"),
+            eq(EventType.QUESTIONNAIRE_LINKED),
+            eq(managementEvent.getEvent()),
+            anyString(),
+            eq(messageTimestamp));
+    verifyNoMoreInteractions(eventLogger);
   }
 
   @Test

@@ -159,8 +159,8 @@ public class QidReceiptServiceTest {
     underTest.processUnreceipt(managementEvent, OffsetDateTime.now(), uacQidLink);
 
     // Then
-    verifyZeroInteractions(caseReceiptService);
-    verifyZeroInteractions(blankQuestionnaireService);
+    verifyNoInteractions(caseReceiptService);
+    verifyNoInteractions(blankQuestionnaireService);
     verify(eventLogger)
         .logUacQidEvent(
             eq(uacQidLink),
@@ -200,8 +200,8 @@ public class QidReceiptServiceTest {
     underTest.processUnreceipt(managementEvent, OffsetDateTime.now(), uacQidLink);
 
     // Then
-    verifyZeroInteractions(uacService);
-    verifyZeroInteractions(caseReceiptService);
-    verifyZeroInteractions(blankQuestionnaireService);
+    verifyNoInteractions(uacService);
+    verifyNoInteractions(caseReceiptService);
+    verifyNoInteractions(blankQuestionnaireService);
   }
 }
