@@ -473,7 +473,7 @@ public class QuestionnaireLinkedServiceTest {
     assertThat(actualUacQidLink.getCaze().getSurvey()).isEqualTo("CENSUS");
     verifyNoMoreInteractions(uacService);
 
-    verifyZeroInteractions(caseReceiptService);
+    verifyNoInteractions(caseReceiptService);
   }
 
   @Test
