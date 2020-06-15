@@ -6,9 +6,20 @@ import ma.glasnost.orika.MapperFacade;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uk.gov.ons.census.casesvc.model.dto.*;
+import uk.gov.ons.census.casesvc.model.dto.Address;
+import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
+import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
+import uk.gov.ons.census.casesvc.model.dto.EventDTO;
+import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
+import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
+import uk.gov.ons.census.casesvc.model.dto.Metadata;
+import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
+import uk.gov.ons.census.casesvc.model.dto.RefusalTypeDTO;
+import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
+import uk.gov.ons.census.casesvc.model.dto.SampleUnitDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.CaseMetadata;
+import uk.gov.ons.census.casesvc.model.entity.RefusalType;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.utility.CaseRefGenerator;
 import uk.gov.ons.census.casesvc.utility.EventHelper;
@@ -219,7 +230,11 @@ public class CaseService {
     collectionCase.setCeExpectedCapacity(caze.getCeExpectedCapacity());
     collectionCase.setCeActualResponses(caze.getCeActualResponses());
     collectionCase.setReceiptReceived(caze.isReceiptReceived());
-    collectionCase.setRefusalReceived(caze.getRefusalReceived());
+    if (caze.getRefusalReceived() != null) {
+      collectionCase.setRefusalReceived(RefusalTypeDTO.valueOf(caze.getRefusalReceived().name()));
+    } else {
+      collectionCase.setRefusalReceived(null);
+    }
     collectionCase.setAddressInvalid(caze.isAddressInvalid());
     collectionCase.setHandDelivery(caze.isHandDelivery());
     collectionCase.setSkeleton(caze.isSkeleton());

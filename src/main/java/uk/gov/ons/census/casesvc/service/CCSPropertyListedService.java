@@ -10,6 +10,7 @@ import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.*;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
+import uk.gov.ons.census.casesvc.model.entity.RefusalType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
@@ -41,11 +42,14 @@ public class CCSPropertyListedService {
     RefusalType refusal = null;
 
     if (ccsProperty.getRefusal() != null) {
-      if (ccsProperty.getRefusal().getType() != RefusalType.EXTRAORDINARY_REFUSAL
-          && ccsProperty.getRefusal().getType() != RefusalType.HARD_REFUSAL) {
+      if (ccsProperty.getRefusal().getType() != RefusalTypeDTO.EXTRAORDINARY_REFUSAL
+          && ccsProperty.getRefusal().getType() != RefusalTypeDTO.HARD_REFUSAL) {
         throw new RuntimeException("Unexpected refusal type" + ccsProperty.getRefusal().getType());
       }
-      refusal = ccsProperty.getRefusal().getType();
+
+      if (ccsProperty.getRefusal().getType() != null) {
+        refusal = RefusalType.valueOf(ccsProperty.getRefusal().getType().name());
+      }
     }
 
     Case caze =
