@@ -37,63 +37,25 @@ public class BlankQuestionnaireService {
     */
 
     rules.put(new Key("HH", "U", HH_FORM_TYPE, true), new NoActionRequired());
-    rules.put(
-        new BlankQuestionnaireService.Key("HH", "U", HH_FORM_TYPE, false),
-        new BlankQuestionnaireService.UnreceiptCaseAndSendToField());
-    rules.put(
-        new BlankQuestionnaireService.Key("CE", "U", IND_FORM_TYPE, true),
-        new BlankQuestionnaireService.NoActionRequired());
-    rules.put(
-        new BlankQuestionnaireService.Key("SPG", "U", IND_FORM_TYPE, true),
-        new BlankQuestionnaireService.NoActionRequired());
-    rules.put(
-        new BlankQuestionnaireService.Key("SPG", "U", HH_FORM_TYPE, true),
-        new BlankQuestionnaireService.NoActionRequired());
-    rules.put(
-        new BlankQuestionnaireService.Key("HI", "U", IND_FORM_TYPE, false),
-        new BlankQuestionnaireService.UnreceiptCase());
-    rules.put(
-        new BlankQuestionnaireService.Key("CE", "E", IND_FORM_TYPE, false),
-        new BlankQuestionnaireService.NoActionRequired());
-    rules.put(
-        new BlankQuestionnaireService.Key("CE", "U", IND_FORM_TYPE, false),
-        new BlankQuestionnaireService.NoActionRequired());
-    rules.put(
-        new BlankQuestionnaireService.Key("SPG", "U", HH_FORM_TYPE, false),
-        new BlankQuestionnaireService.UnreceiptCaseAndSendToField());
-    rules.put(
-        new BlankQuestionnaireService.Key("SPG", "U", IND_FORM_TYPE, false),
-        new BlankQuestionnaireService.NoActionRequired());
-    rules.put(
-        new BlankQuestionnaireService.Key("HH", "U", CONT_FORM_TYPE, false),
-        new BlankQuestionnaireService.NoActionRequired());
-    rules.put(
-        new BlankQuestionnaireService.Key("SPG", "U", CONT_FORM_TYPE, false),
-        new BlankQuestionnaireService.NoActionRequired());
-    rules.put(
-        new BlankQuestionnaireService.Key("SPG", "E", CONT_FORM_TYPE, false),
-        new BlankQuestionnaireService.NoActionRequired());
-    rules.put(
-        new BlankQuestionnaireService.Key("CE", "U", CONT_FORM_TYPE, false),
-        new BlankQuestionnaireService.NoActionRequired());
-    rules.put(
-        new BlankQuestionnaireService.Key("CE", "E", CONT_FORM_TYPE, false),
-        new BlankQuestionnaireService.NoActionRequired());
-    rules.put(
-        new BlankQuestionnaireService.Key("HH", "U", CONT_FORM_TYPE, true),
-        new BlankQuestionnaireService.NoActionRequired());
-    rules.put(
-        new BlankQuestionnaireService.Key("SPG", "U", CONT_FORM_TYPE, true),
-        new BlankQuestionnaireService.NoActionRequired());
-    rules.put(
-        new BlankQuestionnaireService.Key("SPG", "E", CONT_FORM_TYPE, true),
-        new BlankQuestionnaireService.NoActionRequired());
-    rules.put(
-        new BlankQuestionnaireService.Key("CE", "U", CONT_FORM_TYPE, true),
-        new BlankQuestionnaireService.NoActionRequired());
-    rules.put(
-        new BlankQuestionnaireService.Key("CE", "E", CONT_FORM_TYPE, true),
-        new BlankQuestionnaireService.NoActionRequired());
+    rules.put(new Key("HH", "U", HH_FORM_TYPE, false), new UnreceiptCaseAndSendToField());
+    rules.put(new Key("CE", "U", IND_FORM_TYPE, true), new NoActionRequired());
+    rules.put(new Key("SPG", "U", IND_FORM_TYPE, true), new NoActionRequired());
+    rules.put(new Key("SPG", "U", HH_FORM_TYPE, true), new NoActionRequired());
+    rules.put(new Key("HI", "U", IND_FORM_TYPE, false), new UnreceiptCase());
+    rules.put(new Key("CE", "E", IND_FORM_TYPE, false), new NoActionRequired());
+    rules.put(new Key("CE", "U", IND_FORM_TYPE, false), new NoActionRequired());
+    rules.put(new Key("SPG", "U", HH_FORM_TYPE, false), new UnreceiptCaseAndSendToField());
+    rules.put(new Key("SPG", "U", IND_FORM_TYPE, false), new NoActionRequired());
+    rules.put(new Key("HH", "U", CONT_FORM_TYPE, false), new NoActionRequired());
+    rules.put(new Key("SPG", "U", CONT_FORM_TYPE, false), new NoActionRequired());
+    rules.put(new Key("SPG", "E", CONT_FORM_TYPE, false), new NoActionRequired());
+    rules.put(new Key("CE", "U", CONT_FORM_TYPE, false), new NoActionRequired());
+    rules.put(new Key("CE", "E", CONT_FORM_TYPE, false), new NoActionRequired());
+    rules.put(new Key("HH", "U", CONT_FORM_TYPE, true), new NoActionRequired());
+    rules.put(new Key("SPG", "U", CONT_FORM_TYPE, true), new NoActionRequired());
+    rules.put(new Key("SPG", "E", CONT_FORM_TYPE, true), new NoActionRequired());
+    rules.put(new Key("CE", "U", CONT_FORM_TYPE, true), new NoActionRequired());
+    rules.put(new Key("CE", "E", CONT_FORM_TYPE, true), new NoActionRequired());
   }
 
   public void handleBlankQuestionnaire(
