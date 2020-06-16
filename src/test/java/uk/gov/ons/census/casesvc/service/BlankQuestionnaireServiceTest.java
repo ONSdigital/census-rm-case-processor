@@ -16,7 +16,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -384,7 +383,6 @@ public class BlankQuestionnaireServiceTest {
   }
 
   @AllArgsConstructor
-  @EqualsAndHashCode
   private static class Key {
 
     private String caseType;
@@ -397,7 +395,6 @@ public class BlankQuestionnaireServiceTest {
     }
   }
 
-  @EqualsAndHashCode
   private static class Expectation {
 
     boolean unreceiptCase;
