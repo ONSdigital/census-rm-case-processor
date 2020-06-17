@@ -7,6 +7,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.ons.census.casesvc.model.entity.RefusalType.HARD_REFUSAL;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementCCSAddressListedEvent;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
@@ -25,6 +26,7 @@ import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.*;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
+import uk.gov.ons.census.casesvc.model.entity.RefusalType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
@@ -149,13 +151,13 @@ public class CCSPropertyListedServiceTest {
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     RefusalDTO refusalDto = new RefusalDTO();
-    refusalDto.setType(RefusalType.HARD_REFUSAL);
+    refusalDto.setType(RefusalTypeDTO.HARD_REFUSAL);
     managementEvent.getPayload().getCcsProperty().setRefusal(refusalDto);
 
     Case expectedCase =
         getExpectedCCSCase(
             managementEvent.getPayload().getCcsProperty().getCollectionCase().getId());
-    expectedCase.setRefusalReceived(RefusalType.HARD_REFUSAL);
+    expectedCase.setRefusalReceived(HARD_REFUSAL);
 
     when(caseService.createCCSCase(
             expectedCase.getCaseId().toString(),

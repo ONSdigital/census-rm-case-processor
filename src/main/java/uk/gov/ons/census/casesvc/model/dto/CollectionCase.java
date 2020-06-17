@@ -17,7 +17,7 @@ public class CollectionCase {
   private Address address;
   private OffsetDateTime actionableFrom;
   private Boolean receiptReceived;
-  private RefusalType refusalReceived;
+  private RefusalTypeDTO refusalReceived;
   private OffsetDateTime createdDateTime;
   private OffsetDateTime lastUpdated;
 

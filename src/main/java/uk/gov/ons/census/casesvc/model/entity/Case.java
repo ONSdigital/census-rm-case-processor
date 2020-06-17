@@ -11,7 +11,6 @@ import javax.persistence.Table;
 import lombok.Data;
 import lombok.ToString;
 import org.hibernate.annotations.*;
-import uk.gov.ons.census.casesvc.model.dto.RefusalType;
 
 // The bidirectional relationships with other entities can cause stack overflows with the default
 // toString

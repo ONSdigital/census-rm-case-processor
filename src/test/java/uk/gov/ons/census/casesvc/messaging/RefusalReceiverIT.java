@@ -1,6 +1,7 @@
 package uk.gov.ons.census.casesvc.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.ons.census.casesvc.model.entity.RefusalType.EXTRAORDINARY_REFUSAL;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToObject;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementRefusalEvent;
@@ -25,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.model.dto.*;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
+import uk.gov.ons.census.casesvc.model.entity.RefusalType;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
@@ -81,7 +83,7 @@ public class RefusalReceiverIT {
           caseRepository.findById(TEST_CASE_ID).get().getCreatedDateTime();
 
       ResponseManagementEvent managementEvent =
-          getTestResponseManagementRefusalEvent(RefusalType.HARD_REFUSAL);
+          getTestResponseManagementRefusalEvent(RefusalTypeDTO.HARD_REFUSAL);
       managementEvent.getEvent().setTransactionId(UUID.randomUUID());
       RefusalDTO expectedRefusal = managementEvent.getPayload().getRefusal();
       expectedRefusal.getCollectionCase().setId(TEST_CASE_ID.toString());
@@ -141,7 +143,7 @@ public class RefusalReceiverIT {
       // GIVEN
       Case caze = getRandomCase();
       caze.setCaseId(TEST_CASE_ID);
-      caze.setRefusalReceived(RefusalType.EXTRAORDINARY_REFUSAL);
+      caze.setRefusalReceived(EXTRAORDINARY_REFUSAL);
       caze.setSurvey("CENSUS");
       caze.setUacQidLinks(null);
       caze.setEvents(null);
@@ -152,7 +154,7 @@ public class RefusalReceiverIT {
           caseRepository.findById(TEST_CASE_ID).get().getCreatedDateTime();
 
       ResponseManagementEvent managementEvent =
-          getTestResponseManagementRefusalEvent(RefusalType.HARD_REFUSAL);
+          getTestResponseManagementRefusalEvent(RefusalTypeDTO.HARD_REFUSAL);
       managementEvent.getEvent().setTransactionId(UUID.randomUUID());
 
       RefusalDTO refusalDTO = managementEvent.getPayload().getRefusal();
@@ -180,7 +182,7 @@ public class RefusalReceiverIT {
 
       RefusalDTO actualRefusal =
           convertJsonToObject(events.get(0).getEventPayload(), RefusalDTO.class);
-      assertThat(actualRefusal.getType()).isEqualTo(RefusalType.HARD_REFUSAL);
+      assertThat(actualRefusal.getType()).isEqualTo(RefusalTypeDTO.HARD_REFUSAL);
       assertThat(actualRefusal.getReport()).isEqualTo(refusalDTO.getReport());
       assertThat(actualRefusal.getAgentId()).isEqualTo(refusalDTO.getAgentId());
       assertThat(actualRefusal.getCallId()).isEqualTo(refusalDTO.getCallId());

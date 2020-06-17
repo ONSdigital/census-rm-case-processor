@@ -28,13 +28,14 @@ import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.InvalidAddress;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
-import uk.gov.ons.census.casesvc.model.dto.RefusalType;
+import uk.gov.ons.census.casesvc.model.dto.RefusalTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.SampleUnitDTO;
 import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
+import uk.gov.ons.census.casesvc.model.entity.RefusalType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
@@ -160,7 +161,7 @@ public class CCSPropertyListedIT {
     try (QueueSpy queueSpy = rabbitQueueHelper.listen(caseUpdatedQueueName)) {
       // GIVEN
       RefusalDTO refusal = new RefusalDTO();
-      refusal.setType(RefusalType.HARD_REFUSAL);
+      refusal.setType(RefusalTypeDTO.HARD_REFUSAL);
       refusal.setAgentId("test agent");
       refusal.setReport("test report");
 

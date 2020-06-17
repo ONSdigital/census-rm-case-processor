@@ -2,6 +2,7 @@ package uk.gov.ons.census.casesvc.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
+import static uk.gov.ons.census.casesvc.model.entity.RefusalType.EXTRAORDINARY_REFUSAL;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementRefusalEvent;
 
@@ -18,6 +19,7 @@ import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.*;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
+import uk.gov.ons.census.casesvc.model.entity.RefusalType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RefusalServiceTest {
@@ -36,7 +38,7 @@ public class RefusalServiceTest {
   public void testExtraordinaryRefusalForCase() {
     // GIVEN
     ResponseManagementEvent managementEvent =
-        getTestResponseManagementRefusalEvent(RefusalType.EXTRAORDINARY_REFUSAL);
+        getTestResponseManagementRefusalEvent(RefusalTypeDTO.EXTRAORDINARY_REFUSAL);
     CollectionCase collectionCase = managementEvent.getPayload().getRefusal().getCollectionCase();
     collectionCase.setId(TEST_CASE_ID.toString());
     collectionCase.setRefusalReceived(null);
@@ -84,10 +86,10 @@ public class RefusalServiceTest {
   public void testHardRefusalCase() {
     // GIVEN
     ResponseManagementEvent managementEvent =
-        getTestResponseManagementRefusalEvent(RefusalType.HARD_REFUSAL);
+        getTestResponseManagementRefusalEvent(RefusalTypeDTO.HARD_REFUSAL);
     CollectionCase collectionCase = managementEvent.getPayload().getRefusal().getCollectionCase();
     collectionCase.setId(TEST_CASE_ID.toString());
-    collectionCase.setRefusalReceived(RefusalType.HARD_REFUSAL);
+    collectionCase.setRefusalReceived(RefusalTypeDTO.HARD_REFUSAL);
     Case testCase = getRandomCase();
     testCase.setRefusalReceived(null);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
@@ -133,7 +135,7 @@ public class RefusalServiceTest {
   public void testRefusalNotFromFieldForEstabAddressLevelCaseIsLoggedWithoutRefusingTheCase() {
     // GIVEN
     ResponseManagementEvent managementEvent =
-        getTestResponseManagementRefusalEvent(RefusalType.HARD_REFUSAL);
+        getTestResponseManagementRefusalEvent(RefusalTypeDTO.HARD_REFUSAL);
     managementEvent.getEvent().setChannel("NOT FROM FIELD");
     managementEvent.getPayload().getRefusal().getCollectionCase().setId(TEST_CASE_ID.toString());
 
@@ -168,12 +170,12 @@ public class RefusalServiceTest {
   public void testHardRefusalAgainstAlreadyExtraordinaryRefusedCaseJustRecordsEvent() {
     // GIVEN
     ResponseManagementEvent managementEvent =
-        getTestResponseManagementRefusalEvent(RefusalType.HARD_REFUSAL);
+        getTestResponseManagementRefusalEvent(RefusalTypeDTO.HARD_REFUSAL);
     CollectionCase collectionCase = managementEvent.getPayload().getRefusal().getCollectionCase();
     collectionCase.setId(TEST_CASE_ID.toString());
-    collectionCase.setRefusalReceived(RefusalType.HARD_REFUSAL);
+    collectionCase.setRefusalReceived(RefusalTypeDTO.HARD_REFUSAL);
     Case testCase = getRandomCase();
-    testCase.setRefusalReceived(RefusalType.EXTRAORDINARY_REFUSAL);
+    testCase.setRefusalReceived(EXTRAORDINARY_REFUSAL);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     when(caseService.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);

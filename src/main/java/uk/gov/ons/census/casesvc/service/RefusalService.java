@@ -1,5 +1,6 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static uk.gov.ons.census.casesvc.model.entity.RefusalType.EXTRAORDINARY_REFUSAL;
 import static uk.gov.ons.census.casesvc.utility.EventHelper.isEventChannelField;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
@@ -41,7 +42,8 @@ public class RefusalService {
       return;
     }
 
-    refusedCase.setRefusalReceived(refusalDto.getType());
+    refusedCase.setRefusalReceived(
+        uk.gov.ons.census.casesvc.model.entity.RefusalType.valueOf(refusalDto.getType().name()));
     caseService.saveCaseAndEmitCaseUpdatedEvent(refusedCase, buildMetadataForRefusal(refusalEvent));
 
     logRefusalCaseEvent(refusalEvent, refusedCase, messageTimestamp, REFUSAL_RECEIVED);
@@ -59,9 +61,9 @@ public class RefusalService {
       return true;
     }
 
-    if (refusalDto.getType() == RefusalType.HARD_REFUSAL
+    if (refusalDto.getType() == RefusalTypeDTO.HARD_REFUSAL
         && refusedCase.getRefusalReceived() != null
-        && refusedCase.getRefusalReceived() == RefusalType.EXTRAORDINARY_REFUSAL) {
+        && refusedCase.getRefusalReceived() == EXTRAORDINARY_REFUSAL) {
       logRefusalCaseEvent(
           refusalEvent,
           refusedCase,

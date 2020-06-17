@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @JsonInclude(Include.NON_NULL)
 public class RefusalDTO {
-  private RefusalType type;
+  private RefusalTypeDTO type;
   private String report;
   private String agentId;
   private String callId;

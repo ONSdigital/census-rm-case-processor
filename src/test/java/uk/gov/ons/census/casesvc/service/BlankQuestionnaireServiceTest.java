@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.RESPONSE_RECEIVED;
+import static uk.gov.ons.census.casesvc.model.entity.RefusalType.HARD_REFUSAL;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,7 +22,6 @@ import org.junit.runners.Parameterized;
 import org.mockito.ArgumentCaptor;
 import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.Metadata;
-import uk.gov.ons.census.casesvc.model.dto.RefusalType;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
@@ -272,7 +272,7 @@ public class BlankQuestionnaireServiceTest {
     caze.setCaseType(caseType);
     caze.setAddressLevel(addressLevel);
     caze.setCaseId(UUID.randomUUID());
-    caze.setRefusalReceived(RefusalType.HARD_REFUSAL);
+    caze.setRefusalReceived(HARD_REFUSAL);
     caze.setAddressInvalid(false);
 
     UacQidLink uacQidLink = new UacQidLink();
