@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.ons.census.casesvc.model.entity.RefusalType.HARD_REFUSAL;
 import static uk.gov.ons.census.casesvc.testutil.MessageConstructor.constructMessageWithValidTimeStamp;
 import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
@@ -168,7 +169,7 @@ public class UndeliveredMailReceiverTest {
     caze.setReceiptReceived(false);
 
     // Scenario 2 - refusal received
-    caze.setRefusalReceived(RefusalType.HARD_REFUSAL);
+    caze.setRefusalReceived(HARD_REFUSAL);
     underTest.receiveMessage(message);
     caze.setRefusalReceived(null);
 
