@@ -214,6 +214,8 @@ public class CaseService {
     collectionCase.setCollectionExerciseId(caze.getCollectionExerciseId());
     collectionCase.setId(caze.getCaseId().toString());
     collectionCase.setSurvey(caze.getSurvey());
+    collectionCase.setCreatedDateTime(caze.getCreatedDateTime());
+    collectionCase.setLastUpdated(caze.getLastUpdated());
     // Stop. No. Don't put anything else here unless it's in the event dictionary. Look down!
 
     // Below this line is extra data potentially needed by Action Scheduler - will be ignored by RH
