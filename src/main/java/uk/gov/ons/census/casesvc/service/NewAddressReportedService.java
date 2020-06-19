@@ -47,7 +47,7 @@ public class NewAddressReportedService {
     Case skeletonCase = createSkeletonCase(newCollectionCase);
 
     skeletonCase = caseService.saveNewCaseAndStampCaseRef(skeletonCase);
-    if (skeletonCase.getUprn() == null) {
+    if (StringUtils.isEmpty(skeletonCase.getUprn())) {
       addDummyUprnToCase(skeletonCase);
       caseService.saveCase(skeletonCase);
     }
@@ -73,7 +73,7 @@ public class NewAddressReportedService {
     Case newCaseFromSourceCase = buildCaseFromSourceCaseAndEvent(newCollectionCase, sourceCase);
 
     newCaseFromSourceCase = caseService.saveNewCaseAndStampCaseRef(newCaseFromSourceCase);
-    if (newCaseFromSourceCase.getUprn() == null) {
+    if (StringUtils.isEmpty(newCaseFromSourceCase.getUprn())) {
       addDummyUprnToCase(newCaseFromSourceCase);
     }
 
@@ -280,6 +280,6 @@ public class NewAddressReportedService {
   }
 
   private void addDummyUprnToCase(Case newCase) {
-    newCase.setUprn(String.format("%s%s", dummyUprnPrefix, newCase.getCaseRef()));
+    newCase.setUprn(String.format("%s%d", dummyUprnPrefix, newCase.getCaseRef()));
   }
 }
