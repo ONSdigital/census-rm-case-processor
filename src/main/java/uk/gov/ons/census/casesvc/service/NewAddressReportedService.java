@@ -228,17 +228,15 @@ public class NewAddressReportedService {
         getEventValOverSource(
             sourceCase.getLongitude(), newCollectionCase.getAddress().getLongitude()));
 
-    // Set fields empty/null/blank unless they come from the event
-    newCase.setOrganisationName(
-        getEventValOverSource(null, newCollectionCase.getAddress().getOrganisationName()));
-    newCase.setCeExpectedCapacity(
-        getEventValOverSource(null, newCollectionCase.getCeExpectedCapacity()));
+    // Set fields from the event if they exist
+    newCase.setOrganisationName(newCollectionCase.getAddress().getOrganisationName());
+    newCase.setCeExpectedCapacity(newCollectionCase.getCeExpectedCapacity());
+    newCase.setTreatmentCode(newCollectionCase.getTreatmentCode());
+    newCase.setUprn(newCollectionCase.getAddress().getUprn());
+    // If no case type on event - set it to address type from event
     newCase.setCaseType(
         getEventValOverSource(
             newCollectionCase.getAddress().getAddressType(), newCollectionCase.getCaseType()));
-    newCase.setTreatmentCode(getEventValOverSource(null, newCollectionCase.getTreatmentCode()));
-    // If no uprn on event, a uprn will be created after case is stamped and saved with caseRef
-    newCase.setUprn(getEventValOverSource(null, newCollectionCase.getAddress().getUprn()));
 
     // Fields that do not come on the event but come from source case
     newCase.setEstabUprn(sourceCase.getEstabUprn());
