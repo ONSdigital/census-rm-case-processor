@@ -30,6 +30,9 @@ public class NewAddressReportedService {
   @Value("${censusconfig.actionplanid}")
   private String censusActionPlanId;
 
+  @Value("${uprnconfig.uprnprefix}")
+  private String uprnPrefix;
+
   public NewAddressReportedService(CaseService caseService, EventLogger eventLogger) {
     this.caseService = caseService;
     this.eventLogger = eventLogger;
@@ -44,6 +47,10 @@ public class NewAddressReportedService {
     Case skeletonCase = createSkeletonCase(newCollectionCase);
 
     skeletonCase = caseService.saveNewCaseAndStampCaseRef(skeletonCase);
+    if (skeletonCase.getUprn() == null) {
+      addDummyUprnToCase(skeletonCase);
+      caseService.saveCase(skeletonCase);
+    }
     caseService.emitCaseCreatedEvent(skeletonCase);
 
     eventLogger.logCaseEvent(
@@ -66,6 +73,9 @@ public class NewAddressReportedService {
     Case newCaseFromSourceCase = buildCaseFromSourceCaseAndEvent(newCollectionCase, sourceCase);
 
     newCaseFromSourceCase = caseService.saveNewCaseAndStampCaseRef(newCaseFromSourceCase);
+    if (newCaseFromSourceCase.getUprn() == null) {
+      addDummyUprnToCase(newCaseFromSourceCase);
+    }
 
     Metadata metadata =
         getMetaDataToCreateFieldCaseIfConditionsMet(newCaseFromSourceCase, newAddressEvent);
@@ -221,13 +231,14 @@ public class NewAddressReportedService {
     // Set fields empty/null/blank unless they come from the event
     newCase.setOrganisationName(
         getEventValOverSource(null, newCollectionCase.getAddress().getOrganisationName()));
-    newCase.setUprn(getEventValOverSource(null, newCollectionCase.getAddress().getUprn()));
     newCase.setCeExpectedCapacity(
         getEventValOverSource(null, newCollectionCase.getCeExpectedCapacity()));
     newCase.setCaseType(
         getEventValOverSource(
             newCollectionCase.getAddress().getAddressType(), newCollectionCase.getCaseType()));
     newCase.setTreatmentCode(getEventValOverSource(null, newCollectionCase.getTreatmentCode()));
+    // If no uprn on event, a uprn will be created after case is stamped and saved with caseRef
+    newCase.setUprn(getEventValOverSource(null, newCollectionCase.getAddress().getUprn()));
 
     // Fields that do not come on the event but come from source case
     newCase.setEstabUprn(sourceCase.getEstabUprn());
@@ -266,5 +277,9 @@ public class NewAddressReportedService {
     CaseMetadata newCaseMetadata = new CaseMetadata();
     newCaseMetadata.setSecureEstablishment(sourceMetadata.getSecureEstablishment());
     return newCaseMetadata;
+  }
+
+  private void addDummyUprnToCase(Case newCase) {
+    newCase.setUprn(String.format("%s%s", uprnPrefix, newCase.getCaseRef()));
   }
 }
