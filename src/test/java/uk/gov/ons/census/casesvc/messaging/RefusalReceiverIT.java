@@ -9,6 +9,7 @@ import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
@@ -110,6 +111,10 @@ public class RefusalReceiverIT {
       assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
       assertThat(actualCase.getRefusalReceived()).isEqualTo(RefusalType.HARD_REFUSAL);
       assertThat(actualCase.getLastUpdated()).isNotEqualTo(cazeCreatedTime);
+      assertThat(actualCase.getCreatedDateTime()).isEqualTo(caze.getCreatedDateTime());
+
+      Optional<Case> updatedCase = caseRepository.findById(caze.getCaseId());
+      assertThat(actualCase.getLastUpdated()).isEqualTo(updatedCase.get().getLastUpdated());
 
       // check the metadata is included with field CANCEL decision
       assertThat(responseManagementEvent.getPayload().getMetadata().getFieldDecision())

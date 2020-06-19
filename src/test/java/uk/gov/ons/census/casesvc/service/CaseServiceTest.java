@@ -388,6 +388,20 @@ public class CaseServiceTest {
   }
 
   @Test
+  public void testSaveAndEmitCaseEvent() {
+    // Given
+    Case caze = getRandomCase();
+
+    // When
+    PayloadDTO payload = underTest.saveCaseAndEmitCaseCreatedEvent(caze);
+
+    // Then
+    assertThat(payload.getCollectionCase().getCreatedDateTime())
+        .isEqualTo(caze.getCreatedDateTime());
+    assertThat(payload.getCollectionCase().getLastUpdated()).isEqualTo(caze.getLastUpdated());
+  }
+
+  @Test
   public void testSaveAndEmitCaseEventWithNullRegion() {
     // Given
     Case caze = getRandomCase();

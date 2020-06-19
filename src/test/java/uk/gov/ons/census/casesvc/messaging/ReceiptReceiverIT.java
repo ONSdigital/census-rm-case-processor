@@ -231,6 +231,12 @@ public class ReceiptReceiverIT {
           responseManagementEvent.getPayload().getCollectionCase();
       assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID.toString());
       assertThat(actualCollectionCase.getReceiptReceived()).isFalse();
+      assertThat(actualCollectionCase.getLastUpdated()).isNotEqualTo(caze.getLastUpdated());
+      assertThat(actualCollectionCase.getCreatedDateTime()).isEqualTo(caze.getCreatedDateTime());
+
+      Optional<Case> updatedCase = caseRepository.findById(caze.getCaseId());
+      assertThat(actualCollectionCase.getLastUpdated())
+          .isEqualTo(updatedCase.get().getLastUpdated());
 
       // check the metadata is included with field close decision
       assertThat(responseManagementEvent.getPayload().getMetadata().getFieldDecision())
