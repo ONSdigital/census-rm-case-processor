@@ -8,6 +8,7 @@ import com.godaddy.logging.LoggerFactory;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import net.logstash.logback.encoder.org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.retry.MessageRecoverer;
@@ -182,9 +183,11 @@ public class ManagedMessageRecoverer implements MessageRecoverer {
           .with("valid_json", validateJson(rawMessageBody))
           .error("Could not process message", cause);
     } else {
+      String stackTraceRootCause = findUsefulRootCauseInStackTrace(cause);
       log.with("message_hash", messageHash)
           .with("valid_json", validateJson(rawMessageBody))
           .with("cause", cause.getMessage())
+          .with("root_cause", stackTraceRootCause)
           .error("Could not process message");
     }
   }
@@ -208,5 +211,18 @@ public class ManagedMessageRecoverer implements MessageRecoverer {
     } catch (IOException e) {
       return String.format("Invalid JSON: %s", e.getMessage());
     }
+  }
+
+  private String findUsefulRootCauseInStackTrace(Throwable cause) {
+    String[] stackTrace = ExceptionUtils.getRootCauseStackTrace(cause);
+
+    // Iterate through the stack trace until we hit the first problem with our code
+    for (String stackTraceLine : stackTrace) {
+      if (stackTraceLine.contains("uk.gov.ons.census")) {
+        return stackTraceLine;
+      }
+    }
+
+    return stackTrace[0];
   }
 }
