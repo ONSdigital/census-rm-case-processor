@@ -92,4 +92,4 @@ censusconfig:
   actionplanid: c4415287-0e37-447b-9c3d-1a011c9fa3db
 
 uprnconfig:
-  uprn-prefix: 999
+  dummyuprnprefix: 999

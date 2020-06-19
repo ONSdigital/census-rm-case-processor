@@ -30,8 +30,8 @@ public class NewAddressReportedService {
   @Value("${censusconfig.actionplanid}")
   private String censusActionPlanId;
 
-  @Value("${uprnconfig.uprnprefix}")
-  private String uprnPrefix;
+  @Value("${uprnconfig.dummyuprnprefix}")
+  private String dummyUprnPrefix;
 
   public NewAddressReportedService(CaseService caseService, EventLogger eventLogger) {
     this.caseService = caseService;
@@ -280,6 +280,6 @@ public class NewAddressReportedService {
   }
 
   private void addDummyUprnToCase(Case newCase) {
-    newCase.setUprn(String.format("%s%s", uprnPrefix, newCase.getCaseRef()));
+    newCase.setUprn(String.format("%s%s", dummyUprnPrefix, newCase.getCaseRef()));
   }
 }
