@@ -309,7 +309,7 @@ public class AddressReceiverIT {
       assertThat(actualCase.getOrganisationName()).isNull();
       assertThat(actualCase.getLatitude()).isEqualTo(sourceCase.getLatitude());
       assertThat(actualCase.getLongitude()).isEqualTo(sourceCase.getLongitude());
-      assertThat(actualCase.getUprn()).isNull();
+      assertThat(actualCase.getUprn()).isEqualTo("999" + actualCase.getCaseRef());
       assertThat(actualCase.getTreatmentCode()).isNull();
 
       assertThat(actualCase.getEstabUprn()).isEqualTo(sourceCase.getEstabUprn());

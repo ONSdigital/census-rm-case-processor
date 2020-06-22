@@ -90,3 +90,6 @@ directdeliverytreatmentcodes: CE_LDIEE
 censusconfig:
   collectionexerciseid: 34d7f3bb-91c9-45d0-bb2d-90afce4fc790
   actionplanid: c4415287-0e37-447b-9c3d-1a011c9fa3db
+
+uprnconfig:
+  dummyuprnprefix: 999
