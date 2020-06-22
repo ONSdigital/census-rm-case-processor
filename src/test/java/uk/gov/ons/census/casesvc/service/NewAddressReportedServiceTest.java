@@ -40,6 +40,8 @@ public class NewAddressReportedServiceTest {
 
   private String EXPECTED_ACTION_PLAN_ID = UUID.randomUUID().toString();
 
+  private String DUMMY_UPRN_PREFIX = "999";
+
   @Test
   public void testCreatingSkeletonCaseWithAllEventFields() {
     // given
@@ -103,6 +105,9 @@ public class NewAddressReportedServiceTest {
     ReflectionTestUtils.setField(underTest, "censusCollectionExerciseId", collectionExerciseId);
 
     ResponseManagementEvent responseManagementEvent = getMinimalValidNewAddress();
+    Case casetoEmit = new Case();
+    casetoEmit.setUprn("1234");
+    when(caseService.saveNewCaseAndStampCaseRef(any(Case.class))).thenReturn(casetoEmit);
     underTest.processNewAddress(responseManagementEvent, OffsetDateTime.now());
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
 
@@ -123,6 +128,9 @@ public class NewAddressReportedServiceTest {
   @Test
   public void testMinimalGoodNewAddressDoesNotFailValidation() {
     ResponseManagementEvent responseManagementEvent = getMinimalValidNewAddress();
+    Case casetoEmit = new Case();
+    casetoEmit.setUprn("1234");
+    when(caseService.saveNewCaseAndStampCaseRef(any(Case.class))).thenReturn(casetoEmit);
     underTest.processNewAddress(responseManagementEvent, OffsetDateTime.now());
   }
 
@@ -192,6 +200,8 @@ public class NewAddressReportedServiceTest {
 
   @Test
   public void testNewAddressFromSourceCaseWithMinimalEventFields() {
+    ReflectionTestUtils.setField(underTest, "dummyUprnPrefix", DUMMY_UPRN_PREFIX);
+
     EasyRandom easyRandom = new EasyRandom();
     Case sourceCase = easyRandom.nextObject(Case.class);
     sourceCase.setCaseId(UUID.randomUUID());
@@ -226,6 +236,7 @@ public class NewAddressReportedServiceTest {
 
     assertThat(newCase.getLongitude()).isEqualTo(sourceCase.getLongitude());
     assertThat(newCase.getLatitude()).isEqualTo(sourceCase.getLatitude());
+    assertThat(newCase.getUprn()).isEqualTo(DUMMY_UPRN_PREFIX + newCase.getCaseRef());
   }
 
   @Test
@@ -421,6 +432,20 @@ public class NewAddressReportedServiceTest {
     underTest.processNewAddressFromSourceId(newAddressEvent, timeNow, sourceCase.getCaseId());
 
     verify(caseService).saveCaseAndEmitCaseCreatedEvent(any(), eq(null));
+  }
+
+  @Test
+  public void testNewAddressGetsDummyUprn() {
+    ReflectionTestUtils.setField(underTest, "dummyUprnPrefix", DUMMY_UPRN_PREFIX);
+    ResponseManagementEvent responseManagementEvent = getMinimalValidNewAddress();
+    Case casetoEmit = new Case();
+    casetoEmit.setCaseRef(1234L);
+
+    when(caseService.saveNewCaseAndStampCaseRef(any(Case.class))).thenReturn(casetoEmit);
+    underTest.processNewAddress(responseManagementEvent, OffsetDateTime.now());
+    verify(caseService).saveCase(any(Case.class));
+
+    assertThat(casetoEmit.getUprn()).isEqualTo(DUMMY_UPRN_PREFIX + casetoEmit.getCaseRef());
   }
 
   private ResponseManagementEvent getMinimalValidNewAddress() {
