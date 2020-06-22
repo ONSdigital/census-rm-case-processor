@@ -3,7 +3,6 @@ package uk.gov.ons.census.casesvc.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static uk.gov.ons.census.casesvc.model.entity.EventType.FULFILMENT_REQUESTED;
-import static uk.gov.ons.census.casesvc.model.entity.RefusalType.HARD_REFUSAL;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementEvent;
 
@@ -116,15 +115,56 @@ public class FulfilmentRequestServiceTest {
     testIndividualResponseCode(RM_HOUSEHOLD_INDIVIDUAL_TELEPHONE_CAPTURE);
   }
 
+  @Test
+  public void testIndividalResponseFulfilmentRequestForNonHHIsJustLogged() {
+    // Given
+    Case parentCase = getRandomCase();
+    parentCase.setUacQidLinks(new ArrayList<>());
+    parentCase.setEvents(new ArrayList<>());
+    parentCase.setCaseType("SPG");
+
+    ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
+    managementEvent
+        .getPayload()
+        .getFulfilmentRequest()
+        .setCaseId(parentCase.getCaseId().toString());
+    managementEvent
+        .getPayload()
+        .getFulfilmentRequest()
+        .setFulfilmentCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_PRINT);
+    managementEvent
+        .getPayload()
+        .getFulfilmentRequest()
+        .setIndividualCaseId(UUID.randomUUID().toString());
+
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+
+    when(caseService.getCaseByCaseId(eq(parentCase.getCaseId()))).thenReturn(parentCase);
+
+    // when
+    underTest.processFulfilmentRequest(managementEvent, messageTimestamp);
+
+    verify(caseService).getCaseByCaseId(parentCase.getCaseId());
+    verifyNoMoreInteractions(caseService);
+
+    // then
+    verify(eventLogger, times(1))
+        .logCaseEvent(
+            eq(parentCase),
+            eq(managementEvent.getEvent().getDateTime()),
+            eq("Fulfilment Request Received"),
+            eq(FULFILMENT_REQUESTED),
+            eq(managementEvent.getEvent()),
+            anyString(),
+            eq(messageTimestamp));
+  }
+
   private void testIndividualResponseCodePrinter(String individualResponseCode) {
     // Given
     Case parentCase = getRandomCase();
     parentCase.setUacQidLinks(new ArrayList<>());
     parentCase.setEvents(new ArrayList<>());
-    parentCase.setCreatedDateTime(OffsetDateTime.now().minusDays(1));
-    parentCase.setReceiptReceived(true);
-    parentCase.setRefusalReceived(HARD_REFUSAL);
-    parentCase.setAddressType("HH");
+    parentCase.setCaseType("HH");
 
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
     managementEvent
@@ -176,10 +216,7 @@ public class FulfilmentRequestServiceTest {
     Case parentCase = getRandomCase();
     parentCase.setUacQidLinks(new ArrayList<>());
     parentCase.setEvents(new ArrayList<>());
-    parentCase.setCreatedDateTime(OffsetDateTime.now().minusDays(1));
-    parentCase.setReceiptReceived(true);
-    parentCase.setRefusalReceived(HARD_REFUSAL);
-    parentCase.setAddressType("HH");
+    parentCase.setCaseType("HH");
 
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
     FulfilmentRequestDTO expectedFulfilmentRequest =
