@@ -231,7 +231,6 @@ public class ReceiptReceiverIT {
           responseManagementEvent.getPayload().getCollectionCase();
       assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID.toString());
       assertThat(actualCollectionCase.getReceiptReceived()).isFalse();
-      assertThat(actualCollectionCase.getLastUpdated()).isNotEqualTo(caze.getLastUpdated());
       assertThat(actualCollectionCase.getCreatedDateTime()).isEqualTo(caze.getCreatedDateTime());
 
       Optional<Case> updatedCase = caseRepository.findById(caze.getCaseId());
