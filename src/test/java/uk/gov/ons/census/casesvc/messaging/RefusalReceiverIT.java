@@ -9,7 +9,6 @@ import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
@@ -80,9 +79,6 @@ public class RefusalReceiverIT {
       caze.setAddressLevel("U");
       caseRepository.saveAndFlush(caze);
 
-      OffsetDateTime cazeCreatedTime =
-          caseRepository.findById(TEST_CASE_ID).get().getCreatedDateTime();
-
       ResponseManagementEvent managementEvent =
           getTestResponseManagementRefusalEvent(RefusalTypeDTO.HARD_REFUSAL);
       managementEvent.getEvent().setTransactionId(UUID.randomUUID());
@@ -102,19 +98,21 @@ public class RefusalReceiverIT {
       ResponseManagementEvent responseManagementEvent =
           rhCaseQueueSpy.checkExpectedMessageReceived();
 
+      Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
+      OffsetDateTime cazeCreatedTime = actualCase.getCreatedDateTime();
+      OffsetDateTime cazeLastUpdated = actualCase.getLastUpdated();
+
       EventDTO eventDTO = responseManagementEvent.getEvent();
       assertThat(eventDTO.getType()).isEqualTo(EventTypeDTO.CASE_UPDATED);
       assertThat(eventDTO.getSource()).isEqualTo("CASE_SERVICE");
       assertThat(eventDTO.getChannel()).isEqualTo("RM");
 
-      Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
-      assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
-      assertThat(actualCase.getRefusalReceived()).isEqualTo(RefusalType.HARD_REFUSAL);
-      assertThat(actualCase.getLastUpdated()).isNotEqualTo(cazeCreatedTime);
-      //      assertThat(actualCase.getCreatedDateTime()).isEqualTo(caze.getCreatedDateTime());
+      CollectionCase collectionCase = responseManagementEvent.getPayload().getCollectionCase();
+      assertThat(collectionCase.getRefusalReceived()).isEqualTo(RefusalTypeDTO.HARD_REFUSAL);
+      assertThat(collectionCase.getCreatedDateTime()).isEqualTo(cazeCreatedTime);
+      assertThat(collectionCase.getLastUpdated()).isEqualTo(cazeLastUpdated);
 
-      Optional<Case> updatedCase = caseRepository.findById(caze.getCaseId());
-      assertThat(actualCase.getLastUpdated()).isEqualTo(updatedCase.get().getLastUpdated());
+      assertThat(actualCase.getRefusalReceived()).isEqualTo(RefusalType.HARD_REFUSAL);
 
       // check the metadata is included with field CANCEL decision
       assertThat(responseManagementEvent.getPayload().getMetadata().getFieldDecision())
