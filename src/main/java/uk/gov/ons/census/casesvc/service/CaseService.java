@@ -214,6 +214,7 @@ public class CaseService {
     collectionCase.setCollectionExerciseId(caze.getCollectionExerciseId());
     collectionCase.setId(caze.getCaseId().toString());
     collectionCase.setSurvey(caze.getSurvey());
+    collectionCase.setCreatedDateTime(caze.getCreatedDateTime());
     // Stop. No. Don't put anything else here unless it's in the event dictionary. Look down!
 
     // Below this line is extra data potentially needed by Action Scheduler - will be ignored by RH
@@ -241,6 +242,7 @@ public class CaseService {
     collectionCase.setMetadata(caze.getMetadata());
     collectionCase.setPrintBatch(caze.getPrintBatch());
     collectionCase.setSurveyLaunched(caze.isSurveyLaunched());
+    collectionCase.setLastUpdated(caze.getLastUpdated());
     // Yes. You can add stuff to the bottom of this list if you like.
 
     return collectionCase;
