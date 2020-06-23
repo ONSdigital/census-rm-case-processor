@@ -23,11 +23,16 @@ public class ExceptionManagerClient {
   private String port;
 
   public ExceptionReportResponse reportException(
-      String messageHash, String service, String queue, Throwable cause) {
+      String messageHash,
+      String service,
+      String queue,
+      Throwable cause,
+      String stackTraceRootCause) {
 
     ExceptionReport exceptionReport = new ExceptionReport();
     exceptionReport.setExceptionClass(cause.getClass().getName());
     exceptionReport.setExceptionMessage(cause.getMessage());
+    exceptionReport.setExceptionRootCause(stackTraceRootCause);
     exceptionReport.setMessageHash(messageHash);
     exceptionReport.setService(service);
     exceptionReport.setQueue(queue);
