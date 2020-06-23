@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.IntStream;
@@ -134,6 +135,11 @@ public class ReceiptReceiverIT {
           responseManagementEvent.getPayload().getCollectionCase();
       assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID.toString());
       assertThat(actualCollectionCase.getReceiptReceived()).isTrue();
+      assertThat(actualCollectionCase.getCreatedDateTime()).isEqualTo(caze.getCreatedDateTime());
+
+      Optional<Case> updatedCase = caseRepository.findById(caze.getCaseId());
+      assertThat(actualCollectionCase.getLastUpdated())
+          .isEqualTo(updatedCase.get().getLastUpdated());
 
       // check the metadata is included with field CANCEL decision
       assertThat(responseManagementEvent.getPayload().getMetadata().getFieldDecision())
@@ -225,6 +231,11 @@ public class ReceiptReceiverIT {
           responseManagementEvent.getPayload().getCollectionCase();
       assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID.toString());
       assertThat(actualCollectionCase.getReceiptReceived()).isFalse();
+      assertThat(actualCollectionCase.getCreatedDateTime()).isEqualTo(caze.getCreatedDateTime());
+
+      Optional<Case> updatedCase = caseRepository.findById(caze.getCaseId());
+      assertThat(actualCollectionCase.getLastUpdated())
+          .isEqualTo(updatedCase.get().getLastUpdated());
 
       // check the metadata is included with field close decision
       assertThat(responseManagementEvent.getPayload().getMetadata().getFieldDecision())
