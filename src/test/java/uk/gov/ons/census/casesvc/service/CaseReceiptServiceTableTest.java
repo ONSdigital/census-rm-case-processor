@@ -56,6 +56,7 @@ public class CaseReceiptServiceTableTest {
       {new Key("CE", "E", "HH"), new Expectation()},
       {new Key("CE", "U", "Ind"), new Expectation("Y", "Y AR >= ER", ActionInstructionType.CANCEL)},
       {new Key("CE", "U", "Ind"), new Expectation("Y", "N AR < ER", ActionInstructionType.UPDATE)},
+      {new Key("CE", "U", "Ind"), new Expectation("Y", "N ER = null", ActionInstructionType.UPDATE)},
       {new Key("CE", "U", "CE1"), new Expectation()},
       {new Key("CE", "U", "Cont"), new Expectation()},
       {new Key("SPG", "E", "HH"), new Expectation("N", "N", null)},
@@ -92,7 +93,7 @@ public class CaseReceiptServiceTableTest {
       boolean expectIncrement,
       boolean expectReceipt,
       ActionInstructionType expectedFieldInstruction,
-      int capacity) {
+      Integer capacity) {
 
     CaseService caseService = mock(CaseService.class);
     CaseRepository caseRepository = mock(CaseRepository.class);
@@ -193,7 +194,7 @@ public class CaseReceiptServiceTableTest {
     boolean expectedReceipt;
     ActionInstructionType expectedFieldInstruction;
     boolean expectMappingException;
-    int expectedCapacity = 0;
+    Integer expectedCapacity = 0;
 
     public Expectation(
         String incrementStr, String receiptStr, ActionInstructionType expectedFieldInstruction) {
@@ -219,6 +220,11 @@ public class CaseReceiptServiceTableTest {
         case "N AR < ER":
           expectedReceipt = false;
           expectedCapacity = 2;
+          break;
+
+        case "N ER = null":
+          expectedReceipt = false;
+          expectedCapacity = null;
           break;
 
         default:
