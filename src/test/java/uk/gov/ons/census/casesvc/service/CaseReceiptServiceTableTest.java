@@ -32,6 +32,8 @@ public class CaseReceiptServiceTableTest {
   private static final String EQ_EVENT_CHANNEL = "EQ";
   private Key key;
   private Expectation expectation;
+  private static final ActionInstructionType UPDATE = ActionInstructionType.UPDATE;
+  private static final ActionInstructionType CANCEL = ActionInstructionType.CANCEL;
 
   public CaseReceiptServiceTableTest(Key key, Expectation expectation) {
     this.key = key;
@@ -41,7 +43,7 @@ public class CaseReceiptServiceTableTest {
   @Parameterized.Parameters(name = "Test Key: {0}")
   public static Collection<Object[]> data() {
     Object[][] ruleToTest = {
-      {new Key("HH", "U", "HH"), new Expectation("N", "Y", ActionInstructionType.CANCEL)},
+      {new Key("HH", "U", "HH"), new Expectation("N", "Y", CANCEL)},
       {new Key("HH", "U", "Ind"), new Expectation()},
       {new Key("HH", "U", "CE1"), new Expectation()},
       {new Key("HH", "U", "Cont"), new Expectation("N", "N", null)},
@@ -50,19 +52,20 @@ public class CaseReceiptServiceTableTest {
       {new Key("HI", "U", "CE1"), new Expectation()},
       {new Key("HI", "U", "Cont"), new Expectation()},
       {new Key("CE", "E", "HH"), new Expectation()},
-      {new Key("CE", "E", "Ind"), new Expectation("Y", "N", ActionInstructionType.UPDATE)},
-      {new Key("CE", "E", "CE1"), new Expectation("N", "Y", ActionInstructionType.UPDATE)},
+      {new Key("CE", "E", "Ind"), new Expectation("Y", "N", UPDATE)},
+      {new Key("CE", "E", "CE1"), new Expectation("N", "Y", UPDATE)},
       {new Key("CE", "E", "Cont"), new Expectation()},
       {new Key("CE", "E", "HH"), new Expectation()},
-      {new Key("CE", "U", "Ind"), new Expectation("Y", "Y AR >= ER", ActionInstructionType.CANCEL)},
-      {new Key("CE", "U", "Ind"), new Expectation("Y", "N AR < ER", ActionInstructionType.UPDATE)},
+      {new Key("CE", "U", "Ind"), new Expectation("Y", "Y AR >= ER", CANCEL)},
+      {new Key("CE", "U", "Ind"), new Expectation("Y", "N AR < ER", UPDATE)},
+      {new Key("CE", "U", "Ind"), new Expectation("Y", "N ER = null", UPDATE)},
       {new Key("CE", "U", "CE1"), new Expectation()},
       {new Key("CE", "U", "Cont"), new Expectation()},
       {new Key("SPG", "E", "HH"), new Expectation("N", "N", null)},
       {new Key("SPG", "E", "Ind"), new Expectation("N", "N", null)},
       {new Key("SPG", "E", "CE1"), new Expectation()},
       {new Key("SPG", "E", "Cont"), new Expectation()},
-      {new Key("SPG", "U", "HH"), new Expectation("N", "Y", ActionInstructionType.CANCEL)},
+      {new Key("SPG", "U", "HH"), new Expectation("N", "Y", CANCEL)},
       {new Key("SPG", "U", "Ind"), new Expectation("N", "N", null)},
       {new Key("SPG", "U", "CE1"), new Expectation()},
       {new Key("SPG", "U", "Cont"), new Expectation("N", "N", null)}
@@ -92,7 +95,7 @@ public class CaseReceiptServiceTableTest {
       boolean expectIncrement,
       boolean expectReceipt,
       ActionInstructionType expectedFieldInstruction,
-      int capacity) {
+      Integer capacity) {
 
     CaseService caseService = mock(CaseService.class);
     CaseRepository caseRepository = mock(CaseRepository.class);
@@ -193,7 +196,7 @@ public class CaseReceiptServiceTableTest {
     boolean expectedReceipt;
     ActionInstructionType expectedFieldInstruction;
     boolean expectMappingException;
-    int expectedCapacity = 0;
+    Integer expectedCapacity = 0;
 
     public Expectation(
         String incrementStr, String receiptStr, ActionInstructionType expectedFieldInstruction) {
@@ -219,6 +222,11 @@ public class CaseReceiptServiceTableTest {
         case "N AR < ER":
           expectedReceipt = false;
           expectedCapacity = 2;
+          break;
+
+        case "N ER = null":
+          expectedReceipt = false;
+          expectedCapacity = null;
           break;
 
         default:
