@@ -40,6 +40,7 @@ public class CaseServiceTest {
   private static final String TEST_POSTCODE = "TEST_POSTCODE";
   private static final String TEST_EXCHANGE = "TEST_EXCHANGE";
   private static final String TEST_ADDRESS_TYPE = "testy_address_type";
+  private static final String TEST_CHANNEL = "TEST_CHANNEL";
   private static final UUID TEST_UUID = UUID.randomUUID();
   private static final UUID TEST_ACTION_PLAN_ID = UUID.randomUUID();
   private static final UUID TEST_COLLECTION_EXERCISE_ID = UUID.randomUUID();
@@ -423,7 +424,7 @@ public class CaseServiceTest {
 
     // When
     Case actualChildCase =
-        underTest.prepareIndividualResponseCaseFromParentCase(parentCase, childCaseId);
+        underTest.prepareIndividualResponseCaseFromParentCase(parentCase, childCaseId, TEST_CHANNEL);
 
     // Then
     assertChildCaseIsCorrect(parentCase, childCaseId, actualChildCase);
@@ -440,7 +441,7 @@ public class CaseServiceTest {
 
     // When
     Case actualChildCase =
-        underTest.prepareIndividualResponseCaseFromParentCase(parentCase, childCaseId);
+        underTest.prepareIndividualResponseCaseFromParentCase(parentCase, childCaseId, TEST_CHANNEL);
 
     // Then
     assertChildCaseIsCorrect(parentCase, childCaseId, actualChildCase);
@@ -486,6 +487,7 @@ public class CaseServiceTest {
     assertThat(actualChildCase.getCeExpectedCapacity()).isNull();
     assertThat(actualChildCase.getAddressLevel()).isEqualTo(parentCase.getAddressLevel());
     assertThat(actualChildCase.isSkeleton()).isEqualTo(parentCase.isSkeleton());
+    assertThat(actualChildCase.getMetadata().getChannel()).isEqualTo(TEST_CHANNEL);
   }
 
   @Test
