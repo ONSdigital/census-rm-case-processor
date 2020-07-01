@@ -248,7 +248,8 @@ public class CaseService {
     return collectionCase;
   }
 
-  public Case prepareIndividualResponseCaseFromParentCase(Case parentCase, UUID caseId, String channel) {
+  public Case prepareIndividualResponseCaseFromParentCase(
+      Case parentCase, UUID caseId, String channel) {
     Case individualResponseCase = new Case();
 
     individualResponseCase.setCaseId(caseId);

@@ -199,11 +199,9 @@ public class FulfilmentRequestReceiverIT {
       rabbitQueueHelper.sendMessage(inboundQueue, message);
 
       // THEN
-      ResponseManagementEvent resultEvent =
-          rhCaseQueueSpy.checkExpectedMessageReceived();
+      ResponseManagementEvent resultEvent = rhCaseQueueSpy.checkExpectedMessageReceived();
       assertThat(resultEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_CREATED);
-      assertThat(
-              resultEvent.getPayload().getCollectionCase().getAddress().getEstabUprn())
+      assertThat(resultEvent.getPayload().getCollectionCase().getAddress().getEstabUprn())
           .isEqualTo(parentCase.getEstabUprn());
       assertThat(resultEvent.getPayload().getFulfilmentRequest())
           .isEqualTo(sourceEvent.getPayload().getFulfilmentRequest());
@@ -225,7 +223,8 @@ public class FulfilmentRequestReceiverIT {
       Case actualParentCase = caseRepository.findById(parentCase.getCaseId()).get();
       Case actualChildCase = caseRepository.findById(TEST_INDIVIDUAL_CASE_ID).get();
 
-      checkIndividualFulfilmentChildCase(actualParentCase, actualChildCase, sourceEvent, resultEvent);
+      checkIndividualFulfilmentChildCase(
+          actualParentCase, actualChildCase, sourceEvent, resultEvent);
     }
   }
 
@@ -268,11 +267,9 @@ public class FulfilmentRequestReceiverIT {
       rabbitQueueHelper.sendMessage(inboundQueue, message);
 
       // THEN
-      ResponseManagementEvent resultEvent =
-          rhCaseQueueSpy.checkExpectedMessageReceived();
+      ResponseManagementEvent resultEvent = rhCaseQueueSpy.checkExpectedMessageReceived();
       assertThat(resultEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_CREATED);
-      assertThat(
-              resultEvent.getPayload().getCollectionCase().getAddress().getEstabUprn())
+      assertThat(resultEvent.getPayload().getCollectionCase().getAddress().getEstabUprn())
           .isEqualTo(parentCase.getEstabUprn());
       assertThat(resultEvent.getPayload().getFulfilmentRequest())
           .isEqualTo(sourceEvent.getPayload().getFulfilmentRequest());
@@ -312,7 +309,8 @@ public class FulfilmentRequestReceiverIT {
       Case actualParentCase = caseRepository.findById(parentCase.getCaseId()).get();
       Case actualChildCase = caseRepository.findById(TEST_INDIVIDUAL_CASE_ID).get();
 
-      checkIndividualFulfilmentChildCase(actualParentCase, actualChildCase, sourceEvent, resultEvent);
+      checkIndividualFulfilmentChildCase(
+          actualParentCase, actualChildCase, sourceEvent, resultEvent);
     }
   }
 
@@ -349,11 +347,9 @@ public class FulfilmentRequestReceiverIT {
       rabbitQueueHelper.sendMessage(inboundQueue, message);
 
       // THEN
-      ResponseManagementEvent resultEvent =
-          rhCaseQueueSpy.checkExpectedMessageReceived();
+      ResponseManagementEvent resultEvent = rhCaseQueueSpy.checkExpectedMessageReceived();
       assertThat(resultEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_CREATED);
-      assertThat(
-              resultEvent.getPayload().getCollectionCase().getAddress().getEstabUprn())
+      assertThat(resultEvent.getPayload().getCollectionCase().getAddress().getEstabUprn())
           .isEqualTo(parentCase.getEstabUprn());
       assertThat(resultEvent.getPayload().getFulfilmentRequest()).isNull();
 
@@ -372,12 +368,16 @@ public class FulfilmentRequestReceiverIT {
       Case actualParentCase = caseRepository.findById(parentCase.getCaseId()).get();
       Case actualChildCase = caseRepository.findById(TEST_INDIVIDUAL_CASE_ID).get();
 
-      checkIndividualFulfilmentChildCase(actualParentCase, actualChildCase, sourceEvent, resultEvent);
+      checkIndividualFulfilmentChildCase(
+          actualParentCase, actualChildCase, sourceEvent, resultEvent);
     }
   }
 
   private void checkIndividualFulfilmentChildCase(
-      Case parentCase, Case childCase, ResponseManagementEvent sourceEvent, ResponseManagementEvent resultEvent) {
+      Case parentCase,
+      Case childCase,
+      ResponseManagementEvent sourceEvent,
+      ResponseManagementEvent resultEvent) {
     assertThat(childCase.getCaseId())
         .isEqualTo(UUID.fromString(resultEvent.getPayload().getCollectionCase().getId()));
 
@@ -393,7 +393,6 @@ public class FulfilmentRequestReceiverIT {
     assertThat(childCase.getHtcWillingness()).isNull();
     assertThat(childCase.getTreatmentCode()).isNull();
 
-    assertThat(childCase.getMetadata().getChannel())
-        .isEqualTo(sourceEvent.getEvent().getChannel());
+    assertThat(childCase.getMetadata().getChannel()).isEqualTo(sourceEvent.getEvent().getChannel());
   }
 }

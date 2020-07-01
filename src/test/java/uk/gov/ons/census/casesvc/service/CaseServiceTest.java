@@ -424,7 +424,8 @@ public class CaseServiceTest {
 
     // When
     Case actualChildCase =
-        underTest.prepareIndividualResponseCaseFromParentCase(parentCase, childCaseId, TEST_CHANNEL);
+        underTest.prepareIndividualResponseCaseFromParentCase(
+            parentCase, childCaseId, TEST_CHANNEL);
 
     // Then
     assertChildCaseIsCorrect(parentCase, childCaseId, actualChildCase);
@@ -441,7 +442,8 @@ public class CaseServiceTest {
 
     // When
     Case actualChildCase =
-        underTest.prepareIndividualResponseCaseFromParentCase(parentCase, childCaseId, TEST_CHANNEL);
+        underTest.prepareIndividualResponseCaseFromParentCase(
+            parentCase, childCaseId, TEST_CHANNEL);
 
     // Then
     assertChildCaseIsCorrect(parentCase, childCaseId, actualChildCase);

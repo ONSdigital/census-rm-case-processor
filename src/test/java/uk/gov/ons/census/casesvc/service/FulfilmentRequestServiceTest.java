@@ -234,7 +234,8 @@ public class FulfilmentRequestServiceTest {
         UUID.fromString(managementEvent.getPayload().getFulfilmentRequest().getIndividualCaseId());
 
     Case childCase = new Case();
-    when(caseService.prepareIndividualResponseCaseFromParentCase(parentCase, childCaseId, managementEvent.getEvent().getChannel()))
+    when(caseService.prepareIndividualResponseCaseFromParentCase(
+            parentCase, childCaseId, managementEvent.getEvent().getChannel()))
         .thenReturn(childCase);
     when(caseService.saveNewCaseAndStampCaseRef(childCase)).thenReturn(childCase);
 
