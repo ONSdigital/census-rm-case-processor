@@ -8,6 +8,7 @@ import static uk.gov.ons.census.casesvc.testutil.DataUtils.createTestAddressModi
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.createTestAddressTypeChangeJson;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
+import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -67,6 +68,15 @@ public class AddressReceiverIT {
   @Value("${censusconfig.actionplanid}")
   private String censusActionPlanId;
 
+  @Value("${spring.cloud.gcp.pubsub.project-id}")
+  private String aimsProjectId;
+
+  @Value("${pubsub.aimstopic}")
+  private String aimsTopic;
+
+  @Value("${spring.cloud.gcp.pubsub.emulator-host}")
+  private String pubsubEmulatorHost;
+
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
   @Autowired private CaseRepository caseRepository;
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
@@ -74,12 +84,23 @@ public class AddressReceiverIT {
 
   @Before
   @Transactional
-  public void setUp() {
+  public void setUp() throws IOException, InterruptedException {
     rabbitQueueHelper.purgeQueue(addressReceiver);
     rabbitQueueHelper.purgeQueue(rhCaseQueue);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
+
+    Runtime.getRuntime()
+        .exec(
+            "curl -X PUT http://"
+                + pubsubEmulatorHost
+                + "/v1/projects/"
+                + aimsProjectId
+                + "/topics/"
+                + aimsTopic)
+        .waitFor();
+    ;
   }
 
   @Test

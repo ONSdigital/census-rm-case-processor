@@ -8,6 +8,9 @@ import static org.mockito.Mockito.*;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,7 +18,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.cloud.gcp.pubsub.core.PubSubTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.util.concurrent.FailureCallback;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
+import org.springframework.util.concurrent.SuccessCallback;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.Address;
@@ -37,6 +45,7 @@ public class NewAddressReportedServiceTest {
 
   @Mock CaseService caseService;
   @Mock EventLogger eventLogger;
+  @Mock PubSubTemplate pubSubTemplate;
 
   private String EXPECTED_ACTION_PLAN_ID = UUID.randomUUID().toString();
 
@@ -71,6 +80,8 @@ public class NewAddressReportedServiceTest {
     Case casetoEmit = new Case();
     ReflectionTestUtils.setField(underTest, "censusActionPlanId", EXPECTED_ACTION_PLAN_ID);
 
+    when(pubSubTemplate.publish(any(), any(ResponseManagementEvent.class)))
+        .thenReturn(mockFuture());
     when(caseService.saveNewCaseAndStampCaseRef(any(Case.class))).thenReturn(casetoEmit);
     OffsetDateTime expectedDateTime = OffsetDateTime.now();
 
@@ -210,6 +221,8 @@ public class NewAddressReportedServiceTest {
     OffsetDateTime timeNow = OffsetDateTime.now();
     newAddressEvent.getEvent().setChannel("NOT FIELD");
 
+    when(pubSubTemplate.publish(any(), any(ResponseManagementEvent.class)))
+        .thenReturn(mockFuture());
     when(caseService.getCaseByCaseId(any())).thenReturn(sourceCase);
     when(caseService.saveNewCaseAndStampCaseRef(any())).then(returnsFirstArg());
 
@@ -269,6 +282,8 @@ public class NewAddressReportedServiceTest {
 
     newAddressEvent.getEvent().setChannel("NOT FIELD");
 
+    when(pubSubTemplate.publish(any(), any(ResponseManagementEvent.class)))
+        .thenReturn(mockFuture());
     when(caseService.getCaseByCaseId(any())).thenReturn(sourceCase);
     when(caseService.saveNewCaseAndStampCaseRef(any())).then(returnsFirstArg());
 
@@ -317,6 +332,8 @@ public class NewAddressReportedServiceTest {
 
     OffsetDateTime timeNow = OffsetDateTime.now();
 
+    when(pubSubTemplate.publish(any(), any(ResponseManagementEvent.class)))
+        .thenReturn(mockFuture());
     when(caseService.getCaseByCaseId(any())).thenReturn(sourceCase);
     when(caseService.saveNewCaseAndStampCaseRef(any())).then(returnsFirstArg());
 
@@ -370,6 +387,8 @@ public class NewAddressReportedServiceTest {
 
     newAddressEvent.getEvent().setChannel("FIELD");
 
+    when(pubSubTemplate.publish(any(), any(ResponseManagementEvent.class)))
+        .thenReturn(mockFuture());
     when(caseService.getCaseByCaseId(any())).thenReturn(sourceCase);
     when(caseService.saveNewCaseAndStampCaseRef(any())).then(returnsFirstArg());
     OffsetDateTime timeNow = OffsetDateTime.now();
@@ -397,6 +416,8 @@ public class NewAddressReportedServiceTest {
 
     newAddressEvent.getEvent().setChannel("FIELD");
 
+    when(pubSubTemplate.publish(any(), any(ResponseManagementEvent.class)))
+        .thenReturn(mockFuture());
     when(caseService.getCaseByCaseId(any())).thenReturn(sourceCase);
     when(caseService.saveNewCaseAndStampCaseRef(any())).then(returnsFirstArg());
     OffsetDateTime timeNow = OffsetDateTime.now();
@@ -424,6 +445,8 @@ public class NewAddressReportedServiceTest {
 
     newAddressEvent.getEvent().setChannel("FIELD");
 
+    when(pubSubTemplate.publish(any(), any(ResponseManagementEvent.class)))
+        .thenReturn(mockFuture());
     when(caseService.getCaseByCaseId(any())).thenReturn(sourceCase);
     when(caseService.saveNewCaseAndStampCaseRef(any())).then(returnsFirstArg());
     OffsetDateTime timeNow = OffsetDateTime.now();
@@ -441,6 +464,8 @@ public class NewAddressReportedServiceTest {
     Case casetoEmit = new Case();
     casetoEmit.setCaseRef(1234L);
 
+    when(pubSubTemplate.publish(any(), any(ResponseManagementEvent.class)))
+        .thenReturn(mockFuture());
     when(caseService.saveNewCaseAndStampCaseRef(any(Case.class))).thenReturn(casetoEmit);
     underTest.processNewAddress(responseManagementEvent, OffsetDateTime.now());
     verify(caseService).saveCase(any(Case.class));
@@ -506,5 +531,42 @@ public class NewAddressReportedServiceTest {
     expectedCase.setCeActualResponses(0);
 
     return expectedCase;
+  }
+
+  private ListenableFuture<String> mockFuture() {
+    return new ListenableFuture<String>() {
+      @Override
+      public void addCallback(ListenableFutureCallback<? super String> listenableFutureCallback) {}
+
+      @Override
+      public void addCallback(
+          SuccessCallback<? super String> successCallback, FailureCallback failureCallback) {}
+
+      @Override
+      public boolean cancel(boolean mayInterruptIfRunning) {
+        return false;
+      }
+
+      @Override
+      public boolean isCancelled() {
+        return false;
+      }
+
+      @Override
+      public boolean isDone() {
+        return false;
+      }
+
+      @Override
+      public String get() throws InterruptedException, ExecutionException {
+        return null;
+      }
+
+      @Override
+      public String get(long timeout, TimeUnit unit)
+          throws InterruptedException, ExecutionException, TimeoutException {
+        return null;
+      }
+    };
   }
 }

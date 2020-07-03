@@ -26,6 +26,11 @@ spring:
     port: 6672
     virtualhost: /
 
+  cloud:
+    gcp:
+      pubsub:
+        project-id: aims-project
+
 queueconfig:
   inbound-queue: case.sample.inbound
   case-event-exchange: events
@@ -93,3 +98,7 @@ censusconfig:
 
 uprnconfig:
   dummyuprnprefix: 999
+
+pubsub:
+  publishtimeout: 30  # In seconds
+  aimstopic: aims-topic

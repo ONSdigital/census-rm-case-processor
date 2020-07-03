@@ -14,6 +14,10 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.cloud.gcp.pubsub.core.PubSubTemplate;
+import org.springframework.cloud.gcp.pubsub.support.PublisherFactory;
+import org.springframework.cloud.gcp.pubsub.support.SubscriberFactory;
+import org.springframework.cloud.gcp.pubsub.support.converter.JacksonPubSubMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -49,6 +53,25 @@ public class AppConfig {
     MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
 
     return mapperFactory.getMapperFacade();
+  }
+
+  @Bean
+  public PubSubTemplate pubSubTemplate(
+      PublisherFactory publisherFactory,
+      SubscriberFactory subscriberFactory,
+      JacksonPubSubMessageConverter jacksonPubSubMessageConverter) {
+    PubSubTemplate pubSubTemplate = new PubSubTemplate(publisherFactory, subscriberFactory);
+    pubSubTemplate.setMessageConverter(jacksonPubSubMessageConverter);
+    return pubSubTemplate;
+  }
+
+  @Bean
+  public JacksonPubSubMessageConverter jacksonPubSubMessageConverter() {
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.registerModule(new JavaTimeModule());
+    objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    return new JacksonPubSubMessageConverter(objectMapper);
   }
 
   @PostConstruct
