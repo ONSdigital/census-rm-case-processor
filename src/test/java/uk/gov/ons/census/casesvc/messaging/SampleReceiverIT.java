@@ -91,6 +91,10 @@ public class SampleReceiverIT {
       ResponseManagementEvent responseManagementEvent =
           rhCaseQueueSpy.checkExpectedMessageReceived();
       assertEquals(EventTypeDTO.CASE_CREATED, responseManagementEvent.getEvent().getType());
+      assertThat(responseManagementEvent.getPayload().getCollectionCase().getCreatedDateTime())
+          .isNotNull();
+      assertThat(responseManagementEvent.getPayload().getCollectionCase().getLastUpdated())
+          .isNotNull();
 
       responseManagementEvent = rhUacQueueSpy.checkExpectedMessageReceived();
       assertEquals(EventTypeDTO.UAC_UPDATED, responseManagementEvent.getEvent().getType());
@@ -109,6 +113,8 @@ public class SampleReceiverIT {
       assertEquals(1, caseList.size());
       assertEquals("ABC123", caseList.get(0).getPostcode());
       assertNull(caseList.get(0).getCeExpectedCapacity());
+      assertThat(caseList.get(0).getCreatedDateTime()).isNotNull();
+      assertThat(caseList.get(0).getLastUpdated()).isNotNull();
 
       List<Event> eventList = eventRepository.findAll();
       assertThat(eventList.size()).isEqualTo(1);

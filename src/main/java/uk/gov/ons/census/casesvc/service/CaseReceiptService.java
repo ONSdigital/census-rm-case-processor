@@ -141,8 +141,7 @@ public class CaseReceiptService {
 
         Case lockedCase = incrementNoReceipt(caze);
 
-        if (!caze.isReceiptReceived()
-            && lockedCase.getCeActualResponses() >= lockedCase.getCeExpectedCapacity()) {
+        if (hasCeUnitResponsesMetExpected(lockedCase)) {
           lockedCase.setReceiptReceived(true);
           fieldInstruction = ActionInstructionType.CANCEL;
         }
@@ -162,5 +161,11 @@ public class CaseReceiptService {
     private String caseType;
     private String addressLevel;
     private String formType;
+  }
+
+  private boolean hasCeUnitResponsesMetExpected(Case caze) {
+    return caze.getCeExpectedCapacity() != null
+        && !caze.isReceiptReceived()
+        && caze.getCeActualResponses() >= caze.getCeExpectedCapacity();
   }
 }
