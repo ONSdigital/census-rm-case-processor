@@ -19,7 +19,6 @@ import uk.gov.ons.census.casesvc.model.entity.Case;
 @Service
 public class FulfilmentRequestService {
   private static final String FULFILMENT_REQUEST_RECEIVED = "Fulfilment Request Received";
-  private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_CASE_TYPE = "HI";
 
   private static final Set<String> individualResponsePrintRequestCodes =
       new HashSet<>(
@@ -67,8 +66,9 @@ public class FulfilmentRequestService {
 
     Case caze = caseService.getCaseByCaseId(UUID.fromString(fulfilmentRequestPayload.getCaseId()));
 
-    // As part of a fulfilment, we might need to create a 'child' case (an individual)
-    handleIndividualFulfilment(fulfilmentRequestPayload, caze);
+    // As part of a fulfilment, we might need to create a 'child' case (an individual).
+    // We will do this only if the fulfilment is for an Individual and the caze caseType is HH.
+    handleIndividualFulfilmentForHHCase(fulfilmentRequestPayload, caze);
 
     // As part of a fulfilment, we might have created a new UAC-QID pair, which needs to be linked
     // to the case it belongs to
@@ -98,9 +98,10 @@ public class FulfilmentRequestService {
     }
   }
 
-  private void handleIndividualFulfilment(
+  private void handleIndividualFulfilmentForHHCase(
       FulfilmentRequestDTO fulfilmentRequestPayload, Case caze) {
-    if (individualResponseRequestCodes.contains(fulfilmentRequestPayload.getFulfilmentCode())) {
+    if (caze.getCaseType().equals("HH")
+        && individualResponseRequestCodes.contains(fulfilmentRequestPayload.getFulfilmentCode())) {
       Case individualResponseCase =
           caseService.prepareIndividualResponseCaseFromParentCase(
               caze, UUID.fromString(fulfilmentRequestPayload.getIndividualCaseId()));
