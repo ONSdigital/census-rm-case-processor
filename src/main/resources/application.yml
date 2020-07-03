@@ -102,3 +102,5 @@ uprnconfig:
 pubsub:
   publishtimeout: 30  # In seconds
   aimstopic: aims-topic
+
+caserefgeneratorkey: rPr3qsjlU42hsDX5npfuCzlyF4UYfDTO

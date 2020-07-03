@@ -175,6 +175,7 @@ public class FulfilmentRequestReceiverIT {
       caze.setCaseId(TEST_CASE_ID);
       caze.setUacQidLinks(null);
       caze.setEvents(null);
+      caze.setCaseType("HH");
       Case parentCase = caseRepository.saveAndFlush(caze);
 
       ResponseManagementEvent managementEvent = getTestResponseManagementFulfilmentRequestedEvent();
@@ -251,6 +252,7 @@ public class FulfilmentRequestReceiverIT {
       caze.setCaseId(TEST_CASE_ID);
       caze.setUacQidLinks(null);
       caze.setEvents(null);
+      caze.setCaseType("HH");
       Case parentCase = caseRepository.saveAndFlush(caze);
 
       ResponseManagementEvent managementEvent = getTestResponseManagementFulfilmentRequestedEvent();
@@ -351,6 +353,7 @@ public class FulfilmentRequestReceiverIT {
       caze.setCaseId(TEST_CASE_ID);
       caze.setUacQidLinks(null);
       caze.setEvents(null);
+      caze.setCaseType("HH");
       Case parentCase = caseRepository.saveAndFlush(caze);
 
       ResponseManagementEvent managementEvent = getTestResponseManagementFulfilmentRequestedEvent();
