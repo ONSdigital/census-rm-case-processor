@@ -8,7 +8,6 @@ import static uk.gov.ons.census.casesvc.testutil.DataUtils.createTestAddressModi
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.createTestAddressTypeChangeJson;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
-import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +28,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.Address;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
@@ -84,23 +85,24 @@ public class AddressReceiverIT {
 
   @Before
   @Transactional
-  public void setUp() throws IOException, InterruptedException {
+  public void setUp() {
     rabbitQueueHelper.purgeQueue(addressReceiver);
     rabbitQueueHelper.purgeQueue(rhCaseQueue);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
 
-    Runtime.getRuntime()
-        .exec(
-            "curl -X PUT http://"
-                + pubsubEmulatorHost
-                + "/v1/projects/"
-                + aimsProjectId
-                + "/topics/"
-                + aimsTopic)
-        .waitFor();
-    ;
+    String createTopicUrl =
+        "http://" + pubsubEmulatorHost + "/v1/projects/" + aimsProjectId + "/topics/" + aimsTopic;
+    RestTemplate restTemplate = new RestTemplate();
+
+    try {
+      restTemplate.put(createTopicUrl, null);
+    } catch (HttpClientErrorException exception) {
+      if (exception.getRawStatusCode() != 409) {
+        throw exception;
+      }
+    }
   }
 
   @Test
