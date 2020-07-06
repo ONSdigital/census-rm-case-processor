@@ -352,6 +352,7 @@ public class AddressReceiverIT {
     }
   }
 
+  // TEST FAILING? Try running `gcloud auth application-default revoke`
   @Test
   public void testNewAddressCreatedFromEventWithDetailsAndSourceCase() throws Exception {
     try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
@@ -414,6 +415,7 @@ public class AddressReceiverIT {
       rabbitQueueHelper.sendMessage(addressReceiver, responseManagementEvent);
 
       // THEN
+      // TEST FAILING? Try running `gcloud auth application-default revoke`
       ResponseManagementEvent actualResponseManagementEvent =
           rhCaseQueueSpy.checkExpectedMessageReceived();
 

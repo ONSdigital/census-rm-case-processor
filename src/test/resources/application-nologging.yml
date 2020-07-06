@@ -5,6 +5,11 @@ spring:
   rabbitmq:
     port: 35672
 
+  cloud:
+    gcp:
+      pubsub:
+        emulator-host: localhost:18538
+
 uacservice:
   connection:
     port: 18164
