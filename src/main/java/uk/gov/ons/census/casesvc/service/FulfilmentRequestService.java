@@ -68,7 +68,8 @@ public class FulfilmentRequestService {
 
     // As part of a fulfilment, we might need to create a 'child' case (an individual).
     // We will do this only if the fulfilment is for an Individual and the caze caseType is HH.
-    handleIndividualFulfilmentForHHCase(fulfilmentRequestPayload, fulfilmentRequestEvent.getChannel(), caze);
+    handleIndividualFulfilmentForHHCase(
+        fulfilmentRequestPayload, fulfilmentRequestEvent.getChannel(), caze);
 
     // As part of a fulfilment, we might have created a new UAC-QID pair, which needs to be linked
     // to the case it belongs to
