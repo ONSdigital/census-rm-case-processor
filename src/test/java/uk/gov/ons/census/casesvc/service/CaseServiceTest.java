@@ -14,7 +14,6 @@ import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 import java.util.*;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
-import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -418,8 +417,7 @@ public class CaseServiceTest {
   @Test
   public void checkIndividualCaseCreatedCorrectly() {
     // Given
-    EasyRandom easyRandom = new EasyRandom();
-    Case parentCase = easyRandom.nextObject(Case.class);
+    Case parentCase = getRandomCase();
     UUID childCaseId = UUID.randomUUID();
 
     // When
@@ -434,8 +432,7 @@ public class CaseServiceTest {
   @Test
   public void checkIndividualCaseCreatedCorrectlyFromSkeleton() {
     // Given
-    EasyRandom easyRandom = new EasyRandom();
-    Case parentCase = easyRandom.nextObject(Case.class);
+    Case parentCase = getRandomCase();
     UUID childCaseId = UUID.randomUUID();
 
     parentCase.setSkeleton(true);
@@ -447,6 +444,22 @@ public class CaseServiceTest {
 
     // Then
     assertChildCaseIsCorrect(parentCase, childCaseId, actualChildCase);
+  }
+
+  @Test
+  public void testSaveAndEmitCaseCreatedEventIncludesCaseMetadata() {
+    // Given
+    Case caze = getRandomCase();
+    CaseMetadata caseMetadata = new CaseMetadata();
+    caseMetadata.setSecureEstablishment(true);
+    caseMetadata.setChannel(TEST_CHANNEL);
+    caze.setMetadata(caseMetadata);
+
+    // When
+    PayloadDTO actualPayloadDTO = underTest.saveCaseAndEmitCaseCreatedEvent(caze);
+
+    // Then
+    assertThat(actualPayloadDTO.getCollectionCase().getMetadata()).isEqualTo(caseMetadata);
   }
 
   private void assertChildCaseIsCorrect(Case parentCase, UUID childCaseId, Case actualChildCase) {

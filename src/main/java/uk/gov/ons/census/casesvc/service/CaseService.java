@@ -280,8 +280,9 @@ public class CaseService {
         parentCase.getSurvey()); // Should only ever be "CENSUS" from the parent case
 
     // We need to be able to filter individual cases by the channel from whence they were created
-    individualResponseCase.setMetadata(new CaseMetadata());
-    individualResponseCase.getMetadata().setChannel(channel);
+    CaseMetadata caseMetadata = new CaseMetadata();
+    caseMetadata.setChannel(channel);
+    individualResponseCase.setMetadata(caseMetadata);
 
     return individualResponseCase;
   }
