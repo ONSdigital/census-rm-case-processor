@@ -49,7 +49,7 @@ public class QuestionnaireLinkedService {
     logUnlinkedCaseEventAgainstOriginalCaseIfQidIsNowLinkedToNewCase(
         messageTimestamp, questionnaireLinkedEvent, uac, uacQidLink);
 
-    Case caze = caseService.getCaseByCaseId(UUID.fromString(uac.getCaseId()));
+    Case caze = caseService.getCaseByCaseId(uac.getCaseId());
 
     if (checkRequiredFieldsForIndividualHI(questionnaireId, caze.getCaseType())) {
       if (uac.getIndividualCaseId() == null) {
@@ -57,7 +57,7 @@ public class QuestionnaireLinkedService {
       } else {
         caze =
             caseService.prepareIndividualResponseCaseFromParentCase(
-                caze, UUID.fromString(uac.getIndividualCaseId()));
+                caze, uac.getIndividualCaseId());
       }
       caze = caseService.saveNewCaseAndStampCaseRef(caze);
       caseService.emitCaseCreatedEvent(caze);
@@ -91,8 +91,7 @@ public class QuestionnaireLinkedService {
       ResponseManagementEvent questionnaireLinkedEvent,
       UacDTO uac,
       UacQidLink uacQidLink) {
-    if (uacQidLink.getCaze() != null
-        && !uacQidLink.getCaze().getCaseId().equals(UUID.fromString(uac.getCaseId()))) {
+    if (uacQidLink.getCaze() != null && !uacQidLink.getCaze().getCaseId().equals(uac.getCaseId())) {
       String eventDescription =
           String.format("Questionnaire unlinked from case with QID %s", uac.getQuestionnaireId());
       eventLogger.logCaseEvent(

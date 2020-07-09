@@ -92,8 +92,7 @@ public class CCSPropertyListedIT {
       // Then
       ResponseManagementEvent ccsToFwmt = queueSpy.checkExpectedMessageReceived();
       assertThat(ccsToFwmt.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_CREATED);
-      assertThat(ccsToFwmt.getPayload().getCollectionCase().getId())
-          .isEqualTo(TEST_CASE_ID.toString());
+      assertThat(ccsToFwmt.getPayload().getCollectionCase().getId()).isEqualTo(TEST_CASE_ID);
       assertThat(ccsToFwmt.getPayload().getMetadata().getFieldDecision())
           .isEqualTo(ActionInstructionType.CREATE);
       assertThat(ccsToFwmt.getPayload().getMetadata().getCauseEventType())
@@ -276,7 +275,7 @@ public class CCSPropertyListedIT {
   private CCSPropertyDTO getCCSProperty() {
     CCSPropertyDTO ccsPropertyDTO = new CCSPropertyDTO();
     CollectionCase collectionCase = new CollectionCase();
-    collectionCase.setId(TEST_CASE_ID.toString());
+    collectionCase.setId(TEST_CASE_ID);
     ccsPropertyDTO.setCollectionCase(collectionCase);
     ccsPropertyDTO.setSampleUnit(setUpSampleUnitDTO());
 

@@ -6,7 +6,6 @@ import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.*;
@@ -35,8 +34,7 @@ public class RefusalService {
       ResponseManagementEvent refusalEvent, OffsetDateTime messageTimestamp) {
     RefusalDTO refusalDto = refusalEvent.getPayload().getRefusal();
 
-    Case refusedCase =
-        caseService.getCaseByCaseId(UUID.fromString(refusalDto.getCollectionCase().getId()));
+    Case refusedCase = caseService.getCaseByCaseId(refusalDto.getCollectionCase().getId());
 
     if (justLogRefusalIfConditionsMet(refusedCase, refusalEvent, messageTimestamp, refusalDto)) {
       return;

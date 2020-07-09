@@ -38,7 +38,7 @@ public class NewAddressReportedServiceTest {
   @Mock CaseService caseService;
   @Mock EventLogger eventLogger;
 
-  private String EXPECTED_ACTION_PLAN_ID = UUID.randomUUID().toString();
+  private UUID EXPECTED_ACTION_PLAN_ID = UUID.randomUUID();
 
   private String DUMMY_UPRN_PREFIX = "999";
 
@@ -47,7 +47,7 @@ public class NewAddressReportedServiceTest {
     // given
     EasyRandom easyRandom = new EasyRandom();
     CollectionCase collectionCase = easyRandom.nextObject(CollectionCase.class);
-    collectionCase.setId(UUID.randomUUID().toString());
+    collectionCase.setId(UUID.randomUUID());
     collectionCase.setCaseRef(null);
     collectionCase.setCaseType("HH");
 
@@ -101,7 +101,7 @@ public class NewAddressReportedServiceTest {
 
   @Test
   public void testRequiredFieldsSetIfNotOnEvent() {
-    String collectionExerciseId = UUID.randomUUID().toString();
+    UUID collectionExerciseId = UUID.randomUUID();
     ReflectionTestUtils.setField(underTest, "censusCollectionExerciseId", collectionExerciseId);
 
     ResponseManagementEvent responseManagementEvent = getMinimalValidNewAddress();
@@ -227,7 +227,7 @@ public class NewAddressReportedServiceTest {
     assertThat(newCase.getAddressLine2()).isEqualTo(sourceCase.getAddressLine2());
     assertThat(newCase.getAddressLine3()).isEqualTo(sourceCase.getAddressLine3());
 
-    assertThat(newCase.getCaseId().toString()).isEqualTo(newAddressCollectionCase.getId());
+    assertThat(newCase.getCaseId()).isEqualTo(newAddressCollectionCase.getId());
     assertThat(newCase.getAddressType())
         .isEqualTo(newAddressCollectionCase.getAddress().getAddressType());
 
@@ -284,7 +284,7 @@ public class NewAddressReportedServiceTest {
     assertThat(newCase.isSkeleton()).isTrue();
     assertThat(newCase.getAddressLine1())
         .isEqualTo(newAddressCollectionCase.getAddress().getAddressLine1());
-    assertThat(newCase.getCaseId().toString()).isEqualTo(newAddressCollectionCase.getId());
+    assertThat(newCase.getCaseId()).isEqualTo(newAddressCollectionCase.getId());
     assertThat(newCase.getAddressType())
         .isEqualTo(newAddressCollectionCase.getAddress().getAddressType());
     assertThat(newCase.getLatitude())
@@ -333,7 +333,7 @@ public class NewAddressReportedServiceTest {
 
     assertThat(newCase.getAddressLine1())
         .isEqualTo(newAddressCollectionCase.getAddress().getAddressLine1());
-    assertThat(newCase.getCaseId().toString()).isEqualTo(newAddressCollectionCase.getId());
+    assertThat(newCase.getCaseId()).isEqualTo(newAddressCollectionCase.getId());
     assertThat(newCase.getAddressType())
         .isEqualTo(newAddressCollectionCase.getAddress().getAddressType());
     assertThat(newCase.getLatitude())
@@ -346,7 +346,7 @@ public class NewAddressReportedServiceTest {
         .saveCaseAndEmitCaseCreatedEvent(
             caseArgumentCaptor.capture(), metadataArgumentCaptor.capture());
 
-    assertThat(caseArgumentCaptor.getValue().getCaseId().toString())
+    assertThat(caseArgumentCaptor.getValue().getCaseId())
         .isEqualTo(newAddressCollectionCase.getId());
 
     Metadata actualMetadata = metadataArgumentCaptor.getValue();
@@ -455,7 +455,7 @@ public class NewAddressReportedServiceTest {
     address.setAddressType("SPG");
 
     CollectionCase collectionCase = new CollectionCase();
-    collectionCase.setId(UUID.randomUUID().toString());
+    collectionCase.setId(UUID.randomUUID());
     collectionCase.setAddress(address);
 
     NewAddress newAddress = new NewAddress();
@@ -475,7 +475,7 @@ public class NewAddressReportedServiceTest {
 
   private Case getExpectedCase(CollectionCase collectionCase) {
     Case expectedCase = new Case();
-    expectedCase.setCaseId(UUID.fromString(collectionCase.getId()));
+    expectedCase.setCaseId(collectionCase.getId());
     expectedCase.setCollectionExerciseId(collectionCase.getCollectionExerciseId());
     expectedCase.setCaseType(collectionCase.getCaseType());
     expectedCase.setAddressLine1(collectionCase.getAddress().getAddressLine1());

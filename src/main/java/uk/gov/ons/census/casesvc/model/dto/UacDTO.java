@@ -2,6 +2,7 @@ package uk.gov.ons.census.casesvc.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import java.util.UUID;
 import lombok.Data;
 
 @Data
@@ -13,8 +14,8 @@ public class UacDTO {
   private String questionnaireId;
   private String caseType;
   private String region;
-  private String caseId;
-  private String collectionExerciseId;
+  private UUID caseId;
+  private UUID collectionExerciseId;
   private String formType;
-  private String individualCaseId;
+  private UUID individualCaseId;
 }

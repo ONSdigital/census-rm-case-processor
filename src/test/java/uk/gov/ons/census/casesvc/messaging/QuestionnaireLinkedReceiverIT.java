@@ -110,7 +110,7 @@ public class QuestionnaireLinkedReceiverIT {
       ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
       managementEvent.getEvent().setTransactionId(UUID.randomUUID());
       UacDTO uac = new UacDTO();
-      uac.setCaseId(TEST_CASE_ID.toString());
+      uac.setCaseId(TEST_CASE_ID);
       uac.setQuestionnaireId(expectedQuestionnaireId);
       managementEvent.getPayload().setUac(uac);
 
@@ -126,7 +126,7 @@ public class QuestionnaireLinkedReceiverIT {
       assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
       UacDTO actualUac = responseManagementEvent.getPayload().getUac();
       assertThat(actualUac.getQuestionnaireId()).isEqualTo(expectedQuestionnaireId);
-      assertThat(actualUac.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
+      assertThat(actualUac.getCaseId()).isEqualTo(TEST_CASE_ID);
       assertThat(actualUac.getActive()).isTrue();
 
       // Check database Case is still unreceipted and response received not set
@@ -171,7 +171,7 @@ public class QuestionnaireLinkedReceiverIT {
       ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
       managementEvent.getEvent().setTransactionId(UUID.randomUUID());
       UacDTO uac = new UacDTO();
-      uac.setCaseId(TEST_CASE_ID.toString());
+      uac.setCaseId(TEST_CASE_ID);
       uac.setQuestionnaireId(expectedQuestionnaireId);
       managementEvent.getPayload().setUac(uac);
 
@@ -187,7 +187,7 @@ public class QuestionnaireLinkedReceiverIT {
       assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
       UacDTO actualUac = responseManagementEvent.getPayload().getUac();
       assertThat(actualUac.getQuestionnaireId()).isEqualTo(expectedQuestionnaireId);
-      assertThat(actualUac.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
+      assertThat(actualUac.getCaseId()).isEqualTo(TEST_CASE_ID);
 
       // Check Case updated message not sent
       rhCaseQueueSpy.checkMessageIsNotReceived(5);
@@ -238,7 +238,7 @@ public class QuestionnaireLinkedReceiverIT {
       ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
       managementEvent.getEvent().setTransactionId(UUID.randomUUID());
       UacDTO uac = new UacDTO();
-      uac.setCaseId(TEST_CASE_ID.toString());
+      uac.setCaseId(TEST_CASE_ID);
       uac.setQuestionnaireId(expectedQuestionnaireId);
       managementEvent.getPayload().setUac(uac);
 
@@ -254,14 +254,14 @@ public class QuestionnaireLinkedReceiverIT {
       assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
       UacDTO actualUac = responseManagementEvent.getPayload().getUac();
       assertThat(actualUac.getQuestionnaireId()).isEqualTo(expectedQuestionnaireId);
-      assertThat(actualUac.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
+      assertThat(actualUac.getCaseId()).isEqualTo(TEST_CASE_ID);
 
       // Check Case updated message sent and contains expected data
       responseManagementEvent = rhCaseQueueSpy.checkExpectedMessageReceived();
       assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_UPDATED);
       CollectionCase actualCollectionCase =
           responseManagementEvent.getPayload().getCollectionCase();
-      assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID.toString());
+      assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID);
 
       // Check database that Case is still receipted and has response received set
       Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
@@ -304,9 +304,9 @@ public class QuestionnaireLinkedReceiverIT {
       ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
       managementEvent.getEvent().setTransactionId(UUID.randomUUID());
       UacDTO uac = new UacDTO();
-      uac.setCaseId(TEST_CASE_ID.toString());
+      uac.setCaseId(TEST_CASE_ID);
       uac.setQuestionnaireId(expectedQuestionnaireId);
-      uac.setIndividualCaseId(TEST_INDIVIDUAL_CASE_ID.toString());
+      uac.setIndividualCaseId(TEST_INDIVIDUAL_CASE_ID);
       managementEvent.getPayload().setUac(uac);
 
       // WHEN
@@ -328,7 +328,7 @@ public class QuestionnaireLinkedReceiverIT {
       assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
       UacDTO actualUac = responseManagementEvent.getPayload().getUac();
       assertThat(actualUac.getQuestionnaireId()).isEqualTo(expectedQuestionnaireId);
-      assertThat(actualUac.getCaseId()).isEqualTo(TEST_INDIVIDUAL_CASE_ID.toString());
+      assertThat(actualUac.getCaseId()).isEqualTo(TEST_INDIVIDUAL_CASE_ID);
       assertThat(actualUac.getActive()).isTrue();
 
       // Check database HI Case created as expected
@@ -377,7 +377,7 @@ public class QuestionnaireLinkedReceiverIT {
       ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
       managementEvent.getEvent().setTransactionId(UUID.randomUUID());
       UacDTO uac = new UacDTO();
-      uac.setCaseId(TEST_CASE_ID.toString());
+      uac.setCaseId(TEST_CASE_ID);
       uac.setQuestionnaireId(expectedQuestionnaireId);
       managementEvent.getPayload().setUac(uac);
 
@@ -428,7 +428,7 @@ public class QuestionnaireLinkedReceiverIT {
       ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
       managementEvent.getEvent().setTransactionId(UUID.randomUUID());
       UacDTO uac = new UacDTO();
-      uac.setCaseId(TEST_CASE_ID.toString());
+      uac.setCaseId(TEST_CASE_ID);
       uac.setQuestionnaireId(expectedQuestionnaireId);
       managementEvent.getPayload().setUac(uac);
 
@@ -480,7 +480,7 @@ public class QuestionnaireLinkedReceiverIT {
       ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
       managementEvent.getEvent().setTransactionId(UUID.randomUUID());
       UacDTO uac = new UacDTO();
-      uac.setCaseId(TEST_CASE_ID.toString());
+      uac.setCaseId(TEST_CASE_ID);
       uac.setQuestionnaireId(expectedQuestionnaireId);
       managementEvent.getPayload().setUac(uac);
 
@@ -496,7 +496,7 @@ public class QuestionnaireLinkedReceiverIT {
       assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
       UacDTO actualUac = responseManagementEvent.getPayload().getUac();
       assertThat(actualUac.getQuestionnaireId()).isEqualTo(expectedQuestionnaireId);
-      assertThat(actualUac.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
+      assertThat(actualUac.getCaseId()).isEqualTo(TEST_CASE_ID);
       assertThat(actualUac.getActive()).isFalse();
 
       Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
@@ -538,7 +538,7 @@ public class QuestionnaireLinkedReceiverIT {
       ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
       managementEvent.getEvent().setTransactionId(UUID.randomUUID());
       UacDTO uac = new UacDTO();
-      uac.setCaseId(TEST_CASE_ID.toString());
+      uac.setCaseId(TEST_CASE_ID);
       uac.setQuestionnaireId(expectedQuestionnaireId);
       managementEvent.getPayload().setUac(uac);
 
@@ -554,7 +554,7 @@ public class QuestionnaireLinkedReceiverIT {
       assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.UAC_UPDATED);
       UacDTO actualUac = responseManagementEvent.getPayload().getUac();
       assertThat(actualUac.getQuestionnaireId()).isEqualTo(expectedQuestionnaireId);
-      assertThat(actualUac.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
+      assertThat(actualUac.getCaseId()).isEqualTo(TEST_CASE_ID);
       assertThat(actualUac.getActive()).isFalse();
 
       Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
@@ -596,9 +596,9 @@ public class QuestionnaireLinkedReceiverIT {
       ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
       managementEvent.getEvent().setTransactionId(UUID.randomUUID());
       UacDTO uac = new UacDTO();
-      uac.setCaseId(TEST_CASE_ID.toString());
+      uac.setCaseId(TEST_CASE_ID);
       uac.setQuestionnaireId(expectedQuestionnaireId);
-      uac.setIndividualCaseId(UUID.randomUUID().toString());
+      uac.setIndividualCaseId(UUID.randomUUID());
       managementEvent.getPayload().setUac(uac);
 
       // WHEN

@@ -177,7 +177,7 @@ public class EventServiceTest {
     responseManagementEvent.setEvent(event);
 
     FieldCaseSelected fieldCaseSelected = new FieldCaseSelected();
-    fieldCaseSelected.setActionRuleId("Test actionRuleId");
+    fieldCaseSelected.setActionRuleId(UUID.fromString("8faa551c-c04a-4b8a-a164-50c6f3d9d52a"));
     fieldCaseSelected.setCaseRef(TEST_CASE_REF);
 
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
@@ -197,7 +197,7 @@ public class EventServiceTest {
             eq(EventType.FIELD_CASE_SELECTED),
             eq(event),
             eq(
-                "{\"fieldCaseSelected\":{\"caseRef\":1234567890,\"actionRuleId\":\"Test actionRuleId\"}}"),
+                "{\"fieldCaseSelected\":{\"caseRef\":1234567890,\"actionRuleId\":\"8faa551c-c04a-4b8a-a164-50c6f3d9d52a\"}}"),
             eq(messageTimestamp));
   }
 }

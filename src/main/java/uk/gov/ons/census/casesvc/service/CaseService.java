@@ -42,10 +42,10 @@ public class CaseService {
   private String outboundExchange;
 
   @Value("${ccsconfig.action-plan-id}")
-  private String actionPlanId;
+  private UUID actionPlanId;
 
   @Value("${ccsconfig.collection-exercise-id}")
-  private String collectionExerciseId;
+  private UUID collectionExerciseId;
 
   @Value("${caserefgeneratorkey}")
   private byte[] caserefgeneratorkey;
@@ -92,10 +92,10 @@ public class CaseService {
   }
 
   public Case createCCSCase(
-      String caseId, SampleUnitDTO sampleUnit, RefusalType refusal, boolean isInvalidAddress) {
+      UUID caseId, SampleUnitDTO sampleUnit, RefusalType refusal, boolean isInvalidAddress) {
     Case caze = mapperFacade.map(sampleUnit, Case.class);
     caze.setCaseType(sampleUnit.getAddressType());
-    caze.setCaseId(UUID.fromString(caseId));
+    caze.setCaseId(caseId);
     caze.setActionPlanId(actionPlanId);
     caze.setCollectionExerciseId(collectionExerciseId);
     caze.setRefusalReceived(refusal);
@@ -212,7 +212,7 @@ public class CaseService {
     collectionCase.setCaseRef(Long.toString(caze.getCaseRef()));
     collectionCase.setCaseType(caze.getCaseType());
     collectionCase.setCollectionExerciseId(caze.getCollectionExerciseId());
-    collectionCase.setId(caze.getCaseId().toString());
+    collectionCase.setId(caze.getCaseId());
     collectionCase.setSurvey(caze.getSurvey());
     collectionCase.setCreatedDateTime(caze.getCreatedDateTime());
     // Stop. No. Don't put anything else here unless it's in the event dictionary. Look down!

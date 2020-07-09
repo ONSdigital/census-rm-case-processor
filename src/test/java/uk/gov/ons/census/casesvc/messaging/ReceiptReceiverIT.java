@@ -133,7 +133,7 @@ public class ReceiptReceiverIT {
           rhCaseQueueSpy.checkExpectedMessageReceived();
       CollectionCase actualCollectionCase =
           responseManagementEvent.getPayload().getCollectionCase();
-      assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID.toString());
+      assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID);
       assertThat(actualCollectionCase.getReceiptReceived()).isTrue();
       assertThat(actualCollectionCase.getCreatedDateTime()).isEqualTo(caze.getCreatedDateTime());
 
@@ -156,7 +156,7 @@ public class ReceiptReceiverIT {
       UacDTO actualUacDTOObject = responseManagementEvent.getPayload().getUac();
       assertThat(actualUacDTOObject.getUac()).isEqualTo(TEST_UAC);
       assertThat(actualUacDTOObject.getQuestionnaireId()).isEqualTo(ENGLAND_HOUSEHOLD);
-      assertThat(actualUacDTOObject.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
+      assertThat(actualUacDTOObject.getCaseId()).isEqualTo(TEST_CASE_ID);
 
       Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
       assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
@@ -229,7 +229,7 @@ public class ReceiptReceiverIT {
           rhCaseQueueSpy.checkExpectedMessageReceived();
       CollectionCase actualCollectionCase =
           responseManagementEvent.getPayload().getCollectionCase();
-      assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID.toString());
+      assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID);
       assertThat(actualCollectionCase.getReceiptReceived()).isFalse();
       assertThat(actualCollectionCase.getCreatedDateTime()).isEqualTo(caze.getCreatedDateTime());
 
@@ -252,7 +252,7 @@ public class ReceiptReceiverIT {
       UacDTO actualUacDTOObject = responseManagementEvent.getPayload().getUac();
       assertThat(actualUacDTOObject.getUac()).isEqualTo(TEST_UAC);
       assertThat(actualUacDTOObject.getQuestionnaireId()).isEqualTo(ENGLAND_HOUSEHOLD);
-      assertThat(actualUacDTOObject.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
+      assertThat(actualUacDTOObject.getCaseId()).isEqualTo(TEST_CASE_ID);
 
       Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
       assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
@@ -322,7 +322,7 @@ public class ReceiptReceiverIT {
       final UUID caseId = caze.getCaseId();
 
       Message[] qidLinkingMessages =
-          buildLinkReceiptedQidToCaseMsgs(caseId.toString(), numberOfReceiptsAndLinkToSend);
+          buildLinkReceiptedQidToCaseMsgs(caseId, numberOfReceiptsAndLinkToSend);
 
       IntStream.range(0, numberOfReceiptsAndLinkToSend)
           .parallel()
@@ -343,13 +343,12 @@ public class ReceiptReceiverIT {
           .isEqualTo(expectedResponseCount);
       assertThat(actualCase.isReceiptReceived()).as("Case Receipted").isTrue();
 
-      checkExpectedResponsesEmitted(
-          expectedActualResponses, rhCaseQueueSpy, caze.getCaseId().toString());
+      checkExpectedResponsesEmitted(expectedActualResponses, rhCaseQueueSpy, caze.getCaseId());
     }
   }
 
   private void checkExpectedResponsesEmitted(
-      List<Integer> expectedActualResponses, QueueSpy queueSpy, String caseId) throws IOException {
+      List<Integer> expectedActualResponses, QueueSpy queueSpy, UUID caseId) throws IOException {
 
     List<Integer> actualResponsesList = queueSpy.collectAllActualResponseCountsForCaseId(caseId);
 
@@ -374,7 +373,7 @@ public class ReceiptReceiverIT {
     return actualCase;
   }
 
-  private Message[] buildLinkReceiptedQidToCaseMsgs(String caseId, int count) {
+  private Message[] buildLinkReceiptedQidToCaseMsgs(UUID caseId, int count) {
 
     Message[] qidLinkingMsgs = new Message[count];
 

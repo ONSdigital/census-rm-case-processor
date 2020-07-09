@@ -40,7 +40,7 @@ public class RefusalServiceTest {
     ResponseManagementEvent managementEvent =
         getTestResponseManagementRefusalEvent(RefusalTypeDTO.EXTRAORDINARY_REFUSAL);
     CollectionCase collectionCase = managementEvent.getPayload().getRefusal().getCollectionCase();
-    collectionCase.setId(TEST_CASE_ID.toString());
+    collectionCase.setId(TEST_CASE_ID);
     collectionCase.setRefusalReceived(null);
     Case testCase = getRandomCase();
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
@@ -88,7 +88,7 @@ public class RefusalServiceTest {
     ResponseManagementEvent managementEvent =
         getTestResponseManagementRefusalEvent(RefusalTypeDTO.HARD_REFUSAL);
     CollectionCase collectionCase = managementEvent.getPayload().getRefusal().getCollectionCase();
-    collectionCase.setId(TEST_CASE_ID.toString());
+    collectionCase.setId(TEST_CASE_ID);
     collectionCase.setRefusalReceived(RefusalTypeDTO.HARD_REFUSAL);
     Case testCase = getRandomCase();
     testCase.setRefusalReceived(null);
@@ -137,7 +137,7 @@ public class RefusalServiceTest {
     ResponseManagementEvent managementEvent =
         getTestResponseManagementRefusalEvent(RefusalTypeDTO.HARD_REFUSAL);
     managementEvent.getEvent().setChannel("NOT FROM FIELD");
-    managementEvent.getPayload().getRefusal().getCollectionCase().setId(TEST_CASE_ID.toString());
+    managementEvent.getPayload().getRefusal().getCollectionCase().setId(TEST_CASE_ID);
 
     Case testCase = getRandomCase();
     testCase.setAddressLevel(ESTAB_ADDRESS_LEVEL);
@@ -172,7 +172,7 @@ public class RefusalServiceTest {
     ResponseManagementEvent managementEvent =
         getTestResponseManagementRefusalEvent(RefusalTypeDTO.HARD_REFUSAL);
     CollectionCase collectionCase = managementEvent.getPayload().getRefusal().getCollectionCase();
-    collectionCase.setId(TEST_CASE_ID.toString());
+    collectionCase.setId(TEST_CASE_ID);
     collectionCase.setRefusalReceived(RefusalTypeDTO.HARD_REFUSAL);
     Case testCase = getRandomCase();
     testCase.setRefusalReceived(EXTRAORDINARY_REFUSAL);
