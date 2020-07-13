@@ -72,7 +72,8 @@ public class NewAddressReportedService {
 
     skeletonCase = caseService.saveNewCaseAndStampCaseRef(skeletonCase);
     if (StringUtils.isEmpty(skeletonCase.getUprn())) {
-      addDummyUprnToCase(skeletonCase, newAddressEvent);
+      addDummyUprnToCase(skeletonCase);
+      sendNewAddressToAims(newAddressEvent, skeletonCase.getUprn());
       caseService.saveCase(skeletonCase);
     }
     caseService.emitCaseCreatedEvent(skeletonCase);
@@ -98,7 +99,8 @@ public class NewAddressReportedService {
 
     newCaseFromSourceCase = caseService.saveNewCaseAndStampCaseRef(newCaseFromSourceCase);
     if (StringUtils.isEmpty(newCaseFromSourceCase.getUprn())) {
-      addDummyUprnToCase(newCaseFromSourceCase, newAddressEvent);
+      addDummyUprnToCase(newCaseFromSourceCase);
+      sendNewAddressToAims(newAddressEvent, newCaseFromSourceCase.getUprn());
     }
 
     Metadata metadata =
@@ -301,10 +303,45 @@ public class NewAddressReportedService {
     return newCaseMetadata;
   }
 
-  private void addDummyUprnToCase(Case newCase, ResponseManagementEvent newAddressEvent) {
+  private void addDummyUprnToCase(Case newCase) {
     String dummyUprn = String.format("%s%d", dummyUprnPrefix, newCase.getCaseRef());
     newCase.setUprn(dummyUprn);
+  }
 
+  private void sendNewAddressToAims(ResponseManagementEvent newAddressEvent, String dummyUprn) {
+    ResponseManagementEvent enhancedNewAddressEvent =
+        buildEnhancedNewAddressEvent(newAddressEvent, dummyUprn);
+
+    ListenableFuture<String> future = pubSubTemplate.publish(aimsTopic, enhancedNewAddressEvent);
+    try {
+      future.get(publishTimeout, TimeUnit.SECONDS);
+    } catch (InterruptedException | ExecutionException | TimeoutException e) {
+      throw new RuntimeException(e);
+    }
+
+    // Warn about dummy UPRN sent to AIMS out of sync with RM if the transaction rolls back.
+    // There's nothing we can do about these more elegantly - PubSub needs to become transactional.
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      TransactionSynchronizationManager.registerSynchronization(
+          new TransactionSynchronization() {
+            @Override
+            public void afterCompletion(int status) {
+              if (status == STATUS_ROLLED_BACK) {
+                // All we can do is log. Hopefully this is enough info to manually patch the data
+                // in AIMS to get rid of any duplicate addresses
+                log.with("dummy_uprn", dummyUprn)
+                    .with(
+                        "case_id",
+                        newAddressEvent.getPayload().getNewAddress().getCollectionCase().getId())
+                    .error("Transaction rolled back after PubSub message sent");
+              }
+            }
+          });
+    }
+  }
+
+  private ResponseManagementEvent buildEnhancedNewAddressEvent(
+      ResponseManagementEvent newAddressEvent, String dummyUprn) {
     EventDTO event = new EventDTO();
     event.setChannel("RM");
     event.setType(NEW_ADDRESS_ENHANCED);
@@ -344,29 +381,6 @@ public class NewAddressReportedService {
     enhancedNewAddressEvent.setEvent(event);
     enhancedNewAddressEvent.setPayload(payload);
 
-    ListenableFuture<String> future = pubSubTemplate.publish(aimsTopic, enhancedNewAddressEvent);
-    try {
-      future.get(publishTimeout, TimeUnit.SECONDS);
-    } catch (InterruptedException | ExecutionException | TimeoutException e) {
-      throw new RuntimeException(e);
-    }
-
-    // Warn about dummy UPRN sent to AIMS out of sync with RM if the transaction rolls back.
-    // There's nothing we can do about these more elegantly - PubSub needs to become transactional.
-    if (TransactionSynchronizationManager.isSynchronizationActive()) {
-      TransactionSynchronizationManager.registerSynchronization(
-          new TransactionSynchronization() {
-            @Override
-            public void afterCompletion(int status) {
-              if (status == STATUS_ROLLED_BACK) {
-                // All we can do is log. Hopefully this is enough info to manually patch the data
-                // in AIMS to get rid of any duplicate addresses
-                log.with("dummy_uprn", dummyUprn)
-                    .with("case_id", sourceCollectionCase.getId())
-                    .error("Transaction rolled back after PubSub message sent");
-              }
-            }
-          });
-    }
+    return enhancedNewAddressEvent;
   }
 }
