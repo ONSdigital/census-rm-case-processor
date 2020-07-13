@@ -31,12 +31,6 @@ public class FulfilmentRequestServiceTest {
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH_PRINT = "P_OR_I2";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH_PRINT = "P_OR_I2W";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NI_PRINT = "P_OR_I4";
-  private static final String INDIVIDUAL_QUESTIONNAIRE_LARGE_PRINT_ENGLAND_LETTER = "P_LP_ILP1";
-  private static final String INDIVIDUAL_QUESTIONNAIRE_LARGE_PRINT_WALES_ENGLISH_LETTER =
-      "P_LP_ILP2";
-  private static final String INDIVIDUAL_QUESTIONNAIRE_LARGE_PRINT_WALES_WELSH_LETTER =
-      "P_LP_ILP2W";
-  private static final String INDIVIDUAL_QUESTIONNAIRE_LARGE_PRINT_NI_LETTER = "P_LP_IL4";
 
   @Mock private EventLogger eventLogger;
 
@@ -119,26 +113,6 @@ public class FulfilmentRequestServiceTest {
   @Test
   public void testGoodIndividualResponseFulfilmentRequestForRM_TC_HI() {
     testIndividualResponseCode(RM_HOUSEHOLD_INDIVIDUAL_TELEPHONE_CAPTURE);
-  }
-
-  @Test
-  public void testGoodIndividualLargePrintQuestionnaireFulfilmentRequestForP_LP_ILP1() {
-    testIndividualResponseCodePrinter(INDIVIDUAL_QUESTIONNAIRE_LARGE_PRINT_ENGLAND_LETTER);
-  }
-
-  @Test
-  public void testGoodIndividualLargePrintQuestionnaireFulfilmentRequestForP_LP_ILP2() {
-    testIndividualResponseCodePrinter(INDIVIDUAL_QUESTIONNAIRE_LARGE_PRINT_WALES_ENGLISH_LETTER);
-  }
-
-  @Test
-  public void testGoodIndividualLargePrintQuestionnaireFulfilmentRequestForP_LP_ILP2W() {
-    testIndividualResponseCodePrinter(INDIVIDUAL_QUESTIONNAIRE_LARGE_PRINT_WALES_WELSH_LETTER);
-  }
-
-  @Test
-  public void testGoodIndividualLargePrintQuestionnaireFulfilmentRequestForP_LP_IL4() {
-    testIndividualResponseCodePrinter(INDIVIDUAL_QUESTIONNAIRE_LARGE_PRINT_NI_LETTER);
   }
 
   @Test
