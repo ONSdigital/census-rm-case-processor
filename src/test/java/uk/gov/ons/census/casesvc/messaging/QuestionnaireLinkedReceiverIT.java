@@ -337,6 +337,8 @@ public class QuestionnaireLinkedReceiverIT {
       assertThat(actualHICase.getCaseType()).isEqualTo("HI");
       assertThat(actualHICase.getUprn()).isEqualTo(actualHHCase.getUprn());
       assertThat(actualHICase.getEstabUprn()).isEqualTo(actualHHCase.getEstabUprn());
+      assertThat(actualHICase.getMetadata().getChannel())
+          .isEqualTo(managementEvent.getEvent().getChannel());
 
       // Check database that HI Case is linked to UacQidLink
       List<UacQidLink> uacQidLinks = uacQidLinkRepository.findAll();

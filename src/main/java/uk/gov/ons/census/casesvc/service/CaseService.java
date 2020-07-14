@@ -248,7 +248,8 @@ public class CaseService {
     return collectionCase;
   }
 
-  public Case prepareIndividualResponseCaseFromParentCase(Case parentCase, UUID caseId) {
+  public Case prepareIndividualResponseCaseFromParentCase(
+      Case parentCase, UUID caseId, String channel) {
     Case individualResponseCase = new Case();
 
     individualResponseCase.setCaseId(caseId);
@@ -277,6 +278,11 @@ public class CaseService {
     individualResponseCase.setSkeleton(parentCase.isSkeleton());
     individualResponseCase.setSurvey(
         parentCase.getSurvey()); // Should only ever be "CENSUS" from the parent case
+
+    // We need to be able to filter individual cases by the channel from whence they were created
+    CaseMetadata caseMetadata = new CaseMetadata();
+    caseMetadata.setChannel(channel);
+    individualResponseCase.setMetadata(caseMetadata);
 
     return individualResponseCase;
   }

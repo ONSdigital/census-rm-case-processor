@@ -6,4 +6,5 @@ import lombok.Data;
 public class CaseMetadata {
 
   private Boolean secureEstablishment;
+  private String channel;
 }

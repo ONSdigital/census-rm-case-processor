@@ -60,6 +60,7 @@ public class SurveyLaunchedReceiverIT {
   @Transactional
   public void setUp() {
     rabbitQueueHelper.purgeQueue(inboundQueue);
+    rabbitQueueHelper.purgeQueue(rhCaseQueue);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
