@@ -31,8 +31,23 @@ public class CaseService {
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_CASE_TYPE = "HI";
   public static final String CASE_UPDATE_ROUTING_KEY = "event.case.update";
 
-  @Value("${directdeliverytreatmentcodes}")
-  private List<String> directDeliveryTreatmentCodes;
+  private Set<String> directDeliveryTreatmentCodes =
+      Set.of(
+          "CE_LDIEE",
+          "CE_LDIEW",
+          "CE_LDIUE",
+          "CE_LDIUW",
+          "CE_QDIEE",
+          "CE_QDIEW",
+          "CE_LDCEE",
+          "CE_LDCEW",
+          "CE_1QNFN",
+          "CE_2LNFN",
+          "CE_3LSNFN",
+          "SPG_QDHUE",
+          "SPG_QDHUW",
+          "SPG_VDNEE",
+          "SPG_VDNEW");
 
   private final CaseRepository caseRepository;
   private final MapperFacade mapperFacade;
