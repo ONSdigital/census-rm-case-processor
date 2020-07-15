@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.godaddy.logging.LoggingConfigs;
 import java.util.TimeZone;
 import javax.annotation.PostConstruct;
 import ma.glasnost.orika.MapperFacade;
@@ -53,6 +54,7 @@ public class AppConfig {
 
   @PostConstruct
   public void init() {
+//    LoggingConfigs.setCurrent(LoggingConfigs.getCurrent().useJson());
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
   }
 }
