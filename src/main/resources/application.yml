@@ -29,7 +29,9 @@ spring:
   cloud:
     gcp:
       pubsub:
-        project-id: aims-project
+        project-id: aims-new-address-project
+#        REMOVE THIS, REMOVE, REMOVE THE emulator host from here, remove IT
+        emulator-host: localhost:8538
 
 queueconfig:
   inbound-queue: case.sample.inbound
@@ -101,6 +103,12 @@ uprnconfig:
 
 pubsub:
   publishtimeout: 30  # In seconds
-  aimstopic: aims-topic
+  aims-new-address-topic: aims-new-address-topic
 
+#REMOVE THESE, THEY SHALL NOT PASS ETC....  please
 caserefgeneratorkey: rPr3qsjlU42hsDX5npfuCzlyF4UYfDTO
+
+cloud:
+  gcp:
+    pubsub:
+      emulator-host: pubsub-emulator:8538

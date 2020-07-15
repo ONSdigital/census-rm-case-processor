@@ -78,8 +78,8 @@ public class AddressReceiverIT {
   @Value("${spring.cloud.gcp.pubsub.project-id}")
   private String aimsProjectId;
 
-  @Value("${pubsub.aimstopic}")
-  private String aimsTopic;
+  @Value("${pubsub.aims-new-address-topic}")
+  private String aimsNewAddressTopic;
 
   @Value("${spring.cloud.gcp.pubsub.emulator-host}")
   private String pubsubEmulatorHost;
@@ -576,7 +576,12 @@ public class AddressReceiverIT {
     }
 
     String topicUrl =
-        "http://" + pubsubEmulatorHost + "/v1/projects/" + aimsProjectId + "/topics/" + aimsTopic;
+        "http://"
+            + pubsubEmulatorHost
+            + "/v1/projects/"
+            + aimsProjectId
+            + "/topics/"
+            + aimsNewAddressTopic;
 
     try {
       restTemplate.delete(topicUrl);
@@ -606,7 +611,7 @@ public class AddressReceiverIT {
     try {
       restTemplate.put(
           subscriptionUrl,
-          new SubscriptionTopic("projects/" + aimsProjectId + "/topics/" + aimsTopic));
+          new SubscriptionTopic("projects/" + aimsProjectId + "/topics/" + aimsNewAddressTopic));
     } catch (HttpClientErrorException exception) {
       if (exception.getRawStatusCode() != 409) {
         throw exception;

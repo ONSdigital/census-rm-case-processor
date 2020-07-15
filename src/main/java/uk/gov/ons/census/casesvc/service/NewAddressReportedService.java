@@ -52,8 +52,8 @@ public class NewAddressReportedService {
   @Value("${pubsub.publishtimeout}")
   private int publishTimeout;
 
-  @Value("${pubsub.aimstopic}")
-  private String aimsTopic;
+  @Value("${pubsub.aims-new-address-topic}")
+  private String aimsNewAddressTopic;
 
   public NewAddressReportedService(
       CaseService caseService, EventLogger eventLogger, PubSubTemplate pubSubTemplate) {
@@ -312,7 +312,8 @@ public class NewAddressReportedService {
     ResponseManagementEvent enhancedNewAddressEvent =
         buildEnhancedNewAddressEvent(newAddressEvent, dummyUprn);
 
-    ListenableFuture<String> future = pubSubTemplate.publish(aimsTopic, enhancedNewAddressEvent);
+    ListenableFuture<String> future =
+        pubSubTemplate.publish(aimsNewAddressTopic, enhancedNewAddressEvent);
     try {
       future.get(publishTimeout, TimeUnit.SECONDS);
     } catch (InterruptedException | ExecutionException | TimeoutException e) {
