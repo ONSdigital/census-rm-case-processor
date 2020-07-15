@@ -31,7 +31,7 @@ public class CaseService {
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_CASE_TYPE = "HI";
   public static final String CASE_UPDATE_ROUTING_KEY = "event.case.update";
 
-  private Set<String> directDeliveryTreatmentCodes =
+  private static final Set<String> directDeliveryTreatmentCodes =
       Set.of(
           "CE_LDIEE",
           "CE_LDIEW",

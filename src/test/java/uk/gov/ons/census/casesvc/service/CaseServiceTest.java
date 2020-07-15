@@ -48,8 +48,9 @@ public class CaseServiceTest {
       new byte[] {0x10, 0x20, 0x10, 0x20, 0x10, 0x20, 0x10, 0x20};
   private static final Integer CE_ACTUAL_CAPACITY = 0;
   private static final String TEST_ADDRESS_TYPE_CE = "CE";
-  private static final Set<String> DIRECT_DELIVERY_TREATMENT_CODE =
-      Collections.singleton("CE_LDIEE");
+
+  @Mock private CaseService caseService;
+  private static final String DIRECT_DELIVERY_TREATMENT_CODE = "CE_LDIEE";
 
   @Mock CaseRepository caseRepository;
 
@@ -86,10 +87,9 @@ public class CaseServiceTest {
     createCaseSample.setCeExpectedCapacity(CE_CAPACITY);
     createCaseSample.setAddressType(TEST_ADDRESS_TYPE);
     createCaseSample.setSecureEstablishment(0);
+    caseService.isTreatmentCodeDirectDelivered(DIRECT_DELIVERY_TREATMENT_CODE);
 
     ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
-    ReflectionTestUtils.setField(
-        underTest, "directDeliveryTreatmentCodes", DIRECT_DELIVERY_TREATMENT_CODE);
 
     // Given
     when(caseRepository.saveAndFlush(any(Case.class))).then(obj -> obj.getArgument(0));
@@ -122,10 +122,9 @@ public class CaseServiceTest {
     createCaseSample.setCeExpectedCapacity(CE_CAPACITY);
     createCaseSample.setAddressType(TEST_ADDRESS_TYPE_CE);
     createCaseSample.setSecureEstablishment(1);
+    caseService.isTreatmentCodeDirectDelivered(DIRECT_DELIVERY_TREATMENT_CODE);
 
     ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
-    ReflectionTestUtils.setField(
-        underTest, "directDeliveryTreatmentCodes", DIRECT_DELIVERY_TREATMENT_CODE);
 
     // Given
     when(caseRepository.saveAndFlush(any(Case.class))).then(obj -> obj.getArgument(0));
@@ -158,10 +157,9 @@ public class CaseServiceTest {
     createCaseSample.setCeExpectedCapacity(CE_CAPACITY);
     createCaseSample.setAddressType(TEST_ADDRESS_TYPE_CE);
     createCaseSample.setSecureEstablishment(0);
+    caseService.isTreatmentCodeDirectDelivered(DIRECT_DELIVERY_TREATMENT_CODE);
 
     ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
-    ReflectionTestUtils.setField(
-        underTest, "directDeliveryTreatmentCodes", DIRECT_DELIVERY_TREATMENT_CODE);
 
     // Given
     when(caseRepository.saveAndFlush(any(Case.class))).then(obj -> obj.getArgument(0));
@@ -364,8 +362,7 @@ public class CaseServiceTest {
   @Test
   public void testisTreatmentCodeDirectDeliveredIsTrue() {
     // Given
-    ReflectionTestUtils.setField(
-        underTest, "directDeliveryTreatmentCodes", DIRECT_DELIVERY_TREATMENT_CODE);
+    caseService.isTreatmentCodeDirectDelivered(DIRECT_DELIVERY_TREATMENT_CODE);
 
     // When
     boolean treatmentCodeResult = underTest.isTreatmentCodeDirectDelivered("CE_LDIEE");
@@ -377,8 +374,7 @@ public class CaseServiceTest {
   @Test
   public void testisTreatmentCodeDirectDeliveredIsFalse() {
     // Given
-    ReflectionTestUtils.setField(
-        underTest, "directDeliveryTreatmentCodes", DIRECT_DELIVERY_TREATMENT_CODE);
+    caseService.isTreatmentCodeDirectDelivered(DIRECT_DELIVERY_TREATMENT_CODE);
 
     // When
     boolean treatmentCodeResult = underTest.isTreatmentCodeDirectDelivered("CE_LQIEE");
