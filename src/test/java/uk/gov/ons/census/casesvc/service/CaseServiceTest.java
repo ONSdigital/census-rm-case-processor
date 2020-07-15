@@ -49,9 +49,6 @@ public class CaseServiceTest {
   private static final Integer CE_ACTUAL_CAPACITY = 0;
   private static final String TEST_ADDRESS_TYPE_CE = "CE";
 
-  @Mock private CaseService caseService;
-  private static final String DIRECT_DELIVERY_TREATMENT_CODE = "CE_LDIEE";
-
   @Mock CaseRepository caseRepository;
 
   @Spy
@@ -87,7 +84,6 @@ public class CaseServiceTest {
     createCaseSample.setCeExpectedCapacity(CE_CAPACITY);
     createCaseSample.setAddressType(TEST_ADDRESS_TYPE);
     createCaseSample.setSecureEstablishment(0);
-    caseService.isTreatmentCodeDirectDelivered(DIRECT_DELIVERY_TREATMENT_CODE);
 
     ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
 
@@ -122,7 +118,6 @@ public class CaseServiceTest {
     createCaseSample.setCeExpectedCapacity(CE_CAPACITY);
     createCaseSample.setAddressType(TEST_ADDRESS_TYPE_CE);
     createCaseSample.setSecureEstablishment(1);
-    caseService.isTreatmentCodeDirectDelivered(DIRECT_DELIVERY_TREATMENT_CODE);
 
     ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
 
@@ -157,7 +152,6 @@ public class CaseServiceTest {
     createCaseSample.setCeExpectedCapacity(CE_CAPACITY);
     createCaseSample.setAddressType(TEST_ADDRESS_TYPE_CE);
     createCaseSample.setSecureEstablishment(0);
-    caseService.isTreatmentCodeDirectDelivered(DIRECT_DELIVERY_TREATMENT_CODE);
 
     ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
 
@@ -362,7 +356,6 @@ public class CaseServiceTest {
   @Test
   public void testisTreatmentCodeDirectDeliveredIsTrue() {
     // Given
-    caseService.isTreatmentCodeDirectDelivered(DIRECT_DELIVERY_TREATMENT_CODE);
 
     // When
     boolean treatmentCodeResult = underTest.isTreatmentCodeDirectDelivered("CE_LDIEE");
@@ -374,7 +367,6 @@ public class CaseServiceTest {
   @Test
   public void testisTreatmentCodeDirectDeliveredIsFalse() {
     // Given
-    caseService.isTreatmentCodeDirectDelivered(DIRECT_DELIVERY_TREATMENT_CODE);
 
     // When
     boolean treatmentCodeResult = underTest.isTreatmentCodeDirectDelivered("CE_LQIEE");
