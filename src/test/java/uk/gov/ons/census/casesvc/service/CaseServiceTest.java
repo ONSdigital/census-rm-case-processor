@@ -14,7 +14,6 @@ import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 import java.util.*;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
-import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -40,6 +39,7 @@ public class CaseServiceTest {
   private static final String TEST_POSTCODE = "TEST_POSTCODE";
   private static final String TEST_EXCHANGE = "TEST_EXCHANGE";
   private static final String TEST_ADDRESS_TYPE = "testy_address_type";
+  private static final String TEST_CHANNEL = "TEST_CHANNEL";
   private static final UUID TEST_UUID = UUID.randomUUID();
   private static final UUID TEST_ACTION_PLAN_ID = UUID.randomUUID();
   private static final UUID TEST_COLLECTION_EXERCISE_ID = UUID.randomUUID();
@@ -48,8 +48,6 @@ public class CaseServiceTest {
       new byte[] {0x10, 0x20, 0x10, 0x20, 0x10, 0x20, 0x10, 0x20};
   private static final Integer CE_ACTUAL_CAPACITY = 0;
   private static final String TEST_ADDRESS_TYPE_CE = "CE";
-  private List<String> directDeliveryTreatmentCodes =
-      new ArrayList<>(Arrays.asList("CE_LDIEE", "test"));
 
   @Mock CaseRepository caseRepository;
 
@@ -88,8 +86,6 @@ public class CaseServiceTest {
     createCaseSample.setSecureEstablishment(0);
 
     ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
-    ReflectionTestUtils.setField(
-        underTest, "directDeliveryTreatmentCodes", directDeliveryTreatmentCodes);
 
     // Given
     when(caseRepository.saveAndFlush(any(Case.class))).then(obj -> obj.getArgument(0));
@@ -124,8 +120,6 @@ public class CaseServiceTest {
     createCaseSample.setSecureEstablishment(1);
 
     ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
-    ReflectionTestUtils.setField(
-        underTest, "directDeliveryTreatmentCodes", directDeliveryTreatmentCodes);
 
     // Given
     when(caseRepository.saveAndFlush(any(Case.class))).then(obj -> obj.getArgument(0));
@@ -160,8 +154,6 @@ public class CaseServiceTest {
     createCaseSample.setSecureEstablishment(0);
 
     ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
-    ReflectionTestUtils.setField(
-        underTest, "directDeliveryTreatmentCodes", directDeliveryTreatmentCodes);
 
     // Given
     when(caseRepository.saveAndFlush(any(Case.class))).then(obj -> obj.getArgument(0));
@@ -360,8 +352,6 @@ public class CaseServiceTest {
   @Test
   public void testisTreatmentCodeDirectDeliveredIsTrue() {
     // Given
-    ReflectionTestUtils.setField(
-        underTest, "directDeliveryTreatmentCodes", directDeliveryTreatmentCodes);
 
     // When
     boolean treatmentCodeResult = underTest.isTreatmentCodeDirectDelivered("CE_LDIEE");
@@ -373,8 +363,6 @@ public class CaseServiceTest {
   @Test
   public void testisTreatmentCodeDirectDeliveredIsFalse() {
     // Given
-    ReflectionTestUtils.setField(
-        underTest, "directDeliveryTreatmentCodes", directDeliveryTreatmentCodes);
 
     // When
     boolean treatmentCodeResult = underTest.isTreatmentCodeDirectDelivered("CE_LQIEE");
@@ -413,13 +401,13 @@ public class CaseServiceTest {
   @Test
   public void checkIndividualCaseCreatedCorrectly() {
     // Given
-    EasyRandom easyRandom = new EasyRandom();
-    Case parentCase = easyRandom.nextObject(Case.class);
+    Case parentCase = getRandomCase();
     UUID childCaseId = UUID.randomUUID();
 
     // When
     Case actualChildCase =
-        underTest.prepareIndividualResponseCaseFromParentCase(parentCase, childCaseId);
+        underTest.prepareIndividualResponseCaseFromParentCase(
+            parentCase, childCaseId, TEST_CHANNEL);
 
     // Then
     assertChildCaseIsCorrect(parentCase, childCaseId, actualChildCase);
@@ -428,18 +416,34 @@ public class CaseServiceTest {
   @Test
   public void checkIndividualCaseCreatedCorrectlyFromSkeleton() {
     // Given
-    EasyRandom easyRandom = new EasyRandom();
-    Case parentCase = easyRandom.nextObject(Case.class);
+    Case parentCase = getRandomCase();
     UUID childCaseId = UUID.randomUUID();
 
     parentCase.setSkeleton(true);
 
     // When
     Case actualChildCase =
-        underTest.prepareIndividualResponseCaseFromParentCase(parentCase, childCaseId);
+        underTest.prepareIndividualResponseCaseFromParentCase(
+            parentCase, childCaseId, TEST_CHANNEL);
 
     // Then
     assertChildCaseIsCorrect(parentCase, childCaseId, actualChildCase);
+  }
+
+  @Test
+  public void testSaveAndEmitCaseCreatedEventIncludesCaseMetadata() {
+    // Given
+    Case caze = getRandomCase();
+    CaseMetadata caseMetadata = new CaseMetadata();
+    caseMetadata.setSecureEstablishment(true);
+    caseMetadata.setChannel(TEST_CHANNEL);
+    caze.setMetadata(caseMetadata);
+
+    // When
+    PayloadDTO actualPayloadDTO = underTest.saveCaseAndEmitCaseCreatedEvent(caze);
+
+    // Then
+    assertThat(actualPayloadDTO.getCollectionCase().getMetadata()).isEqualTo(caseMetadata);
   }
 
   private void assertChildCaseIsCorrect(Case parentCase, UUID childCaseId, Case actualChildCase) {
@@ -482,6 +486,7 @@ public class CaseServiceTest {
     assertThat(actualChildCase.getCeExpectedCapacity()).isNull();
     assertThat(actualChildCase.getAddressLevel()).isEqualTo(parentCase.getAddressLevel());
     assertThat(actualChildCase.isSkeleton()).isEqualTo(parentCase.isSkeleton());
+    assertThat(actualChildCase.getMetadata().getChannel()).isEqualTo(TEST_CHANNEL);
   }
 
   @Test

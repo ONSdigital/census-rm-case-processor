@@ -25,7 +25,6 @@ import uk.gov.ons.census.casesvc.model.entity.RefusalType;
 public class RefusalServiceTest {
 
   private static final String REFUSAL_RECEIVED = "Refusal Received";
-  private static final String ESTAB_ADDRESS_LEVEL = "E";
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
 
   @Mock private CaseService caseService;
@@ -132,15 +131,16 @@ public class RefusalServiceTest {
   }
 
   @Test
-  public void testRefusalNotFromFieldForEstabAddressLevelCaseIsLoggedWithoutRefusingTheCase() {
+  public void testRefusalForCaseFromField() {
     // GIVEN
     ResponseManagementEvent managementEvent =
         getTestResponseManagementRefusalEvent(RefusalTypeDTO.HARD_REFUSAL);
-    managementEvent.getEvent().setChannel("NOT FROM FIELD");
-    managementEvent.getPayload().getRefusal().getCollectionCase().setId(TEST_CASE_ID);
-
+    managementEvent.getEvent().setChannel("FIELD");
+    CollectionCase collectionCase = managementEvent.getPayload().getRefusal().getCollectionCase();
+    collectionCase.setId(TEST_CASE_ID);
+    collectionCase.setRefusalReceived(RefusalTypeDTO.HARD_REFUSAL);
     Case testCase = getRandomCase();
-    testCase.setAddressLevel(ESTAB_ADDRESS_LEVEL);
+    testCase.setRefusalReceived(null);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     when(caseService.getCaseByCaseId(TEST_CASE_ID)).thenReturn(testCase);
@@ -149,21 +149,34 @@ public class RefusalServiceTest {
     underTest.processRefusal(managementEvent, messageTimestamp);
 
     // THEN
-    // verify the event is logged
-    verify(eventLogger)
+    InOrder inOrder = inOrder(caseService, eventLogger);
+
+    inOrder.verify(caseService).getCaseByCaseId(any(UUID.class));
+
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    ArgumentCaptor<Metadata> metadataArgumentCaptor = ArgumentCaptor.forClass(Metadata.class);
+    inOrder
+        .verify(caseService)
+        .saveCaseAndEmitCaseUpdatedEvent(
+            caseArgumentCaptor.capture(), metadataArgumentCaptor.capture());
+    Case actualCase = caseArgumentCaptor.getValue();
+    Metadata metadata = metadataArgumentCaptor.getValue();
+    verifyNoMoreInteractions(caseService);
+
+    assertThat(actualCase.getRefusalReceived()).isEqualTo(RefusalType.HARD_REFUSAL);
+    assertThat(metadata.getCauseEventType()).isEqualTo(EventTypeDTO.REFUSAL_RECEIVED);
+    assertThat(metadata.getFieldDecision()).isNull();
+    inOrder
+        .verify(eventLogger, times(1))
         .logCaseEvent(
             eq(testCase),
             any(OffsetDateTime.class),
-            eq("Refusal received for individual on Estab"),
+            eq(REFUSAL_RECEIVED),
             eq(EventType.REFUSAL_RECEIVED),
             eq(managementEvent.getEvent()),
             anyString(),
             eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
-
-    // verify we do not try to update the case in any way
-    verify(caseService, times(1)).getCaseByCaseId(any(UUID.class));
-    verifyNoMoreInteractions(caseService);
   }
 
   @Test

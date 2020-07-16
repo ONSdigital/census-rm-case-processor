@@ -81,11 +81,6 @@ logging:
   level:
     org.springframework.amqp.rabbit.listener.ConditionalRejectingErrorHandler: ERROR
 
-# At the moment the treatment codes aren't finalised so there's an example one
-# that tests it. Once the direct delivery treatment codes have been finalised then we can add
-# them to the list.
-directdeliverytreatmentcodes: CE_LDIEE
-
 # Skeleton cases need to know the collection exercise id and action_plan_id
 censusconfig:
   collectionexerciseid: 34d7f3bb-91c9-45d0-bb2d-90afce4fc790
@@ -93,5 +88,3 @@ censusconfig:
 
 uprnconfig:
   dummyuprnprefix: 999
-
-caserefgeneratorkey: rPr3qsjlU42hsDX5npfuCzlyF4UYfDTO
