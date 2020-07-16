@@ -124,7 +124,7 @@ public class FulfilmentRequestReceiverIT {
     UacCreatedDTO uacQidCreated = new UacCreatedDTO();
     uacQidCreated.setCaseId(TEST_CASE_ID);
     uacQidCreated.setQid("123");
-    uacQidCreated.setUac(UUID.randomUUID());
+    uacQidCreated.setUac(UUID.randomUUID().toString());
     managementEvent.getPayload().getFulfilmentRequest().setUacQidCreated(uacQidCreated);
 
     // WHEN
@@ -183,7 +183,7 @@ public class FulfilmentRequestReceiverIT {
       sourceEvent
           .getPayload()
           .getFulfilmentRequest()
-          .setIndividualCaseId(TEST_INDIVIDUAL_CASE_ID.toString());
+          .setIndividualCaseId(TEST_INDIVIDUAL_CASE_ID);
       sourceEvent
           .getPayload()
           .getFulfilmentRequest()
@@ -373,7 +373,7 @@ public class FulfilmentRequestReceiverIT {
       ResponseManagementEvent sourceEvent,
       ResponseManagementEvent resultEvent) {
     assertThat(childCase.getCaseId())
-        .isEqualTo(UUID.fromString(resultEvent.getPayload().getCollectionCase().getId()));
+        .isEqualTo(resultEvent.getPayload().getCollectionCase().getId());
 
     assertThat(childCase.getEstabUprn()).isEqualTo(parentCase.getEstabUprn());
     assertThat(childCase.getAddressLine1()).isEqualTo(parentCase.getAddressLine1());
