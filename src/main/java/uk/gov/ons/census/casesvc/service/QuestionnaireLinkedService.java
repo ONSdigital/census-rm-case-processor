@@ -59,9 +59,7 @@ public class QuestionnaireLinkedService {
       } else {
         caze =
             caseService.prepareIndividualResponseCaseFromParentCase(
-                caze, 
-                uac.getIndividualCaseId(),
-                questionnaireLinkedEvent.getEvent().getChannel());
+                caze, uac.getIndividualCaseId(), questionnaireLinkedEvent.getEvent().getChannel());
       }
       caze = caseService.saveNewCaseAndStampCaseRef(caze);
       caseService.emitCaseCreatedEvent(caze);
