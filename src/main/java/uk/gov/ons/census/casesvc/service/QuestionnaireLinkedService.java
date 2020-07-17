@@ -53,11 +53,15 @@ public class QuestionnaireLinkedService {
 
     if (checkRequiredFieldsForIndividualHI(questionnaireId, caze.getCaseType())) {
       if (uac.getIndividualCaseId() == null) {
-        caze = caseService.prepareIndividualResponseCaseFromParentCase(caze, UUID.randomUUID());
+        caze =
+            caseService.prepareIndividualResponseCaseFromParentCase(
+                caze, UUID.randomUUID(), questionnaireLinkedEvent.getEvent().getChannel());
       } else {
         caze =
             caseService.prepareIndividualResponseCaseFromParentCase(
-                caze, UUID.fromString(uac.getIndividualCaseId()));
+                caze,
+                UUID.fromString(uac.getIndividualCaseId()),
+                questionnaireLinkedEvent.getEvent().getChannel());
       }
       caze = caseService.saveNewCaseAndStampCaseRef(caze);
       caseService.emitCaseCreatedEvent(caze);

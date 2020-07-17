@@ -192,7 +192,7 @@ public class QuestionnaireLinkedServiceTest {
 
     when(uacService.findByQid(TEST_HI_QID)).thenReturn(testHIUacQidLink);
     when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testHHCase);
-    when(caseService.prepareIndividualResponseCaseFromParentCase(any(), any()))
+    when(caseService.prepareIndividualResponseCaseFromParentCase(any(), any(), anyString()))
         .thenReturn(testHICase);
     when(caseService.saveNewCaseAndStampCaseRef(testHICase)).thenReturn(testHICase);
 
@@ -206,7 +206,7 @@ public class QuestionnaireLinkedServiceTest {
     inOrder.verify(caseService).getCaseByCaseId(TEST_CASE_ID_1);
     inOrder
         .verify(caseService)
-        .prepareIndividualResponseCaseFromParentCase(eq(testHHCase), any(UUID.class));
+        .prepareIndividualResponseCaseFromParentCase(eq(testHHCase), any(UUID.class), anyString());
     inOrder.verify(caseService).saveNewCaseAndStampCaseRef(testHICase);
 
     ArgumentCaptor<Case> caseCaptor = ArgumentCaptor.forClass(Case.class);
@@ -325,7 +325,8 @@ public class QuestionnaireLinkedServiceTest {
 
     when(uacService.findByQid(TEST_HI_QID)).thenReturn(testHIUacQidLink);
     when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testHHCase);
-    when(caseService.prepareIndividualResponseCaseFromParentCase(any(), any()))
+    when(caseService.prepareIndividualResponseCaseFromParentCase(
+            any(), any(), eq(managementEvent.getEvent().getChannel())))
         .thenReturn(testHICase);
     when(caseService.saveNewCaseAndStampCaseRef(any())).thenReturn(testHICase);
 
@@ -338,7 +339,8 @@ public class QuestionnaireLinkedServiceTest {
     inOrder.verify(caseService).getCaseByCaseId(TEST_CASE_ID_1);
     inOrder
         .verify(caseService)
-        .prepareIndividualResponseCaseFromParentCase(eq(testHHCase), any(UUID.class));
+        .prepareIndividualResponseCaseFromParentCase(
+            eq(testHHCase), any(UUID.class), eq(managementEvent.getEvent().getChannel()));
     inOrder.verify(caseService).saveNewCaseAndStampCaseRef(testHICase);
     inOrder.verify(caseService).emitCaseCreatedEvent(testHICase);
 
@@ -612,7 +614,8 @@ public class QuestionnaireLinkedServiceTest {
 
     when(uacService.findByQid(TEST_HI_QID)).thenReturn(testHIUacQidLink);
     when(caseService.getCaseByCaseId(TEST_CASE_ID_1)).thenReturn(testHHCase);
-    when(caseService.prepareIndividualResponseCaseFromParentCase(any(), any()))
+    when(caseService.prepareIndividualResponseCaseFromParentCase(
+            any(), any(), eq(managementEvent.getEvent().getChannel())))
         .thenReturn(testHICase);
     when(caseService.saveNewCaseAndStampCaseRef(testHICase)).thenReturn(testHICase);
 
@@ -626,7 +629,8 @@ public class QuestionnaireLinkedServiceTest {
     inOrder.verify(caseService).getCaseByCaseId(TEST_CASE_ID_1);
     inOrder
         .verify(caseService)
-        .prepareIndividualResponseCaseFromParentCase(eq(testHHCase), any(UUID.class));
+        .prepareIndividualResponseCaseFromParentCase(
+            eq(testHHCase), any(UUID.class), eq(managementEvent.getEvent().getChannel()));
     inOrder.verify(caseService).saveNewCaseAndStampCaseRef(testHICase);
 
     ArgumentCaptor<Case> caseCaptor = ArgumentCaptor.forClass(Case.class);

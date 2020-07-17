@@ -17,11 +17,8 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 public class RefusalService {
 
   private static final String REFUSAL_RECEIVED = "Refusal Received";
-  private static final String ESTAB_INDIVIDUAL_REFUSAL_RECEIVED =
-      "Refusal received for individual on Estab";
   private static final String HARD_REFUSAL_FOR_ALREADY_EXTRAORDINARY_REFUSED_CASE =
       "Hard Refusal Received for case already marked Extraordinary refused";
-  private static final String ESTAB_ADDRESS_LEVEL = "E";
 
   private final CaseService caseService;
   private final EventLogger eventLogger;
@@ -55,12 +52,6 @@ public class RefusalService {
       OffsetDateTime messageTimestamp,
       RefusalDTO refusalDto) {
 
-    if (isEstabLevelAddressAndChannelIsNotField(refusedCase.getAddressLevel(), refusalEvent)) {
-      logRefusalCaseEvent(
-          refusalEvent, refusedCase, messageTimestamp, ESTAB_INDIVIDUAL_REFUSAL_RECEIVED);
-      return true;
-    }
-
     if (refusalDto.getType() == RefusalTypeDTO.HARD_REFUSAL
         && refusedCase.getRefusalReceived() != null
         && refusedCase.getRefusalReceived() == EXTRAORDINARY_REFUSAL) {
@@ -80,11 +71,6 @@ public class RefusalService {
       return buildMetadata(event.getEvent().getType(), ActionInstructionType.CANCEL);
     }
     return buildMetadata(event.getEvent().getType(), null);
-  }
-
-  private boolean isEstabLevelAddressAndChannelIsNotField(
-      String addressLevel, ResponseManagementEvent event) {
-    return addressLevel.equals(ESTAB_ADDRESS_LEVEL) && !isEventChannelField(event);
   }
 
   private void logRefusalCaseEvent(
