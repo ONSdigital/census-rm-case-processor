@@ -7,7 +7,6 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
@@ -105,7 +104,7 @@ public class FulfilmentRequestService {
         && individualResponseRequestCodes.contains(fulfilmentRequestPayload.getFulfilmentCode())) {
       Case individualResponseCase =
           caseService.prepareIndividualResponseCaseFromParentCase(
-              caze, UUID.fromString(fulfilmentRequestPayload.getIndividualCaseId()), eventChannel);
+              caze, fulfilmentRequestPayload.getIndividualCaseId(), eventChannel);
       individualResponseCase = caseService.saveNewCaseAndStampCaseRef(individualResponseCase);
 
       if (individualResponsePrintRequestCodes.contains(

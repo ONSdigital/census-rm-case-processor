@@ -129,10 +129,7 @@ public class FulfilmentRequestServiceTest {
         .getPayload()
         .getFulfilmentRequest()
         .setFulfilmentCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_PRINT);
-    managementEvent
-        .getPayload()
-        .getFulfilmentRequest()
-        .setIndividualCaseId(UUID.randomUUID().toString());
+    managementEvent.getPayload().getFulfilmentRequest().setIndividualCaseId(UUID.randomUUID());
 
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
@@ -166,17 +163,13 @@ public class FulfilmentRequestServiceTest {
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
     managementEvent.getPayload().getFulfilmentRequest().setCaseId(parentCase.getCaseId());
     managementEvent.getPayload().getFulfilmentRequest().setFulfilmentCode(individualResponseCode);
-    managementEvent
-        .getPayload()
-        .getFulfilmentRequest()
-        .setIndividualCaseId(UUID.randomUUID().toString());
+    managementEvent.getPayload().getFulfilmentRequest().setIndividualCaseId(UUID.randomUUID());
 
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     when(caseService.getCaseByCaseId(eq(parentCase.getCaseId()))).thenReturn(parentCase);
 
-    UUID childCaseId =
-        UUID.fromString(managementEvent.getPayload().getFulfilmentRequest().getIndividualCaseId());
+    UUID childCaseId = managementEvent.getPayload().getFulfilmentRequest().getIndividualCaseId();
 
     Case childCase = new Case();
     when(caseService.prepareIndividualResponseCaseFromParentCase(
@@ -218,13 +211,12 @@ public class FulfilmentRequestServiceTest {
         managementEvent.getPayload().getFulfilmentRequest();
     expectedFulfilmentRequest.setCaseId(parentCase.getCaseId());
     expectedFulfilmentRequest.setFulfilmentCode(individualResponseCode);
-    expectedFulfilmentRequest.setIndividualCaseId(UUID.randomUUID().toString());
+    expectedFulfilmentRequest.setIndividualCaseId(UUID.randomUUID());
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     when(caseService.getCaseByCaseId(expectedFulfilmentRequest.getCaseId())).thenReturn(parentCase);
 
-    UUID childCaseId =
-        UUID.fromString(managementEvent.getPayload().getFulfilmentRequest().getIndividualCaseId());
+    UUID childCaseId = managementEvent.getPayload().getFulfilmentRequest().getIndividualCaseId();
 
     Case childCase = new Case();
     when(caseService.prepareIndividualResponseCaseFromParentCase(

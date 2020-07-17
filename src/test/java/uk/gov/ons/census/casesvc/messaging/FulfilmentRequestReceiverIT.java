@@ -180,10 +180,7 @@ public class FulfilmentRequestReceiverIT {
 
       ResponseManagementEvent sourceEvent = getTestResponseManagementFulfilmentRequestedEvent();
       sourceEvent.getPayload().getFulfilmentRequest().setCaseId(TEST_CASE_ID);
-      sourceEvent
-          .getPayload()
-          .getFulfilmentRequest()
-          .setIndividualCaseId(TEST_INDIVIDUAL_CASE_ID);
+      sourceEvent.getPayload().getFulfilmentRequest().setIndividualCaseId(TEST_INDIVIDUAL_CASE_ID);
       sourceEvent
           .getPayload()
           .getFulfilmentRequest()
