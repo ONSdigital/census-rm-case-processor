@@ -27,6 +27,8 @@ import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 @RunWith(MockitoJUnitRunner.class)
 public class EventServiceTest {
   private static final long TEST_CASE_REF = 1234567890L;
+  private static final UUID TEST_ACTION_RULE_ID = UUID.randomUUID();
+  private static final UUID TEST_BATCH_ID = UUID.randomUUID();
 
   @Mock CaseService caseService;
 
@@ -132,8 +134,8 @@ public class EventServiceTest {
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     PrintCaseSelected printCaseSelected = new PrintCaseSelected();
-    printCaseSelected.setActionRuleId("Test actionRuleId");
-    printCaseSelected.setBatchId("Test batchId");
+    printCaseSelected.setActionRuleId(TEST_ACTION_RULE_ID);
+    printCaseSelected.setBatchId(TEST_BATCH_ID);
     printCaseSelected.setCaseRef(TEST_CASE_REF);
     printCaseSelected.setPackCode("Test packCode");
 
@@ -153,7 +155,11 @@ public class EventServiceTest {
             eq(event),
             eq(
                 "{\"printCaseSelected\":{\"caseRef\":1234567890,\"packCode\":\"Test packCode\","
-                    + "\"actionRuleId\":\"Test actionRuleId\",\"batchId\":\"Test batchId\"}}"),
+                    + "\"actionRuleId\":\""
+                    + TEST_ACTION_RULE_ID.toString()
+                    + "\",\"batchId\":\""
+                    + TEST_BATCH_ID
+                    + "\"}}"),
             eq(messageTimestamp));
   }
 
