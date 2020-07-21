@@ -55,9 +55,6 @@ public class NewAddressReportedService {
   @Value("${pubsub.aims-new-address-topic}")
   private String aimsNewAddressTopic;
 
-  @Value("${cloud.gcp.pubsub.emulator-host}")
-  private String emulator_host;
-
   public NewAddressReportedService(
       CaseService caseService, EventLogger eventLogger, PubSubTemplate pubSubTemplate) {
     this.caseService = caseService;
@@ -314,8 +311,6 @@ public class NewAddressReportedService {
   private void sendNewAddressToAims(ResponseManagementEvent newAddressEvent, String dummyUprn) {
     ResponseManagementEvent enhancedNewAddressEvent =
         buildEnhancedNewAddressEvent(newAddressEvent, dummyUprn);
-
-    log.error("PUBSUB HOST: " + emulator_host);
 
     ListenableFuture<String> future =
         pubSubTemplate.publish(aimsNewAddressTopic, enhancedNewAddressEvent);
