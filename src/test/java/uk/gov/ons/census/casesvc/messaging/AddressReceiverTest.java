@@ -24,6 +24,7 @@ import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
+import uk.gov.ons.census.casesvc.service.AddressModificationService;
 import uk.gov.ons.census.casesvc.service.CaseService;
 import uk.gov.ons.census.casesvc.service.InvalidAddressService;
 import uk.gov.ons.census.casesvc.service.NewAddressReportedService;
@@ -40,6 +41,8 @@ public class AddressReceiverTest {
   @Mock private EventLogger eventLogger;
 
   @Mock private InvalidAddressService invalidAddressService;
+
+  @Mock private AddressModificationService addressModificationService;
 
   @Mock private NewAddressReportedService newAddressReportedService;
 
@@ -106,16 +109,22 @@ public class AddressReceiverTest {
   }
 
   @Test
-  public void testAddressModifiedEventTypeLoggedOnly() throws JSONException, IOException {
-    PayloadDTO payload = new PayloadDTO();
-    payload.setAddressModification(createTestAddressModifiedJson(TEST_CASE_ID));
+  public void testAddressModifiedEventType() {
+    // Given
+    ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
+    EventDTO event = new EventDTO();
+    event.setType(ADDRESS_MODIFIED);
+    responseManagementEvent.setEvent(event);
+    Message<ResponseManagementEvent> message =
+        constructMessageWithValidTimeStamp(responseManagementEvent);
+    OffsetDateTime expectedDateTime = MsgDateHelper.getMsgTimeStamp(message);
 
-    testEventTypeLoggedOnly(
-        payload,
-        JsonHelper.convertObjectToJson(payload.getAddressModification()),
-        ADDRESS_MODIFIED,
-        EventType.ADDRESS_MODIFIED,
-        "Address modified");
+    // When
+    underTest.receiveMessage(message);
+
+    // Then
+    verify(addressModificationService)
+        .processMessage(eq(responseManagementEvent), eq(expectedDateTime));
   }
 
   @Test

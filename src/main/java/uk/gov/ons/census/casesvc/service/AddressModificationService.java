@@ -68,7 +68,6 @@ public class AddressModificationService {
 
   public void processMessage(
       ResponseManagementEvent responseManagementEvent, OffsetDateTime messageTimestamp) {
-
     AddressModification addressModification =
         responseManagementEvent.getPayload().getAddressModification();
 
@@ -90,7 +89,7 @@ public class AddressModificationService {
     eventLogger.logCaseEvent(
         caze,
         responseManagementEvent.getEvent().getDateTime(),
-        "Modified address",
+        "Address modified",
         EventType.ADDRESS_MODIFIED,
         responseManagementEvent.getEvent(),
         convertObjectToJson(addressModification),
@@ -105,9 +104,7 @@ public class AddressModificationService {
     }
 
     if (!ESTAB_TYPES.contains(addressModification.getNewAddress().getEstabType())) {
-        throw new RuntimeException("Estab Type not valid");
+      throw new RuntimeException("Estab Type not valid");
     }
-
-
   }
 }
