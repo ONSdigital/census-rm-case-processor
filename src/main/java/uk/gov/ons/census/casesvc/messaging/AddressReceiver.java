@@ -14,6 +14,7 @@ import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
+import uk.gov.ons.census.casesvc.service.AddressModificationService;
 import uk.gov.ons.census.casesvc.service.CaseService;
 import uk.gov.ons.census.casesvc.service.InvalidAddressService;
 import uk.gov.ons.census.casesvc.service.NewAddressReportedService;
@@ -22,15 +23,18 @@ import uk.gov.ons.census.casesvc.utility.JsonHelper;
 @MessageEndpoint
 public class AddressReceiver {
   private final InvalidAddressService invalidAddressService;
+  private final AddressModificationService addressModificationService;
   private final NewAddressReportedService newAddressReportedService;
   private final CaseService caseService;
   private final EventLogger eventLogger;
 
   public AddressReceiver(
       InvalidAddressService invalidAddressService,
+      AddressModificationService addressModificationService,
       NewAddressReportedService newAddressReportedService,
       CaseService caseService,
       EventLogger eventLogger) {
+    this.addressModificationService = addressModificationService;
     this.newAddressReportedService = newAddressReportedService;
     this.caseService = caseService;
     this.eventLogger = eventLogger;
@@ -51,13 +55,7 @@ public class AddressReceiver {
         break;
 
       case ADDRESS_MODIFIED:
-        logEvent(
-            responseManagementEvent.getPayload().getAddressModification(),
-            responseManagementEvent.getEvent(),
-            "Address modified",
-            EventType.ADDRESS_MODIFIED,
-            messageTimestamp);
-        // currently logged and ignored
+        addressModificationService.processMessage(responseManagementEvent, messageTimestamp);
         break;
 
       case ADDRESS_TYPE_CHANGED:
