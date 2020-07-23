@@ -74,12 +74,29 @@ public class AddressModificationService {
 
     Case caze = caseService.getCaseByCaseId(addressModification.getCollectionCase().getId());
 
-    caze.setEstabType(addressModification.getNewAddress().getEstabType());
-    caze.setTownName(addressModification.getNewAddress().getTownName());
-    caze.setAddressLine1(addressModification.getNewAddress().getAddressLine1());
-    caze.setAddressLine2(addressModification.getNewAddress().getAddressLine2());
-    caze.setAddressLine3(addressModification.getNewAddress().getAddressLine3());
-    caze.setOrganisationName(addressModification.getNewAddress().getOrganisationName());
+    if (addressModification.getNewAddress().getEstabType().isPresent()) {
+      caze.setEstabType(addressModification.getNewAddress().getEstabType().get());
+    }
+
+    if (addressModification.getNewAddress().getTownName().isPresent()) {
+      caze.setTownName(addressModification.getNewAddress().getTownName().get());
+    }
+
+    if (addressModification.getNewAddress().getAddressLine1().isPresent()) {
+      caze.setAddressLine1(addressModification.getNewAddress().getAddressLine1().get());
+    }
+
+    if (addressModification.getNewAddress().getAddressLine2().isPresent()) {
+      caze.setAddressLine2(addressModification.getNewAddress().getAddressLine2().get());
+    }
+
+    if (addressModification.getNewAddress().getAddressLine3().isPresent()) {
+      caze.setAddressLine3(addressModification.getNewAddress().getAddressLine3().get());
+    }
+
+    if (addressModification.getNewAddress().getOrganisationName().isPresent()) {
+      caze.setOrganisationName(addressModification.getNewAddress().getOrganisationName().get());
+    }
 
     caseService.saveCaseAndEmitCaseUpdatedEvent(caze, null);
 
@@ -94,13 +111,21 @@ public class AddressModificationService {
   }
 
   private void validate(AddressModification addressModification) {
-
-    if (StringUtils.isEmpty(addressModification.getNewAddress().getTownName())
-        || StringUtils.isEmpty(addressModification.getNewAddress().getAddressLine1())) {
-      throw new RuntimeException("Mandatory field is empty");
+    if (addressModification.getNewAddress().getTownName() == null
+        || (addressModification.getNewAddress().getTownName().isPresent()
+            && StringUtils.isEmpty(addressModification.getNewAddress().getTownName().get()))) {
+      throw new RuntimeException("Mandatory town name is empty");
     }
 
-    if (!ESTAB_TYPES.contains(addressModification.getNewAddress().getEstabType())) {
+    if (addressModification.getNewAddress().getAddressLine1() == null
+        || (addressModification.getNewAddress().getAddressLine1().isPresent()
+            && StringUtils.isEmpty(addressModification.getNewAddress().getAddressLine1().get()))) {
+      throw new RuntimeException("Mandatory address line 1 is empty");
+    }
+
+    if (addressModification.getNewAddress().getEstabType() == null
+        || (addressModification.getNewAddress().getEstabType().isPresent()
+            && !ESTAB_TYPES.contains(addressModification.getNewAddress().getEstabType().get()))) {
       throw new RuntimeException("Estab Type not valid");
     }
   }

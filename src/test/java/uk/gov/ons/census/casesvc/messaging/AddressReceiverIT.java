@@ -35,6 +35,7 @@ import uk.gov.ons.census.casesvc.model.dto.CollectionCaseCaseId;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.InvalidAddress;
+import uk.gov.ons.census.casesvc.model.dto.ModifiedAddress;
 import uk.gov.ons.census.casesvc.model.dto.NewAddress;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
@@ -178,14 +179,14 @@ public class AddressReceiverIT {
           .getAddressModification()
           .getCollectionCase()
           .setId(caze.getCaseId());
-      Address newAddress = new Address();
+      ModifiedAddress newAddress = new ModifiedAddress();
       managementEvent.getPayload().getAddressModification().setNewAddress(newAddress);
-      newAddress.setAddressLine1("modified address line 1");
-      newAddress.setAddressLine2("modified address line 2");
-      newAddress.setAddressLine3("modified address line 3");
-      newAddress.setTownName("modified town name");
-      newAddress.setOrganisationName("modified org name");
-      newAddress.setEstabType("HOSPITAL");
+      newAddress.setAddressLine1(Optional.of("modified address line 1"));
+      newAddress.setAddressLine2(Optional.of("modified address line 2"));
+      newAddress.setAddressLine3(Optional.of("modified address line 3"));
+      newAddress.setTownName(Optional.of("modified town name"));
+      newAddress.setOrganisationName(Optional.of("modified org name"));
+      newAddress.setEstabType(Optional.of("HOSPITAL"));
 
       String json = convertObjectToJson(managementEvent);
       Message message =
@@ -216,6 +217,7 @@ public class AddressReceiverIT {
       assertThat(actualPayloadCase.getAddress().getOrganisationName())
           .isEqualTo("modified org name");
       assertThat(actualPayloadCase.getAddress().getTownName()).isEqualTo("modified town name");
+      assertThat(actualPayloadCase.getAddress().getEstabType()).isEqualTo("HOSPITAL");
 
       Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
       assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");

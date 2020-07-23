@@ -6,5 +6,5 @@ import lombok.Data;
 public class AddressModification {
   private CollectionCaseCaseId collectionCase;
   private Address originalAddress;
-  private Address newAddress;
+  private ModifiedAddress newAddress;
 }

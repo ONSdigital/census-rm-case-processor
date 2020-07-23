@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 
 import java.time.OffsetDateTime;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,10 +16,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
-import uk.gov.ons.census.casesvc.model.dto.Address;
 import uk.gov.ons.census.casesvc.model.dto.AddressModification;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCaseCaseId;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
+import uk.gov.ons.census.casesvc.model.dto.ModifiedAddress;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -42,21 +43,24 @@ public class AddressModificationServiceTest {
     rme.getPayload()
         .getAddressModification()
         .getNewAddress()
-        .setAddressLine1("modified address line 1");
+        .setAddressLine1(Optional.of("modified address line 1"));
     rme.getPayload()
         .getAddressModification()
         .getNewAddress()
-        .setAddressLine2("modified address line 2");
+        .setAddressLine2(Optional.of("modified address line 2"));
     rme.getPayload()
         .getAddressModification()
         .getNewAddress()
-        .setAddressLine3("modified address line 3");
-    rme.getPayload().getAddressModification().getNewAddress().setTownName("modified town name");
+        .setAddressLine3(Optional.of("modified address line 3"));
     rme.getPayload()
         .getAddressModification()
         .getNewAddress()
-        .setOrganisationName("modified org name");
-    rme.getPayload().getAddressModification().getNewAddress().setEstabType("HOSPITAL");
+        .setTownName(Optional.of("modified town name"));
+    rme.getPayload()
+        .getAddressModification()
+        .getNewAddress()
+        .setOrganisationName(Optional.of("modified org name"));
+    rme.getPayload().getAddressModification().getNewAddress().setEstabType(Optional.of("HOSPITAL"));
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     Case caze = new Case();
@@ -97,59 +101,19 @@ public class AddressModificationServiceTest {
             messageTimestamp);
   }
 
-  @Test
-  public void testProcessMessageDoesNotChangePostcode() {
+  @Test(expected = RuntimeException.class)
+  public void testProcessMessageMissingMandatoryFieldTownNameNull() {
     // Given
     ResponseManagementEvent rme = getEvent();
     rme.getPayload()
         .getAddressModification()
         .getNewAddress()
-        .setAddressLine1("modified address line 1");
-    rme.getPayload().getAddressModification().getNewAddress().setTownName("modified town name");
-    rme.getPayload().getAddressModification().getNewAddress().setEstabType("HOSPITAL");
-    rme.getPayload().getAddressModification().getNewAddress().setPostcode("NAUGHTY!!!");
-    OffsetDateTime messageTimestamp = OffsetDateTime.now();
-
-    Case caze = new Case();
-    caze.setAddressLine1("test address line 1");
-    caze.setTownName("test town name");
-    caze.setEstabType("test estab type");
-    caze.setPostcode("MUST NOT BE CHANGED");
-    Mockito.when(caseService.getCaseByCaseId(any())).thenReturn(caze);
-
-    // When
-    underTest.processMessage(rme, messageTimestamp);
-
-    // Then
-    verify(caseService).getCaseByCaseId(TEST_CASE_ID);
-
-    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    verify(caseService).saveCaseAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture(), isNull());
-
-    Case actualCase = caseArgumentCaptor.getValue();
-    assertThat(actualCase).isEqualTo(caze);
-    assertThat(actualCase.getAddressLine1()).isEqualTo("modified address line 1");
-    assertThat(actualCase.getTownName()).isEqualTo("modified town name");
-    assertThat(actualCase.getEstabType()).isEqualTo("HOSPITAL");
-    assertThat(actualCase.getPostcode()).isEqualTo("MUST NOT BE CHANGED");
-
-    verify(eventLogger)
-        .logCaseEvent(
-            caze,
-            rme.getEvent().getDateTime(),
-            "Address modified",
-            EventType.ADDRESS_MODIFIED,
-            rme.getEvent(),
-            JsonHelper.convertObjectToJson(rme.getPayload().getAddressModification()),
-            messageTimestamp);
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testProcessMessageMissingMandatoryFieldTownName() {
-    // Given
-    ResponseManagementEvent rme = getEvent();
-    rme.getPayload().getAddressModification().getNewAddress().setAddressLine1("123 Fake Street");
-    rme.getPayload().getAddressModification().getNewAddress().setEstabType("HOUSEHOLD");
+        .setAddressLine1(Optional.of("123 Fake Street"));
+    rme.getPayload()
+        .getAddressModification()
+        .getNewAddress()
+        .setEstabType(Optional.of("HOUSEHOLD"));
+    rme.getPayload().getAddressModification().getNewAddress().setTownName(Optional.of(null));
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     // When
@@ -159,11 +123,66 @@ public class AddressModificationServiceTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void testProcessMessageMissingMandatoryFieldAddressLine1() {
+  public void testProcessMessageMissingMandatoryFieldTownNameEmpty() {
     // Given
     ResponseManagementEvent rme = getEvent();
-    rme.getPayload().getAddressModification().getNewAddress().setTownName("Fake Town");
-    rme.getPayload().getAddressModification().getNewAddress().setEstabType("HOUSEHOLD");
+    rme.getPayload()
+        .getAddressModification()
+        .getNewAddress()
+        .setAddressLine1(Optional.of("123 Fake Street"));
+    rme.getPayload()
+        .getAddressModification()
+        .getNewAddress()
+        .setEstabType(Optional.of("HOUSEHOLD"));
+    rme.getPayload().getAddressModification().getNewAddress().setTownName(Optional.of(" "));
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+
+    // When
+    underTest.processMessage(rme, messageTimestamp);
+
+    // Then
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testProcessMessageMissingMandatoryFieldAddressLine1Null() {
+    // Given
+    ResponseManagementEvent rme = getEvent();
+    rme.getPayload().getAddressModification().getNewAddress().setAddressLine1(Optional.of(null));
+    rme.getPayload()
+        .getAddressModification()
+        .getNewAddress()
+        .setEstabType(Optional.of("HOUSEHOLD"));
+    rme.getPayload().getAddressModification().getNewAddress().setTownName(Optional.of("Fake Town"));
+    rme.getPayload()
+        .getAddressModification()
+        .getNewAddress()
+        .setEstabType(Optional.of("HOUSEHOLD"));
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+
+    // When
+    underTest.processMessage(rme, messageTimestamp);
+
+    // Then
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testProcessMessageMissingMandatoryFieldAddressLine1Empty() {
+    // Given
+    ResponseManagementEvent rme = getEvent();
+    rme.getPayload().getAddressModification().getNewAddress().setAddressLine1(Optional.of(" "));
+    rme.getPayload()
+        .getAddressModification()
+        .getNewAddress()
+        .setEstabType(Optional.of("HOUSEHOLD"));
+    rme.getPayload().getAddressModification().getNewAddress().setTownName(Optional.of("Fake Town"));
+    rme.getPayload()
+        .getAddressModification()
+        .getNewAddress()
+        .setEstabType(Optional.of("HOUSEHOLD"));
+    rme.getPayload()
+        .getAddressModification()
+        .getNewAddress()
+        .setEstabType(Optional.of("HOUSEHOLD"));
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     // When
@@ -176,8 +195,11 @@ public class AddressModificationServiceTest {
   public void testProcessMessageMissingMandatoryFieldEstabType() {
     // Given
     ResponseManagementEvent rme = getEvent();
-    rme.getPayload().getAddressModification().getNewAddress().setAddressLine1("123 Fake Street");
-    rme.getPayload().getAddressModification().getNewAddress().setTownName("Fake Town");
+    rme.getPayload()
+        .getAddressModification()
+        .getNewAddress()
+        .setAddressLine1(Optional.of("123 Fake Street"));
+    rme.getPayload().getAddressModification().getNewAddress().setTownName(Optional.of("Fake Town"));
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     // When
@@ -187,12 +209,36 @@ public class AddressModificationServiceTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void testProcessMessageInvalidEstabType() {
+  public void testProcessMessageEstabTypeInvalid() {
     // Given
     ResponseManagementEvent rme = getEvent();
-    rme.getPayload().getAddressModification().getNewAddress().setAddressLine1("123 Fake Street");
-    rme.getPayload().getAddressModification().getNewAddress().setTownName("Fake Town");
-    rme.getPayload().getAddressModification().getNewAddress().setEstabType("SPACE STATION");
+    rme.getPayload()
+        .getAddressModification()
+        .getNewAddress()
+        .setAddressLine1(Optional.of("123 Fake Street"));
+    rme.getPayload().getAddressModification().getNewAddress().setTownName(Optional.of("Fake Town"));
+    rme.getPayload()
+        .getAddressModification()
+        .getNewAddress()
+        .setEstabType(Optional.of("SPACE STATION"));
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+
+    // When
+    underTest.processMessage(rme, messageTimestamp);
+
+    // Then
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testProcessMessageEstabTypeNull() {
+    // Given
+    ResponseManagementEvent rme = getEvent();
+    rme.getPayload()
+        .getAddressModification()
+        .getNewAddress()
+        .setAddressLine1(Optional.of("123 Fake Street"));
+    rme.getPayload().getAddressModification().getNewAddress().setTownName(Optional.of("Fake Town"));
+    rme.getPayload().getAddressModification().getNewAddress().setEstabType(Optional.of(null));
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     // When
@@ -205,7 +251,7 @@ public class AddressModificationServiceTest {
     CollectionCaseCaseId collectionCaseCaseId = new CollectionCaseCaseId();
     collectionCaseCaseId.setId(TEST_CASE_ID);
 
-    Address newAddress = new Address();
+    ModifiedAddress newAddress = new ModifiedAddress();
 
     AddressModification addressModification = new AddressModification();
     addressModification.setCollectionCase(collectionCaseCaseId);
