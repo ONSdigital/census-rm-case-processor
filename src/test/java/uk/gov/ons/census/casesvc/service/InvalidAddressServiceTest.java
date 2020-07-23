@@ -41,11 +41,7 @@ public class InvalidAddressServiceTest {
     managementEvent.setPayload(new PayloadDTO());
     managementEvent.getPayload().setInvalidAddress(new InvalidAddress());
     managementEvent.getPayload().getInvalidAddress().setCollectionCase(new CollectionCaseCaseId());
-    managementEvent
-        .getPayload()
-        .getInvalidAddress()
-        .getCollectionCase()
-        .setId(UUID.randomUUID().toString());
+    managementEvent.getPayload().getInvalidAddress().getCollectionCase().setId(UUID.randomUUID());
 
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 

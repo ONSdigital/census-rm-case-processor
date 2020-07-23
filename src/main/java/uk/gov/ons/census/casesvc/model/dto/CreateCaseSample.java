@@ -1,5 +1,6 @@
 package uk.gov.ons.census.casesvc.model.dto;
 
+import java.util.UUID;
 import lombok.Data;
 
 @Data
@@ -29,8 +30,8 @@ public class CreateCaseSample {
   private String fieldOfficerId;
   private String treatmentCode;
   private Integer ceExpectedCapacity;
-  private String collectionExerciseId;
-  private String actionPlanId;
+  private UUID collectionExerciseId;
+  private UUID actionPlanId;
   private Integer secureEstablishment;
   private String printBatch;
 }

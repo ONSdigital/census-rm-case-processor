@@ -50,9 +50,9 @@ public class FulfilmentRequestServiceTest {
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     Case expectedCase = getRandomCase();
-    expectedFulfilmentRequest.setCaseId(expectedCase.getCaseId().toString());
+    expectedFulfilmentRequest.setCaseId(expectedCase.getCaseId());
 
-    when(caseService.getCaseByCaseId(UUID.fromString(expectedFulfilmentRequest.getCaseId())))
+    when(caseService.getCaseByCaseId(expectedFulfilmentRequest.getCaseId()))
         .thenReturn(expectedCase);
 
     // when
@@ -124,18 +124,12 @@ public class FulfilmentRequestServiceTest {
     parentCase.setCaseType("SPG");
 
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
-    managementEvent
-        .getPayload()
-        .getFulfilmentRequest()
-        .setCaseId(parentCase.getCaseId().toString());
+    managementEvent.getPayload().getFulfilmentRequest().setCaseId(parentCase.getCaseId());
     managementEvent
         .getPayload()
         .getFulfilmentRequest()
         .setFulfilmentCode(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_PRINT);
-    managementEvent
-        .getPayload()
-        .getFulfilmentRequest()
-        .setIndividualCaseId(UUID.randomUUID().toString());
+    managementEvent.getPayload().getFulfilmentRequest().setIndividualCaseId(UUID.randomUUID());
 
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
@@ -167,22 +161,15 @@ public class FulfilmentRequestServiceTest {
     parentCase.setCaseType("HH");
 
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
-    managementEvent
-        .getPayload()
-        .getFulfilmentRequest()
-        .setCaseId(parentCase.getCaseId().toString());
+    managementEvent.getPayload().getFulfilmentRequest().setCaseId(parentCase.getCaseId());
     managementEvent.getPayload().getFulfilmentRequest().setFulfilmentCode(individualResponseCode);
-    managementEvent
-        .getPayload()
-        .getFulfilmentRequest()
-        .setIndividualCaseId(UUID.randomUUID().toString());
+    managementEvent.getPayload().getFulfilmentRequest().setIndividualCaseId(UUID.randomUUID());
 
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     when(caseService.getCaseByCaseId(eq(parentCase.getCaseId()))).thenReturn(parentCase);
 
-    UUID childCaseId =
-        UUID.fromString(managementEvent.getPayload().getFulfilmentRequest().getIndividualCaseId());
+    UUID childCaseId = managementEvent.getPayload().getFulfilmentRequest().getIndividualCaseId();
 
     Case childCase = new Case();
     when(caseService.prepareIndividualResponseCaseFromParentCase(
@@ -222,16 +209,14 @@ public class FulfilmentRequestServiceTest {
     ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
     FulfilmentRequestDTO expectedFulfilmentRequest =
         managementEvent.getPayload().getFulfilmentRequest();
-    expectedFulfilmentRequest.setCaseId(parentCase.getCaseId().toString());
+    expectedFulfilmentRequest.setCaseId(parentCase.getCaseId());
     expectedFulfilmentRequest.setFulfilmentCode(individualResponseCode);
-    expectedFulfilmentRequest.setIndividualCaseId(UUID.randomUUID().toString());
+    expectedFulfilmentRequest.setIndividualCaseId(UUID.randomUUID());
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
-    when(caseService.getCaseByCaseId(UUID.fromString(expectedFulfilmentRequest.getCaseId())))
-        .thenReturn(parentCase);
+    when(caseService.getCaseByCaseId(expectedFulfilmentRequest.getCaseId())).thenReturn(parentCase);
 
-    UUID childCaseId =
-        UUID.fromString(managementEvent.getPayload().getFulfilmentRequest().getIndividualCaseId());
+    UUID childCaseId = managementEvent.getPayload().getFulfilmentRequest().getIndividualCaseId();
 
     Case childCase = new Case();
     when(caseService.prepareIndividualResponseCaseFromParentCase(

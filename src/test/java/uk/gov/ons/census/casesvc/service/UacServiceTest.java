@@ -158,7 +158,7 @@ public class UacServiceTest {
         uacCreatedEvent.getPayload().getUacQidCreated().getUac(),
         responseManagementEventArgumentCaptor.getValue().getPayload().getUac().getUac());
     assertEquals(
-        uacCreatedEvent.getPayload().getUacQidCreated().getCaseId().toString(),
+        uacCreatedEvent.getPayload().getUacQidCreated().getCaseId(),
         responseManagementEventArgumentCaptor.getValue().getPayload().getUac().getCaseId());
   }
 

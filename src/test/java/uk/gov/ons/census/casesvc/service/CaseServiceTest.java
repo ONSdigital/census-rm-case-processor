@@ -180,12 +180,11 @@ public class CaseServiceTest {
   @Test
   public void testCreateCCSCaseWithRefusalNotReceived() {
     // Given
-    String caseId = TEST_UUID.toString();
+    UUID caseId = TEST_UUID;
     SampleUnitDTO sampleUnit = new SampleUnitDTO();
 
-    ReflectionTestUtils.setField(underTest, "actionPlanId", TEST_ACTION_PLAN_ID.toString());
-    ReflectionTestUtils.setField(
-        underTest, "collectionExerciseId", TEST_COLLECTION_EXERCISE_ID.toString());
+    ReflectionTestUtils.setField(underTest, "actionPlanId", TEST_ACTION_PLAN_ID);
+    ReflectionTestUtils.setField(underTest, "collectionExerciseId", TEST_COLLECTION_EXERCISE_ID);
     ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
 
     // This simulates the DB creating the ID, which it does when the case is persisted
@@ -203,22 +202,20 @@ public class CaseServiceTest {
     // Then
     verify(mapperFacade).map(sampleUnit, Case.class);
     assertThat(actualCase.getSurvey()).isEqualTo("CCS");
-    assertThat(actualCase.getCaseId()).isEqualTo(UUID.fromString(caseId));
+    assertThat(actualCase.getCaseId()).isEqualTo(caseId);
     assertThat(actualCase.getRefusalReceived()).isNull();
-    assertThat(actualCase.getActionPlanId()).isEqualTo(TEST_ACTION_PLAN_ID.toString());
-    assertThat(actualCase.getCollectionExerciseId())
-        .isEqualTo(TEST_COLLECTION_EXERCISE_ID.toString());
+    assertThat(actualCase.getActionPlanId()).isEqualTo(TEST_ACTION_PLAN_ID);
+    assertThat(actualCase.getCollectionExerciseId()).isEqualTo(TEST_COLLECTION_EXERCISE_ID);
   }
 
   @Test
   public void testCreateCCSCaseWithRefusalReceived() {
     // Given
-    String caseId = TEST_UUID.toString();
+    UUID caseId = TEST_UUID;
     SampleUnitDTO sampleUnit = new SampleUnitDTO();
 
-    ReflectionTestUtils.setField(underTest, "actionPlanId", TEST_ACTION_PLAN_ID.toString());
-    ReflectionTestUtils.setField(
-        underTest, "collectionExerciseId", TEST_COLLECTION_EXERCISE_ID.toString());
+    ReflectionTestUtils.setField(underTest, "actionPlanId", TEST_ACTION_PLAN_ID);
+    ReflectionTestUtils.setField(underTest, "collectionExerciseId", TEST_COLLECTION_EXERCISE_ID);
     ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
 
     // This simulates the DB creating the ID, which it does when the case is persisted
@@ -236,11 +233,10 @@ public class CaseServiceTest {
     // Then
     verify(mapperFacade).map(sampleUnit, Case.class);
     assertThat(actualCase.getSurvey()).isEqualTo("CCS");
-    assertThat(actualCase.getCaseId()).isEqualTo(UUID.fromString(caseId));
+    assertThat(actualCase.getCaseId()).isEqualTo(caseId);
     assertThat(actualCase.getRefusalReceived()).isEqualTo(HARD_REFUSAL);
-    assertThat(actualCase.getActionPlanId()).isEqualTo(TEST_ACTION_PLAN_ID.toString());
-    assertThat(actualCase.getCollectionExerciseId())
-        .isEqualTo(TEST_COLLECTION_EXERCISE_ID.toString());
+    assertThat(actualCase.getActionPlanId()).isEqualTo(TEST_ACTION_PLAN_ID);
+    assertThat(actualCase.getCollectionExerciseId()).isEqualTo(TEST_COLLECTION_EXERCISE_ID);
   }
 
   @Test
@@ -523,8 +519,7 @@ public class CaseServiceTest {
     ResponseManagementEvent emittedEvent = eventArgumentCaptor.getValue();
     assertThat(emittedEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_UPDATED);
     assertThat(emittedEvent.getPayload().getCollectionCase().getReceiptReceived()).isFalse();
-    assertThat(emittedEvent.getPayload().getCollectionCase().getId())
-        .isEqualTo(caze.getCaseId().toString());
+    assertThat(emittedEvent.getPayload().getCollectionCase().getId()).isEqualTo(caze.getCaseId());
     assertThat(emittedEvent.getPayload().getMetadata()).isEqualToComparingFieldByField(metadata);
   }
 }

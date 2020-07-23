@@ -51,7 +51,7 @@ public class QuestionnaireLinkedServiceTest {
     ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
 
     UacDTO uac = managementEvent.getPayload().getUac();
-    uac.setCaseId(TEST_CASE_ID_1.toString());
+    uac.setCaseId(TEST_CASE_ID_1);
     uac.setQuestionnaireId(TEST_HH_QID);
 
     Case testCase = getRandomCaseWithUacQidLinks(1);
@@ -106,7 +106,7 @@ public class QuestionnaireLinkedServiceTest {
     ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
 
     UacDTO uac = managementEvent.getPayload().getUac();
-    uac.setCaseId(TEST_CASE_ID_1.toString());
+    uac.setCaseId(TEST_CASE_ID_1);
     uac.setQuestionnaireId(TEST_HH_QID);
 
     Case testCase = getRandomCaseWithUacQidLinks(1);
@@ -168,9 +168,9 @@ public class QuestionnaireLinkedServiceTest {
     ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
 
     UacDTO uac = managementEvent.getPayload().getUac();
-    uac.setCaseId(TEST_CASE_ID_1.toString());
+    uac.setCaseId(TEST_CASE_ID_1);
     uac.setQuestionnaireId(TEST_HI_QID);
-    uac.setIndividualCaseId(TEST_INDIVIDUAL_CASE_ID.toString());
+    uac.setIndividualCaseId(TEST_INDIVIDUAL_CASE_ID);
 
     Case testHHCase = getRandomCase();
     testHHCase.setCaseId(TEST_CASE_ID_1);
@@ -242,7 +242,7 @@ public class QuestionnaireLinkedServiceTest {
     // Given
     ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
     UacDTO uac = managementEvent.getPayload().getUac();
-    uac.setCaseId(TEST_CASE_ID_1.toString());
+    uac.setCaseId(TEST_CASE_ID_1);
     uac.setQuestionnaireId(TEST_HH_QID);
 
     Case testCase = getRandomCase();
@@ -304,9 +304,9 @@ public class QuestionnaireLinkedServiceTest {
     ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
 
     UacDTO uac = managementEvent.getPayload().getUac();
-    uac.setCaseId(TEST_CASE_ID_1.toString());
+    uac.setCaseId(TEST_CASE_ID_1);
     uac.setQuestionnaireId(TEST_HI_QID);
-    uac.setIndividualCaseId(TEST_INDIVIDUAL_CASE_ID.toString());
+    uac.setIndividualCaseId(TEST_INDIVIDUAL_CASE_ID);
 
     Case testHHCase = getRandomCase();
     testHHCase.setCaseId(TEST_CASE_ID_1);
@@ -384,7 +384,7 @@ public class QuestionnaireLinkedServiceTest {
 
     ResponseManagementEvent linkingEvent = getTestResponseManagementQuestionnaireLinkedEvent();
     UacDTO uac = linkingEvent.getPayload().getUac();
-    uac.setCaseId(TEST_CASE_ID_1.toString());
+    uac.setCaseId(TEST_CASE_ID_1);
     uac.setQuestionnaireId(TEST_HH_QID);
 
     when(uacService.findByQid(TEST_HH_QID)).thenReturn(testUacQidLink);
@@ -449,7 +449,7 @@ public class QuestionnaireLinkedServiceTest {
 
     ResponseManagementEvent linkingEvent = getTestResponseManagementQuestionnaireLinkedEvent();
     UacDTO uac = linkingEvent.getPayload().getUac();
-    uac.setCaseId(TEST_CASE_ID_1.toString());
+    uac.setCaseId(TEST_CASE_ID_1);
     uac.setQuestionnaireId(TEST_HH_QID);
 
     when(uacService.findByQid(TEST_HH_QID)).thenReturn(testUacQidLink);
@@ -497,7 +497,7 @@ public class QuestionnaireLinkedServiceTest {
 
     ResponseManagementEvent linkingEvent = getTestResponseManagementQuestionnaireLinkedEvent();
     UacDTO uac = linkingEvent.getPayload().getUac();
-    uac.setCaseId(TEST_CASE_ID_1.toString());
+    uac.setCaseId(TEST_CASE_ID_1);
     uac.setQuestionnaireId(TEST_HH_QID);
 
     when(uacService.findByQid(TEST_HH_QID)).thenReturn(testUacQidLink);
@@ -532,9 +532,9 @@ public class QuestionnaireLinkedServiceTest {
     ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
 
     UacDTO uac = managementEvent.getPayload().getUac();
-    uac.setCaseId(TEST_CASE_ID_1.toString());
+    uac.setCaseId(TEST_CASE_ID_1);
     uac.setQuestionnaireId(TEST_HI_QID);
-    uac.setIndividualCaseId(TEST_INDIVIDUAL_CASE_ID.toString());
+    uac.setIndividualCaseId(TEST_INDIVIDUAL_CASE_ID);
 
     Case testCase = getRandomCase();
     testCase.setCaseId(TEST_CASE_ID_1);
@@ -590,7 +590,7 @@ public class QuestionnaireLinkedServiceTest {
     ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
 
     UacDTO uac = managementEvent.getPayload().getUac();
-    uac.setCaseId(TEST_CASE_ID_1.toString());
+    uac.setCaseId(TEST_CASE_ID_1);
     uac.setQuestionnaireId(TEST_HI_QID);
     uac.setIndividualCaseId(null);
 
