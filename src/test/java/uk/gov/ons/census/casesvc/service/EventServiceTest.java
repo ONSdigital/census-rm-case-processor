@@ -1,8 +1,10 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static org.mockito.Mockito.*;
+import static uk.gov.ons.census.casesvc.service.EventService.CREATE_BULK_CASE_SAMPLE_RECEIVED;
 import static uk.gov.ons.census.casesvc.service.EventService.CREATE_CASE_SAMPLE_RECEIVED;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -13,13 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
-import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
-import uk.gov.ons.census.casesvc.model.dto.EventDTO;
-import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
-import uk.gov.ons.census.casesvc.model.dto.FieldCaseSelected;
-import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
-import uk.gov.ons.census.casesvc.model.dto.PrintCaseSelected;
-import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
+import uk.gov.ons.census.casesvc.model.dto.*;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
@@ -71,6 +67,41 @@ public class EventServiceTest {
             eq(convertObjectToJson(createCaseSample)),
             eq(messageTimestamp));
   }
+
+  @Test
+  public void testBulkProcessedNewAddress() {
+    // Given
+    CreateCaseSample createCaseSample = new CreateCaseSample();
+    createCaseSample.setBulkProcessed(true);
+    Case caze = new Case();
+    caze.setTreatmentCode("HH_LF2R3BE");
+    caze.setRegion("E1000");
+    caze.setCaseType("HH");
+    when(caseService.saveCaseSample(createCaseSample)).thenReturn(caze);
+    when(caseService.saveCaseAndEmitCaseCreatedEvent(any(Case.class))).thenReturn(new PayloadDTO());
+    Metadata expectedMetadata =
+            buildMetadata(EventTypeDTO.SAMPLE_LOADED, ActionInstructionType.CREATE);
+
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+
+    // When
+    underTest.processSampleReceivedMessage(createCaseSample, messageTimestamp);
+
+    // Then
+    verify(caseService).saveCaseSample(createCaseSample);
+    verifyNoInteractions(uacService);
+    verify(caseService).saveCaseAndEmitCaseCreatedEvent(eq(caze), eq(expectedMetadata));
+    verify(eventLogger)
+            .logCaseEvent(
+                    eq(caze),
+                    any(OffsetDateTime.class),
+                    eq(CREATE_BULK_CASE_SAMPLE_RECEIVED),
+                    eq(EventType.SAMPLE_LOADED),
+                    any(EventDTO.class),
+                    eq(convertObjectToJson(createCaseSample)),
+                    eq(messageTimestamp));
+  }
+
 
   @Test
   public void testWelshQuestionnaire() {
