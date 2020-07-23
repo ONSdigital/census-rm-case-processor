@@ -178,37 +178,14 @@ public class AddressReceiverIT {
           .getAddressModification()
           .getCollectionCase()
           .setId(caze.getCaseId());
-      managementEvent.getPayload().getAddressModification().setNewAddress(new Address());
-      managementEvent
-          .getPayload()
-          .getAddressModification()
-          .getNewAddress()
-          .setAddressLine1("modified address line 1");
-      managementEvent
-          .getPayload()
-          .getAddressModification()
-          .getNewAddress()
-          .setAddressLine2("modified address line 2");
-      managementEvent
-          .getPayload()
-          .getAddressModification()
-          .getNewAddress()
-          .setAddressLine3("modified address line 3");
-      managementEvent
-          .getPayload()
-          .getAddressModification()
-          .getNewAddress()
-          .setTownName("modified town name");
-      managementEvent
-          .getPayload()
-          .getAddressModification()
-          .getNewAddress()
-          .setOrganisationName("modified org name");
-      managementEvent
-          .getPayload()
-          .getAddressModification()
-          .getNewAddress()
-          .setEstabType("HOSPITAL");
+      Address newAddress = new Address();
+      managementEvent.getPayload().getAddressModification().setNewAddress(newAddress);
+      newAddress.setAddressLine1("modified address line 1");
+      newAddress.setAddressLine2("modified address line 2");
+      newAddress.setAddressLine3("modified address line 3");
+      newAddress.setTownName("modified town name");
+      newAddress.setOrganisationName("modified org name");
+      newAddress.setEstabType("HOSPITAL");
 
       String json = convertObjectToJson(managementEvent);
       Message message =
