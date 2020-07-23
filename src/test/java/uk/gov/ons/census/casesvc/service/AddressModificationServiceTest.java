@@ -113,7 +113,7 @@ public class AddressModificationServiceTest {
         .getAddressModification()
         .getNewAddress()
         .setEstabType(Optional.of("HOUSEHOLD"));
-    rme.getPayload().getAddressModification().getNewAddress().setTownName(Optional.of(null));
+    rme.getPayload().getAddressModification().getNewAddress().setTownName(Optional.empty());
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     // When
@@ -147,7 +147,7 @@ public class AddressModificationServiceTest {
   public void testProcessMessageMissingMandatoryFieldAddressLine1Null() {
     // Given
     ResponseManagementEvent rme = getEvent();
-    rme.getPayload().getAddressModification().getNewAddress().setAddressLine1(Optional.of(null));
+    rme.getPayload().getAddressModification().getNewAddress().setAddressLine1(Optional.empty());
     rme.getPayload()
         .getAddressModification()
         .getNewAddress()
@@ -238,7 +238,7 @@ public class AddressModificationServiceTest {
         .getNewAddress()
         .setAddressLine1(Optional.of("123 Fake Street"));
     rme.getPayload().getAddressModification().getNewAddress().setTownName(Optional.of("Fake Town"));
-    rme.getPayload().getAddressModification().getNewAddress().setEstabType(Optional.of(null));
+    rme.getPayload().getAddressModification().getNewAddress().setEstabType(Optional.empty());
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     // When
