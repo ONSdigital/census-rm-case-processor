@@ -11,6 +11,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import lombok.AllArgsConstructor;
@@ -51,7 +52,7 @@ public class QueueSpy implements AutoCloseable {
     assertNull("Message received when not expected", actualMessage);
   }
 
-  public List<Integer> collectAllActualResponseCountsForCaseId(String caseId) throws IOException {
+  public List<Integer> collectAllActualResponseCountsForCaseId(UUID caseId) throws IOException {
     List<String> jsonList = new ArrayList<>();
     queue.drainTo(jsonList);
 

@@ -80,7 +80,7 @@ public class FieldCaseUpdatedReceiverIT {
 
       ResponseManagementEvent managementEvent = getTestResponseManagementFieldUpdatedEvent();
       managementEvent.getEvent().setTransactionId(UUID.randomUUID());
-      managementEvent.getPayload().getCollectionCase().setId(TEST_CASE_ID.toString());
+      managementEvent.getPayload().getCollectionCase().setId(TEST_CASE_ID);
       managementEvent.getPayload().getCollectionCase().setCeExpectedCapacity(6);
 
       String json = convertObjectToJson(managementEvent);
@@ -99,7 +99,7 @@ public class FieldCaseUpdatedReceiverIT {
           fieldOutboundQueue.checkExpectedMessageReceived();
       CollectionCase actualCollectionCase =
           responseManagementEvent.getPayload().getCollectionCase();
-      assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID.toString());
+      assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID);
       assertThat(actualCollectionCase.getCeExpectedCapacity()).isEqualTo(6);
 
       // check the metadata does NOT have a CANCEL decision
@@ -125,7 +125,7 @@ public class FieldCaseUpdatedReceiverIT {
 
       ResponseManagementEvent managementEvent = getTestResponseManagementFieldUpdatedEvent();
       managementEvent.getEvent().setTransactionId(UUID.randomUUID());
-      managementEvent.getPayload().getCollectionCase().setId(TEST_CASE_ID.toString());
+      managementEvent.getPayload().getCollectionCase().setId(TEST_CASE_ID);
       managementEvent.getPayload().getCollectionCase().setCeExpectedCapacity(2);
 
       String json = convertObjectToJson(managementEvent);
@@ -144,7 +144,7 @@ public class FieldCaseUpdatedReceiverIT {
           fieldOutboundQueue.checkExpectedMessageReceived();
       CollectionCase actualCollectionCase =
           responseManagementEvent.getPayload().getCollectionCase();
-      assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID.toString());
+      assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID);
       assertThat(actualCollectionCase.getCeExpectedCapacity()).isEqualTo(2);
 
       // check the metadata is included with field CANCEL decision

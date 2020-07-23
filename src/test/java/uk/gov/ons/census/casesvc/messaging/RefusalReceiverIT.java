@@ -83,7 +83,7 @@ public class RefusalReceiverIT {
           getTestResponseManagementRefusalEvent(RefusalTypeDTO.HARD_REFUSAL);
       managementEvent.getEvent().setTransactionId(UUID.randomUUID());
       RefusalDTO expectedRefusal = managementEvent.getPayload().getRefusal();
-      expectedRefusal.getCollectionCase().setId(TEST_CASE_ID.toString());
+      expectedRefusal.getCollectionCase().setId(TEST_CASE_ID);
 
       String json = convertObjectToJson(managementEvent);
       Message message =
@@ -161,7 +161,7 @@ public class RefusalReceiverIT {
       managementEvent.getEvent().setTransactionId(UUID.randomUUID());
 
       RefusalDTO refusalDTO = managementEvent.getPayload().getRefusal();
-      refusalDTO.getCollectionCase().setId(TEST_CASE_ID.toString());
+      refusalDTO.getCollectionCase().setId(TEST_CASE_ID);
 
       String json = convertObjectToJson(managementEvent);
       Message message =

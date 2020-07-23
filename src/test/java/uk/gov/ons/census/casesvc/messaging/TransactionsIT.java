@@ -124,7 +124,7 @@ public class TransactionsIT {
       ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
       managementEvent.getEvent().setTransactionId(UUID.randomUUID());
       UacDTO uac = managementEvent.getPayload().getUac();
-      uac.setCaseId(TEST_CASE_ID.toString());
+      uac.setCaseId(TEST_CASE_ID);
       uac.setQuestionnaireId(TEST_QID);
 
       String json = convertObjectToJson(managementEvent);

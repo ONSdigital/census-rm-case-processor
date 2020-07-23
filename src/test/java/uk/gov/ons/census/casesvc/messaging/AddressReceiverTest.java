@@ -87,7 +87,7 @@ public class AddressReceiverTest {
     EventDTO event = new EventDTO();
     event.setType(NEW_ADDRESS_REPORTED);
     NewAddress newAddress = new NewAddress();
-    newAddress.setSourceCaseId(UUID.randomUUID().toString());
+    newAddress.setSourceCaseId(UUID.randomUUID());
     PayloadDTO payload = new PayloadDTO();
     payload.setNewAddress(newAddress);
     responseManagementEvent.setEvent(event);
@@ -100,9 +100,7 @@ public class AddressReceiverTest {
 
     verify(newAddressReportedService)
         .processNewAddressFromSourceId(
-            eq(responseManagementEvent),
-            eq(expectedDateTime),
-            eq(UUID.fromString(newAddress.getSourceCaseId())));
+            eq(responseManagementEvent), eq(expectedDateTime), eq(newAddress.getSourceCaseId()));
   }
 
   @Test

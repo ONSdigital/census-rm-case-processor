@@ -75,7 +75,7 @@ public class FulfilmentRequestReceiverIT {
     caseRepository.saveAndFlush(caze);
 
     ResponseManagementEvent managementEvent = getTestResponseManagementFulfilmentRequestedEvent();
-    managementEvent.getPayload().getFulfilmentRequest().setCaseId(TEST_CASE_ID.toString());
+    managementEvent.getPayload().getFulfilmentRequest().setCaseId(TEST_CASE_ID);
     managementEvent
         .getPayload()
         .getFulfilmentRequest()
@@ -98,7 +98,7 @@ public class FulfilmentRequestReceiverIT {
     Event event = events.get(0);
     FulfilmentRequestDTO actualFulfilmentRequest =
         convertJsonToObject(event.getEventPayload(), FulfilmentRequestDTO.class);
-    assertThat(actualFulfilmentRequest.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
+    assertThat(actualFulfilmentRequest.getCaseId()).isEqualTo(TEST_CASE_ID);
     assertThat(actualFulfilmentRequest.getFulfilmentCode())
         .isEqualTo(TEST_REPLACEMENT_FULFILMENT_CODE);
   }
@@ -114,7 +114,7 @@ public class FulfilmentRequestReceiverIT {
     caseRepository.saveAndFlush(caze);
 
     ResponseManagementEvent managementEvent = getTestResponseManagementFulfilmentRequestedEvent();
-    managementEvent.getPayload().getFulfilmentRequest().setCaseId(TEST_CASE_ID.toString());
+    managementEvent.getPayload().getFulfilmentRequest().setCaseId(TEST_CASE_ID);
     managementEvent.getPayload().getFulfilmentRequest().setIndividualCaseId(null);
     managementEvent
         .getPayload()
@@ -147,7 +147,7 @@ public class FulfilmentRequestReceiverIT {
       if (event.getEventType() == EventType.FULFILMENT_REQUESTED) {
         FulfilmentRequestDTO actualFulfilmentRequest =
             convertJsonToObject(event.getEventPayload(), FulfilmentRequestDTO.class);
-        assertThat(actualFulfilmentRequest.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
+        assertThat(actualFulfilmentRequest.getCaseId()).isEqualTo(TEST_CASE_ID);
         assertThat(actualFulfilmentRequest.getFulfilmentCode())
             .isEqualTo(TEST_REPLACEMENT_FULFILMENT_CODE);
         remainingMatches--;
@@ -179,11 +179,8 @@ public class FulfilmentRequestReceiverIT {
       Case parentCase = caseRepository.saveAndFlush(caze);
 
       ResponseManagementEvent sourceEvent = getTestResponseManagementFulfilmentRequestedEvent();
-      sourceEvent.getPayload().getFulfilmentRequest().setCaseId(TEST_CASE_ID.toString());
-      sourceEvent
-          .getPayload()
-          .getFulfilmentRequest()
-          .setIndividualCaseId(TEST_INDIVIDUAL_CASE_ID.toString());
+      sourceEvent.getPayload().getFulfilmentRequest().setCaseId(TEST_CASE_ID);
+      sourceEvent.getPayload().getFulfilmentRequest().setIndividualCaseId(TEST_INDIVIDUAL_CASE_ID);
       sourceEvent
           .getPayload()
           .getFulfilmentRequest()
@@ -211,7 +208,7 @@ public class FulfilmentRequestReceiverIT {
       Event event = events.get(0);
       FulfilmentRequestDTO actualFulfilmentRequest =
           convertJsonToObject(event.getEventPayload(), FulfilmentRequestDTO.class);
-      assertThat(actualFulfilmentRequest.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
+      assertThat(actualFulfilmentRequest.getCaseId()).isEqualTo(TEST_CASE_ID);
       assertThat(actualFulfilmentRequest.getFulfilmentCode())
           .isEqualTo(TEST_INDIVIDUAL_RESPONSE_FULFILMENT_CODE);
 
@@ -241,11 +238,8 @@ public class FulfilmentRequestReceiverIT {
       Case parentCase = caseRepository.saveAndFlush(caze);
 
       ResponseManagementEvent sourceEvent = getTestResponseManagementFulfilmentRequestedEvent();
-      sourceEvent.getPayload().getFulfilmentRequest().setCaseId(TEST_CASE_ID.toString());
-      sourceEvent
-          .getPayload()
-          .getFulfilmentRequest()
-          .setIndividualCaseId(TEST_INDIVIDUAL_CASE_ID.toString());
+      sourceEvent.getPayload().getFulfilmentRequest().setCaseId(TEST_CASE_ID);
+      sourceEvent.getPayload().getFulfilmentRequest().setIndividualCaseId(TEST_INDIVIDUAL_CASE_ID);
       sourceEvent
           .getPayload()
           .getFulfilmentRequest()
@@ -283,7 +277,7 @@ public class FulfilmentRequestReceiverIT {
         if (event.getEventType() == EventType.FULFILMENT_REQUESTED) {
           FulfilmentRequestDTO actualFulfilmentRequest =
               convertJsonToObject(event.getEventPayload(), FulfilmentRequestDTO.class);
-          assertThat(actualFulfilmentRequest.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
+          assertThat(actualFulfilmentRequest.getCaseId()).isEqualTo(TEST_CASE_ID);
           assertThat(actualFulfilmentRequest.getFulfilmentCode())
               .isEqualTo(TEST_INDIVIDUAL_RESPONSE_FULFILMENT_CODE);
 
@@ -327,11 +321,8 @@ public class FulfilmentRequestReceiverIT {
       Case parentCase = caseRepository.saveAndFlush(caze);
 
       ResponseManagementEvent sourceEvent = getTestResponseManagementFulfilmentRequestedEvent();
-      sourceEvent.getPayload().getFulfilmentRequest().setCaseId(TEST_CASE_ID.toString());
-      sourceEvent
-          .getPayload()
-          .getFulfilmentRequest()
-          .setIndividualCaseId(TEST_INDIVIDUAL_CASE_ID.toString());
+      sourceEvent.getPayload().getFulfilmentRequest().setCaseId(TEST_CASE_ID);
+      sourceEvent.getPayload().getFulfilmentRequest().setIndividualCaseId(TEST_INDIVIDUAL_CASE_ID);
       sourceEvent
           .getPayload()
           .getFulfilmentRequest()
@@ -358,7 +349,7 @@ public class FulfilmentRequestReceiverIT {
       Event event = events.get(0);
       FulfilmentRequestDTO actualFulfilmentRequest =
           convertJsonToObject(event.getEventPayload(), FulfilmentRequestDTO.class);
-      assertThat(actualFulfilmentRequest.getCaseId()).isEqualTo(TEST_CASE_ID.toString());
+      assertThat(actualFulfilmentRequest.getCaseId()).isEqualTo(TEST_CASE_ID);
       assertThat(actualFulfilmentRequest.getFulfilmentCode())
           .isEqualTo(TEST_INDIVIDUAL_RESPONSE_FULFILMENT_CODE_SMS);
 
@@ -379,7 +370,7 @@ public class FulfilmentRequestReceiverIT {
       ResponseManagementEvent sourceEvent,
       ResponseManagementEvent resultEvent) {
     assertThat(childCase.getCaseId())
-        .isEqualTo(UUID.fromString(resultEvent.getPayload().getCollectionCase().getId()));
+        .isEqualTo(resultEvent.getPayload().getCollectionCase().getId());
 
     assertThat(childCase.getEstabUprn()).isEqualTo(parentCase.getEstabUprn());
     assertThat(childCase.getAddressLine1()).isEqualTo(parentCase.getAddressLine1());

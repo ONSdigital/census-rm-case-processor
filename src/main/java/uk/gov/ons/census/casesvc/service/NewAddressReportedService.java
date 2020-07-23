@@ -41,10 +41,10 @@ public class NewAddressReportedService {
   private final PubSubTemplate pubSubTemplate;
 
   @Value("${censusconfig.collectionexerciseid}")
-  private String censusCollectionExerciseId;
+  private UUID censusCollectionExerciseId;
 
   @Value("${censusconfig.actionplanid}")
-  private String censusActionPlanId;
+  private UUID censusActionPlanId;
 
   @Value("${uprnconfig.dummyuprnprefix}")
   private String dummyUprnPrefix;
@@ -145,7 +145,7 @@ public class NewAddressReportedService {
   private Case createSkeletonCase(CollectionCase collectionCase) {
     Case skeletonCase = new Case();
     skeletonCase.setSkeleton(true);
-    skeletonCase.setCaseId(UUID.fromString(collectionCase.getId()));
+    skeletonCase.setCaseId(collectionCase.getId());
 
     if (StringUtils.isEmpty(collectionCase.getCaseType())) {
       skeletonCase.setCaseType(collectionCase.getAddress().getAddressType());
@@ -214,7 +214,7 @@ public class NewAddressReportedService {
 
     // Set mandatory fields from the event
     newCase.setCaseRef(null);
-    newCase.setCaseId(UUID.fromString(newCollectionCase.getId()));
+    newCase.setCaseId(newCollectionCase.getId());
     newCase.setRegion(newCollectionCase.getAddress().getRegion());
     newCase.setAddressLevel(newCollectionCase.getAddress().getAddressLevel());
     newCase.setAddressType(newCollectionCase.getAddress().getAddressType());
