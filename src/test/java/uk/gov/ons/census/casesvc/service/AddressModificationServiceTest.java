@@ -52,6 +52,10 @@ public class AddressModificationServiceTest {
         .getNewAddress()
         .setAddressLine3("modified address line 3");
     rme.getPayload().getAddressModification().getNewAddress().setTownName("modified town name");
+    rme.getPayload()
+        .getAddressModification()
+        .getNewAddress()
+        .setOrganisationName("modified org name");
     rme.getPayload().getAddressModification().getNewAddress().setEstabType("HOSPITAL");
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
@@ -60,6 +64,7 @@ public class AddressModificationServiceTest {
     caze.setAddressLine2("test address line 2");
     caze.setAddressLine3("test address line 3");
     caze.setTownName("test town name");
+    caze.setOrganisationName("test org name");
     caze.setEstabType("test estab type");
     Mockito.when(caseService.getCaseByCaseId(any())).thenReturn(caze);
 
@@ -78,6 +83,7 @@ public class AddressModificationServiceTest {
     assertThat(actualCase.getAddressLine2()).isEqualTo("modified address line 2");
     assertThat(actualCase.getAddressLine3()).isEqualTo("modified address line 3");
     assertThat(actualCase.getTownName()).isEqualTo("modified town name");
+    assertThat(actualCase.getOrganisationName()).isEqualTo("modified org name");
     assertThat(actualCase.getEstabType()).isEqualTo("HOSPITAL");
 
     verify(eventLogger)
@@ -197,7 +203,7 @@ public class AddressModificationServiceTest {
 
   private ResponseManagementEvent getEvent() {
     CollectionCaseCaseId collectionCaseCaseId = new CollectionCaseCaseId();
-    collectionCaseCaseId.setId(TEST_CASE_ID.toString());
+    collectionCaseCaseId.setId(TEST_CASE_ID);
 
     Address newAddress = new Address();
 

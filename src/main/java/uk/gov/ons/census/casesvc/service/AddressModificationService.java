@@ -4,7 +4,6 @@ import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.time.OffsetDateTime;
 import java.util.Set;
-import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
@@ -73,9 +72,7 @@ public class AddressModificationService {
 
     validate(addressModification);
 
-    Case caze =
-        caseService.getCaseByCaseId(
-            UUID.fromString(addressModification.getCollectionCase().getId()));
+    Case caze = caseService.getCaseByCaseId(addressModification.getCollectionCase().getId());
 
     caze.setEstabType(addressModification.getNewAddress().getEstabType());
     caze.setTownName(addressModification.getNewAddress().getTownName());

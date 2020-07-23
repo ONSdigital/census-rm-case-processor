@@ -177,7 +177,7 @@ public class AddressReceiverIT {
           .getPayload()
           .getAddressModification()
           .getCollectionCase()
-          .setId(caze.getCaseId().toString());
+          .setId(caze.getCaseId());
       managementEvent.getPayload().getAddressModification().setNewAddress(new Address());
       managementEvent
           .getPayload()
@@ -203,6 +203,11 @@ public class AddressReceiverIT {
           .getPayload()
           .getAddressModification()
           .getNewAddress()
+          .setOrganisationName("modified org name");
+      managementEvent
+          .getPayload()
+          .getAddressModification()
+          .getNewAddress()
           .setEstabType("HOSPITAL");
 
       String json = convertObjectToJson(managementEvent);
@@ -222,7 +227,7 @@ public class AddressReceiverIT {
 
       assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_UPDATED);
       CollectionCase actualPayloadCase = responseManagementEvent.getPayload().getCollectionCase();
-      assertThat(actualPayloadCase.getId()).isEqualTo(caze.getCaseId().toString());
+      assertThat(actualPayloadCase.getId()).isEqualTo(caze.getCaseId());
 
       assertThat(actualPayloadCase.getAddress().getAddressLine1())
           .isEqualTo("modified address line 1");
@@ -230,6 +235,9 @@ public class AddressReceiverIT {
           .isEqualTo("modified address line 2");
       assertThat(actualPayloadCase.getAddress().getAddressLine3())
           .isEqualTo("modified address line 3");
+      assertThat(actualPayloadCase.getAddress().getTownName()).isEqualTo("modified town name");
+      assertThat(actualPayloadCase.getAddress().getOrganisationName())
+          .isEqualTo("modified org name");
       assertThat(actualPayloadCase.getAddress().getTownName()).isEqualTo("modified town name");
 
       Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
@@ -239,6 +247,7 @@ public class AddressReceiverIT {
       assertThat(actualCase.getAddressLine2()).isEqualTo("modified address line 2");
       assertThat(actualCase.getAddressLine3()).isEqualTo("modified address line 3");
       assertThat(actualCase.getTownName()).isEqualTo("modified town name");
+      assertThat(actualCase.getOrganisationName()).isEqualTo("modified org name");
       assertThat(actualCase.getEstabType()).isEqualTo("HOSPITAL");
 
       // check database for log eventDTO
