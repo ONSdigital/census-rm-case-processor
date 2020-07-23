@@ -243,6 +243,7 @@ public class AddressReceiverIT {
       assertThat(actualCase.getAddressLine2()).isEqualTo("modified address line 2");
       assertThat(actualCase.getAddressLine3()).isEqualTo("modified address line 3");
       assertThat(actualCase.getTownName()).isEqualTo("modified town name");
+      assertThat(actualCase.getEstabType()).isEqualTo("HOSPITAL");
 
       // check database for log eventDTO
       List<Event> events = eventRepository.findAll();
