@@ -8,6 +8,7 @@ import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManage
 import static uk.gov.ons.census.casesvc.testutil.MessageConstructor.constructMessageWithValidTimeStamp;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.messaging.Message;
@@ -24,8 +25,7 @@ public class CCSPropertyListedReceiverTest {
     Message<ResponseManagementEvent> message = constructMessageWithValidTimeStamp(managementEvent);
     OffsetDateTime messageTimestamp = MsgDateHelper.getMsgTimeStamp(message);
 
-    String expectedCaseId =
-        managementEvent.getPayload().getCcsProperty().getCollectionCase().getId();
+    UUID expectedCaseId = managementEvent.getPayload().getCcsProperty().getCollectionCase().getId();
 
     CCSPropertyListedService ccsPropertyListedService = mock(CCSPropertyListedService.class);
 
@@ -38,7 +38,7 @@ public class CCSPropertyListedReceiverTest {
     verify(ccsPropertyListedService)
         .processCCSPropertyListed(eventArgumentCaptor.capture(), eq(messageTimestamp));
 
-    String actualCaseId =
+    UUID actualCaseId =
         eventArgumentCaptor.getValue().getPayload().getCcsProperty().getCollectionCase().getId();
     assertThat(actualCaseId).isEqualTo(expectedCaseId);
   }

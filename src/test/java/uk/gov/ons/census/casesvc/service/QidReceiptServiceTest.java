@@ -26,7 +26,6 @@ import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 public class QidReceiptServiceTest {
 
   private final String TEST_NON_CCS_QID_ID = "0134567890123456";
-  private final String TEST_CONTINUATION_QID = "113456789023";
 
   @Mock private CaseReceiptService caseReceiptService;
 

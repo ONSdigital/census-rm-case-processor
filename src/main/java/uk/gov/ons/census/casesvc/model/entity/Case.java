@@ -91,9 +91,9 @@ public class Case {
 
   @Column private Integer ceActualResponses;
 
-  @Column private String collectionExerciseId;
+  @Column private UUID collectionExerciseId;
 
-  @Column private String actionPlanId;
+  @Column private UUID actionPlanId;
 
   @Column(nullable = false)
   private String survey;

@@ -5,7 +5,6 @@ import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
@@ -29,8 +28,7 @@ public class InvalidAddressService {
       ResponseManagementEvent invalidAddressEvent, OffsetDateTime messageTimestamp) {
     InvalidAddress invalidAddress = invalidAddressEvent.getPayload().getInvalidAddress();
 
-    Case caze =
-        caseService.getCaseByCaseId(UUID.fromString(invalidAddress.getCollectionCase().getId()));
+    Case caze = caseService.getCaseByCaseId(invalidAddress.getCollectionCase().getId());
 
     caze.setAddressInvalid(true);
 

@@ -85,7 +85,7 @@ public class AddressReceiver {
       newAddressReportedService.processNewAddressFromSourceId(
           responseManagementEvent,
           messageTimestamp,
-          UUID.fromString(responseManagementEvent.getPayload().getNewAddress().getSourceCaseId()));
+          responseManagementEvent.getPayload().getNewAddress().getSourceCaseId());
     } else {
       newAddressReportedService.processNewAddress(responseManagementEvent, messageTimestamp);
     }

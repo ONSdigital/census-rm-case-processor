@@ -4,7 +4,6 @@ import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
@@ -37,7 +36,7 @@ public class FieldCaseUpdatedService {
     CollectionCase fieldCaseUpdatedPayload =
         responseManagementEvent.getPayload().getCollectionCase();
 
-    Case caze = caseService.getCaseAndLockIt(UUID.fromString(fieldCaseUpdatedPayload.getId()));
+    Case caze = caseService.getCaseAndLockIt(fieldCaseUpdatedPayload.getId());
 
     if (!caze.getCaseType().equals(CE_CASE_TYPE)) {
       throw new IllegalArgumentException(

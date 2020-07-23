@@ -62,10 +62,10 @@ public class AddressReceiverIT {
   private String rhCaseQueue;
 
   @Value("${censusconfig.collectionexerciseid}")
-  private String censuscollectionExerciseId;
+  private UUID censuscollectionExerciseId;
 
   @Value("${censusconfig.actionplanid}")
-  private String censusActionPlanId;
+  private UUID censusActionPlanId;
 
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
   @Autowired private CaseRepository caseRepository;
@@ -107,11 +107,7 @@ public class AddressReceiverIT {
           .getPayload()
           .getInvalidAddress()
           .setCollectionCase(new CollectionCaseCaseId());
-      managementEvent
-          .getPayload()
-          .getInvalidAddress()
-          .getCollectionCase()
-          .setId(caze.getCaseId().toString());
+      managementEvent.getPayload().getInvalidAddress().getCollectionCase().setId(caze.getCaseId());
 
       String json = convertObjectToJson(managementEvent);
       Message message =
@@ -130,7 +126,7 @@ public class AddressReceiverIT {
 
       assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_UPDATED);
       CollectionCase actualPayloadCase = responseManagementEvent.getPayload().getCollectionCase();
-      assertThat(actualPayloadCase.getId()).isEqualTo(caze.getCaseId().toString());
+      assertThat(actualPayloadCase.getId()).isEqualTo(caze.getCaseId());
       assertThat(actualPayloadCase.getAddressInvalid()).isTrue();
 
       Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
@@ -277,7 +273,7 @@ public class AddressReceiverIT {
       address.setRegion("W");
 
       CollectionCase collectionCase = new CollectionCase();
-      collectionCase.setId(UUID.randomUUID().toString());
+      collectionCase.setId(UUID.randomUUID());
       collectionCase.setAddress(address);
 
       NewAddress newAddress = new NewAddress();
@@ -308,7 +304,7 @@ public class AddressReceiverIT {
       assertThat(actualPayloadCase.getId()).isEqualTo(collectionCase.getId());
       assertThat(actualPayloadCase.isSkeleton()).isTrue().as("Is Skeleton Case");
 
-      Case actualCase = caseRepository.findById(UUID.fromString(collectionCase.getId())).get();
+      Case actualCase = caseRepository.findById(collectionCase.getId()).get();
       assertThat(actualCase.getCollectionExerciseId()).isEqualTo(censuscollectionExerciseId);
       assertThat(actualCase.getActionPlanId()).isEqualTo(censusActionPlanId);
       assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
@@ -347,12 +343,12 @@ public class AddressReceiverIT {
       address.setRegion("W");
 
       CollectionCase collectionCase = new CollectionCase();
-      collectionCase.setId(UUID.randomUUID().toString());
+      collectionCase.setId(UUID.randomUUID());
       collectionCase.setAddress(address);
 
       NewAddress newAddress = new NewAddress();
       newAddress.setCollectionCase(collectionCase);
-      newAddress.setSourceCaseId(sourceCase.getCaseId().toString());
+      newAddress.setSourceCaseId(sourceCase.getCaseId());
 
       EventDTO eventDTO = new EventDTO();
       eventDTO.setType(NEW_ADDRESS_REPORTED);
@@ -378,7 +374,7 @@ public class AddressReceiverIT {
           actualResponseManagementEvent.getPayload().getCollectionCase();
       assertThat(actualPayloadCase.getId()).isEqualTo(collectionCase.getId());
 
-      Case actualCase = caseRepository.findById(UUID.fromString(collectionCase.getId())).get();
+      Case actualCase = caseRepository.findById(collectionCase.getId()).get();
       assertThat(actualCase.getCollectionExerciseId()).isEqualTo(censuscollectionExerciseId);
       assertThat(actualCase.getActionPlanId()).isEqualTo(censusActionPlanId);
       assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
@@ -452,7 +448,7 @@ public class AddressReceiverIT {
       address.setUprn("uprn01");
 
       CollectionCase collectionCase = new CollectionCase();
-      collectionCase.setId(UUID.randomUUID().toString());
+      collectionCase.setId(UUID.randomUUID());
       collectionCase.setAddress(address);
       collectionCase.setFieldCoordinatorId("1234");
       collectionCase.setFieldOfficerId("5678");
@@ -462,7 +458,7 @@ public class AddressReceiverIT {
 
       NewAddress newAddress = new NewAddress();
       newAddress.setCollectionCase(collectionCase);
-      newAddress.setSourceCaseId(sourceCase.getCaseId().toString());
+      newAddress.setSourceCaseId(sourceCase.getCaseId());
 
       EventDTO eventDTO = new EventDTO();
       eventDTO.setType(NEW_ADDRESS_REPORTED);
@@ -489,7 +485,7 @@ public class AddressReceiverIT {
           actualResponseManagementEvent.getPayload().getCollectionCase();
       assertThat(actualPayloadCase.getId()).isEqualTo(collectionCase.getId());
 
-      Case actualCase = caseRepository.findById(UUID.fromString(collectionCase.getId())).get();
+      Case actualCase = caseRepository.findById(collectionCase.getId()).get();
       assertThat(actualCase.getCollectionExerciseId()).isEqualTo(censuscollectionExerciseId);
       assertThat(actualCase.getActionPlanId()).isEqualTo(censusActionPlanId);
       assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
