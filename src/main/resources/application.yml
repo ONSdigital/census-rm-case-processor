@@ -29,8 +29,6 @@ spring:
   cloud:
     gcp:
       pubsub:
-        #        REMOVE THIS, REMOVE, REMOVE THE emulator host from here, remove IT
-#        emulator-host: localhost:8538
         project-id: aims-new-address-project
 
 queueconfig:
