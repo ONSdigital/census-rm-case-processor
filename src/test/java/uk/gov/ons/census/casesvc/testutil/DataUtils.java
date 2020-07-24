@@ -6,6 +6,7 @@ import static org.jeasy.random.FieldPredicates.ofType;
 import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.CCS_ADDRESS_LISTED;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.time.OffsetDateTime;
@@ -17,12 +18,12 @@ import org.jeasy.random.EasyRandomParameters;
 import uk.gov.ons.census.casesvc.model.dto.*;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
-import uk.gov.ons.census.casesvc.utility.OneObjectMapperToRuleThemAll;
+import uk.gov.ons.census.casesvc.utility.ObjectMapperFactory;
 
 public class DataUtils {
 
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
-
+  private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
   private static final EasyRandom easyRandom;
 
   static {
@@ -257,7 +258,7 @@ public class DataUtils {
 
   public static <T> T convertJsonToObject(String json, Class<T> clazz) {
     try {
-      return OneObjectMapperToRuleThemAll.objectMapper.readValue(json, clazz);
+      return objectMapper.readValue(json, clazz);
     } catch (IOException e) {
       throw new RuntimeException("Failed converting Json To FulfilmentRequestDTO", e);
     }
@@ -279,13 +280,10 @@ public class DataUtils {
 
   public static JsonNode createTestAddressModifiedJson(UUID caseId) {
     ObjectNode collectionCaseNode =
-        OneObjectMapperToRuleThemAll.objectMapper
-            .createObjectNode()
-            .put("id", caseId.toString())
-            .put("ceExpectedCapacity", 20);
+        objectMapper.createObjectNode().put("id", caseId.toString()).put("ceExpectedCapacity", 20);
 
     ObjectNode addressNode =
-        OneObjectMapperToRuleThemAll.objectMapper
+        objectMapper
             .createObjectNode()
             .put("organisationName", "XXXXXXXXXXXXX")
             .put("addressLine1", "1a main street")
@@ -297,7 +295,7 @@ public class DataUtils {
             .put("uprn", "XXXXXXXXXXXXX")
             .put("estabUprn", "XXXXX");
 
-    ObjectNode parentNode = OneObjectMapperToRuleThemAll.objectMapper.createObjectNode();
+    ObjectNode parentNode = objectMapper.createObjectNode();
     parentNode.set("collectionCase", collectionCaseNode);
     parentNode.set("address", addressNode);
 
@@ -306,13 +304,10 @@ public class DataUtils {
 
   public static JsonNode createTestAddressTypeChangeJson(UUID caseId) {
     ObjectNode collectionCaseNode =
-        OneObjectMapperToRuleThemAll.objectMapper
-            .createObjectNode()
-            .put("id", caseId.toString())
-            .put("ceExpectedCapacity", 20);
+        objectMapper.createObjectNode().put("id", caseId.toString()).put("ceExpectedCapacity", 20);
 
     ObjectNode addressNode =
-        OneObjectMapperToRuleThemAll.objectMapper
+        objectMapper
             .createObjectNode()
             .put("organisationName", "XXXXXXXXXXXXX")
             .put("uprn", "XXXXXXXXXXXXX")
@@ -321,7 +316,7 @@ public class DataUtils {
 
     collectionCaseNode.set("address", addressNode);
 
-    ObjectNode parentNode = OneObjectMapperToRuleThemAll.objectMapper.createObjectNode();
+    ObjectNode parentNode = objectMapper.createObjectNode();
     parentNode.set("collectionCase", collectionCaseNode);
 
     return parentNode;

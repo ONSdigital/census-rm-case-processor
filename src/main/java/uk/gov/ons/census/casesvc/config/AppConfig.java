@@ -13,7 +13,7 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import uk.gov.ons.census.casesvc.utility.OneObjectMapperToRuleThemAll;
+import uk.gov.ons.census.casesvc.utility.ObjectMapperFactory;
 
 @Configuration
 @EnableScheduling
@@ -29,7 +29,7 @@ public class AppConfig {
 
   @Bean
   public Jackson2JsonMessageConverter messageConverter() {
-    return new Jackson2JsonMessageConverter(OneObjectMapperToRuleThemAll.objectMapper);
+    return new Jackson2JsonMessageConverter(ObjectMapperFactory.objectMapper());
   }
 
   @Bean

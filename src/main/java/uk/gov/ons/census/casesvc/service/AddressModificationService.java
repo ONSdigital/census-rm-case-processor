@@ -65,9 +65,6 @@ public class AddressModificationService {
     this.eventLogger = eventLogger;
   }
 
-  // The cyclomatic complexity of this function is ludicrously high illustrating the absurdity
-  // of RM having to be the debugger for other systems. Upstream should validate and stop these
-  // problems at source, and report back to the users. RM cannot report these errors to users.
   public void processMessage(
       ResponseManagementEvent responseManagementEvent, OffsetDateTime messageTimestamp) {
     AddressModification addressModification =

@@ -35,12 +35,14 @@ import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 import uk.gov.ons.census.casesvc.testutil.QueueSpy;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
+import uk.gov.ons.census.casesvc.utility.ObjectMapperFactory;
 
 @ContextConfiguration
 @ActiveProfiles("test")
 @SpringBootTest
 @RunWith(SpringJUnit4ClassRunner.class)
 public class SampleReceiverIT {
+  private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
 
   @Value("${queueconfig.inbound-queue}")
   private String inboundQueue;
@@ -121,7 +123,7 @@ public class SampleReceiverIT {
       Event actualEvent = eventList.get(0);
 
       CreateCaseSample actualcreateCaseSample =
-          new ObjectMapper().readValue(actualEvent.getEventPayload(), CreateCaseSample.class);
+          objectMapper.readValue(actualEvent.getEventPayload(), CreateCaseSample.class);
 
       assertThat(actualcreateCaseSample).isEqualTo(createCaseSample);
     }
