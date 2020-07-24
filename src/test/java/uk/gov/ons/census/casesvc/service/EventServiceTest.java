@@ -78,9 +78,10 @@ public class EventServiceTest {
     caze.setRegion("E1000");
     caze.setCaseType("HH");
     when(caseService.saveCaseSample(createCaseSample)).thenReturn(caze);
-    when(caseService.saveCaseAndEmitCaseCreatedEvent(any(Case.class))).thenReturn(new PayloadDTO());
+    when(caseService.saveCaseAndEmitCaseCreatedEvent(any(Case.class), any(Metadata.class)))
+        .thenReturn(new PayloadDTO());
     Metadata expectedMetadata =
-            buildMetadata(EventTypeDTO.SAMPLE_LOADED, ActionInstructionType.CREATE);
+        buildMetadata(EventTypeDTO.SAMPLE_LOADED, ActionInstructionType.CREATE);
 
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
@@ -92,16 +93,15 @@ public class EventServiceTest {
     verifyNoInteractions(uacService);
     verify(caseService).saveCaseAndEmitCaseCreatedEvent(eq(caze), eq(expectedMetadata));
     verify(eventLogger)
-            .logCaseEvent(
-                    eq(caze),
-                    any(OffsetDateTime.class),
-                    eq(CREATE_BULK_CASE_SAMPLE_RECEIVED),
-                    eq(EventType.SAMPLE_LOADED),
-                    any(EventDTO.class),
-                    eq(convertObjectToJson(createCaseSample)),
-                    eq(messageTimestamp));
+        .logCaseEvent(
+            eq(caze),
+            any(OffsetDateTime.class),
+            eq(CREATE_BULK_CASE_SAMPLE_RECEIVED),
+            eq(EventType.SAMPLE_LOADED),
+            any(EventDTO.class),
+            eq(convertObjectToJson(createCaseSample)),
+            eq(messageTimestamp));
   }
-
 
   @Test
   public void testWelshQuestionnaire() {
