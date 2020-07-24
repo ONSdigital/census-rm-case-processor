@@ -157,6 +157,50 @@ public class AddressModificationServiceTest {
             messageTimestamp);
   }
 
+  @Test
+  public void testProcessMessageHappyPathDontChangeAnything() {
+    // Given
+    ResponseManagementEvent rme = getEvent();
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+
+    Case caze = new Case();
+    caze.setAddressLine1("test address line 1");
+    caze.setAddressLine2("test address line 2");
+    caze.setAddressLine3("test address line 3");
+    caze.setTownName("test town name");
+    caze.setOrganisationName("test org name");
+    caze.setEstabType("test estab type");
+    Mockito.when(caseService.getCaseByCaseId(any())).thenReturn(caze);
+
+    // When
+    underTest.processMessage(rme, messageTimestamp);
+
+    // Then
+    verify(caseService).getCaseByCaseId(TEST_CASE_ID);
+
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseService).saveCaseAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture(), isNull());
+
+    Case actualCase = caseArgumentCaptor.getValue();
+    assertThat(actualCase).isEqualTo(caze);
+    assertThat(actualCase.getAddressLine1()).isEqualTo("test address line 1");
+    assertThat(actualCase.getAddressLine2()).isEqualTo("test address line 2");
+    assertThat(actualCase.getAddressLine3()).isEqualTo("test address line 3");
+    assertThat(actualCase.getTownName()).isEqualTo("test town name");
+    assertThat(actualCase.getOrganisationName()).isEqualTo("test org name");
+    assertThat(actualCase.getEstabType()).isEqualTo("test estab type");
+
+    verify(eventLogger)
+        .logCaseEvent(
+            caze,
+            rme.getEvent().getDateTime(),
+            "Address modified",
+            EventType.ADDRESS_MODIFIED,
+            rme.getEvent(),
+            JsonHelper.convertObjectToJson(rme.getPayload().getAddressModification()),
+            messageTimestamp);
+  }
+
   @Test(expected = RuntimeException.class)
   public void testProcessMessageTownNameNull() {
     // Given
