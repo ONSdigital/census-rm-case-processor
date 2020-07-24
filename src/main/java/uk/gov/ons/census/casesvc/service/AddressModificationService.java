@@ -20,7 +20,8 @@ public class AddressModificationService {
   private final Set<String> estabTypes;
 
   public AddressModificationService(
-      CaseService caseService, EventLogger eventLogger,
+      CaseService caseService,
+      EventLogger eventLogger,
       @Value("${approvedlistofgovernmentauthorisedpremises}") Set<String> estabTypes) {
     this.caseService = caseService;
     this.eventLogger = eventLogger;
