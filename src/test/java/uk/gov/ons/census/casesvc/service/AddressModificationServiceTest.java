@@ -37,6 +37,7 @@ public class AddressModificationServiceTest {
   static {
     estabTypes = new HashSet<>();
     estabTypes.add("HOSPITAL");
+    estabTypes.add("HOUSEHOLD");
   }
 
   @Mock private CaseService caseService;
@@ -157,17 +158,9 @@ public class AddressModificationServiceTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void testProcessMessageMissingMandatoryFieldTownNameNull() {
+  public void testProcessMessageTownNameNull() {
     // Given
     ResponseManagementEvent rme = getEvent();
-    rme.getPayload()
-        .getAddressModification()
-        .getNewAddress()
-        .setAddressLine1(Optional.of("123 Fake Street"));
-    rme.getPayload()
-        .getAddressModification()
-        .getNewAddress()
-        .setEstabType(Optional.of("HOUSEHOLD"));
     rme.getPayload().getAddressModification().getNewAddress().setTownName(Optional.empty());
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
@@ -178,17 +171,9 @@ public class AddressModificationServiceTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void testProcessMessageMissingMandatoryFieldTownNameEmpty() {
+  public void testProcessMessageMissingTownNameEmpty() {
     // Given
     ResponseManagementEvent rme = getEvent();
-    rme.getPayload()
-        .getAddressModification()
-        .getNewAddress()
-        .setAddressLine1(Optional.of("123 Fake Street"));
-    rme.getPayload()
-        .getAddressModification()
-        .getNewAddress()
-        .setEstabType(Optional.of("HOUSEHOLD"));
     rme.getPayload().getAddressModification().getNewAddress().setTownName(Optional.of(" "));
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
@@ -199,19 +184,10 @@ public class AddressModificationServiceTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void testProcessMessageMissingMandatoryFieldAddressLine1Null() {
+  public void testProcessMessageAddressLine1Null() {
     // Given
     ResponseManagementEvent rme = getEvent();
     rme.getPayload().getAddressModification().getNewAddress().setAddressLine1(Optional.empty());
-    rme.getPayload()
-        .getAddressModification()
-        .getNewAddress()
-        .setEstabType(Optional.of("HOUSEHOLD"));
-    rme.getPayload().getAddressModification().getNewAddress().setTownName(Optional.of("Fake Town"));
-    rme.getPayload()
-        .getAddressModification()
-        .getNewAddress()
-        .setEstabType(Optional.of("HOUSEHOLD"));
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     // When
@@ -221,40 +197,10 @@ public class AddressModificationServiceTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void testProcessMessageMissingMandatoryFieldAddressLine1Empty() {
+  public void testProcessMessageAddressLine1Empty() {
     // Given
     ResponseManagementEvent rme = getEvent();
     rme.getPayload().getAddressModification().getNewAddress().setAddressLine1(Optional.of(" "));
-    rme.getPayload()
-        .getAddressModification()
-        .getNewAddress()
-        .setEstabType(Optional.of("HOUSEHOLD"));
-    rme.getPayload().getAddressModification().getNewAddress().setTownName(Optional.of("Fake Town"));
-    rme.getPayload()
-        .getAddressModification()
-        .getNewAddress()
-        .setEstabType(Optional.of("HOUSEHOLD"));
-    rme.getPayload()
-        .getAddressModification()
-        .getNewAddress()
-        .setEstabType(Optional.of("HOUSEHOLD"));
-    OffsetDateTime messageTimestamp = OffsetDateTime.now();
-
-    // When
-    underTest.processMessage(rme, messageTimestamp);
-
-    // Then
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testProcessMessageMissingMandatoryFieldEstabType() {
-    // Given
-    ResponseManagementEvent rme = getEvent();
-    rme.getPayload()
-        .getAddressModification()
-        .getNewAddress()
-        .setAddressLine1(Optional.of("123 Fake Street"));
-    rme.getPayload().getAddressModification().getNewAddress().setTownName(Optional.of("Fake Town"));
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     // When
@@ -270,13 +216,25 @@ public class AddressModificationServiceTest {
     rme.getPayload()
         .getAddressModification()
         .getNewAddress()
-        .setAddressLine1(Optional.of("123 Fake Street"));
-    rme.getPayload().getAddressModification().getNewAddress().setTownName(Optional.of("Fake Town"));
-    rme.getPayload()
-        .getAddressModification()
-        .getNewAddress()
         .setEstabType(Optional.of("SPACE STATION"));
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
+
+    // When
+    underTest.processMessage(rme, messageTimestamp);
+
+    // Then
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testProcessMessageEstabTypeInvalidForHouseholdCase() {
+    // Given
+    ResponseManagementEvent rme = getEvent();
+    rme.getPayload().getAddressModification().getNewAddress().setEstabType(Optional.of("HOSPITAL"));
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+
+    Case caze = new Case();
+    caze.setCaseType("HH");
+    Mockito.when(caseService.getCaseByCaseId(any())).thenReturn(caze);
 
     // When
     underTest.processMessage(rme, messageTimestamp);
@@ -288,11 +246,6 @@ public class AddressModificationServiceTest {
   public void testProcessMessageEstabTypeNull() {
     // Given
     ResponseManagementEvent rme = getEvent();
-    rme.getPayload()
-        .getAddressModification()
-        .getNewAddress()
-        .setAddressLine1(Optional.of("123 Fake Street"));
-    rme.getPayload().getAddressModification().getNewAddress().setTownName(Optional.of("Fake Town"));
     rme.getPayload().getAddressModification().getNewAddress().setEstabType(Optional.empty());
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 

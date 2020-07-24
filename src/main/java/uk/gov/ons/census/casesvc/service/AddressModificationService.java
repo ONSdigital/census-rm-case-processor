@@ -33,9 +33,9 @@ public class AddressModificationService {
     AddressModification addressModification =
         responseManagementEvent.getPayload().getAddressModification();
 
-    validate(addressModification);
-
     Case caze = caseService.getCaseByCaseId(addressModification.getCollectionCase().getId());
+
+    validate(addressModification, caze);
 
     if (addressModification.getNewAddress().getEstabType() != null
         && addressModification.getNewAddress().getEstabType().isPresent()) {
@@ -88,7 +88,7 @@ public class AddressModificationService {
         messageTimestamp);
   }
 
-  private void validate(AddressModification addressModification) {
+  private void validate(AddressModification addressModification, Case caze) {
     if (addressModification.getNewAddress().getTownName() != null
         && !addressModification.getNewAddress().getTownName().isPresent()) {
       throw new RuntimeException("Mandatory town name cannot be set to null");
@@ -120,6 +120,13 @@ public class AddressModificationService {
         && addressModification.getNewAddress().getEstabType().isPresent()
         && !estabTypes.contains(addressModification.getNewAddress().getEstabType().get())) {
       throw new RuntimeException("Estab Type not valid");
+    }
+
+    if (caze.getCaseType() == "HH"
+        && addressModification.getNewAddress().getEstabType() != null
+        && addressModification.getNewAddress().getEstabType().isPresent()
+        && !addressModification.getNewAddress().getEstabType().get().equals("HOUSEHOLD")) {
+      throw new RuntimeException("Households can only be households");
     }
   }
 }
