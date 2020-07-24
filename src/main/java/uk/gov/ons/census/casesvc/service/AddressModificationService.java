@@ -4,6 +4,7 @@ import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.time.OffsetDateTime;
 import java.util.Set;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
@@ -14,55 +15,16 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 
 @Service
 public class AddressModificationService {
-  private static final Set<String> ESTAB_TYPES =
-      Set.of(
-          "HALL OF RESIDENCE",
-          "CARE HOME",
-          "HOSPITAL",
-          "HOSPICE",
-          "MENTAL HEALTH HOSPITAL",
-          "MEDICAL CARE OTHER",
-          "BOARDING SCHOOL",
-          "LOW/MEDIUM SECURE MENTAL HEALTH",
-          "HIGH SECURE MENTAL HEALTH",
-          "HOTEL",
-          "YOUTH HOSTEL",
-          "HOSTEL",
-          "MILITARY SLA",
-          "MILITARY US",
-          "RELIGIOUS COMMUNITY",
-          "RESIDENTIAL CHILDRENS HOME",
-          "EDUCATION OTHER",
-          "PRISON",
-          "IMMIGRATION REMOVAL CENTRE",
-          "APPROVED PREMISES",
-          "ROUGH SLEEPER",
-          "STAFF ACCOMMODATION",
-          "CAMPHILL",
-          "HOLIDAY PARK",
-          "HOUSEHOLD",
-          "SHELTERED ACCOMMODATION",
-          "RESIDENTIAL CARAVAN",
-          "RESIDENTIAL BOAT",
-          "GATED APARTMENTS",
-          "MOD HOUSEHOLDS",
-          "FOREIGN OFFICES",
-          "CASTLES",
-          "GRT SITE",
-          "MILITARY SFA",
-          "EMBASSY",
-          "ROYAL HOUSEHOLD",
-          "CARAVAN SITE",
-          "MARINA",
-          "TRAVELLING PERSONS",
-          "TRANSIENT PERSONS");
-
   private final CaseService caseService;
   private final EventLogger eventLogger;
+  private final Set<String> estabTypes;
 
-  public AddressModificationService(CaseService caseService, EventLogger eventLogger) {
+  public AddressModificationService(
+      CaseService caseService, EventLogger eventLogger,
+      @Value("${approvedlistofgovernmentauthorisedpremises}") Set<String> estabTypes) {
     this.caseService = caseService;
     this.eventLogger = eventLogger;
+    this.estabTypes = estabTypes;
   }
 
   public void processMessage(
@@ -155,7 +117,7 @@ public class AddressModificationService {
 
     if (addressModification.getNewAddress().getEstabType() != null
         && addressModification.getNewAddress().getEstabType().isPresent()
-        && !ESTAB_TYPES.contains(addressModification.getNewAddress().getEstabType().get())) {
+        && !estabTypes.contains(addressModification.getNewAddress().getEstabType().get())) {
       throw new RuntimeException("Estab Type not valid");
     }
   }

@@ -6,7 +6,9 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 
 import java.time.OffsetDateTime;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,6 +16,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.AddressModification;
@@ -29,9 +32,14 @@ import uk.gov.ons.census.casesvc.utility.JsonHelper;
 @RunWith(MockitoJUnitRunner.class)
 public class AddressModificationServiceTest {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
+  @Spy private static Set<String> estabTypes;
+
+  static {
+    estabTypes = new HashSet<>();
+    estabTypes.add("HOSPITAL");
+  }
 
   @Mock private CaseService caseService;
-
   @Mock private EventLogger eventLogger;
 
   @InjectMocks private AddressModificationService underTest;
