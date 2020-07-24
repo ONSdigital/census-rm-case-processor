@@ -69,7 +69,10 @@ public class AddressModificationServiceTest {
         .getAddressModification()
         .getNewAddress()
         .setOrganisationName(Optional.of("modified org name"));
-    rme.getPayload().getAddressModification().getNewAddress().setEstabType(Optional.of("HOSPITAL"));
+    rme.getPayload()
+        .getAddressModification()
+        .getNewAddress()
+        .setEstabType(Optional.of("HOUSEHOLD"));
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
     Case caze = new Case();
@@ -79,6 +82,7 @@ public class AddressModificationServiceTest {
     caze.setTownName("test town name");
     caze.setOrganisationName("test org name");
     caze.setEstabType("test estab type");
+    caze.setCaseType("HH");
     Mockito.when(caseService.getCaseByCaseId(any())).thenReturn(caze);
 
     // When
@@ -97,7 +101,7 @@ public class AddressModificationServiceTest {
     assertThat(actualCase.getAddressLine3()).isEqualTo("modified address line 3");
     assertThat(actualCase.getTownName()).isEqualTo("modified town name");
     assertThat(actualCase.getOrganisationName()).isEqualTo("modified org name");
-    assertThat(actualCase.getEstabType()).isEqualTo("HOSPITAL");
+    assertThat(actualCase.getEstabType()).isEqualTo("HOUSEHOLD");
 
     verify(eventLogger)
         .logCaseEvent(
@@ -126,6 +130,7 @@ public class AddressModificationServiceTest {
     caze.setTownName("test town name");
     caze.setOrganisationName("test org name");
     caze.setEstabType("test estab type");
+    caze.setCaseType("HH");
     Mockito.when(caseService.getCaseByCaseId(any())).thenReturn(caze);
 
     // When
@@ -170,6 +175,7 @@ public class AddressModificationServiceTest {
     caze.setTownName("test town name");
     caze.setOrganisationName("test org name");
     caze.setEstabType("test estab type");
+    caze.setCaseType("HH");
     Mockito.when(caseService.getCaseByCaseId(any())).thenReturn(caze);
 
     // When

@@ -122,7 +122,7 @@ public class AddressModificationService {
       throw new RuntimeException("Estab Type not valid");
     }
 
-    if (caze.getCaseType() == "HH"
+    if (caze.getCaseType().equals("HH")
         && addressModification.getNewAddress().getEstabType() != null
         && addressModification.getNewAddress().getEstabType().isPresent()
         && !addressModification.getNewAddress().getEstabType().get().equals("HOUSEHOLD")) {
