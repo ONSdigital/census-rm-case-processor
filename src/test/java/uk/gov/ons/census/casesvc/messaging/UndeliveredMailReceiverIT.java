@@ -115,7 +115,7 @@ public class UndeliveredMailReceiverIT {
       assertThat(responseManagementEvent.getPayload().getMetadata().getCauseEventType())
           .isEqualTo(EventTypeDTO.UNDELIVERED_MAIL_REPORTED);
       CollectionCase actualCase = responseManagementEvent.getPayload().getCollectionCase();
-      assertThat(actualCase.getId()).isEqualTo(TEST_CASE_ID.toString());
+      assertThat(actualCase.getId()).isEqualTo(TEST_CASE_ID);
       assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
 
       // check database for log eventDTO
@@ -171,7 +171,7 @@ public class UndeliveredMailReceiverIT {
       assertThat(responseManagementEvent.getPayload().getMetadata().getCauseEventType())
           .isEqualTo(EventTypeDTO.UNDELIVERED_MAIL_REPORTED);
       CollectionCase actualCase = responseManagementEvent.getPayload().getCollectionCase();
-      assertThat(actualCase.getId()).isEqualTo(TEST_CASE_ID.toString());
+      assertThat(actualCase.getId()).isEqualTo(TEST_CASE_ID);
       assertThat(actualCase.getCaseRef()).isEqualTo(Long.toString(TEST_CASE_REF));
       assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
 

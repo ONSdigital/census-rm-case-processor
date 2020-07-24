@@ -121,7 +121,7 @@ public class CCSPropertyListedServiceTest {
             managementEvent.getPayload().getCcsProperty().getCollectionCase().getId());
 
     when(caseService.createCCSCase(
-            expectedCase.getCaseId().toString(),
+            expectedCase.getCaseId(),
             managementEvent.getPayload().getCcsProperty().getSampleUnit(),
             null,
             false))
@@ -160,7 +160,7 @@ public class CCSPropertyListedServiceTest {
     expectedCase.setRefusalReceived(HARD_REFUSAL);
 
     when(caseService.createCCSCase(
-            expectedCase.getCaseId().toString(),
+            expectedCase.getCaseId(),
             managementEvent.getPayload().getCcsProperty().getSampleUnit(),
             RefusalType.HARD_REFUSAL,
             false))
@@ -175,7 +175,7 @@ public class CCSPropertyListedServiceTest {
     inOrder
         .verify(caseService)
         .createCCSCase(
-            expectedCase.getCaseId().toString(),
+            expectedCase.getCaseId(),
             managementEvent.getPayload().getCcsProperty().getSampleUnit(),
             RefusalType.HARD_REFUSAL,
             false);
@@ -198,7 +198,7 @@ public class CCSPropertyListedServiceTest {
     expectedCase.setAddressInvalid(true);
 
     when(caseService.createCCSCase(
-            expectedCase.getCaseId().toString(),
+            expectedCase.getCaseId(),
             managementEvent.getPayload().getCcsProperty().getSampleUnit(),
             null,
             true))
@@ -212,9 +212,9 @@ public class CCSPropertyListedServiceTest {
     checkCorrectEventLogging(inOrder, expectedCase, managementEvent, messageTimestamp);
   }
 
-  private Case getExpectedCCSCase(String id) {
+  private Case getExpectedCCSCase(UUID id) {
     Case caze = new Case();
-    caze.setCaseId(UUID.fromString(id));
+    caze.setCaseId(id);
     caze.setSurvey("CCS");
     caze.setRefusalReceived(null);
     caze.setAddressInvalid(false);

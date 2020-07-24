@@ -57,7 +57,7 @@ public class SurveyServiceTest {
     managementEvent.setPayload(new PayloadDTO());
 
     ResponseDTO response = new ResponseDTO();
-    response.setCaseId(TEST_CASE_ID.toString());
+    response.setCaseId(TEST_CASE_ID);
     response.setQuestionnaireId(TEST_QID_ID);
     response.setAgentId(TEST_AGENT_ID);
     managementEvent.getPayload().setResponse(response);
@@ -107,7 +107,7 @@ public class SurveyServiceTest {
     managementEvent.setPayload(new PayloadDTO());
 
     ResponseDTO response = new ResponseDTO();
-    response.setCaseId(TEST_CASE_ID.toString());
+    response.setCaseId(TEST_CASE_ID);
     response.setQuestionnaireId(TEST_QID_ID);
     response.setAgentId(TEST_AGENT_ID);
     managementEvent.getPayload().setResponse(response);
@@ -152,7 +152,7 @@ public class SurveyServiceTest {
     managementEvent.setPayload(new PayloadDTO());
 
     ResponseDTO response = new ResponseDTO();
-    response.setCaseId(TEST_CASE_ID.toString());
+    response.setCaseId(TEST_CASE_ID);
     response.setQuestionnaireId(TEST_QID_ID);
     response.setAgentId(TEST_AGENT_ID);
     managementEvent.getPayload().setResponse(response);

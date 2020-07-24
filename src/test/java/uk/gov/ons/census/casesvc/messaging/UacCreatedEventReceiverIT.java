@@ -77,7 +77,7 @@ public class UacCreatedEventReceiverIT {
       // Check the UAC Updated event is emitted
       ResponseManagementEvent uacUpdatedEvent = rhUacQueueSpy.checkExpectedMessageReceived();
       assertEquals(
-          uacCreatedEvent.getPayload().getUacQidCreated().getCaseId().toString(),
+          uacCreatedEvent.getPayload().getUacQidCreated().getCaseId(),
           uacUpdatedEvent.getPayload().getUac().getCaseId());
 
       // Check the Uac Qid Link is created

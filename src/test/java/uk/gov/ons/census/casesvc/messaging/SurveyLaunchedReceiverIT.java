@@ -103,8 +103,7 @@ public class SurveyLaunchedReceiverIT {
       // THEN
       ResponseManagementEvent caseUpdatedEvent = rhCaseQueueSpy.checkExpectedMessageReceived();
 
-      assertThat(caseUpdatedEvent.getPayload().getCollectionCase().getId())
-          .isEqualTo(TEST_CASE_ID.toString());
+      assertThat(caseUpdatedEvent.getPayload().getCollectionCase().getId()).isEqualTo(TEST_CASE_ID);
       assertThat(caseUpdatedEvent.getPayload().getCollectionCase().isSurveyLaunched()).isTrue();
 
       List<Event> events = eventRepository.findAll();

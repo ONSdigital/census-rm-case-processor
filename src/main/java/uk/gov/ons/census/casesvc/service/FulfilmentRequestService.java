@@ -7,7 +7,6 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
@@ -64,7 +63,7 @@ public class FulfilmentRequestService {
     FulfilmentRequestDTO fulfilmentRequestPayload =
         fulfilmentRequest.getPayload().getFulfilmentRequest();
 
-    Case caze = caseService.getCaseByCaseId(UUID.fromString(fulfilmentRequestPayload.getCaseId()));
+    Case caze = caseService.getCaseByCaseId(fulfilmentRequestPayload.getCaseId());
 
     // As part of a fulfilment, we might need to create a 'child' case (an individual).
     // We will do this only if the fulfilment is for an Individual and the caze caseType is HH.
@@ -105,7 +104,7 @@ public class FulfilmentRequestService {
         && individualResponseRequestCodes.contains(fulfilmentRequestPayload.getFulfilmentCode())) {
       Case individualResponseCase =
           caseService.prepareIndividualResponseCaseFromParentCase(
-              caze, UUID.fromString(fulfilmentRequestPayload.getIndividualCaseId()), eventChannel);
+              caze, fulfilmentRequestPayload.getIndividualCaseId(), eventChannel);
       individualResponseCase = caseService.saveNewCaseAndStampCaseRef(individualResponseCase);
 
       if (individualResponsePrintRequestCodes.contains(

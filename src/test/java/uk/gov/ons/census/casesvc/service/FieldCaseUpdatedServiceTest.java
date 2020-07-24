@@ -45,7 +45,7 @@ public class FieldCaseUpdatedServiceTest {
     ResponseManagementEvent managementEvent = getTestResponseManagementFieldUpdatedEvent();
 
     CollectionCase collectionCase = managementEvent.getPayload().getCollectionCase();
-    collectionCase.setId(TEST_CASE_ID.toString());
+    collectionCase.setId(TEST_CASE_ID);
 
     Case testCase = getRandomCase();
     testCase.setCaseId(TEST_CASE_ID);
@@ -87,7 +87,7 @@ public class FieldCaseUpdatedServiceTest {
     ResponseManagementEvent managementEvent = getTestResponseManagementFieldUpdatedEvent();
 
     CollectionCase collectionCase = managementEvent.getPayload().getCollectionCase();
-    collectionCase.setId(TEST_CASE_ID.toString());
+    collectionCase.setId(TEST_CASE_ID);
 
     Case testCase = getRandomCase();
     testCase.setCaseId(TEST_CASE_ID);
@@ -129,7 +129,7 @@ public class FieldCaseUpdatedServiceTest {
     ResponseManagementEvent managementEvent = getTestResponseManagementFieldUpdatedEvent();
 
     CollectionCase collectionCase = managementEvent.getPayload().getCollectionCase();
-    collectionCase.setId(TEST_CASE_ID.toString());
+    collectionCase.setId(TEST_CASE_ID);
 
     Case testCase = getRandomCase();
     testCase.setCaseId(TEST_CASE_ID);

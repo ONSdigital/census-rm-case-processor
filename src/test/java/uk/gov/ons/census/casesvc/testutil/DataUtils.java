@@ -249,7 +249,7 @@ public class DataUtils {
     ResponseManagementEvent managementEvent = easyRandom.nextObject(ResponseManagementEvent.class);
     managementEvent.getEvent().setType(CCS_ADDRESS_LISTED);
     CCSPropertyDTO ccsPropertyDTO = managementEvent.getPayload().getCcsProperty();
-    ccsPropertyDTO.getCollectionCase().setId(TEST_CASE_ID.toString());
+    ccsPropertyDTO.getCollectionCase().setId(TEST_CASE_ID);
     ccsPropertyDTO.setRefusal(null);
     ccsPropertyDTO.setInvalidAddress(null);
     ccsPropertyDTO.setUac(null);

@@ -37,6 +37,8 @@ import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 public class ActionSchedulerEventReceieverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final long TEST_CASE_REF = 1234567890L;
+  private static final UUID TEST_ACTION_RULE_ID = UUID.randomUUID();
+  private static final UUID TEST_BATCH_ID = UUID.randomUUID();
 
   @Value("${queueconfig.action-case-queue}")
   private String actionCaseQueue;
@@ -76,8 +78,8 @@ public class ActionSchedulerEventReceieverIT {
     responseManagementEvent.setEvent(event);
 
     PrintCaseSelected printCaseSelected = new PrintCaseSelected();
-    printCaseSelected.setActionRuleId("Test actionRuleId");
-    printCaseSelected.setBatchId("Test batchId");
+    printCaseSelected.setActionRuleId(TEST_ACTION_RULE_ID);
+    printCaseSelected.setBatchId(TEST_BATCH_ID);
     printCaseSelected.setCaseRef(caze.getCaseRef());
     printCaseSelected.setPackCode("Test packCode");
 
@@ -107,8 +109,8 @@ public class ActionSchedulerEventReceieverIT {
         objectMapper.readValue(actualEvent.getEventPayload(), PayloadDTO.class);
     assertThat(TEST_CASE_REF).isEqualTo(actualPayload.getPrintCaseSelected().getCaseRef());
     assertThat("Test packCode").isEqualTo(actualPayload.getPrintCaseSelected().getPackCode());
-    assertThat("Test batchId").isEqualTo(actualPayload.getPrintCaseSelected().getBatchId());
-    assertThat("Test actionRuleId")
+    assertThat(TEST_BATCH_ID).isEqualTo(actualPayload.getPrintCaseSelected().getBatchId());
+    assertThat(TEST_ACTION_RULE_ID)
         .isEqualTo(actualPayload.getPrintCaseSelected().getActionRuleId());
     assertThat(actualEvent.getRmEventProcessed()).isNotNull();
     assertThat("Case sent to printer with pack code Test packCode")
