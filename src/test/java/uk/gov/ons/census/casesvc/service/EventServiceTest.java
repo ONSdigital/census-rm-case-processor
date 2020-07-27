@@ -1,7 +1,6 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static org.mockito.Mockito.*;
-import static uk.gov.ons.census.casesvc.service.EventService.CREATE_BULK_CASE_SAMPLE_RECEIVED;
 import static uk.gov.ons.census.casesvc.service.EventService.CREATE_CASE_SAMPLE_RECEIVED;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
@@ -25,6 +24,7 @@ public class EventServiceTest {
   private static final long TEST_CASE_REF = 1234567890L;
   private static final UUID TEST_ACTION_RULE_ID = UUID.randomUUID();
   private static final UUID TEST_BATCH_ID = UUID.randomUUID();
+  private static final String CREATE_BULK_CASE_SAMPLE_RECEIVED = "Create bulk case sample received";
 
   @Mock CaseService caseService;
 

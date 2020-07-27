@@ -42,6 +42,8 @@ import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 @SpringBootTest
 @RunWith(SpringJUnit4ClassRunner.class)
 public class SampleReceiverIT {
+  private static final String BULK_PROCESSING_EVENT_CHANNEL = "AR";
+  private static final String CREATE_BULK_CASE_SAMPLE_RECEIVED = "Create bulk case sample received";
 
   @Value("${queueconfig.inbound-queue}")
   private String inboundQueue;
@@ -188,6 +190,8 @@ public class SampleReceiverIT {
       List<Event> eventList = eventRepository.findAll();
       assertThat(eventList.size()).isEqualTo(1);
       Event actualEvent = eventList.get(0);
+      assertEquals(actualEvent.getEventChannel(), BULK_PROCESSING_EVENT_CHANNEL);
+      assertEquals(actualEvent.getEventDescription(), CREATE_BULK_CASE_SAMPLE_RECEIVED);
 
       assertEquals(uacQidLinkRepository.count(), 0);
 
