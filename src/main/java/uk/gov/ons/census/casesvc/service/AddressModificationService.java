@@ -42,11 +42,6 @@ public class AddressModificationService {
       caze.setEstabType(addressModification.getNewAddress().getEstabType().get());
     }
 
-    if (addressModification.getNewAddress().getTownName() != null
-        && addressModification.getNewAddress().getTownName().isPresent()) {
-      caze.setTownName(addressModification.getNewAddress().getTownName().get());
-    }
-
     if (addressModification.getNewAddress().getAddressLine1() != null
         && addressModification.getNewAddress().getAddressLine1().isPresent()) {
       caze.setAddressLine1(addressModification.getNewAddress().getAddressLine1().get());
@@ -89,17 +84,6 @@ public class AddressModificationService {
   }
 
   private void validate(AddressModification addressModification, Case caze) {
-    if (addressModification.getNewAddress().getTownName() != null
-        && !addressModification.getNewAddress().getTownName().isPresent()) {
-      throw new RuntimeException("Mandatory town name cannot be set to null");
-    }
-
-    if (addressModification.getNewAddress().getTownName() != null
-        && addressModification.getNewAddress().getTownName().isPresent()
-        && StringUtils.isEmpty(addressModification.getNewAddress().getTownName().get())) {
-      throw new RuntimeException("Mandatory town name is empty");
-    }
-
     if (addressModification.getNewAddress().getAddressLine1() != null
         && !addressModification.getNewAddress().getAddressLine1().isPresent()) {
       throw new RuntimeException("Mandatory address line 1 cannot be set to null");

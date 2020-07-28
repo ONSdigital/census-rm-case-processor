@@ -64,10 +64,6 @@ public class AddressModificationServiceTest {
     rme.getPayload()
         .getAddressModification()
         .getNewAddress()
-        .setTownName(Optional.of("modified town name"));
-    rme.getPayload()
-        .getAddressModification()
-        .getNewAddress()
         .setOrganisationName(Optional.of("modified org name"));
     rme.getPayload()
         .getAddressModification()
@@ -79,7 +75,6 @@ public class AddressModificationServiceTest {
     caze.setAddressLine1("test address line 1");
     caze.setAddressLine2("test address line 2");
     caze.setAddressLine3("test address line 3");
-    caze.setTownName("test town name");
     caze.setOrganisationName("test org name");
     caze.setEstabType("test estab type");
     caze.setCaseType("HH");
@@ -99,7 +94,6 @@ public class AddressModificationServiceTest {
     assertThat(actualCase.getAddressLine1()).isEqualTo("modified address line 1");
     assertThat(actualCase.getAddressLine2()).isEqualTo("modified address line 2");
     assertThat(actualCase.getAddressLine3()).isEqualTo("modified address line 3");
-    assertThat(actualCase.getTownName()).isEqualTo("modified town name");
     assertThat(actualCase.getOrganisationName()).isEqualTo("modified org name");
     assertThat(actualCase.getEstabType()).isEqualTo("HOUSEHOLD");
 
@@ -205,32 +199,6 @@ public class AddressModificationServiceTest {
             rme.getEvent(),
             JsonHelper.convertObjectToJson(rme.getPayload().getAddressModification()),
             messageTimestamp);
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testProcessMessageTownNameNull() {
-    // Given
-    ResponseManagementEvent rme = getEvent();
-    rme.getPayload().getAddressModification().getNewAddress().setTownName(Optional.empty());
-    OffsetDateTime messageTimestamp = OffsetDateTime.now();
-
-    // When
-    underTest.processMessage(rme, messageTimestamp);
-
-    // Then
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testProcessMessageMissingTownNameEmpty() {
-    // Given
-    ResponseManagementEvent rme = getEvent();
-    rme.getPayload().getAddressModification().getNewAddress().setTownName(Optional.of(" "));
-    OffsetDateTime messageTimestamp = OffsetDateTime.now();
-
-    // When
-    underTest.processMessage(rme, messageTimestamp);
-
-    // Then
   }
 
   @Test(expected = RuntimeException.class)

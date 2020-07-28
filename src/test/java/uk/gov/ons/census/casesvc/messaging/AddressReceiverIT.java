@@ -184,7 +184,6 @@ public class AddressReceiverIT {
       newAddress.setAddressLine1(Optional.of("modified address line 1"));
       newAddress.setAddressLine2(Optional.of("modified address line 2"));
       newAddress.setAddressLine3(Optional.of("modified address line 3"));
-      newAddress.setTownName(Optional.of("modified town name"));
       newAddress.setOrganisationName(Optional.of("modified org name"));
       newAddress.setEstabType(Optional.of("HOSPITAL"));
 
@@ -213,10 +212,8 @@ public class AddressReceiverIT {
           .isEqualTo("modified address line 2");
       assertThat(actualPayloadCase.getAddress().getAddressLine3())
           .isEqualTo("modified address line 3");
-      assertThat(actualPayloadCase.getAddress().getTownName()).isEqualTo("modified town name");
       assertThat(actualPayloadCase.getAddress().getOrganisationName())
           .isEqualTo("modified org name");
-      assertThat(actualPayloadCase.getAddress().getTownName()).isEqualTo("modified town name");
       assertThat(actualPayloadCase.getAddress().getEstabType()).isEqualTo("HOSPITAL");
 
       Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
@@ -225,7 +222,6 @@ public class AddressReceiverIT {
       assertThat(actualCase.getAddressLine1()).isEqualTo("modified address line 1");
       assertThat(actualCase.getAddressLine2()).isEqualTo("modified address line 2");
       assertThat(actualCase.getAddressLine3()).isEqualTo("modified address line 3");
-      assertThat(actualCase.getTownName()).isEqualTo("modified town name");
       assertThat(actualCase.getOrganisationName()).isEqualTo("modified org name");
       assertThat(actualCase.getEstabType()).isEqualTo("HOSPITAL");
 
