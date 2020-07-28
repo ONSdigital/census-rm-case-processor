@@ -24,6 +24,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
@@ -43,6 +44,8 @@ import uk.gov.ons.census.casesvc.utility.ObjectMapperFactory;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class SampleReceiverIT {
   private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
+  private static final String BULK_PROCESSING_EVENT_CHANNEL = "AR"; // Address Resolution
+  private static final String CREATE_BULK_CASE_SAMPLE_RECEIVED = "Create bulk case sample received";
 
   @Value("${queueconfig.inbound-queue}")
   private String inboundQueue;
@@ -56,6 +59,9 @@ public class SampleReceiverIT {
   @Value("${queueconfig.action-scheduler-queue}")
   private String actionSchedulerQueue;
 
+  @Value("${queueconfig.case-updated-queue}")
+  private String caseUpdatedQueueName;
+
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
   @Autowired private CaseRepository caseRepository;
   @Autowired private EventRepository eventRepository;
@@ -68,6 +74,7 @@ public class SampleReceiverIT {
     rabbitQueueHelper.purgeQueue(rhCaseQueue);
     rabbitQueueHelper.purgeQueue(rhUacQueue);
     rabbitQueueHelper.purgeQueue(actionSchedulerQueue);
+    rabbitQueueHelper.purgeQueue(caseUpdatedQueueName);
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
@@ -121,6 +128,74 @@ public class SampleReceiverIT {
       List<Event> eventList = eventRepository.findAll();
       assertThat(eventList.size()).isEqualTo(1);
       Event actualEvent = eventList.get(0);
+
+      CreateCaseSample actualcreateCaseSample =
+          new ObjectMapper().readValue(actualEvent.getEventPayload(), CreateCaseSample.class);
+
+      assertThat(actualcreateCaseSample).isEqualTo(createCaseSample);
+    }
+  }
+
+  @Test
+  public void testBulkProcessedNewAddresses() throws Exception {
+    try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue);
+        QueueSpy rhUacQueueSpy = rabbitQueueHelper.listen(rhUacQueue);
+        QueueSpy actionSchedulerQueueSpy = rabbitQueueHelper.listen(actionSchedulerQueue);
+        QueueSpy fieldOutboundQueue = rabbitQueueHelper.listen(caseUpdatedQueueName)) {
+      // GIVEN
+      CreateCaseSample createCaseSample = new CreateCaseSample();
+      createCaseSample.setAddressType("HH");
+      createCaseSample.setPostcode("ABC123");
+      createCaseSample.setRegion("E12000009");
+      createCaseSample.setTreatmentCode("HH_LF3R2E");
+      createCaseSample.setCeExpectedCapacity(null);
+      createCaseSample.setSecureEstablishment(0);
+      createCaseSample.setBulkProcessed(true);
+      // WHEN
+      rabbitQueueHelper.sendMessage(inboundQueue, createCaseSample);
+
+      // THEN
+      ResponseManagementEvent responseManagementEvent =
+          rhCaseQueueSpy.checkExpectedMessageReceived();
+      assertEquals(EventTypeDTO.CASE_CREATED, responseManagementEvent.getEvent().getType());
+      assertThat(responseManagementEvent.getPayload().getCollectionCase().getCreatedDateTime())
+          .isNotNull();
+      assertThat(responseManagementEvent.getPayload().getCollectionCase().getLastUpdated())
+          .isNotNull();
+
+      ResponseManagementEvent responseManagementEventToField =
+          fieldOutboundQueue.checkExpectedMessageReceived();
+
+      assertThat(responseManagementEventToField.getPayload().getMetadata()).isNotNull();
+      assertEquals(
+          ActionInstructionType.CREATE,
+          responseManagementEventToField.getPayload().getMetadata().getFieldDecision());
+      assertEquals(
+          EventTypeDTO.SAMPLE_LOADED,
+          responseManagementEventToField.getPayload().getMetadata().getCauseEventType());
+
+      rhUacQueueSpy.checkMessageIsNotReceived(5);
+
+      List<EventTypeDTO> eventTypesSeenDTO = new LinkedList<>();
+      responseManagementEvent = actionSchedulerQueueSpy.checkExpectedMessageReceived();
+      eventTypesSeenDTO.add(responseManagementEvent.getEvent().getType());
+
+      assertThat(eventTypesSeenDTO, containsInAnyOrder(EventTypeDTO.CASE_CREATED));
+
+      List<Case> caseList = caseRepository.findAll();
+      assertEquals(1, caseList.size());
+      assertEquals("ABC123", caseList.get(0).getPostcode());
+      assertNull(caseList.get(0).getCeExpectedCapacity());
+      assertThat(caseList.get(0).getCreatedDateTime()).isNotNull();
+      assertThat(caseList.get(0).getLastUpdated()).isNotNull();
+
+      List<Event> eventList = eventRepository.findAll();
+      assertThat(eventList.size()).isEqualTo(1);
+      Event actualEvent = eventList.get(0);
+      assertEquals(actualEvent.getEventChannel(), BULK_PROCESSING_EVENT_CHANNEL);
+      assertEquals(actualEvent.getEventDescription(), CREATE_BULK_CASE_SAMPLE_RECEIVED);
+
+      assertEquals(uacQidLinkRepository.count(), 0);
 
       CreateCaseSample actualcreateCaseSample =
           objectMapper.readValue(actualEvent.getEventPayload(), CreateCaseSample.class);

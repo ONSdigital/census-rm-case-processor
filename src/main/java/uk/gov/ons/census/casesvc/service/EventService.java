@@ -2,10 +2,12 @@ package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.utility.EventHelper.createEventDTO;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
 import java.time.OffsetDateTime;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
+import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
@@ -18,6 +20,9 @@ import uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper;
 public class EventService {
 
   public static final String CREATE_CASE_SAMPLE_RECEIVED = "Create case sample received";
+  private static final String CREATE_BULK_CASE_SAMPLE_RECEIVED = "Create bulk case sample received";
+  private static final String BULK_PROCESSING_EVENT_CHANNEL = "AR"; // Address Resolution
+  private static final String BULK_PROCESSING_EVENT_SOURCE = "RM";
 
   private final CaseService caseService;
   private final UacService uacService;
@@ -35,22 +40,39 @@ public class EventService {
     int questionnaireType =
         QuestionnaireTypeHelper.calculateQuestionnaireType(
             caze.getCaseType(), caze.getRegion(), caze.getAddressLevel());
-    UacQidLink uacQidLink = uacService.buildUacQidLink(caze, questionnaireType);
-    uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
-    caseService.saveCaseAndEmitCaseCreatedEvent(caze);
+    if (createCaseSample.isBulkProcessed()) {
+      caseService.saveCaseAndEmitCaseCreatedEvent(
+          caze, buildMetadata(EventTypeDTO.SAMPLE_LOADED, ActionInstructionType.CREATE));
 
-    eventLogger.logCaseEvent(
-        caze,
-        OffsetDateTime.now(),
-        CREATE_CASE_SAMPLE_RECEIVED,
-        EventType.SAMPLE_LOADED,
-        createEventDTO(EventTypeDTO.SAMPLE_LOADED),
-        convertObjectToJson(createCaseSample),
-        messageTimestamp);
-
-    if (QuestionnaireTypeHelper.isQuestionnaireWelsh(caze.getTreatmentCode())) {
-      uacQidLink = uacService.buildUacQidLink(caze, 3);
+      eventLogger.logCaseEvent(
+          caze,
+          OffsetDateTime.now(),
+          CREATE_BULK_CASE_SAMPLE_RECEIVED,
+          EventType.SAMPLE_LOADED,
+          createEventDTO(
+              EventTypeDTO.SAMPLE_LOADED,
+              BULK_PROCESSING_EVENT_CHANNEL,
+              BULK_PROCESSING_EVENT_SOURCE),
+          convertObjectToJson(createCaseSample),
+          messageTimestamp);
+    } else {
+      UacQidLink uacQidLink = uacService.buildUacQidLink(caze, questionnaireType);
       uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
+      caseService.saveCaseAndEmitCaseCreatedEvent(caze);
+
+      eventLogger.logCaseEvent(
+          caze,
+          OffsetDateTime.now(),
+          CREATE_CASE_SAMPLE_RECEIVED,
+          EventType.SAMPLE_LOADED,
+          createEventDTO(EventTypeDTO.SAMPLE_LOADED),
+          convertObjectToJson(createCaseSample),
+          messageTimestamp);
+
+      if (QuestionnaireTypeHelper.isQuestionnaireWelsh(caze.getTreatmentCode())) {
+        uacQidLink = uacService.buildUacQidLink(caze, 3);
+        uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
+      }
     }
   }
 
