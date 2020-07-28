@@ -89,7 +89,7 @@ censusconfig:
 uprnconfig:
   dummyuprnprefix: 999
 
-approvedlistofgovernmentauthorisedpremises: >
+estabtypes: >
   HALL OF RESIDENCE,
   CARE HOME,
   HOSPITAL,

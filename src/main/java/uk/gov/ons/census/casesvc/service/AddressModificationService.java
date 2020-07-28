@@ -22,7 +22,7 @@ public class AddressModificationService {
   public AddressModificationService(
       CaseService caseService,
       EventLogger eventLogger,
-      @Value("${approvedlistofgovernmentauthorisedpremises}") Set<String> estabTypes) {
+      @Value("${estabtypes}") Set<String> estabTypes) {
     this.caseService = caseService;
     this.eventLogger = eventLogger;
     this.estabTypes = estabTypes;
