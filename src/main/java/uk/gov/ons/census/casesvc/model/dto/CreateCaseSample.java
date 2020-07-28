@@ -34,4 +34,5 @@ public class CreateCaseSample {
   private UUID actionPlanId;
   private Integer secureEstablishment;
   private String printBatch;
+  private boolean bulkProcessed;
 }
