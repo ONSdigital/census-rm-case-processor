@@ -26,10 +26,6 @@ spring:
     port: 6672
     virtualhost: /
 
-  cloud:
-    gcp:
-      pubsub:
-        project-id: aims-new-address-project
 
 queueconfig:
   inbound-queue: case.sample.inbound

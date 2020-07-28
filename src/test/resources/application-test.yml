@@ -9,6 +9,8 @@ spring:
     gcp:
       pubsub:
         emulator-host: localhost:18538
+#        Does this even need to be here?
+        project-id: aims-new-address-project
 
 uacservice:
   connection:
