@@ -21,7 +21,7 @@ public class EventService {
 
   public static final String CREATE_CASE_SAMPLE_RECEIVED = "Create case sample received";
   private static final String CREATE_BULK_CASE_SAMPLE_RECEIVED = "Create bulk case sample received";
-  private static final String BULK_PROCESSING_EVENT_CHANNEL = "AR";
+  private static final String BULK_PROCESSING_EVENT_CHANNEL = "AR"; // Address Resolution
   private static final String BULK_PROCESSING_EVENT_SOURCE = "RM";
 
   private final CaseService caseService;
