@@ -46,7 +46,7 @@ public class NewAddressReportedService {
   @Value("${censusconfig.actionplanid}")
   private UUID censusActionPlanId;
 
-  @Value("${uprnconfig.dummyuprnxprefix}")
+  @Value("${uprnconfig.dummyuprnprefix}")
   private String dummyUprnPrefix;
 
   @Value("${pubsub.publishtimeout}")

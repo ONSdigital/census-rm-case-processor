@@ -1,21 +1,15 @@
 package uk.gov.ons.census.casesvc.testutil;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import org.springframework.cloud.gcp.pubsub.core.PubSubTemplate;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
+import uk.gov.ons.census.casesvc.utility.ObjectMapperFactory;
 
 public class PubSubHelper {
-  private static final ObjectMapper objectMapper = new ObjectMapper();
-
-  static {
-    objectMapper.registerModule(new JavaTimeModule());
-    objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-  }
+  private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
 
   public static BlockingQueue<ResponseManagementEvent> subscribe(
       PubSubTemplate pubSubTemplate, String subscription) {

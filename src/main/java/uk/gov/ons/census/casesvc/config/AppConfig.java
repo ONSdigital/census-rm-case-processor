@@ -61,11 +61,7 @@ public class AppConfig {
 
   @Bean
   public JacksonPubSubMessageConverter jacksonPubSubMessageConverter() {
-    ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.registerModule(new JavaTimeModule());
-    objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    return new JacksonPubSubMessageConverter(objectMapper);
+    return new JacksonPubSubMessageConverter(ObjectMapperFactory.objectMapper());
   }
 
   @PostConstruct
