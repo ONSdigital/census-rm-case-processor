@@ -1,9 +1,5 @@
 package uk.gov.ons.census.casesvc.config;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.TimeZone;
 import javax.annotation.PostConstruct;
 import ma.glasnost.orika.MapperFacade;
@@ -17,6 +13,7 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import uk.gov.ons.census.casesvc.utility.ObjectMapperFactory;
 
 @Configuration
 @EnableScheduling
@@ -32,11 +29,7 @@ public class AppConfig {
 
   @Bean
   public Jackson2JsonMessageConverter messageConverter() {
-    ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.registerModule(new JavaTimeModule());
-    objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    return new Jackson2JsonMessageConverter(objectMapper);
+    return new Jackson2JsonMessageConverter(ObjectMapperFactory.objectMapper());
   }
 
   @Bean
