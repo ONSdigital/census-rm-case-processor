@@ -46,7 +46,7 @@ public class NewAddressReportedService {
   @Value("${censusconfig.actionplanid}")
   private UUID censusActionPlanId;
 
-  @Value("${uprnconfig.dummyuprnprefix}")
+  @Value("${uprnconfig.dummyuprnxprefix}")
   private String dummyUprnPrefix;
 
   @Value("${pubsub.publishtimeout}")
@@ -360,7 +360,6 @@ public class NewAddressReportedService {
     address.setTownName(sourceCollectionCase.getAddress().getTownName());
     address.setPostcode(sourceCollectionCase.getAddress().getPostcode());
     address.setAddressType(sourceCollectionCase.getAddress().getAddressType());
-    address.setAddressLevel(sourceCollectionCase.getAddress().getAddressLevel());
     address.setAddressLevel(sourceCollectionCase.getAddress().getAddressLevel());
     address.setLatitude(sourceCollectionCase.getAddress().getLatitude());
     address.setLongitude(sourceCollectionCase.getAddress().getLongitude());
