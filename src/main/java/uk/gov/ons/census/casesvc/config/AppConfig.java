@@ -25,6 +25,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Configuration
 @EnableScheduling
 public class AppConfig {
+
   @Bean
   public RabbitTemplate rabbitTemplate(
       ConnectionFactory connectionFactory, Jackson2JsonMessageConverter messageConverter) {

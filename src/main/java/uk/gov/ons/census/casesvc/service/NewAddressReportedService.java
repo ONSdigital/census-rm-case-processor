@@ -370,6 +370,7 @@ public class NewAddressReportedService {
     collectionCase.setId(sourceCollectionCase.getId());
     collectionCase.setCaseType(sourceCollectionCase.getCaseType());
     collectionCase.setAddress(address);
+    collectionCase.setSurvey("CENSUS");
 
     NewAddress newAddress = new NewAddress();
     newAddress.setCollectionCase(collectionCase);
