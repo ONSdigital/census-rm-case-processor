@@ -12,16 +12,21 @@ public class EventHelper {
   private static final String EVENT_CHANNEL = "RM";
   private static final String FIELD_CHANNEL = "FIELD";
 
-  public static EventDTO createEventDTO(EventTypeDTO eventType) {
+  public static EventDTO createEventDTO(
+      EventTypeDTO eventType, String event_channel, String event_source) {
     EventDTO eventDTO = new EventDTO();
 
-    eventDTO.setChannel(EVENT_CHANNEL);
-    eventDTO.setSource(EVENT_SOURCE);
+    eventDTO.setChannel(event_channel);
+    eventDTO.setSource(event_source);
     eventDTO.setDateTime(OffsetDateTime.now());
     eventDTO.setTransactionId(UUID.randomUUID());
     eventDTO.setType(eventType);
 
     return eventDTO;
+  }
+
+  public static EventDTO createEventDTO(EventTypeDTO eventType) {
+    return createEventDTO(eventType, EVENT_CHANNEL, EVENT_SOURCE);
   }
 
   public static boolean isEventChannelField(ResponseManagementEvent event) {

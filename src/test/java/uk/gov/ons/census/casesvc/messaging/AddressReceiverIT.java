@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.skyscreamer.jsonassert.JSONCompareMode.STRICT;
 import static org.springframework.data.domain.Sort.Direction.ASC;
 import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.*;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.createTestAddressModifiedJson;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.createTestAddressTypeChangeJson;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
@@ -36,11 +35,13 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.Address;
+import uk.gov.ons.census.casesvc.model.dto.AddressModification;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCaseCaseId;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.InvalidAddress;
+import uk.gov.ons.census.casesvc.model.dto.ModifiedAddress;
 import uk.gov.ons.census.casesvc.model.dto.NewAddress;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
@@ -169,16 +170,88 @@ public class AddressReceiverIT {
   }
 
   @Test
-  public void testAddressModifiedEventTypeLoggedOnly() throws Exception {
-    PayloadDTO payload = new PayloadDTO();
-    payload.setAddressModification(createTestAddressModifiedJson(TEST_CASE_ID));
+  public void testAddressModifiedEventType() throws Exception {
+    try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
+      // GIVEN
+      EasyRandom easyRandom = new EasyRandom();
+      Case caze = easyRandom.nextObject(Case.class);
+      caze.setCaseId(TEST_CASE_ID);
+      caze.setSurvey("CENSUS");
+      caze.setUacQidLinks(null);
+      caze.setEvents(null);
+      caze.setAddressInvalid(false);
+      caze = caseRepository.saveAndFlush(caze);
 
-    testEventTypeLoggedOnly(
-        payload,
-        JsonHelper.convertObjectToJson(payload.getAddressModification()),
-        ADDRESS_MODIFIED,
-        EventType.ADDRESS_MODIFIED,
-        "Address modified");
+      ResponseManagementEvent managementEvent = new ResponseManagementEvent();
+      managementEvent.setEvent(new EventDTO());
+      managementEvent.getEvent().setDateTime(OffsetDateTime.now());
+      managementEvent.getEvent().setChannel("Test channel");
+      managementEvent.getEvent().setSource("Test source");
+      managementEvent.getEvent().setType(ADDRESS_MODIFIED);
+      managementEvent.setPayload(new PayloadDTO());
+      managementEvent.getPayload().setAddressModification(new AddressModification());
+      managementEvent
+          .getPayload()
+          .getAddressModification()
+          .setCollectionCase(new CollectionCaseCaseId());
+      managementEvent
+          .getPayload()
+          .getAddressModification()
+          .getCollectionCase()
+          .setId(caze.getCaseId());
+      ModifiedAddress newAddress = new ModifiedAddress();
+      managementEvent.getPayload().getAddressModification().setNewAddress(newAddress);
+      newAddress.setAddressLine1(Optional.of("modified address line 1"));
+      newAddress.setAddressLine2(Optional.of("modified address line 2"));
+      newAddress.setAddressLine3(Optional.of("modified address line 3"));
+      newAddress.setOrganisationName(Optional.of("modified org name"));
+      newAddress.setEstabType(Optional.of("HOSPITAL"));
+
+      String json = convertObjectToJson(managementEvent);
+      Message message =
+          MessageBuilder.withBody(json.getBytes())
+              .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+              .build();
+
+      // WHEN
+      rabbitQueueHelper.sendMessage(addressReceiver, message);
+
+      // THEN
+
+      // check the emitted eventDTO
+      ResponseManagementEvent responseManagementEvent =
+          rhCaseQueueSpy.checkExpectedMessageReceived();
+
+      assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_UPDATED);
+      CollectionCase actualPayloadCase = responseManagementEvent.getPayload().getCollectionCase();
+      assertThat(actualPayloadCase.getId()).isEqualTo(caze.getCaseId());
+
+      assertThat(actualPayloadCase.getAddress().getAddressLine1())
+          .isEqualTo("modified address line 1");
+      assertThat(actualPayloadCase.getAddress().getAddressLine2())
+          .isEqualTo("modified address line 2");
+      assertThat(actualPayloadCase.getAddress().getAddressLine3())
+          .isEqualTo("modified address line 3");
+      assertThat(actualPayloadCase.getAddress().getOrganisationName())
+          .isEqualTo("modified org name");
+      assertThat(actualPayloadCase.getAddress().getEstabType()).isEqualTo("HOSPITAL");
+
+      Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
+      assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
+
+      assertThat(actualCase.getAddressLine1()).isEqualTo("modified address line 1");
+      assertThat(actualCase.getAddressLine2()).isEqualTo("modified address line 2");
+      assertThat(actualCase.getAddressLine3()).isEqualTo("modified address line 3");
+      assertThat(actualCase.getOrganisationName()).isEqualTo("modified org name");
+      assertThat(actualCase.getEstabType()).isEqualTo("HOSPITAL");
+
+      // check database for log eventDTO
+      List<Event> events = eventRepository.findAll();
+      assertThat(events.size()).isEqualTo(1);
+      Event event = events.get(0);
+      assertThat(event.getEventDescription()).isEqualTo("Address modified");
+      assertThat(event.getEventType()).isEqualTo(EventType.ADDRESS_MODIFIED);
+    }
   }
 
   @Test

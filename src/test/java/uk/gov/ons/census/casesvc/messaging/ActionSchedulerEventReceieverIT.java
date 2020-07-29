@@ -29,12 +29,14 @@ import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
+import uk.gov.ons.census.casesvc.utility.ObjectMapperFactory;
 
 @ContextConfiguration
 @ActiveProfiles("test")
 @SpringBootTest
 @RunWith(SpringJUnit4ClassRunner.class)
 public class ActionSchedulerEventReceieverIT {
+  private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final long TEST_CASE_REF = 1234567890L;
   private static final UUID TEST_ACTION_RULE_ID = UUID.randomUUID();
@@ -104,7 +106,6 @@ public class ActionSchedulerEventReceieverIT {
     assertThat(event.getType().toString()).isEqualTo(actualEvent.getEventType().toString());
     assertThat(event.getDateTime()).isEqualTo(actualEvent.getEventDate());
 
-    ObjectMapper objectMapper = new ObjectMapper();
     PayloadDTO actualPayload =
         objectMapper.readValue(actualEvent.getEventPayload(), PayloadDTO.class);
     assertThat(TEST_CASE_REF).isEqualTo(actualPayload.getPrintCaseSelected().getCaseRef());

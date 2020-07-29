@@ -42,13 +42,14 @@ import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 import uk.gov.ons.census.casesvc.testutil.QueueSpy;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
+import uk.gov.ons.census.casesvc.utility.ObjectMapperFactory;
 
 @ContextConfiguration
 @ActiveProfiles("test")
 @SpringBootTest
 @RunWith(SpringJUnit4ClassRunner.class)
 public class CCSPropertyListedIT {
-
+  private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final String CCS_PROPERTY_LISTED_CHANNEL = "FIELD";
   private static final String CCS_PROPERTY_LISTED_SOURCE = "FIELDWORK_GATEWAY";
@@ -246,7 +247,6 @@ public class CCSPropertyListedIT {
     assertThat(event.getEventType()).isEqualTo(EventType.CCS_ADDRESS_LISTED);
     assertThat(event.getEventDescription()).isEqualTo("CCS Address Listed");
 
-    ObjectMapper objectMapper = new ObjectMapper();
     CCSPropertyDTO actualCCSPropertyDTO =
         objectMapper.readValue(event.getEventPayload(), CCSPropertyDTO.class);
 
