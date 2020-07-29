@@ -89,6 +89,10 @@ censusconfig:
 uprnconfig:
   dummyuprnprefix: 999
 
+pubsub:
+  publishtimeout: 30  # In seconds
+  aims-new-address-topic: aims-new-address-topic
+
 estabtypes: >
   HALL OF RESIDENCE,
   CARE HOME,

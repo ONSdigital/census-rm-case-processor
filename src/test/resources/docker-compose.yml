@@ -21,6 +21,12 @@ services:
       - ./rabbitmq.config:/etc/rabbitmq/rabbitmq.config:ro
       - ./definitions.json:/opt/definitions.json:ro
 
+  pubsub-emulator:
+    container_name: pubsub-emulator-case-it
+    image: eu.gcr.io/census-rm-ci/rm/gcloud-pubsub-emulator:latest
+    ports:
+      - "18538:8538"
+
   uac-qid:
     container_name: uac-qid-case-it
     image: eu.gcr.io/census-rm-ci/rm/census-rm-uac-qid-service:latest

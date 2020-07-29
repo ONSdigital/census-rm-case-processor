@@ -5,6 +5,12 @@ spring:
   rabbitmq:
     port: 35672
 
+  cloud:
+    gcp:
+      pubsub:
+        emulator-host: localhost:18538
+        project-id: aims-new-address-project
+
 uacservice:
   connection:
     port: 18164

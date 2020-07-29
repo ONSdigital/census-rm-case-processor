@@ -11,6 +11,9 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,11 +25,14 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.gcp.pubsub.core.PubSubTemplate;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.Address;
 import uk.gov.ons.census.casesvc.model.dto.AddressModification;
@@ -45,6 +51,7 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
+import uk.gov.ons.census.casesvc.testutil.PubSubHelper;
 import uk.gov.ons.census.casesvc.testutil.QueueSpy;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 import uk.gov.ons.census.casesvc.utility.JsonHelper;
@@ -55,6 +62,7 @@ import uk.gov.ons.census.casesvc.utility.JsonHelper;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class AddressReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
+  private static final String AIMS_SUBSCRIPTION = "aims-subscription";
 
   @Value("${queueconfig.address-inbound-queue}")
   private String addressReceiver;
@@ -68,10 +76,20 @@ public class AddressReceiverIT {
   @Value("${censusconfig.actionplanid}")
   private UUID censusActionPlanId;
 
+  @Value("${spring.cloud.gcp.pubsub.project-id}")
+  private String aimsProjectId;
+
+  @Value("${pubsub.aims-new-address-topic}")
+  private String aimsNewAddressTopic;
+
+  @Value("${spring.cloud.gcp.pubsub.emulator-host}")
+  private String pubsubEmulatorHost;
+
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
   @Autowired private CaseRepository caseRepository;
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
   @Autowired private EventRepository eventRepository;
+  @Autowired private PubSubTemplate pubSubTemplate;
 
   @Before
   @Transactional
@@ -81,6 +99,8 @@ public class AddressReceiverIT {
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
+
+    setupPubsubTopicAndSubscription();
   }
 
   @Test
@@ -247,6 +267,7 @@ public class AddressReceiverIT {
         "Address type changed");
   }
 
+  // TEST FAILING? Try running `gcloud auth application-default revoke`
   @Test
   public void testNewAddressCreatesSkeletonCase() throws Exception {
     try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
@@ -278,6 +299,7 @@ public class AddressReceiverIT {
       rabbitQueueHelper.sendMessage(addressReceiver, responseManagementEvent);
 
       // THEN
+      // TEST FAILING? Try running `gcloud auth application-default revoke`
       ResponseManagementEvent actualResponseManagementEvent =
           rhCaseQueueSpy.checkExpectedMessageReceived();
 
@@ -301,9 +323,18 @@ public class AddressReceiverIT {
       Event event = events.get(0);
       assertThat(event.getEventDescription()).isEqualTo("New Address reported");
       assertThat(event.getEventType()).isEqualTo(EventType.NEW_ADDRESS_REPORTED);
+
+      // check pubsub for message to AIMS
+      ResponseManagementEvent rmEventToAims =
+          PubSubHelper.subscribe(pubSubTemplate, AIMS_SUBSCRIPTION).poll(20, TimeUnit.SECONDS);
+      assertThat(rmEventToAims.getEvent().getType()).isEqualTo(NEW_ADDRESS_ENHANCED);
+      assertThat(
+              rmEventToAims.getPayload().getNewAddress().getCollectionCase().getAddress().getUprn())
+          .startsWith("999");
     }
   }
 
+  // TEST FAILING? Try running `gcloud auth application-default revoke`
   @Test
   public void testNewAddressCreatedFromBasicEventAndSourceCase() throws Exception {
     try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
@@ -349,6 +380,7 @@ public class AddressReceiverIT {
       rabbitQueueHelper.sendMessage(addressReceiver, responseManagementEvent);
 
       // THEN
+      // TEST FAILING? Try running `gcloud auth application-default revoke`
       ResponseManagementEvent actualResponseManagementEvent =
           rhCaseQueueSpy.checkExpectedMessageReceived();
 
@@ -395,6 +427,14 @@ public class AddressReceiverIT {
       Event event = events.get(0);
       assertThat(event.getEventDescription()).isEqualTo("New Address reported");
       assertThat(event.getEventType()).isEqualTo(EventType.NEW_ADDRESS_REPORTED);
+
+      // check pubsub for message to AIMS
+      ResponseManagementEvent rmEventToAims =
+          PubSubHelper.subscribe(pubSubTemplate, AIMS_SUBSCRIPTION).poll(20, TimeUnit.SECONDS);
+      assertThat(rmEventToAims.getEvent().getType()).isEqualTo(NEW_ADDRESS_ENHANCED);
+      assertThat(
+              rmEventToAims.getPayload().getNewAddress().getCollectionCase().getAddress().getUprn())
+          .startsWith("999");
     }
   }
 
@@ -429,7 +469,7 @@ public class AddressReceiverIT {
       address.setOrganisationName("Super Org");
       address.setLatitude("12.34");
       address.setLongitude("56.78");
-      address.setUprn("uprn01");
+      address.setUprn("uprn01"); // NOTE: This means no message to AIMS
 
       CollectionCase collectionCase = new CollectionCase();
       collectionCase.setId(UUID.randomUUID());
@@ -567,6 +607,84 @@ public class AddressReceiverIT {
 
       String actualEventPayloadJson = event.getEventPayload();
       JSONAssert.assertEquals(actualEventPayloadJson, expectedEventPayloadJson, STRICT);
+    }
+  }
+
+  @Data
+  @AllArgsConstructor
+  private class SubscriptionTopic {
+    private String topic;
+  }
+
+  private void setupPubsubTopicAndSubscription() {
+    RestTemplate restTemplate = new RestTemplate();
+
+    String subscriptionUrl =
+        "http://"
+            + pubsubEmulatorHost
+            + "/v1/projects/"
+            + aimsProjectId
+            + "/subscriptions/"
+            + AIMS_SUBSCRIPTION;
+
+    try {
+      restTemplate.delete(subscriptionUrl);
+    } catch (HttpClientErrorException exception) {
+      if (exception.getRawStatusCode() != 404) {
+        throw exception;
+      }
+    }
+
+    // There's no concept of a 'purge' with pubsub. Crudely, we have to delete, and in so doing
+    // we expose other problems with the timing of everything in the integration tests. Sleeps are
+    // unavoidable.
+    try {
+      Thread.sleep(500);
+    } catch (InterruptedException e) {
+      // Ignored
+    }
+
+    String topicUrl =
+        "http://"
+            + pubsubEmulatorHost
+            + "/v1/projects/"
+            + aimsProjectId
+            + "/topics/"
+            + aimsNewAddressTopic;
+
+    try {
+      restTemplate.delete(topicUrl);
+    } catch (HttpClientErrorException exception) {
+      if (exception.getRawStatusCode() != 404) {
+        throw exception;
+      }
+    }
+
+    // There's no concept of a 'purge' with pubsub. Crudely, we have to delete, and in so doing
+    // we expose other problems with the timing of everything in the integration tests. Sleeps are
+    // unavoidable.
+    try {
+      Thread.sleep(500);
+    } catch (InterruptedException e) {
+      // Ignored
+    }
+
+    try {
+      restTemplate.put(topicUrl, null);
+    } catch (HttpClientErrorException exception) {
+      if (exception.getRawStatusCode() != 409) {
+        throw exception;
+      }
+    }
+
+    try {
+      restTemplate.put(
+          subscriptionUrl,
+          new SubscriptionTopic("projects/" + aimsProjectId + "/topics/" + aimsNewAddressTopic));
+    } catch (HttpClientErrorException exception) {
+      if (exception.getRawStatusCode() != 409) {
+        throw exception;
+      }
     }
   }
 }
