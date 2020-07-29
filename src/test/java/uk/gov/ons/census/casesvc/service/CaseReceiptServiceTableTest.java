@@ -44,7 +44,6 @@ public class CaseReceiptServiceTableTest {
   public static Collection<Object[]> data() {
     Object[][] ruleToTest = {
       {new Key("HH", "U", "HH"), new Expectation("N", "Y", CANCEL)},
-      {new Key("HH", "U", "Ind"), new Expectation("N", "Y", CANCEL)},
       {new Key("HH", "U", "CE1"), new Expectation("N", "N", null)},
       {new Key("HH", "U", "Cont"), new Expectation("N", "N", null)},
       {new Key("HI", "U", "HH"), new Expectation("N", "Y", null)},

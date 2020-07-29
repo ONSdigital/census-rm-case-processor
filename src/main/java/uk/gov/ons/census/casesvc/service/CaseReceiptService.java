@@ -43,7 +43,6 @@ public class CaseReceiptService {
     */
 
     rules.put(new Key("HH", "U", HH), receiptAndCancel);
-    rules.put(new Key("HH", "U", IND), receiptAndCancel);
     rules.put(new Key("HH", "U", CE1), noActionRequired);
     rules.put(new Key("HH", "U", CONT), noActionRequired);
     rules.put(new Key("HI", "U", HH), receiptCase);
