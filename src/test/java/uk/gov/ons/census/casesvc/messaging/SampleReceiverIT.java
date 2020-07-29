@@ -36,12 +36,14 @@ import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 import uk.gov.ons.census.casesvc.testutil.QueueSpy;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
+import uk.gov.ons.census.casesvc.utility.ObjectMapperFactory;
 
 @ContextConfiguration
 @ActiveProfiles("test")
 @SpringBootTest
 @RunWith(SpringJUnit4ClassRunner.class)
 public class SampleReceiverIT {
+  private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
   private static final String BULK_PROCESSING_EVENT_CHANNEL = "AR"; // Address Resolution
   private static final String CREATE_BULK_CASE_SAMPLE_RECEIVED = "Create bulk case sample received";
 
@@ -196,7 +198,7 @@ public class SampleReceiverIT {
       assertEquals(uacQidLinkRepository.count(), 0);
 
       CreateCaseSample actualcreateCaseSample =
-          new ObjectMapper().readValue(actualEvent.getEventPayload(), CreateCaseSample.class);
+          objectMapper.readValue(actualEvent.getEventPayload(), CreateCaseSample.class);
 
       assertThat(actualcreateCaseSample).isEqualTo(createCaseSample);
     }

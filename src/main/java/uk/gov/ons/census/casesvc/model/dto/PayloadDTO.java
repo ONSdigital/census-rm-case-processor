@@ -25,6 +25,6 @@ public class PayloadDTO {
   @JsonProperty("CCSProperty")
   private CCSPropertyDTO ccsProperty;
 
-  private JsonNode addressModification;
+  private AddressModification addressModification;
   private JsonNode addressTypeChange;
 }
