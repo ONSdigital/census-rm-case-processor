@@ -1,8 +1,6 @@
 package uk.gov.ons.census.casesvc.messaging;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import java.io.IOException;
@@ -16,17 +14,14 @@ import org.springframework.amqp.rabbit.support.ListenerExecutionFailedException;
 import uk.gov.ons.census.casesvc.client.ExceptionManagerClient;
 import uk.gov.ons.census.casesvc.model.dto.ExceptionReportResponse;
 import uk.gov.ons.census.casesvc.model.dto.SkippedMessage;
+import uk.gov.ons.census.casesvc.utility.ObjectMapperFactory;
 
 public class ManagedMessageRecoverer implements MessageRecoverer {
   private static final Logger log = LoggerFactory.getLogger(ManagedMessageRecoverer.class);
-  private static final ObjectMapper objectMapper;
+  private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
   private static final MessageDigest digest;
 
   static {
-    objectMapper = new ObjectMapper();
-    objectMapper.registerModule(new JavaTimeModule());
-    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
     try {
       digest = MessageDigest.getInstance("SHA-256");
     } catch (NoSuchAlgorithmException e) {

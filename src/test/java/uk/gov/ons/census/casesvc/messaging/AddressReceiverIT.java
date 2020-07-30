@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.skyscreamer.jsonassert.JSONCompareMode.STRICT;
 import static org.springframework.data.domain.Sort.Direction.ASC;
 import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.*;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.createTestAddressModifiedJson;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.createTestAddressTypeChangeJson;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
@@ -12,6 +11,9 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,18 +25,23 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.gcp.pubsub.core.PubSubTemplate;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.Address;
+import uk.gov.ons.census.casesvc.model.dto.AddressModification;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCaseCaseId;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.InvalidAddress;
+import uk.gov.ons.census.casesvc.model.dto.ModifiedAddress;
 import uk.gov.ons.census.casesvc.model.dto.NewAddress;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
@@ -44,6 +51,7 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
+import uk.gov.ons.census.casesvc.testutil.PubSubHelper;
 import uk.gov.ons.census.casesvc.testutil.QueueSpy;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 import uk.gov.ons.census.casesvc.utility.JsonHelper;
@@ -54,6 +62,7 @@ import uk.gov.ons.census.casesvc.utility.JsonHelper;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class AddressReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
+  private static final String AIMS_SUBSCRIPTION = "aims-subscription";
 
   @Value("${queueconfig.address-inbound-queue}")
   private String addressReceiver;
@@ -67,10 +76,20 @@ public class AddressReceiverIT {
   @Value("${censusconfig.actionplanid}")
   private UUID censusActionPlanId;
 
+  @Value("${spring.cloud.gcp.pubsub.project-id}")
+  private String aimsProjectId;
+
+  @Value("${pubsub.aims-new-address-topic}")
+  private String aimsNewAddressTopic;
+
+  @Value("${spring.cloud.gcp.pubsub.emulator-host}")
+  private String pubsubEmulatorHost;
+
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
   @Autowired private CaseRepository caseRepository;
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
   @Autowired private EventRepository eventRepository;
+  @Autowired private PubSubTemplate pubSubTemplate;
 
   @Before
   @Transactional
@@ -80,6 +99,8 @@ public class AddressReceiverIT {
     eventRepository.deleteAllInBatch();
     uacQidLinkRepository.deleteAllInBatch();
     caseRepository.deleteAllInBatch();
+
+    setupPubsubTopicAndSubscription();
   }
 
   @Test
@@ -149,16 +170,88 @@ public class AddressReceiverIT {
   }
 
   @Test
-  public void testAddressModifiedEventTypeLoggedOnly() throws Exception {
-    PayloadDTO payload = new PayloadDTO();
-    payload.setAddressModification(createTestAddressModifiedJson(TEST_CASE_ID));
+  public void testAddressModifiedEventType() throws Exception {
+    try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
+      // GIVEN
+      EasyRandom easyRandom = new EasyRandom();
+      Case caze = easyRandom.nextObject(Case.class);
+      caze.setCaseId(TEST_CASE_ID);
+      caze.setSurvey("CENSUS");
+      caze.setUacQidLinks(null);
+      caze.setEvents(null);
+      caze.setAddressInvalid(false);
+      caze = caseRepository.saveAndFlush(caze);
 
-    testEventTypeLoggedOnly(
-        payload,
-        JsonHelper.convertObjectToJson(payload.getAddressModification()),
-        ADDRESS_MODIFIED,
-        EventType.ADDRESS_MODIFIED,
-        "Address modified");
+      ResponseManagementEvent managementEvent = new ResponseManagementEvent();
+      managementEvent.setEvent(new EventDTO());
+      managementEvent.getEvent().setDateTime(OffsetDateTime.now());
+      managementEvent.getEvent().setChannel("Test channel");
+      managementEvent.getEvent().setSource("Test source");
+      managementEvent.getEvent().setType(ADDRESS_MODIFIED);
+      managementEvent.setPayload(new PayloadDTO());
+      managementEvent.getPayload().setAddressModification(new AddressModification());
+      managementEvent
+          .getPayload()
+          .getAddressModification()
+          .setCollectionCase(new CollectionCaseCaseId());
+      managementEvent
+          .getPayload()
+          .getAddressModification()
+          .getCollectionCase()
+          .setId(caze.getCaseId());
+      ModifiedAddress newAddress = new ModifiedAddress();
+      managementEvent.getPayload().getAddressModification().setNewAddress(newAddress);
+      newAddress.setAddressLine1(Optional.of("modified address line 1"));
+      newAddress.setAddressLine2(Optional.of("modified address line 2"));
+      newAddress.setAddressLine3(Optional.of("modified address line 3"));
+      newAddress.setOrganisationName(Optional.of("modified org name"));
+      newAddress.setEstabType(Optional.of("HOSPITAL"));
+
+      String json = convertObjectToJson(managementEvent);
+      Message message =
+          MessageBuilder.withBody(json.getBytes())
+              .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+              .build();
+
+      // WHEN
+      rabbitQueueHelper.sendMessage(addressReceiver, message);
+
+      // THEN
+
+      // check the emitted eventDTO
+      ResponseManagementEvent responseManagementEvent =
+          rhCaseQueueSpy.checkExpectedMessageReceived();
+
+      assertThat(responseManagementEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_UPDATED);
+      CollectionCase actualPayloadCase = responseManagementEvent.getPayload().getCollectionCase();
+      assertThat(actualPayloadCase.getId()).isEqualTo(caze.getCaseId());
+
+      assertThat(actualPayloadCase.getAddress().getAddressLine1())
+          .isEqualTo("modified address line 1");
+      assertThat(actualPayloadCase.getAddress().getAddressLine2())
+          .isEqualTo("modified address line 2");
+      assertThat(actualPayloadCase.getAddress().getAddressLine3())
+          .isEqualTo("modified address line 3");
+      assertThat(actualPayloadCase.getAddress().getOrganisationName())
+          .isEqualTo("modified org name");
+      assertThat(actualPayloadCase.getAddress().getEstabType()).isEqualTo("HOSPITAL");
+
+      Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
+      assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
+
+      assertThat(actualCase.getAddressLine1()).isEqualTo("modified address line 1");
+      assertThat(actualCase.getAddressLine2()).isEqualTo("modified address line 2");
+      assertThat(actualCase.getAddressLine3()).isEqualTo("modified address line 3");
+      assertThat(actualCase.getOrganisationName()).isEqualTo("modified org name");
+      assertThat(actualCase.getEstabType()).isEqualTo("HOSPITAL");
+
+      // check database for log eventDTO
+      List<Event> events = eventRepository.findAll();
+      assertThat(events.size()).isEqualTo(1);
+      Event event = events.get(0);
+      assertThat(event.getEventDescription()).isEqualTo("Address modified");
+      assertThat(event.getEventType()).isEqualTo(EventType.ADDRESS_MODIFIED);
+    }
   }
 
   @Test
@@ -174,6 +267,7 @@ public class AddressReceiverIT {
         "Address type changed");
   }
 
+  // TEST FAILING? Try running `gcloud auth application-default revoke`
   @Test
   public void testNewAddressCreatesSkeletonCase() throws Exception {
     try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
@@ -205,6 +299,7 @@ public class AddressReceiverIT {
       rabbitQueueHelper.sendMessage(addressReceiver, responseManagementEvent);
 
       // THEN
+      // TEST FAILING? Try running `gcloud auth application-default revoke`
       ResponseManagementEvent actualResponseManagementEvent =
           rhCaseQueueSpy.checkExpectedMessageReceived();
 
@@ -228,9 +323,18 @@ public class AddressReceiverIT {
       Event event = events.get(0);
       assertThat(event.getEventDescription()).isEqualTo("New Address reported");
       assertThat(event.getEventType()).isEqualTo(EventType.NEW_ADDRESS_REPORTED);
+
+      // check pubsub for message to AIMS
+      ResponseManagementEvent rmEventToAims =
+          PubSubHelper.subscribe(pubSubTemplate, AIMS_SUBSCRIPTION).poll(20, TimeUnit.SECONDS);
+      assertThat(rmEventToAims.getEvent().getType()).isEqualTo(NEW_ADDRESS_ENHANCED);
+      assertThat(
+              rmEventToAims.getPayload().getNewAddress().getCollectionCase().getAddress().getUprn())
+          .startsWith("999");
     }
   }
 
+  // TEST FAILING? Try running `gcloud auth application-default revoke`
   @Test
   public void testNewAddressCreatedFromBasicEventAndSourceCase() throws Exception {
     try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
@@ -276,6 +380,7 @@ public class AddressReceiverIT {
       rabbitQueueHelper.sendMessage(addressReceiver, responseManagementEvent);
 
       // THEN
+      // TEST FAILING? Try running `gcloud auth application-default revoke`
       ResponseManagementEvent actualResponseManagementEvent =
           rhCaseQueueSpy.checkExpectedMessageReceived();
 
@@ -322,6 +427,14 @@ public class AddressReceiverIT {
       Event event = events.get(0);
       assertThat(event.getEventDescription()).isEqualTo("New Address reported");
       assertThat(event.getEventType()).isEqualTo(EventType.NEW_ADDRESS_REPORTED);
+
+      // check pubsub for message to AIMS
+      ResponseManagementEvent rmEventToAims =
+          PubSubHelper.subscribe(pubSubTemplate, AIMS_SUBSCRIPTION).poll(20, TimeUnit.SECONDS);
+      assertThat(rmEventToAims.getEvent().getType()).isEqualTo(NEW_ADDRESS_ENHANCED);
+      assertThat(
+              rmEventToAims.getPayload().getNewAddress().getCollectionCase().getAddress().getUprn())
+          .startsWith("999");
     }
   }
 
@@ -356,7 +469,7 @@ public class AddressReceiverIT {
       address.setOrganisationName("Super Org");
       address.setLatitude("12.34");
       address.setLongitude("56.78");
-      address.setUprn("uprn01");
+      address.setUprn("uprn01"); // NOTE: This means no message to AIMS
 
       CollectionCase collectionCase = new CollectionCase();
       collectionCase.setId(UUID.randomUUID());
@@ -494,6 +607,84 @@ public class AddressReceiverIT {
 
       String actualEventPayloadJson = event.getEventPayload();
       JSONAssert.assertEquals(actualEventPayloadJson, expectedEventPayloadJson, STRICT);
+    }
+  }
+
+  @Data
+  @AllArgsConstructor
+  private class SubscriptionTopic {
+    private String topic;
+  }
+
+  private void setupPubsubTopicAndSubscription() {
+    RestTemplate restTemplate = new RestTemplate();
+
+    String subscriptionUrl =
+        "http://"
+            + pubsubEmulatorHost
+            + "/v1/projects/"
+            + aimsProjectId
+            + "/subscriptions/"
+            + AIMS_SUBSCRIPTION;
+
+    try {
+      restTemplate.delete(subscriptionUrl);
+    } catch (HttpClientErrorException exception) {
+      if (exception.getRawStatusCode() != 404) {
+        throw exception;
+      }
+    }
+
+    // There's no concept of a 'purge' with pubsub. Crudely, we have to delete, and in so doing
+    // we expose other problems with the timing of everything in the integration tests. Sleeps are
+    // unavoidable.
+    try {
+      Thread.sleep(500);
+    } catch (InterruptedException e) {
+      // Ignored
+    }
+
+    String topicUrl =
+        "http://"
+            + pubsubEmulatorHost
+            + "/v1/projects/"
+            + aimsProjectId
+            + "/topics/"
+            + aimsNewAddressTopic;
+
+    try {
+      restTemplate.delete(topicUrl);
+    } catch (HttpClientErrorException exception) {
+      if (exception.getRawStatusCode() != 404) {
+        throw exception;
+      }
+    }
+
+    // There's no concept of a 'purge' with pubsub. Crudely, we have to delete, and in so doing
+    // we expose other problems with the timing of everything in the integration tests. Sleeps are
+    // unavoidable.
+    try {
+      Thread.sleep(500);
+    } catch (InterruptedException e) {
+      // Ignored
+    }
+
+    try {
+      restTemplate.put(topicUrl, null);
+    } catch (HttpClientErrorException exception) {
+      if (exception.getRawStatusCode() != 409) {
+        throw exception;
+      }
+    }
+
+    try {
+      restTemplate.put(
+          subscriptionUrl,
+          new SubscriptionTopic("projects/" + aimsProjectId + "/topics/" + aimsNewAddressTopic));
+    } catch (HttpClientErrorException exception) {
+      if (exception.getRawStatusCode() != 409) {
+        throw exception;
+      }
     }
   }
 }
