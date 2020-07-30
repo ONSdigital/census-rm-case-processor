@@ -28,7 +28,10 @@ public class FulfilmentRequestService {
               "P_OR_I4", // HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NI_PRINT,
               "P_UAC_UACIP1", // INDIVIDUAL_UAC_ENGLAND_PRINT_LETTER
               "P_UAC_UACIP2B", // INDIVIDUAL_UAC_WALES_BILINGUAL_PRINT_LETTER
-              "P_UAC_UACIP4" // INDIVIDUAL_UAC_NI_PRINT_LETTER
+              "P_UAC_UACIP4", // INDIVIDUAL_UAC_NI_PRINT_LETTER
+              "P_UAC_UACIPA1", // INDIVIDUAL_UAC_ENGLAND_PRINT_LETTER_FROM_EQ
+              "P_UAC_UACIPA2B", // INDIVIDUAL_UAC_WALES_BILINGUAL_PRINT_LETTER_FROM_EQ
+              "P_UAC_UACIPA4" // INDIVIDUAL_UAC_NI_PRINT_LETTER_FROM_EQ
               ));
 
   private static final Set<String> individualResponseRequestCodes;
