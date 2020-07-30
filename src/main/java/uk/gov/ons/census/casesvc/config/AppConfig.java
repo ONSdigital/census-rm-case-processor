@@ -10,6 +10,10 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.cloud.gcp.pubsub.core.PubSubTemplate;
+import org.springframework.cloud.gcp.pubsub.support.PublisherFactory;
+import org.springframework.cloud.gcp.pubsub.support.SubscriberFactory;
+import org.springframework.cloud.gcp.pubsub.support.converter.JacksonPubSubMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -18,6 +22,7 @@ import uk.gov.ons.census.casesvc.utility.ObjectMapperFactory;
 @Configuration
 @EnableScheduling
 public class AppConfig {
+
   @Bean
   public RabbitTemplate rabbitTemplate(
       ConnectionFactory connectionFactory, Jackson2JsonMessageConverter messageConverter) {
@@ -42,6 +47,21 @@ public class AppConfig {
     MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
 
     return mapperFactory.getMapperFacade();
+  }
+
+  @Bean
+  public PubSubTemplate pubSubTemplate(
+      PublisherFactory publisherFactory,
+      SubscriberFactory subscriberFactory,
+      JacksonPubSubMessageConverter jacksonPubSubMessageConverter) {
+    PubSubTemplate pubSubTemplate = new PubSubTemplate(publisherFactory, subscriberFactory);
+    pubSubTemplate.setMessageConverter(jacksonPubSubMessageConverter);
+    return pubSubTemplate;
+  }
+
+  @Bean
+  public JacksonPubSubMessageConverter jacksonPubSubMessageConverter() {
+    return new JacksonPubSubMessageConverter(ObjectMapperFactory.objectMapper());
   }
 
   @PostConstruct
