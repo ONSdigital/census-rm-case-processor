@@ -47,7 +47,6 @@ queueconfig:
   fulfilment-confirmed-queue: case.fulfilmentConfirmed
   field-case-updated-queue: case.field.update
   consumers: 50
-  retry-attempts: 1
   retry-delay: 1000 #milliseconds
 
 ccsconfig:
