@@ -43,18 +43,28 @@ public class CaseReceiptService {
     */
 
     rules.put(new Key("HH", "U", HH), receiptAndCancel);
+    rules.put(new Key("HH", "U", CE1), noActionRequired);
     rules.put(new Key("HH", "U", CONT), noActionRequired);
+    rules.put(new Key("HI", "U", HH), receiptCase);
     rules.put(new Key("HI", "U", IND), receiptCase);
+    rules.put(new Key("HI", "U", CE1), noActionRequired);
+    rules.put(new Key("HI", "U", CONT), noActionRequired);
+    rules.put(new Key("CE", "E", HH), incrementAndUpdate);
     rules.put(new Key("CE", "E", IND), incrementAndUpdate);
     rules.put(new Key("CE", "E", CE1), receiptAndUpdate);
+    rules.put(new Key("CE", "E", CONT), noActionRequired);
+    rules.put(new Key("CE", "U", HH), ceUnitRule);
     rules.put(new Key("CE", "U", IND), ceUnitRule);
+    rules.put(new Key("CE", "U", CE1), noActionRequired);
+    rules.put(new Key("CE", "U", CONT), noActionRequired);
     rules.put(new Key("SPG", "E", HH), noActionRequired);
     rules.put(new Key("SPG", "E", IND), noActionRequired);
+    rules.put(new Key("SPG", "E", CE1), noActionRequired);
+    rules.put(new Key("SPG", "E", CONT), noActionRequired);
     rules.put(new Key("SPG", "U", HH), receiptAndCancel);
     rules.put(new Key("SPG", "U", IND), noActionRequired);
+    rules.put(new Key("SPG", "U", CE1), noActionRequired);
     rules.put(new Key("SPG", "U", CONT), noActionRequired);
-    // TODO Rules for missing combinations or make the default action "NoActionRequired"?
-    //  We need to be able to handle all combinations
   }
 
   public void receiptCase(UacQidLink uacQidLink, EventDTO causeEvent) {
