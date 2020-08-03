@@ -47,8 +47,7 @@ queueconfig:
   fulfilment-confirmed-queue: case.fulfilmentConfirmed
   field-case-updated-queue: case.field.update
   consumers: 50
-  retry-attempts: 3
-  retry-delay: 1000 #milliseconds
+  retry-delay: 3000 #milliseconds
 
 ccsconfig:
   action-plan-id: 38a48608-1c2a-4c2b-b7bc-cb52fcbb4927
@@ -66,7 +65,7 @@ uacservice:
 
   uacqid-cache-min: 500
   uacqid-fetch-count: 1000
-  uacqid-get-timeout: 5   #seconds
+  uacqid-get-timeout: 60   #seconds
 
 exceptionmanager:
   connection:
