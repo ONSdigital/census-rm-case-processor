@@ -33,9 +33,6 @@ public class MessageConsumerConfig {
   @Value("${queueconfig.consumers}")
   private int consumers;
 
-  @Value("${queueconfig.retry-attempts}")
-  private int retryAttempts;
-
   @Value("${queueconfig.retry-delay}")
   private int retryDelay;
 
@@ -338,9 +335,12 @@ public class MessageConsumerConfig {
             "Case Processor",
             queueName);
 
+    // The retries don't seem to respect the transactions and we can end up with a messed up
+    // state involving Rabbit messages being emitted but DB changes not being committed.
+    // A single retry seems to work, but more than that is problematic.
     RetryOperationsInterceptor retryOperationsInterceptor =
         RetryInterceptorBuilder.stateless()
-            .maxAttempts(retryAttempts)
+            .maxAttempts(1) // DO NOT INCREASE TO MORE THAN 1 - NASTY SPRING BUG
             .backOffPolicy(fixedBackOffPolicy)
             .recoverer(managedMessageRecoverer)
             .build();
