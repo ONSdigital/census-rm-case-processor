@@ -340,7 +340,7 @@ public class MessageConsumerConfig {
     // A single retry seems to work, but more than that is problematic.
     RetryOperationsInterceptor retryOperationsInterceptor =
         RetryInterceptorBuilder.stateless()
-            .maxAttempts(1) // DO NOT INCREASE TO MORE THAN 1 - NASTY SPRING BUG
+            .maxAttempts(2) // DO NOT INCREASE TO MORE THAN 2 - NASTY SPRING BUG
             .backOffPolicy(fixedBackOffPolicy)
             .recoverer(managedMessageRecoverer)
             .build();
