@@ -217,6 +217,7 @@ public class UndeliveredMailReceiverTest {
     caze.setAddressInvalid(false);
     caze.setRegion("E123456");
     caze.setCaseType("CE");
+    caze.setFieldCoordinatorId("fieldCord123");
     underTest.receiveMessage(message);
 
     // Then
@@ -227,5 +228,42 @@ public class UndeliveredMailReceiverTest {
         .saveCaseAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture(), eq(expectedMetadata));
     Case actualCase = caseArgumentCaptor.getValue();
     assertThat(actualCase).isEqualTo(caze);
+  }
+
+  @Test
+  public void testUpdateMessageNotSentForCasesMissingFieldCoordinatorId() {
+    ResponseManagementEvent event = new ResponseManagementEvent();
+    event.setEvent(new EventDTO());
+    event.getEvent().setDateTime(OffsetDateTime.now());
+    event.getEvent().setType(EventTypeDTO.UNDELIVERED_MAIL_REPORTED);
+    event.setPayload(new PayloadDTO());
+    event.getPayload().setFulfilmentInformation(new FulfilmentInformation());
+    event.getPayload().getFulfilmentInformation().setCaseRef(Long.toString(TEST_CASE_REF));
+
+    Case caze = new Case();
+    UacQidLink uacQidLink = new UacQidLink();
+    uacQidLink.setCaze(caze);
+
+    UacService uacService = mock(UacService.class);
+    CaseService caseService = mock(CaseService.class);
+    EventLogger eventLogger = mock(EventLogger.class);
+    UndeliveredMailReceiver underTest =
+        new UndeliveredMailReceiver(uacService, caseService, eventLogger);
+    Message<ResponseManagementEvent> message = constructMessageWithValidTimeStamp(event);
+
+    // Given
+    when(caseService.getCaseByCaseRef(eq(TEST_CASE_REF))).thenReturn(caze);
+
+    // When
+    caze.setReceiptReceived(false);
+    caze.setRefusalReceived(null);
+    caze.setAddressInvalid(false);
+    caze.setRegion("E123456");
+    caze.setCaseType("CE");
+    caze.setFieldCoordinatorId(null);
+    underTest.receiveMessage(message);
+
+    // Then
+    verify(caseService, never()).saveCaseAndEmitCaseUpdatedEvent(any(), any());
   }
 }
