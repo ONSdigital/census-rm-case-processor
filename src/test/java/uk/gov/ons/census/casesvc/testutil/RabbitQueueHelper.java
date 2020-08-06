@@ -1,7 +1,5 @@
 package uk.gov.ons.census.casesvc.testutil;
 
-import static org.junit.Assert.*;
-
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import org.springframework.amqp.core.AmqpAdmin;
@@ -27,7 +25,7 @@ public class RabbitQueueHelper {
   @Autowired private AmqpAdmin amqpAdmin;
 
   public QueueSpy listen(String queueName) {
-    return listen(queueName, 50);
+    return listen(queueName, 200);
   }
 
   public QueueSpy listen(String queueName, int capacity) {

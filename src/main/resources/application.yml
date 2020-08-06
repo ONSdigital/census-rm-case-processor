@@ -6,7 +6,7 @@ spring:
     driverClassName: org.postgresql.Driver
     initialization-mode: always
     hikari:
-      maximumPoolSize: 50
+      maximumPoolSize: 75  # We need a pool slightly bigger than the max concurrent threads
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQL94Dialect
@@ -47,7 +47,8 @@ queueconfig:
   fulfilment-confirmed-queue: case.fulfilmentConfirmed
   field-case-updated-queue: case.field.update
   consumers: 50
-  retry-delay: 3000 #milliseconds
+  retry-attempts: 3
+  retry-delay: 1000 #milliseconds
 
 ccsconfig:
   action-plan-id: 38a48608-1c2a-4c2b-b7bc-cb52fcbb4927

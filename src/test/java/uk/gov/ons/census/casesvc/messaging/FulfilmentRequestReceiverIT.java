@@ -135,7 +135,7 @@ public class FulfilmentRequestReceiverIT {
             .build();
     rabbitQueueHelper.sendMessage(inboundQueue, message);
 
-    Thread.sleep(1000);
+    Thread.sleep(2000);
 
     // THEN
     List<Event> events = eventRepository.findAll();
