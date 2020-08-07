@@ -64,6 +64,36 @@ public class AppConfig {
     return new JacksonPubSubMessageConverter(ObjectMapperFactory.objectMapper());
   }
 
+  //  @Bean
+  //  public PlatformTransactionManager transactionManager(
+  //      EntityManagerFactory emf, ConnectionFactory connectionFactory) {
+  //    JpaTransactionManager jpaTransactionManager = new JpaTransactionManager(emf);
+  //    RabbitTransactionManager rabbitTransactionManager =
+  //        new RabbitTransactionManager(connectionFactory);
+
+  // We are using a technique described by Dr David Syer in order to synchronise the commits
+  // and rollbacks across both Rabbit and Postgres (i.e. AMQP and JPA/Hibernate/JDBC).
+  // We could have used Atomikos, but it was decided to be overkill by architects & tech leads.
+  // The original article is: Distributed transactions in Spring, with and without XA
+  // infoworld.com/article/2077963/distributed-transactions-in-spring--with-and-without-xa.html
+  //    return new ChainedTransactionManager(rabbitTransactionManager, jpaTransactionManager);
+  //  }
+
+  //  @Bean
+  //  public PlatformTransactionManager transactionManager(
+  //      EntityManagerFactory emf) {
+  //    return new JpaTransactionManager(emf);
+  //  }
+
+  //  @Bean
+  //  public RabbitAndJpaTransactionManager transactionManager(
+  //      EntityManagerFactory emf, ConnectionFactory connectionFactory) {
+  //    JpaTransactionManager jpaTransactionManager = new JpaTransactionManager(emf);
+  //    RabbitTransactionManager rabbitTransactionManager =
+  //        new RabbitTransactionManager(connectionFactory);
+  //    return new RabbitAndJpaTransactionManager(rabbitTransactionManager, jpaTransactionManager);
+  //  }
+
   @PostConstruct
   public void init() {
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
