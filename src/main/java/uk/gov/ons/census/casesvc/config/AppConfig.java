@@ -81,8 +81,7 @@ public class AppConfig {
     // We could have used Atomikos, but it was decided to be overkill by architects & tech leads.
     // The original article is: Distributed transactions in Spring, with and without XA
     // infoworld.com/article/2077963/distributed-transactions-in-spring--with-and-without-xa.html
-    // NOTE: rabbit must be LAST to commit in order to guarantee retries
-    return new ChainedTransactionManager(jpaTransactionManager, rabbitTransactionManager);
+    return new ChainedTransactionManager(rabbitTransactionManager, jpaTransactionManager);
   }
 
   @PostConstruct
