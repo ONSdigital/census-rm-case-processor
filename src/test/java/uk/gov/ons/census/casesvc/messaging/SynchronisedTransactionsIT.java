@@ -5,15 +5,11 @@ import static org.junit.Assert.assertTrue;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.IntStream;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.amqp.core.Message;
@@ -68,15 +64,17 @@ public class SynchronisedTransactionsIT {
   // This test exists for the purpose of checking that we never commit a DB transaction without
   // also committing the Rabbit transaction, and vice-versa: the transactions need to synchronise
   // their commits AND rollbacks.
+  // TODO: this test should fail on the original code, but it doesn't.
   @Test
-  @Ignore // TODO: this test should fail on the original code, but it doesn't. Ignore for now
   public void testTransactionSynchronisation() throws Exception {
     try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
       // GIVEN
 
       // WHEN
-      Collection<CreateCaseSample> samples = Collections.synchronizedCollection(new LinkedList<>());
-      IntStream.range(0, SIZE_OF_SAMPLE).parallel().forEach(i -> samples.add(sendSample()));
+      List<CreateCaseSample> samples = new LinkedList<>();
+      for (int i = 0; i < SIZE_OF_SAMPLE; i++) {
+        samples.add(sendSample());
+      }
 
       List<String> messages = new LinkedList<>();
 

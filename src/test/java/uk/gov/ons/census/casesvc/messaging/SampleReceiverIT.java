@@ -249,7 +249,7 @@ public class SampleReceiverIT {
             });
 
     for (int i = 0; i < 20; i++) {
-      Thread.sleep(10000);
+      Thread.sleep(2000);
       List<Case> caseList = caseRepository.findAll();
 
       if (caseList.size() < expectedSize) {

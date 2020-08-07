@@ -1,8 +1,6 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:15432/postgres
-    hikari:
-      maximumPoolSize: 250 # Needs to be bigger for the integration test for some reason
 
   rabbitmq:
     port: 35672
