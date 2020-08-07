@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.amqp.core.Message;
@@ -36,7 +35,6 @@ import uk.gov.ons.census.casesvc.utility.ObjectMapperFactory;
 @ActiveProfiles("synctxns")
 @SpringBootTest
 @RunWith(SpringJUnit4ClassRunner.class)
-@Ignore // TODO: These tests can't recreate the transaction retry problem for unknown reason(s)
 public class SynchronisedTransactionsIT {
   private static final int SIZE_OF_SAMPLE = 50;
   private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
@@ -63,6 +61,10 @@ public class SynchronisedTransactionsIT {
     caseRepository.deleteAllInBatch();
   }
 
+  // This test exists for the purpose of checking that we never commit a DB transaction without
+  // also committing the Rabbit transaction, and vice-versa: the transactions need to synchronise
+  // their commits AND rollbacks.
+  // TODO: this test should fail on the original code, but it doesn't.
   @Test
   public void testTransactionSynchronisation() throws Exception {
     try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
