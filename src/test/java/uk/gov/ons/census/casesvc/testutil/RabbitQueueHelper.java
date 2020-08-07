@@ -25,11 +25,7 @@ public class RabbitQueueHelper {
   @Autowired private AmqpAdmin amqpAdmin;
 
   public QueueSpy listen(String queueName) {
-    return listen(queueName, 200);
-  }
-
-  public QueueSpy listen(String queueName, int capacity) {
-    BlockingQueue<String> transfer = new ArrayBlockingQueue(capacity);
+    BlockingQueue<String> transfer = new ArrayBlockingQueue(200);
 
     MessageListener messageListener =
         message -> {
