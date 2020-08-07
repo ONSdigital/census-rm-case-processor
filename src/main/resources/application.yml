@@ -6,7 +6,7 @@ spring:
     driverClassName: org.postgresql.Driver
     initialization-mode: always
     hikari:
-      maximumPoolSize: 250  # TODO: figure out why the pool has to be so massive
+      maximumPoolSize: 100  # TODO: figure out why the pool has to be so massive (on startup)
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQL94Dialect
