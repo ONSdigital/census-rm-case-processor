@@ -17,7 +17,6 @@ import org.springframework.integration.channel.DirectChannel;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.retry.backoff.FixedBackOffPolicy;
 import org.springframework.retry.interceptor.RetryOperationsInterceptor;
-import org.springframework.transaction.PlatformTransactionManager;
 import uk.gov.ons.census.casesvc.client.ExceptionManagerClient;
 import uk.gov.ons.census.casesvc.messaging.ManagedMessageRecoverer;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
@@ -83,8 +82,7 @@ public class MessageConsumerConfig {
   private String fieldCaseUpdatedQueue;
 
   public MessageConsumerConfig(
-      ExceptionManagerClient exceptionManagerClient,
-      ConnectionFactory connectionFactory) {
+      ExceptionManagerClient exceptionManagerClient, ConnectionFactory connectionFactory) {
     this.exceptionManagerClient = exceptionManagerClient;
     this.connectionFactory = connectionFactory;
   }
