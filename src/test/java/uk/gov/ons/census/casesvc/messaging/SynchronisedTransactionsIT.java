@@ -5,9 +5,12 @@ import static org.junit.Assert.assertTrue;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,6 +18,9 @@ import org.junit.runner.RunWith;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.core.MessageProperties;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,6 +46,7 @@ public class SynchronisedTransactionsIT {
   private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
   private static final EasyRandom easyRandom = new EasyRandom();
 
+
   @Value("${queueconfig.inbound-queue}")
   private String inboundQueue;
 
@@ -50,6 +57,10 @@ public class SynchronisedTransactionsIT {
   @Autowired private CaseRepository caseRepository;
   @Autowired private EventRepository eventRepository;
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
+  @Autowired
+  private ConnectionFactory connectionFactory;
+  @Autowired
+  Jackson2JsonMessageConverter messageConverter;
 
   @Before
   @Transactional
@@ -68,13 +79,22 @@ public class SynchronisedTransactionsIT {
   @Test
   public void testTransactionSynchronisation() throws Exception {
     try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
+      RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+      rabbitTemplate.setMessageConverter(messageConverter);
+
       // GIVEN
 
       // WHEN
-      List<CreateCaseSample> samples = new LinkedList<>();
-      for (int i = 0; i < SIZE_OF_SAMPLE; i++) {
-        samples.add(sendSample());
-      }
+      Collection<CreateCaseSample> samples = Collections.synchronizedCollection(new LinkedList<>());
+      IntStream.range(0, SIZE_OF_SAMPLE).parallel().forEach(i -> {
+        CreateCaseSample createCaseSample = easyRandom.nextObject(CreateCaseSample.class);
+        createCaseSample.setAddressType("HH");
+        createCaseSample.setAddressLevel("U");
+        createCaseSample.setRegion("E");
+        createCaseSample.setBulkProcessed(false);
+        rabbitTemplate.convertAndSend("", inboundQueue, createCaseSample);
+        samples.add(createCaseSample);
+      });
 
       List<String> messages = new LinkedList<>();
 
@@ -115,22 +135,5 @@ public class SynchronisedTransactionsIT {
         }
       }
     }
-  }
-
-  private CreateCaseSample sendSample() {
-    CreateCaseSample createCaseSample = easyRandom.nextObject(CreateCaseSample.class);
-    createCaseSample.setAddressType("HH");
-    createCaseSample.setAddressLevel("U");
-    createCaseSample.setRegion("E");
-    createCaseSample.setBulkProcessed(false);
-
-    String json = convertObjectToJson(createCaseSample);
-    Message message =
-        MessageBuilder.withBody(json.getBytes())
-            .setContentType(MessageProperties.CONTENT_TYPE_JSON)
-            .build();
-    rabbitQueueHelper.sendMessage(inboundQueue, message);
-
-    return createCaseSample;
   }
 }
