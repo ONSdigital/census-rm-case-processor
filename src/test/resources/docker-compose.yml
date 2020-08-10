@@ -3,7 +3,7 @@ services:
   postgres:
     container_name: postgres-case-it
     image: sdcplatform/ras-rm-docker-postgres
-    command: ["-c", "shared_buffers=256MB", "-c", "max_connections=1000"]
+    command: ["-c", "shared_buffers=256MB", "-c", "max_connections=300"]
     ports:
       - "15432:5432"
 
