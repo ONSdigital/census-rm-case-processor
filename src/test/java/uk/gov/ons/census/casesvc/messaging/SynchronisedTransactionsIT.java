@@ -2,7 +2,6 @@ package uk.gov.ons.census.casesvc.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Collection;
@@ -15,9 +14,6 @@ import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessageBuilder;
-import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -46,7 +42,6 @@ public class SynchronisedTransactionsIT {
   private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
   private static final EasyRandom easyRandom = new EasyRandom();
 
-
   @Value("${queueconfig.inbound-queue}")
   private String inboundQueue;
 
@@ -57,10 +52,8 @@ public class SynchronisedTransactionsIT {
   @Autowired private CaseRepository caseRepository;
   @Autowired private EventRepository eventRepository;
   @Autowired private UacQidLinkRepository uacQidLinkRepository;
-  @Autowired
-  private ConnectionFactory connectionFactory;
-  @Autowired
-  Jackson2JsonMessageConverter messageConverter;
+  @Autowired private ConnectionFactory connectionFactory;
+  @Autowired Jackson2JsonMessageConverter messageConverter;
 
   @Before
   @Transactional
@@ -86,15 +79,18 @@ public class SynchronisedTransactionsIT {
 
       // WHEN
       Collection<CreateCaseSample> samples = Collections.synchronizedCollection(new LinkedList<>());
-      IntStream.range(0, SIZE_OF_SAMPLE).parallel().forEach(i -> {
-        CreateCaseSample createCaseSample = easyRandom.nextObject(CreateCaseSample.class);
-        createCaseSample.setAddressType("HH");
-        createCaseSample.setAddressLevel("U");
-        createCaseSample.setRegion("E");
-        createCaseSample.setBulkProcessed(false);
-        rabbitTemplate.convertAndSend("", inboundQueue, createCaseSample);
-        samples.add(createCaseSample);
-      });
+      IntStream.range(0, SIZE_OF_SAMPLE)
+          .parallel()
+          .forEach(
+              i -> {
+                CreateCaseSample createCaseSample = easyRandom.nextObject(CreateCaseSample.class);
+                createCaseSample.setAddressType("HH");
+                createCaseSample.setAddressLevel("U");
+                createCaseSample.setRegion("E");
+                createCaseSample.setBulkProcessed(false);
+                rabbitTemplate.convertAndSend("", inboundQueue, createCaseSample);
+                samples.add(createCaseSample);
+              });
 
       List<String> messages = new LinkedList<>();
 
