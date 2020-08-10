@@ -370,7 +370,7 @@ public class ReceiptReceiverIT {
         return actualCase;
       }
 
-      Thread.sleep(1000);
+      Thread.sleep(5000);
     }
 
     return actualCase;
