@@ -68,7 +68,6 @@ public class SynchronisedTransactionsIT {
   // This test exists for the purpose of checking that we never commit a DB transaction without
   // also committing the Rabbit transaction, and vice-versa: the transactions need to synchronise
   // their commits AND rollbacks.
-  // TODO: this test should fail on the original code, but it doesn't.
   @Test
   public void testTransactionSynchronisation() throws Exception {
     try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
