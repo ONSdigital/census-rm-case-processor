@@ -45,7 +45,7 @@ public class QidReceiptService {
       return;
     }
 
-    if (!uacQidLink.isActive()) {
+    if (uacQidLink.isActive()) {
       uacQidLink.setActive(false);
 
       uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
