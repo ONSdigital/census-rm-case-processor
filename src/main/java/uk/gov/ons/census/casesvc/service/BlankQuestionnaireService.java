@@ -1,14 +1,12 @@
 package uk.gov.ons.census.casesvc.service;
 
-import static uk.gov.ons.census.casesvc.utility.FormTypeHelper.CONT_FORM_TYPE;
-import static uk.gov.ons.census.casesvc.utility.FormTypeHelper.HH_FORM_TYPE;
-import static uk.gov.ons.census.casesvc.utility.FormTypeHelper.IND_FORM_TYPE;
-import static uk.gov.ons.census.casesvc.utility.FormTypeHelper.mapQuestionnaireTypeToFormType;
+import static uk.gov.ons.census.casesvc.utility.FormTypeHelper.*;
 import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiFunction;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -22,9 +20,10 @@ import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 @Component
 public class BlankQuestionnaireService {
 
-  private final CaseService caseService;
+  private CaseService caseService;
 
-  private Map<BlankQuestionnaireService.Key, BlankQuestionnaireRule> rules = new HashMap<>();
+  private Map<BlankQuestionnaireService.Key, BiFunction<Case, EventTypeDTO, Case>> rules =
+      new HashMap<>();
 
   public BlankQuestionnaireService(CaseService caseService) {
     this.caseService = caseService;
@@ -34,51 +33,42 @@ public class BlankQuestionnaireService {
   private void setUpRules() {
     /*
      This table is based on: https://collaborate2.ons.gov.uk/confluence/display/SDC/Process+Flow+for+Blank+PQs
-    */
 
-    rules.put(new Key("HH", "U", HH_FORM_TYPE, true), new NoActionRequired());
-    rules.put(new Key("HH", "U", HH_FORM_TYPE, false), new UnreceiptCaseAndSendToField());
-    rules.put(new Key("CE", "U", IND_FORM_TYPE, true), new NoActionRequired());
-    rules.put(new Key("SPG", "U", IND_FORM_TYPE, true), new NoActionRequired());
-    rules.put(new Key("SPG", "U", HH_FORM_TYPE, true), new NoActionRequired());
-    rules.put(new Key("HI", "U", IND_FORM_TYPE, false), new UnreceiptCase());
-    rules.put(new Key("CE", "E", IND_FORM_TYPE, false), new NoActionRequired());
-    rules.put(new Key("CE", "U", IND_FORM_TYPE, false), new NoActionRequired());
-    rules.put(new Key("SPG", "U", HH_FORM_TYPE, false), new UnreceiptCaseAndSendToField());
-    rules.put(new Key("SPG", "U", IND_FORM_TYPE, false), new NoActionRequired());
-    rules.put(new Key("HH", "U", CONT_FORM_TYPE, false), new NoActionRequired());
-    rules.put(new Key("SPG", "U", CONT_FORM_TYPE, false), new NoActionRequired());
-    rules.put(new Key("SPG", "E", CONT_FORM_TYPE, false), new NoActionRequired());
-    rules.put(new Key("CE", "U", CONT_FORM_TYPE, false), new NoActionRequired());
-    rules.put(new Key("CE", "E", CONT_FORM_TYPE, false), new NoActionRequired());
-    rules.put(new Key("HH", "U", CONT_FORM_TYPE, true), new NoActionRequired());
-    rules.put(new Key("SPG", "U", CONT_FORM_TYPE, true), new NoActionRequired());
-    rules.put(new Key("SPG", "E", CONT_FORM_TYPE, true), new NoActionRequired());
-    rules.put(new Key("CE", "U", CONT_FORM_TYPE, true), new NoActionRequired());
-    rules.put(new Key("CE", "E", CONT_FORM_TYPE, true), new NoActionRequired());
+     All No Action Required Rules (don't alter response flag and don't tell field) do not appear in this list
+     Invalid scenarios (qid shouldn't be linked to case) are treated like No Action Required. Do Nothing.
+    */
+    rules.put(new Key("HH", "U", HH_FORM_TYPE, false), unreceiptCaseAndSendToField);
+    rules.put(new Key("HI", "U", IND_FORM_TYPE, false), unreceiptCase);
+    rules.put(new Key("SPG", "U", HH_FORM_TYPE, false), unreceiptCaseAndSendToField);
   }
 
   public void handleBlankQuestionnaire(
       Case caze, UacQidLink uacQidLink, EventTypeDTO causeEventType) {
-    BlankQuestionnaireService.Key ruleKey = makeRulesKey(caze, uacQidLink);
+    Key ruleKey = new Key(caze, uacQidLink);
 
-    if (!rules.containsKey(ruleKey)) {
-      throw new RuntimeException(ruleKey.toString() + " does not map to any known processing rule");
+    if (rules.containsKey(ruleKey)) {
+      rules.get(ruleKey).apply(caze, causeEventType);
     }
-
-    BlankQuestionnaireRule rule = rules.get(ruleKey);
-    rule.run(caze, causeEventType);
   }
 
-  private BlankQuestionnaireService.Key makeRulesKey(Case caze, UacQidLink uacQidLink) {
-    String formType = mapQuestionnaireTypeToFormType(uacQidLink.getQid());
+  BiFunction<Case, EventTypeDTO, Case> unreceiptCaseAndSendToField =
+      (caze, causeEventType) -> {
+        Metadata metadata = null;
+        if (caze.getRefusalReceived() == null && !caze.isAddressInvalid()) {
+          // Only send to fieldwork if the case is not refused or address invalid
+          metadata = buildMetadata(causeEventType, ActionInstructionType.UPDATE, true);
+        }
 
-    return new BlankQuestionnaireService.Key(
-        caze.getCaseType(),
-        caze.getAddressLevel(),
-        formType,
-        caseHasOtherValidReceiptForFormType(caze, formType, uacQidLink));
-  }
+        caseService.unreceiptCase(caze, metadata);
+
+        return caze;
+      };
+
+  BiFunction<Case, EventTypeDTO, Case> unreceiptCase =
+      (caze, causeEventType) -> {
+        caseService.unreceiptCase(caze, null);
+        return caze;
+      };
 
   private boolean caseHasOtherValidReceiptForFormType(
       Case caze, String formType, UacQidLink uacQidLink) {
@@ -95,44 +85,17 @@ public class BlankQuestionnaireService {
   @EqualsAndHashCode
   @ToString
   private class Key {
-
     private String caseType;
     private String addressLevel;
     private String formType;
     private boolean hasOtherValidReceiptForFormType;
-  }
 
-  private interface BlankQuestionnaireRule {
-
-    void run(Case caze, EventTypeDTO causeEventType);
-  }
-
-  private class UnreceiptCaseAndSendToField implements BlankQuestionnaireRule {
-
-    @Override
-    public void run(Case caze, EventTypeDTO causeEventType) {
-      Metadata metadata = null;
-      if (caze.getRefusalReceived() == null && !caze.isAddressInvalid()) {
-        // Only send to fieldwork if the case is not refused or address invalid
-        metadata = buildMetadata(causeEventType, ActionInstructionType.UPDATE, true);
-      }
-      caseService.unreceiptCase(caze, metadata);
-    }
-  }
-
-  private class UnreceiptCase implements BlankQuestionnaireRule {
-
-    @Override
-    public void run(Case caze, EventTypeDTO causeEventType) {
-      caseService.unreceiptCase(caze, null);
-    }
-  }
-
-  private class NoActionRequired implements BlankQuestionnaireRule {
-
-    @Override
-    public void run(Case caze, EventTypeDTO causeEventType) {
-      // No Updating, saving or emitting required
+    public Key(Case caze, UacQidLink uacQidLink) {
+      caseType = caze.getCaseType();
+      addressLevel = caze.getAddressLevel();
+      formType = mapQuestionnaireTypeToFormType(uacQidLink.getQid());
+      hasOtherValidReceiptForFormType =
+          caseHasOtherValidReceiptForFormType(caze, formType, uacQidLink);
     }
   }
 }

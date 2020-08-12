@@ -85,7 +85,6 @@ public class QidReceiptService {
           .with("channel", unreceiptEvent.getEvent().getChannel())
           .warn("Unreceipt received for QID which was already receipted via EQ");
     } else {
-
       handleBlankQuestionnaire(unreceiptEvent, uacQidLink, receiptPayload);
     }
 
