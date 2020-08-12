@@ -172,11 +172,6 @@ public class BlankQuestionnaireServiceTest {
       when(uacService.findByQid(eq(otherQid))).thenReturn(otherUacQidLink);
     }
 
-    if (expectation.invalid) {
-      checkExceptionIsRaised(caseService, underTest, caze, uacQidLink);
-      return;
-    }
-
     underTest.handleBlankQuestionnaire(caze, uacQidLink, RESPONSE_RECEIVED);
 
     if (!expectation.unreceiptCase && !expectation.sendToField) {
@@ -197,23 +192,6 @@ public class BlankQuestionnaireServiceTest {
       verify(caseService).unreceiptCase(any(), eq(null));
       return;
     }
-  }
-
-  private void checkExceptionIsRaised(
-      CaseService caseService,
-      BlankQuestionnaireService underTest,
-      Case caze,
-      UacQidLink uacQidLink) {
-    try {
-      underTest.handleBlankQuestionnaire(caze, uacQidLink, RESPONSE_RECEIVED);
-    } catch (RuntimeException rte) {
-      assertThat(rte).isInstanceOf(RuntimeException.class);
-      assertThat(rte.getMessage()).endsWith(" does not map to any known processing rule");
-      verifyNoInteractions(caseService);
-      return;
-    }
-
-    fail("Expected RuntimeException to be thrown");
   }
 
   private void runBlankQreTestCaseAlreadyReceipted(
@@ -252,11 +230,6 @@ public class BlankQuestionnaireServiceTest {
       otherUacQidLink.setActive(false);
       caze.setUacQidLinks(List.of(uacQidLink, otherUacQidLink));
       when(uacService.findByQid(eq(otherQid))).thenReturn(otherUacQidLink);
-    }
-
-    if (expectation.invalid) {
-      checkExceptionIsRaised(caseService, underTest, caze, uacQidLink);
-      return;
     }
 
     underTest.handleBlankQuestionnaire(caze, uacQidLink, RESPONSE_RECEIVED);
@@ -312,11 +285,6 @@ public class BlankQuestionnaireServiceTest {
       when(uacService.findByQid(eq(otherQid))).thenReturn(otherUacQidLink);
     }
 
-    if (expectation.invalid) {
-      checkExceptionIsRaised(caseService, underTest, caze, uacQidLink);
-      return;
-    }
-
     underTest.handleBlankQuestionnaire(caze, uacQidLink, RESPONSE_RECEIVED);
 
     if (!expectation.unreceiptCase) {
@@ -367,11 +335,6 @@ public class BlankQuestionnaireServiceTest {
       when(uacService.findByQid(eq(otherQid))).thenReturn(otherUacQidLink);
     }
 
-    if (expectation.invalid) {
-      checkExceptionIsRaised(caseService, underTest, caze, uacQidLink);
-      return;
-    }
-
     underTest.handleBlankQuestionnaire(caze, uacQidLink, RESPONSE_RECEIVED);
 
     if (!expectation.unreceiptCase) {
@@ -416,18 +379,12 @@ public class BlankQuestionnaireServiceTest {
   }
 
   private static class Expectation {
-
     boolean unreceiptCase;
     boolean sendToField;
-    boolean invalid;
 
     public Expectation(boolean unreceiptCase, boolean sendToField) {
       this.unreceiptCase = unreceiptCase;
       this.sendToField = sendToField;
-    }
-
-    public Expectation(boolean invalid) {
-      this.invalid = true;
     }
   }
 }
