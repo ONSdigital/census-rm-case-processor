@@ -1,15 +1,11 @@
 package uk.gov.ons.census.casesvc.testutil;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import lombok.AllArgsConstructor;
@@ -44,25 +40,5 @@ public class QueueSpy implements AutoCloseable {
   public void checkMessageIsNotReceived(int timeOut) throws InterruptedException {
     String actualMessage = queue.poll(timeOut, TimeUnit.SECONDS);
     assertNull("Message received when not expected", actualMessage);
-  }
-
-  public List<Integer> collectAllActualResponseCountsForCaseId(UUID caseId) throws IOException {
-    List<String> jsonList = new ArrayList<>();
-    queue.drainTo(jsonList);
-
-    List<Integer> actualActualResponseCountList = new ArrayList<>();
-
-    for (String jsonString : jsonList) {
-      ResponseManagementEvent responseManagementEvent =
-          objectMapper.readValue(jsonString, ResponseManagementEvent.class);
-
-      assertThat(responseManagementEvent.getPayload().getCollectionCase().getId())
-          .isEqualTo(caseId);
-
-      actualActualResponseCountList.add(
-          responseManagementEvent.getPayload().getCollectionCase().getCeActualResponses());
-    }
-
-    return actualActualResponseCountList;
   }
 }

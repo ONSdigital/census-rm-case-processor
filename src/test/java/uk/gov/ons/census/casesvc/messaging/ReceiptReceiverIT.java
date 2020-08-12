@@ -3,17 +3,18 @@ package uk.gov.ons.census.casesvc.messaging;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.RESPONSE_RECEIVED;
 import static uk.gov.ons.census.casesvc.service.QidReceiptService.QID_RECEIPTED;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementQuestionnaireLinkedEvent;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementReceiptEvent;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.IntStream;
 import org.jeasy.random.EasyRandom;
 import org.json.JSONObject;
@@ -44,6 +45,7 @@ import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 import uk.gov.ons.census.casesvc.testutil.QueueSpy;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
+import uk.gov.ons.census.casesvc.utility.ObjectMapperFactory;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -51,6 +53,7 @@ import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class ReceiptReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
+  private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
   private static final EasyRandom easyRandom = new EasyRandom();
   private final String ENGLAND_HOUSEHOLD = "0134567890123456";
   private static final String TEST_UAC = easyRandom.nextObject(String.class);
@@ -277,14 +280,13 @@ public class ReceiptReceiverIT {
     }
   }
 
+  // The purpose of this test is to prove that we can cope with locking and updating the case when
+  // multiple receipt messages are trying to lock it simultaneously
   @Test
-  public void testParallelReceiptAndLinkingOfReceiptedQidUpdatesToCorrectNumberAndIsReceipted()
-      throws Exception {
-    int numberOfReceiptsAndLinkToSend = 3;
-    int expectedResponseCount = numberOfReceiptsAndLinkToSend * 2;
+  public void testParallelReceiptingUpdatesExpectedResponseCount() throws Exception {
+    int numberOfResponses = 10;
 
-    try (QueueSpy rhCaseQueueSpy =
-        rabbitQueueHelper.listen(rhCaseQueue, expectedResponseCount + 10)) {
+    try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
       // GIVEN
       EasyRandom easyRandom = new EasyRandom();
       Case caze = easyRandom.nextObject(Case.class);
@@ -295,52 +297,53 @@ public class ReceiptReceiverIT {
       caze.setAddressLevel("U");
       caze.setCaseType("CE");
       caze.setCeActualResponses(0);
-      caze.setCeExpectedCapacity(expectedResponseCount);
+      caze.setCeExpectedCapacity(numberOfResponses);
       caze = caseRepository.saveAndFlush(caze);
 
-      UacQidLink uacQidLink = new UacQidLink();
-      uacQidLink.setId(UUID.randomUUID());
-      uacQidLink.setCaze(caze);
-      uacQidLink.setCcsCase(false);
-      uacQidLink.setQid(HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_ENGLAND);
-      uacQidLink.setUac(TEST_UAC);
-      uacQidLinkRepository.saveAndFlush(uacQidLink);
+      List<Message> receiptMessages = new LinkedList<>();
+      List<Integer> expectedActualResponses = new LinkedList<>();
 
-      ResponseManagementEvent managementEvent = getTestResponseManagementReceiptEvent();
-      managementEvent.getPayload().getResponse().setQuestionnaireId(uacQidLink.getQid());
-      managementEvent.getEvent().setTransactionId(UUID.randomUUID());
+      Case finalCaze = caze;
+      IntStream.range(0, numberOfResponses)
+          .forEach(
+              i -> {
+                expectedActualResponses.add(i + 1);
 
-      String json = convertObjectToJson(managementEvent);
-      Message message =
-          MessageBuilder.withBody(json.getBytes())
-              .setContentType(MessageProperties.CONTENT_TYPE_JSON)
-              .build();
+                UacQidLink uacQidLink = new UacQidLink();
+                uacQidLink.setId(UUID.randomUUID());
+                uacQidLink.setCaze(finalCaze);
+                uacQidLink.setCcsCase(false);
+                uacQidLink.setQid(
+                    HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_ENGLAND
+                        + easyRandom.nextObject(String.class));
+                uacQidLink.setUac(easyRandom.nextObject(String.class));
+                uacQidLink = uacQidLinkRepository.saveAndFlush(uacQidLink);
+
+                ResponseManagementEvent managementEvent = getTestResponseManagementReceiptEvent();
+                managementEvent.getPayload().getResponse().setQuestionnaireId(uacQidLink.getQid());
+                managementEvent.getEvent().setTransactionId(UUID.randomUUID());
+
+                String json = convertObjectToJson(managementEvent);
+                Message message =
+                    MessageBuilder.withBody(json.getBytes())
+                        .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+                        .build();
+                receiptMessages.add(message);
+              });
 
       // WHEN
       assertThat(caze.getCeActualResponses()).isEqualTo(0);
-      CopyOnWriteArrayList<Integer> expectedActualResponses = new CopyOnWriteArrayList<Integer>();
-      final UUID caseId = caze.getCaseId();
 
-      Message[] qidLinkingMessages =
-          buildLinkReceiptedQidToCaseMsgs(caseId, numberOfReceiptsAndLinkToSend);
-
-      IntStream.range(0, numberOfReceiptsAndLinkToSend)
+      receiptMessages.stream()
           .parallel()
-          .forEach(
-              count -> {
-                rabbitQueueHelper.sendMessage(inboundQueue, message);
-                rabbitQueueHelper.sendMessage(questionnaireLinkedQueue, qidLinkingMessages[count]);
-
-                expectedActualResponses.add(count + 1);
-                expectedActualResponses.add(numberOfReceiptsAndLinkToSend + count + 1);
-              });
+          .forEach(message -> rabbitQueueHelper.sendMessage(inboundQueue, message));
 
       // THEN
       Case actualCase =
-          pollDatabaseUntilCorrectActualResponseCount(caseId, expectedResponseCount, 100);
+          pollDatabaseUntilCorrectActualResponseCount(caze.getCaseId(), numberOfResponses, 100);
       assertThat(actualCase.getCeActualResponses())
           .as("ActualResponses Count")
-          .isEqualTo(expectedResponseCount);
+          .isEqualTo(numberOfResponses);
       assertThat(actualCase.isReceiptReceived()).as("Case Receipted").isTrue();
 
       checkExpectedResponsesEmitted(expectedActualResponses, rhCaseQueueSpy, caze.getCaseId());
@@ -350,7 +353,7 @@ public class ReceiptReceiverIT {
   private void checkExpectedResponsesEmitted(
       List<Integer> expectedActualResponses, QueueSpy queueSpy, UUID caseId) throws IOException {
 
-    List<Integer> actualResponsesList = queueSpy.collectAllActualResponseCountsForCaseId(caseId);
+    List<Integer> actualResponsesList = collectAllActualResponseCountsForCaseId(queueSpy, caseId);
 
     assertThat(actualResponsesList).hasSameElementsAs(expectedActualResponses);
   }
@@ -367,41 +370,10 @@ public class ReceiptReceiverIT {
         return actualCase;
       }
 
-      Thread.sleep(1000);
+      Thread.sleep(5000);
     }
 
     return actualCase;
-  }
-
-  private Message[] buildLinkReceiptedQidToCaseMsgs(UUID caseId, int count) {
-
-    Message[] qidLinkingMsgs = new Message[count];
-
-    for (int i = 0; i < count; i++) {
-      UacQidLink receiptedUacQid = new UacQidLink();
-      receiptedUacQid.setId(UUID.randomUUID());
-      receiptedUacQid.setBatchId(UUID.randomUUID());
-      receiptedUacQid.setUac("test uac");
-      receiptedUacQid.setQid("21" + i);
-      receiptedUacQid.setActive(false);
-      UacQidLink createdUacQidLink = uacQidLinkRepository.save(receiptedUacQid);
-
-      String expectedQuestionnaireId = createdUacQidLink.getQid();
-      ResponseManagementEvent managementEvent = getTestResponseManagementQuestionnaireLinkedEvent();
-      managementEvent.getEvent().setTransactionId(UUID.randomUUID());
-      UacDTO uac = new UacDTO();
-      uac.setCaseId(caseId);
-      uac.setQuestionnaireId(expectedQuestionnaireId);
-      uac.setIndividualCaseId(null);
-      managementEvent.getPayload().setUac(uac);
-
-      qidLinkingMsgs[i] =
-          MessageBuilder.withBody(convertObjectToJson(managementEvent).getBytes())
-              .setContentType(MessageProperties.CONTENT_TYPE_JSON)
-              .build();
-    }
-
-    return qidLinkingMsgs;
   }
 
   private boolean isStringFormattedAsUTCDate(String dateAsString) {
@@ -411,5 +383,26 @@ public class ReceiptReceiverIT {
     } catch (DateTimeParseException dtpe) {
       return false;
     }
+  }
+
+  private List<Integer> collectAllActualResponseCountsForCaseId(QueueSpy queueSpy, UUID caseId)
+      throws IOException {
+    List<String> jsonList = new ArrayList<>();
+    queueSpy.getQueue().drainTo(jsonList);
+
+    List<Integer> actualActualResponseCountList = new ArrayList<>();
+
+    for (String jsonString : jsonList) {
+      ResponseManagementEvent responseManagementEvent =
+          objectMapper.readValue(jsonString, ResponseManagementEvent.class);
+
+      assertThat(responseManagementEvent.getPayload().getCollectionCase().getId())
+          .isEqualTo(caseId);
+
+      actualActualResponseCountList.add(
+          responseManagementEvent.getPayload().getCollectionCase().getCeActualResponses());
+    }
+
+    return actualActualResponseCountList;
   }
 }
