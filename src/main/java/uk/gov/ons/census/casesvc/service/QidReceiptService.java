@@ -44,19 +44,22 @@ public class QidReceiptService {
       processUnreceipt(receiptEvent, messageTimestamp, uacQidLink);
       return;
     }
-    uacQidLink.setActive(false);
 
-    uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
+    if (!uacQidLink.isActive()) {
+      uacQidLink.setActive(false);
 
-    Case caze = uacQidLink.getCaze();
+      uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
 
-    if (caze != null) {
-      caseReceiptService.receiptCase(uacQidLink, receiptEvent.getEvent());
-    } else {
-      log.with("qid", receiptPayload.getQuestionnaireId())
-          .with("tx_id", receiptEvent.getEvent().getTransactionId())
-          .with("channel", receiptEvent.getEvent().getChannel())
-          .warn("Receipt received for unaddressed UAC/QID pair not yet linked to a case");
+      Case caze = uacQidLink.getCaze();
+
+      if (caze != null) {
+        caseReceiptService.receiptCase(uacQidLink, receiptEvent.getEvent());
+      } else {
+        log.with("qid", receiptPayload.getQuestionnaireId())
+            .with("tx_id", receiptEvent.getEvent().getTransactionId())
+            .with("channel", receiptEvent.getEvent().getChannel())
+            .warn("Receipt received for unaddressed UAC/QID pair not yet linked to a case");
+      }
     }
 
     eventLogger.logUacQidEvent(
