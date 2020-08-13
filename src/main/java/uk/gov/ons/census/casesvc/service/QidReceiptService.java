@@ -47,7 +47,6 @@ public class QidReceiptService {
 
     if (uacQidLink.isActive()) {
       uacQidLink.setActive(false);
-
       uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
 
       Case caze = uacQidLink.getCaze();
