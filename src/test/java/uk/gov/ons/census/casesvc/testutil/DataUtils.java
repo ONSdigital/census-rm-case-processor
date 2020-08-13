@@ -76,6 +76,7 @@ public class DataUtils {
     UacQidLink uacQidLink = generateRandomUacQidLink();
     uacQidLink.setCaze(linkedCase);
     uacQidLink.setEvents(null);
+    uacQidLink.setActive(true);
     linkedCase.setUacQidLinks(List.of(uacQidLink));
     return uacQidLink;
   }
