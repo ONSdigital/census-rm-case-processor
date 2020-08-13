@@ -45,7 +45,10 @@ public class QidReceiptService {
       return;
     }
 
-    if (uacQidLink.isActive()) {
+    // Deactivating a UAC which is already deactivated is madness, but the blank questionnaire
+    // scenarios are horrendously over-complicated, including the impossible scenario where
+    // a respondent attempts to use their UAC via EQ after THEY ALREADY SENT IT BACK TO US BLANK
+    if (uacQidLink.isActive() || uacQidLink.isBlankQuestionnaire()) {
       uacQidLink.setActive(false);
       uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
 
