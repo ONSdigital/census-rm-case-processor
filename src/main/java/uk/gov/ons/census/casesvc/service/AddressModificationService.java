@@ -105,12 +105,5 @@ public class AddressModificationService {
         && !estabTypes.contains(addressModification.getNewAddress().getEstabType().get())) {
       throw new RuntimeException("Estab Type not valid");
     }
-
-    if (caze.getCaseType().equals("HH")
-        && addressModification.getNewAddress().getEstabType() != null
-        && addressModification.getNewAddress().getEstabType().isPresent()
-        && !addressModification.getNewAddress().getEstabType().get().equals("HOUSEHOLD")) {
-      throw new RuntimeException("Households can only be households");
-    }
   }
 }
