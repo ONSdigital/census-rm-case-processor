@@ -104,6 +104,7 @@ public class SpringRetryIT {
       UacQidLink uacQidLink = new UacQidLink();
       uacQidLink.setId(UUID.randomUUID());
       uacQidLink.setCaze(caze);
+      uacQidLink.setActive(true);
       uacQidLink.setQid(TEST_QID);
       uacQidLink.setUac(TEST_UAC);
       uacQidLinkRepository.saveAndFlush(uacQidLink);

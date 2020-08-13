@@ -44,19 +44,24 @@ public class QidReceiptService {
       processUnreceipt(receiptEvent, messageTimestamp, uacQidLink);
       return;
     }
-    uacQidLink.setActive(false);
 
-    uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
+    // Deactivating a UAC which is already deactivated is madness, but the blank questionnaire
+    // scenarios are horrendously over-complicated, including the impossible scenario where
+    // a respondent attempts to use their UAC via EQ after THEY ALREADY SENT IT BACK TO US BLANK
+    if (uacQidLink.isActive() || uacQidLink.isBlankQuestionnaire()) {
+      uacQidLink.setActive(false);
+      uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
 
-    Case caze = uacQidLink.getCaze();
+      Case caze = uacQidLink.getCaze();
 
-    if (caze != null) {
-      caseReceiptService.receiptCase(uacQidLink, receiptEvent.getEvent());
-    } else {
-      log.with("qid", receiptPayload.getQuestionnaireId())
-          .with("tx_id", receiptEvent.getEvent().getTransactionId())
-          .with("channel", receiptEvent.getEvent().getChannel())
-          .warn("Receipt received for unaddressed UAC/QID pair not yet linked to a case");
+      if (caze != null) {
+        caseReceiptService.receiptCase(uacQidLink, receiptEvent.getEvent());
+      } else {
+        log.with("qid", receiptPayload.getQuestionnaireId())
+            .with("tx_id", receiptEvent.getEvent().getTransactionId())
+            .with("channel", receiptEvent.getEvent().getChannel())
+            .warn("Receipt received for unaddressed UAC/QID pair not yet linked to a case");
+      }
     }
 
     eventLogger.logUacQidEvent(

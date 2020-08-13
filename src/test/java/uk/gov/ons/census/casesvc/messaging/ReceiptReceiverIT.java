@@ -112,6 +112,7 @@ public class ReceiptReceiverIT {
       uacQidLink.setId(UUID.randomUUID());
       uacQidLink.setCaze(caze);
       uacQidLink.setCcsCase(false);
+      uacQidLink.setActive(true);
       uacQidLink.setQid(ENGLAND_HOUSEHOLD);
       uacQidLink.setUac(TEST_UAC);
       uacQidLinkRepository.saveAndFlush(uacQidLink);
@@ -313,6 +314,7 @@ public class ReceiptReceiverIT {
                 uacQidLink.setId(UUID.randomUUID());
                 uacQidLink.setCaze(finalCaze);
                 uacQidLink.setCcsCase(false);
+                uacQidLink.setActive(true);
                 uacQidLink.setQid(
                     HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_ENGLAND
                         + easyRandom.nextObject(String.class));
