@@ -45,26 +45,46 @@ public class BlankQuestionnaireServiceTest {
   public static Collection<Object[]> data() {
     Object[][] ruleToTest = {
       {new Key("HH", "U", "HH", true), new Expectation(false, false)},
+      {new Key("HH", "U", "Ind", true), new Expectation(false, false)},
+      {new Key("HH", "U", "CE1", true), new Expectation(false, false)},
+      {new Key("HI", "U", "HH", true), new Expectation(false, false)},
+      {new Key("HI", "U", "Ind", true), new Expectation(false, false)},
+      {new Key("HI", "U", "CE1", true), new Expectation(false, false)},
+      {new Key("CE", "E", "HH", true), new Expectation(false, false)},
+      {new Key("CE", "E", "Ind", true), new Expectation(false, false)},
+      {new Key("CE", "E", "CE1", true), new Expectation(false, false)},
+      {new Key("CE", "U", "HH", true), new Expectation(false, false)},
       {new Key("CE", "U", "Ind", true), new Expectation(false, false)},
-      {new Key("SPG", "U", "HH", false), new Expectation(true, true)},
+      {new Key("CE", "U", "CE1", true), new Expectation(false, false)},
+      {new Key("SPG", "E", "HH", true), new Expectation(false, false)},
+      {new Key("SPG", "E", "Ind", true), new Expectation(false, false)},
+      {new Key("SPG", "E", "CE1", true), new Expectation(false, false)},
+      {new Key("SPG", "U", "HH", true), new Expectation(false, false)},
       {new Key("SPG", "U", "Ind", true), new Expectation(false, false)},
+      {new Key("SPG", "U", "CE1", true), new Expectation(false, false)},
       {new Key("HH", "U", "HH", false), new Expectation(true, true)},
+      {new Key("HH", "U", "Ind", false), new Expectation(false, false)},
+      {new Key("HH", "U", "CE1", false), new Expectation(false, false)},
+      {new Key("HI", "U", "HH", false), new Expectation(false, false)},
       {new Key("HI", "U", "Ind", false), new Expectation(true, false)},
+      {new Key("HI", "U", "CE1", false), new Expectation(false, false)},
+      {new Key("CE", "E", "HH", false), new Expectation(false, false)},
       {new Key("CE", "E", "Ind", false), new Expectation(false, false)},
+      {new Key("CE", "E", "CE1", false), new Expectation(false, false)},
+      {new Key("CE", "U", "HH", false), new Expectation(false, false)},
       {new Key("CE", "U", "Ind", false), new Expectation(false, false)},
+      {new Key("CE", "U", "CE1", false), new Expectation(false, false)},
+      {new Key("SPG", "E", "HH", false), new Expectation(false, false)},
+      {new Key("SPG", "E", "Ind", false), new Expectation(false, false)},
+      {new Key("SPG", "E", "CE1", false), new Expectation(false, false)},
       {new Key("SPG", "U", "HH", false), new Expectation(true, true)},
       {new Key("SPG", "U", "Ind", false), new Expectation(false, false)},
+      {new Key("SPG", "U", "CE1", false), new Expectation(false, false)},
       {new Key("HH", "U", "Cont", false), new Expectation(false, false)},
-      {new Key("SPG", "U", "Cont", false), new Expectation(false, false)},
-      {new Key("SPG", "U", "Cont", false), new Expectation(false, false)},
+      {new Key("CE", "E", "Cont", false), new Expectation(false, false)},
       {new Key("CE", "U", "Cont", false), new Expectation(false, false)},
-      {new Key("CE", "U", "Cont", false), new Expectation(false, false)},
-      {new Key("HH", "U", "Cont", true), new Expectation(false, false)},
-      {new Key("SPG", "U", "Cont", true), new Expectation(false, false)},
-      {new Key("SPG", "U", "Cont", true), new Expectation(false, false)},
-      {new Key("CE", "U", "Cont", true), new Expectation(false, false)},
-      {new Key("CE", "U", "Cont", true), new Expectation(false, false)},
-      {new Key("HH", "U", "Ind", true), new Expectation(true)}
+      {new Key("SPG", "E", "Cont", false), new Expectation(false, false)},
+      {new Key("SPG", "U", "Cont", false), new Expectation(false, false)},
     };
 
     return Arrays.asList(ruleToTest);
@@ -152,11 +172,6 @@ public class BlankQuestionnaireServiceTest {
       when(uacService.findByQid(eq(otherQid))).thenReturn(otherUacQidLink);
     }
 
-    if (expectation.invalid) {
-      checkExceptionIsRaised(caseService, underTest, caze, uacQidLink);
-      return;
-    }
-
     underTest.handleBlankQuestionnaire(caze, uacQidLink, RESPONSE_RECEIVED);
 
     if (!expectation.unreceiptCase && !expectation.sendToField) {
@@ -177,23 +192,6 @@ public class BlankQuestionnaireServiceTest {
       verify(caseService).unreceiptCase(any(), eq(null));
       return;
     }
-  }
-
-  private void checkExceptionIsRaised(
-      CaseService caseService,
-      BlankQuestionnaireService underTest,
-      Case caze,
-      UacQidLink uacQidLink) {
-    try {
-      underTest.handleBlankQuestionnaire(caze, uacQidLink, RESPONSE_RECEIVED);
-    } catch (RuntimeException rte) {
-      assertThat(rte).isInstanceOf(RuntimeException.class);
-      assertThat(rte.getMessage()).endsWith(" does not map to any known processing rule");
-      verifyNoInteractions(caseService);
-      return;
-    }
-
-    fail("Expected RuntimeException to be thrown");
   }
 
   private void runBlankQreTestCaseAlreadyReceipted(
@@ -232,11 +230,6 @@ public class BlankQuestionnaireServiceTest {
       otherUacQidLink.setActive(false);
       caze.setUacQidLinks(List.of(uacQidLink, otherUacQidLink));
       when(uacService.findByQid(eq(otherQid))).thenReturn(otherUacQidLink);
-    }
-
-    if (expectation.invalid) {
-      checkExceptionIsRaised(caseService, underTest, caze, uacQidLink);
-      return;
     }
 
     underTest.handleBlankQuestionnaire(caze, uacQidLink, RESPONSE_RECEIVED);
@@ -292,11 +285,6 @@ public class BlankQuestionnaireServiceTest {
       when(uacService.findByQid(eq(otherQid))).thenReturn(otherUacQidLink);
     }
 
-    if (expectation.invalid) {
-      checkExceptionIsRaised(caseService, underTest, caze, uacQidLink);
-      return;
-    }
-
     underTest.handleBlankQuestionnaire(caze, uacQidLink, RESPONSE_RECEIVED);
 
     if (!expectation.unreceiptCase) {
@@ -347,11 +335,6 @@ public class BlankQuestionnaireServiceTest {
       when(uacService.findByQid(eq(otherQid))).thenReturn(otherUacQidLink);
     }
 
-    if (expectation.invalid) {
-      checkExceptionIsRaised(caseService, underTest, caze, uacQidLink);
-      return;
-    }
-
     underTest.handleBlankQuestionnaire(caze, uacQidLink, RESPONSE_RECEIVED);
 
     if (!expectation.unreceiptCase) {
@@ -396,18 +379,12 @@ public class BlankQuestionnaireServiceTest {
   }
 
   private static class Expectation {
-
     boolean unreceiptCase;
     boolean sendToField;
-    boolean invalid;
 
     public Expectation(boolean unreceiptCase, boolean sendToField) {
       this.unreceiptCase = unreceiptCase;
       this.sendToField = sendToField;
-    }
-
-    public Expectation(boolean invalid) {
-      this.invalid = true;
     }
   }
 }
