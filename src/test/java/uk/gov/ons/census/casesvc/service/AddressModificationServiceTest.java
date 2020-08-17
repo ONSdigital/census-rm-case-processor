@@ -244,23 +244,6 @@ public class AddressModificationServiceTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void testProcessMessageEstabTypeInvalidForHouseholdCase() {
-    // Given
-    ResponseManagementEvent rme = getEvent();
-    rme.getPayload().getAddressModification().getNewAddress().setEstabType(Optional.of("HOSPITAL"));
-    OffsetDateTime messageTimestamp = OffsetDateTime.now();
-
-    Case caze = new Case();
-    caze.setCaseType("HH");
-    Mockito.when(caseService.getCaseByCaseId(any())).thenReturn(caze);
-
-    // When
-    underTest.processMessage(rme, messageTimestamp);
-
-    // Then
-  }
-
-  @Test(expected = RuntimeException.class)
   public void testProcessMessageEstabTypeNull() {
     // Given
     ResponseManagementEvent rme = getEvent();
