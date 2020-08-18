@@ -8,4 +8,5 @@ public class UacCreatedDTO {
   private String uac;
   private String qid;
   private UUID caseId;
+  private UUID batchId;
 }

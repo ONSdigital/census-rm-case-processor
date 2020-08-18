@@ -132,7 +132,8 @@ public class UacService {
     Case linkedCase = caseService.getCaseByCaseId(uacCreated.getCaseId());
 
     UacQidLink uacQidLink =
-        buildUacQidLink(linkedCase, null, uacCreated.getUac(), uacCreated.getQid());
+        buildUacQidLink(
+            linkedCase, uacCreated.getBatchId(), uacCreated.getUac(), uacCreated.getQid());
 
     saveAndEmitUacUpdatedEvent(uacQidLink);
 
