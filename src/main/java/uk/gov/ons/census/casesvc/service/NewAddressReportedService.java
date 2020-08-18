@@ -84,7 +84,7 @@ public class NewAddressReportedService {
         "New Address reported",
         EventType.NEW_ADDRESS_REPORTED,
         newAddressEvent.getEvent(),
-        JsonHelper.convertObjectToJson(newAddressEvent.getPayload()),
+        JsonHelper.convertObjectToJson(newAddressEvent.getPayload().getNewAddress()),
         messageTimestamp);
   }
 
