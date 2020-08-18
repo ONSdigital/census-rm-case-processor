@@ -121,6 +121,9 @@ public class UacServiceTest {
     assertEquals(
         uacCreatedEvent.getPayload().getUacQidCreated().getCaseId(),
         uacQidLinkArgumentCaptor.getValue().getCaze().getCaseId());
+    assertEquals(
+        uacCreatedEvent.getPayload().getUacQidCreated().getBatchId(),
+        uacQidLinkArgumentCaptor.getValue().getBatchId());
   }
 
   @Test
