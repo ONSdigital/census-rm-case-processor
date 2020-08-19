@@ -56,7 +56,7 @@ public class FieldCaseUpdatedService {
         FIELD_CASE_UPDATED_DESCRIPTION,
         EventType.FIELD_CASE_UPDATED,
         responseManagementEvent.getEvent(),
-        convertObjectToJson(fieldCaseUpdatedPayload),
+        convertObjectToJson(responseManagementEvent.getPayload()),
         messageTimestamp);
   }
 

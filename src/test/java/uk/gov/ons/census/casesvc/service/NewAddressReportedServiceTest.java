@@ -106,7 +106,7 @@ public class NewAddressReportedServiceTest {
             eq("New Address reported"),
             eq(EventType.NEW_ADDRESS_REPORTED),
             eq(eventDTO),
-            eq(JsonHelper.convertObjectToJson(newAddressEvent.getPayload())),
+            eq(JsonHelper.convertObjectToJson(newAddressEvent.getPayload().getNewAddress())),
             eq(expectedDateTime));
   }
 
