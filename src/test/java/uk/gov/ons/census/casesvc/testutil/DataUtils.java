@@ -269,6 +269,7 @@ public class DataUtils {
     UacCreatedDTO uacCreatedPayload = easyRandom.nextObject(UacCreatedDTO.class);
     uacCreatedPayload.setCaseId(linkedCase.getCaseId());
     uacCreatedPayload.setQid("01234567890");
+    uacCreatedPayload.setBatchId(UUID.randomUUID());
     EventDTO eventDTO = easyRandom.nextObject(EventDTO.class);
     eventDTO.setType(EventTypeDTO.RM_UAC_CREATED);
     PayloadDTO payloadDTO = new PayloadDTO();
