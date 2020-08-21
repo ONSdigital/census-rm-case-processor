@@ -1,6 +1,14 @@
 package uk.gov.ons.census.casesvc.messaging;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.ons.census.casesvc.testutil.MessageConstructor.constructMessageWithValidTimeStamp;
 
+import java.time.OffsetDateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -19,26 +27,14 @@ import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.service.UacService;
 import uk.gov.ons.census.casesvc.utility.MsgDateHelper;
 
-import java.time.OffsetDateTime;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.ons.census.casesvc.testutil.MessageConstructor.constructMessageWithValidTimeStamp;
-
 @RunWith(MockitoJUnitRunner.class)
 public class DeactivateUacReceiverTest {
   private static final String TEST_QID = "test_qid";
 
-  @Mock
-  private UacService uacService;
+  @Mock private UacService uacService;
   @Mock private EventLogger eventLogger;
 
-  @InjectMocks
-  DeactivateUacReceiver underTest;
+  @InjectMocks DeactivateUacReceiver underTest;
 
   @Test
   public void testDeactivateUac() {
