@@ -22,6 +22,7 @@ import uk.gov.ons.census.casesvc.model.dto.UacQidDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
+import uk.gov.ons.census.casesvc.model.entity.UacQidLinkMetadata;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 import uk.gov.ons.census.casesvc.utility.EventHelper;
 import uk.gov.ons.census.casesvc.utility.Sha256Helper;
@@ -53,16 +54,18 @@ public class UacService {
     this.caseService = caseService;
   }
 
-  public UacQidLink buildUacQidLink(Case caze, int questionnaireType) {
-    return buildUacQidLink(caze, questionnaireType, null);
-  }
-
-  public UacQidLink buildUacQidLink(Case caze, int questionnaireType, UUID batchId) {
+  public UacQidLink buildUacQidLink(
+      Case caze, int questionnaireType, UUID batchId, EventDTO sourceEvent) {
     UacQidDTO uacQid = uacQidCache.getUacQidPair(questionnaireType);
-    return buildUacQidLink(caze, batchId, uacQid.getUac(), uacQid.getQid());
+    return buildUacQidLink(caze, batchId, sourceEvent, uacQid.getUac(), uacQid.getQid());
   }
 
-  private UacQidLink buildUacQidLink(Case linkedCase, UUID batchId, String uac, String qid) {
+  private UacQidLink buildUacQidLink(
+      Case linkedCase, UUID batchId, EventDTO sourceEvent, String uac, String qid) {
+    UacQidLinkMetadata metadata = new UacQidLinkMetadata();
+    metadata.setChannel(sourceEvent.getChannel());
+    metadata.setSource(sourceEvent.getSource());
+
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setId(UUID.randomUUID());
     uacQidLink.setUac(uac);
@@ -74,9 +77,10 @@ public class UacService {
     return uacQidLink;
   }
 
-  public UacQidLink createUacQidLinkedToCCSCase(Case caze) {
+  public UacQidLink createUacQidLinkedToCCSCase(Case caze, EventDTO sourceEvent) {
     UacQidLink uacQidLink =
-        buildUacQidLink(caze, CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
+        buildUacQidLink(
+            caze, CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES, null, sourceEvent);
     uacQidLink.setCcsCase(true);
 
     uacQidLinkRepository.saveAndFlush(uacQidLink);
@@ -133,7 +137,11 @@ public class UacService {
 
     UacQidLink uacQidLink =
         buildUacQidLink(
-            linkedCase, uacCreated.getBatchId(), uacCreated.getUac(), uacCreated.getQid());
+            linkedCase,
+            uacCreated.getBatchId(),
+            responseManagementEvent.getEvent(),
+            uacCreated.getUac(),
+            uacCreated.getQid());
 
     saveAndEmitUacUpdatedEvent(uacQidLink);
 
