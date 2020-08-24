@@ -14,7 +14,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.ons.census.casesvc.model.dto.DeactivateUacDto;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
@@ -64,9 +63,9 @@ public class DeactivateUacReceiverIT {
       responseManagementEvent.setEvent(eventDTO);
 
       PayloadDTO payloadDTO = new PayloadDTO();
-      DeactivateUacDto deactivateUacDto = new DeactivateUacDto();
-      deactivateUacDto.setQid(TEST_QID);
-      payloadDTO.setDeactivateUacDto(deactivateUacDto);
+      UacDTO deactivateUacDto = new UacDTO();
+      deactivateUacDto.setQuestionnaireId(TEST_QID);
+      payloadDTO.setUac(deactivateUacDto);
       responseManagementEvent.setPayload(payloadDTO);
 
       UacQidLink uacQidLink = new UacQidLink();

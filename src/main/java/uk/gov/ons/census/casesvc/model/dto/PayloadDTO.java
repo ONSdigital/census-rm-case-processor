@@ -27,5 +27,4 @@ public class PayloadDTO {
 
   private AddressModification addressModification;
   private JsonNode addressTypeChange;
-  private DeactivateUacDto deactivateUacDto;
 }

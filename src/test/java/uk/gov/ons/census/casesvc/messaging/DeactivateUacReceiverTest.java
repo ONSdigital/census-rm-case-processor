@@ -17,11 +17,11 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.messaging.Message;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
-import uk.gov.ons.census.casesvc.model.dto.DeactivateUacDto;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
+import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.service.UacService;
@@ -44,9 +44,9 @@ public class DeactivateUacReceiverTest {
     responseManagementEvent.setEvent(eventDTO);
 
     PayloadDTO payloadDTO = new PayloadDTO();
-    DeactivateUacDto deactivateUacDto = new DeactivateUacDto();
-    deactivateUacDto.setQid(TEST_QID);
-    payloadDTO.setDeactivateUacDto(deactivateUacDto);
+    UacDTO deactivateUacDto = new UacDTO();
+    deactivateUacDto.setQuestionnaireId(TEST_QID);
+    payloadDTO.setUac(deactivateUacDto);
     responseManagementEvent.setPayload(payloadDTO);
 
     Message<ResponseManagementEvent> message =
@@ -74,6 +74,6 @@ public class DeactivateUacReceiverTest {
             eq(EventType.DEACTIVATE_UAC),
             any(),
             any(),
-            any());
+            eq(expectedDateTime));
   }
 }

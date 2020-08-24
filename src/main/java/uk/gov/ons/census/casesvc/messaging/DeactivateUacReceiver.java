@@ -9,8 +9,8 @@ import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
-import uk.gov.ons.census.casesvc.model.dto.DeactivateUacDto;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
+import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.service.UacService;
@@ -32,9 +32,9 @@ public class DeactivateUacReceiver {
   public void receiveMessage(Message<ResponseManagementEvent> message) {
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
 
-    DeactivateUacDto deactivateUac = message.getPayload().getPayload().getDeactivateUacDto();
+    UacDTO uacDTO = message.getPayload().getPayload().getUac();
 
-    UacQidLink uacQidLink = uacService.findByQid(deactivateUac.getQid());
+    UacQidLink uacQidLink = uacService.findByQid(uacDTO.getQuestionnaireId());
     uacQidLink.setActive(false);
     uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
 
