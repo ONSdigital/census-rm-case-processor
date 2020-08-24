@@ -14,10 +14,7 @@ import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
-import uk.gov.ons.census.casesvc.service.AddressModificationService;
-import uk.gov.ons.census.casesvc.service.CaseService;
-import uk.gov.ons.census.casesvc.service.InvalidAddressService;
-import uk.gov.ons.census.casesvc.service.NewAddressReportedService;
+import uk.gov.ons.census.casesvc.service.*;
 import uk.gov.ons.census.casesvc.utility.JsonHelper;
 
 @MessageEndpoint
@@ -25,6 +22,7 @@ public class AddressReceiver {
   private final InvalidAddressService invalidAddressService;
   private final AddressModificationService addressModificationService;
   private final NewAddressReportedService newAddressReportedService;
+  private final AddressTypeChangedService addressTypeChangedService;
   private final CaseService caseService;
   private final EventLogger eventLogger;
 
@@ -32,10 +30,12 @@ public class AddressReceiver {
       InvalidAddressService invalidAddressService,
       AddressModificationService addressModificationService,
       NewAddressReportedService newAddressReportedService,
+      AddressTypeChangedService addressTypeChangedService,
       CaseService caseService,
       EventLogger eventLogger) {
     this.addressModificationService = addressModificationService;
     this.newAddressReportedService = newAddressReportedService;
+    this.addressTypeChangedService = addressTypeChangedService;
     this.caseService = caseService;
     this.eventLogger = eventLogger;
     this.invalidAddressService = invalidAddressService;
@@ -59,13 +59,7 @@ public class AddressReceiver {
         break;
 
       case ADDRESS_TYPE_CHANGED:
-        logEvent(
-            responseManagementEvent.getPayload().getAddressTypeChange(),
-            responseManagementEvent.getEvent(),
-            "Address type changed",
-            EventType.ADDRESS_TYPE_CHANGED,
-            messageTimestamp);
-        // currently logged and ignored
+        addressTypeChangedService.processMessage(responseManagementEvent, messageTimestamp);
         break;
 
       case NEW_ADDRESS_REPORTED:
