@@ -2,7 +2,6 @@ package uk.gov.ons.census.casesvc.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.skyscreamer.jsonassert.JSONCompareMode.STRICT;
-import static org.springframework.data.domain.Sort.Direction.ASC;
 import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.*;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
@@ -25,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.gcp.pubsub.core.PubSubTemplate;
-import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -406,21 +404,42 @@ public class AddressReceiverIT {
       List<Event> events = eventRepository.findAll();
       assertThat(events.size()).isEqualTo(3);
       Event addressInvalidEvent = null;
+      Event oldAddressTypeChangedEvent = null;
+      Event newAddressTypeChangedEvent = null;
 
       for (Event eventItem : events) {
-        if (eventItem.getEventType().equals(ADDRESS_NOT_VALID)) {
-          if (addressInvalidEvent == null) {
-            addressInvalidEvent = eventItem;
-          } else {
-            assert (false);
+        if (eventItem.getEventType().equals(EventType.ADDRESS_NOT_VALID)) {
+          addressInvalidEvent = eventItem;
+        }
+        if (eventItem.getEventType().equals(EventType.ADDRESS_TYPE_CHANGED)) {
+          if (eventItem.getCaze().getCaseId().equals(TEST_CASE_ID)) {
+            oldAddressTypeChangedEvent = eventItem;
+          } else if (eventItem.getCaze().getCaseId().equals(NEW_TEST_CASE_ID)) {
+            newAddressTypeChangedEvent = eventItem;
           }
         }
       }
       assertThat(addressInvalidEvent).isNotNull();
+      assertThat(oldAddressTypeChangedEvent).isNotNull();
+      assertThat(newAddressTypeChangedEvent).isNotNull();
+      assertThat(addressInvalidEvent.getCaze().getCaseId()).isEqualTo(TEST_CASE_ID);
+      assertThat(addressInvalidEvent.getEventDescription()).isEqualTo("Invalid address");
+      assertThat(oldAddressTypeChangedEvent.getEventDescription())
+          .isEqualTo("Address type changed");
+      assertThat(newAddressTypeChangedEvent.getEventDescription())
+          .isEqualTo("Address type changed");
 
+      JSONAssert.assertEquals(
+          addressInvalidEvent.getEventPayload(), convertObjectToJson(addressTypeChanged), STRICT);
+      JSONAssert.assertEquals(
+          oldAddressTypeChangedEvent.getEventPayload(),
+          convertObjectToJson(addressTypeChanged),
+          STRICT);
+      JSONAssert.assertEquals(
+          newAddressTypeChangedEvent.getEventPayload(),
+          convertObjectToJson(addressTypeChanged),
+          STRICT);
     }
-
-
   }
 
   // TEST FAILING? Try running `gcloud auth application-default revoke`
@@ -709,60 +728,6 @@ public class AddressReceiverIT {
       Event event = events.get(0);
       assertThat(event.getEventDescription()).isEqualTo("New Address reported");
       assertThat(event.getEventType()).isEqualTo(EventType.NEW_ADDRESS_REPORTED);
-    }
-  }
-
-  public void testEventTypeLoggedOnly(
-      PayloadDTO payload,
-      String expectedEventPayloadJson,
-      EventTypeDTO eventTypeDTO,
-      EventType eventType,
-      String eventDescription)
-      throws Exception {
-    try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
-      // GIVEN
-      EasyRandom easyRandom = new EasyRandom();
-      Case caze = easyRandom.nextObject(Case.class);
-      caze.setCaseId(TEST_CASE_ID);
-      caze.setUacQidLinks(null);
-      caze.setEvents(null);
-      caze.setAddressInvalid(false);
-      caze = caseRepository.saveAndFlush(caze);
-
-      ResponseManagementEvent managementEvent = new ResponseManagementEvent();
-      managementEvent.setEvent(new EventDTO());
-      managementEvent.getEvent().setDateTime(OffsetDateTime.now());
-      managementEvent.getEvent().setChannel("Test channel");
-      managementEvent.getEvent().setSource("Test source");
-      managementEvent.getEvent().setType(eventTypeDTO);
-      managementEvent.setPayload(payload);
-
-      String json = convertObjectToJson(managementEvent);
-      Message message =
-          MessageBuilder.withBody(json.getBytes())
-              .setContentType(MessageProperties.CONTENT_TYPE_JSON)
-              .build();
-      rabbitQueueHelper.sendMessage(addressReceiver, message);
-
-      // Check no message emitted
-      rhCaseQueueSpy.checkMessageIsNotReceived(3);
-
-      // Check case not changed
-      Optional<Case> actualCaseOpt = caseRepository.findById(caze.getCaseId());
-      Case actualCase = actualCaseOpt.get();
-      assertThat(actualCase.isAddressInvalid()).isFalse();
-
-      // Event logged is as expected
-      List<Event> events = eventRepository.findAll(Sort.by(ASC, "rmEventProcessed"));
-      assertThat(events.size()).isEqualTo(1);
-      Event event = events.get(0);
-      assertThat(event.getEventChannel()).isEqualTo("Test channel");
-      assertThat(event.getEventSource()).isEqualTo("Test source");
-      assertThat(event.getEventDescription()).isEqualTo(eventDescription);
-      assertThat(event.getEventType()).isEqualTo(eventType);
-
-      String actualEventPayloadJson = event.getEventPayload();
-      JSONAssert.assertEquals(actualEventPayloadJson, expectedEventPayloadJson, STRICT);
     }
   }
 

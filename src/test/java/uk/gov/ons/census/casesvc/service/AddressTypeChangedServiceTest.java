@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,6 +48,7 @@ public class AddressTypeChangedServiceTest {
     AddressTypeChangedDetails addressTypeChangedDetails = new AddressTypeChangedDetails();
     addressTypeChanged.setCollectionCase(addressTypeChangedDetails);
     addressTypeChangedDetails.setCeExpectedCapacity("20");
+    addressTypeChangedDetails.setId(UUID.randomUUID());
 
     Address address = new Address();
     addressTypeChangedDetails.setAddress(address);
@@ -54,6 +56,7 @@ public class AddressTypeChangedServiceTest {
 
     Case oldCase = easyRandom.nextObject(Case.class);
     oldCase.setCaseType("HH");
+    oldCase.setCaseId(UUID.randomUUID());
     when(caseService.getCaseByCaseId(any())).thenReturn(oldCase);
     when(caseService.saveNewCaseAndStampCaseRef(any())).thenAnswer(i -> i.getArguments()[0]);
 
@@ -114,5 +117,149 @@ public class AddressTypeChangedServiceTest {
             eq(rme.getEvent()),
             eq(JsonHelper.convertObjectToJson(addressTypeChanged)),
             eq(messageTimestamp));
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testOldCaseIdCannotEqualNewCaseId() {
+    // Given
+    UUID oneUuid = UUID.randomUUID();
+    ResponseManagementEvent rme = new ResponseManagementEvent();
+
+    PayloadDTO payload = new PayloadDTO();
+    rme.setPayload(payload);
+
+    AddressTypeChanged addressTypeChanged = new AddressTypeChanged();
+    payload.setAddressTypeChanged(addressTypeChanged);
+    addressTypeChanged.setNewCaseId(oneUuid);
+
+    AddressTypeChangedDetails addressTypeChangedDetails = new AddressTypeChangedDetails();
+    addressTypeChanged.setCollectionCase(addressTypeChangedDetails);
+    addressTypeChangedDetails.setId(oneUuid);
+
+    // When
+    underTest.processMessage(rme, null);
+
+    // Then
+
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testCannotChangeHiCases() {
+    // Given
+    ResponseManagementEvent rme = new ResponseManagementEvent();
+
+    EventDTO event = new EventDTO();
+    rme.setEvent(event);
+
+    PayloadDTO payload = new PayloadDTO();
+    rme.setPayload(payload);
+
+    AddressTypeChanged addressTypeChanged = new AddressTypeChanged();
+    payload.setAddressTypeChanged(addressTypeChanged);
+
+    AddressTypeChangedDetails addressTypeChangedDetails = new AddressTypeChangedDetails();
+    addressTypeChanged.setCollectionCase(addressTypeChangedDetails);
+    addressTypeChangedDetails.setId(UUID.randomUUID());
+
+    Case oldCase = easyRandom.nextObject(Case.class);
+    oldCase.setCaseType("HI");
+    oldCase.setCaseId(UUID.randomUUID());
+    when(caseService.getCaseByCaseId(any())).thenReturn(oldCase);
+
+    // When
+    underTest.processMessage(rme, null);
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testCannotChangeHhToHhCases() {
+    // Given
+    ResponseManagementEvent rme = new ResponseManagementEvent();
+
+    EventDTO event = new EventDTO();
+    rme.setEvent(event);
+
+    PayloadDTO payload = new PayloadDTO();
+    rme.setPayload(payload);
+
+    AddressTypeChanged addressTypeChanged = new AddressTypeChanged();
+    payload.setAddressTypeChanged(addressTypeChanged);
+
+    AddressTypeChangedDetails addressTypeChangedDetails = new AddressTypeChangedDetails();
+    addressTypeChanged.setCollectionCase(addressTypeChangedDetails);
+    addressTypeChangedDetails.setId(UUID.randomUUID());
+
+    Address address = new Address();
+    addressTypeChangedDetails.setAddress(address);
+    address.setAddressType("HH");
+
+    Case oldCase = easyRandom.nextObject(Case.class);
+    oldCase.setCaseType("HH");
+    oldCase.setCaseId(UUID.randomUUID());
+    when(caseService.getCaseByCaseId(any())).thenReturn(oldCase);
+
+    // When
+    underTest.processMessage(rme, null);
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testCannotChangeSpgToSpgCases() {
+    // Given
+    ResponseManagementEvent rme = new ResponseManagementEvent();
+
+    EventDTO event = new EventDTO();
+    rme.setEvent(event);
+
+    PayloadDTO payload = new PayloadDTO();
+    rme.setPayload(payload);
+
+    AddressTypeChanged addressTypeChanged = new AddressTypeChanged();
+    payload.setAddressTypeChanged(addressTypeChanged);
+
+    AddressTypeChangedDetails addressTypeChangedDetails = new AddressTypeChangedDetails();
+    addressTypeChanged.setCollectionCase(addressTypeChangedDetails);
+    addressTypeChangedDetails.setId(UUID.randomUUID());
+
+    Address address = new Address();
+    addressTypeChangedDetails.setAddress(address);
+    address.setAddressType("SPG");
+
+    Case oldCase = easyRandom.nextObject(Case.class);
+    oldCase.setCaseType("SPG");
+    oldCase.setCaseId(UUID.randomUUID());
+    when(caseService.getCaseByCaseId(any())).thenReturn(oldCase);
+
+    // When
+    underTest.processMessage(rme, null);
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testCannotChangeCeToCeCases() {
+    // Given
+    ResponseManagementEvent rme = new ResponseManagementEvent();
+
+    EventDTO event = new EventDTO();
+    rme.setEvent(event);
+
+    PayloadDTO payload = new PayloadDTO();
+    rme.setPayload(payload);
+
+    AddressTypeChanged addressTypeChanged = new AddressTypeChanged();
+    payload.setAddressTypeChanged(addressTypeChanged);
+
+    AddressTypeChangedDetails addressTypeChangedDetails = new AddressTypeChangedDetails();
+    addressTypeChanged.setCollectionCase(addressTypeChangedDetails);
+    addressTypeChangedDetails.setId(UUID.randomUUID());
+
+    Address address = new Address();
+    addressTypeChangedDetails.setAddress(address);
+    address.setAddressType("CE");
+
+    Case oldCase = easyRandom.nextObject(Case.class);
+    oldCase.setCaseType("CE");
+    oldCase.setCaseId(UUID.randomUUID());
+    when(caseService.getCaseByCaseId(any())).thenReturn(oldCase);
+
+    // When
+    underTest.processMessage(rme, null);
   }
 }
