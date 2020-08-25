@@ -207,7 +207,7 @@ public class CaseService {
     address.setLongitude(caze.getLongitude());
     address.setPostcode(caze.getPostcode());
     address.setTownName(caze.getTownName());
-    address.setApbCode(caze.getAbpCode());
+    address.setAbpCode(caze.getAbpCode());
     address.setOrganisationName(caze.getOrganisationName());
     address.setUprn(caze.getUprn());
     address.setEstabUprn(caze.getEstabUprn());
