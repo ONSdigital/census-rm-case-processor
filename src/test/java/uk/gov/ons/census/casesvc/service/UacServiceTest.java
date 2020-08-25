@@ -216,6 +216,8 @@ public class UacServiceTest {
     assertThat(actualUacQidLink.getCaze().getSurvey()).isEqualTo("CCS");
     assertThat(actualUacQidLink.getCaze()).isNotNull();
     assertThat(actualUacQidLink.isCcsCase()).isTrue();
+    assertThat(actualUacQidLink.getMetadata().getChannel()).isEqualTo("DUMMY");
+    assertThat(actualUacQidLink.getMetadata().getSource()).isEqualTo("DUMMY");
 
     Case actualCase = actualUacQidLink.getCaze();
     assertThat(actualCase.getCaseId()).isEqualTo(TEST_CASE_ID);

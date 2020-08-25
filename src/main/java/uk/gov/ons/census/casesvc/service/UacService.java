@@ -73,6 +73,7 @@ public class UacService {
     uacQidLink.setBatchId(batchId);
     uacQidLink.setActive(true);
     uacQidLink.setQid(qid);
+    uacQidLink.setMetadata(metadata);
 
     return uacQidLink;
   }
