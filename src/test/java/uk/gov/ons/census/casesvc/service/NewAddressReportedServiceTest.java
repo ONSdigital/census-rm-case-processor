@@ -244,12 +244,12 @@ public class NewAddressReportedServiceTest {
     assertThat(newCase.getAddressType())
         .isEqualTo(newAddressCollectionCase.getAddress().getAddressType());
 
-    assertThat(newCase.getEstabUprn()).isEqualTo(sourceCase.getEstabUprn());
     assertThat(newCase.getMetadata().getSecureEstablishment()).isTrue();
 
     assertThat(newCase.getLongitude()).isEqualTo(sourceCase.getLongitude());
     assertThat(newCase.getLatitude()).isEqualTo(sourceCase.getLatitude());
     assertThat(newCase.getUprn()).isEqualTo(DUMMY_UPRN_PREFIX + newCase.getCaseRef());
+    assertThat(newCase.getEstabUprn()).isEqualTo(DUMMY_UPRN_PREFIX + newCase.getCaseRef());
   }
 
   @Test
@@ -306,7 +306,6 @@ public class NewAddressReportedServiceTest {
         .isEqualTo(newAddressCollectionCase.getAddress().getLatitude());
     assertThat(newCase.getLongitude())
         .isEqualTo(newAddressCollectionCase.getAddress().getLongitude());
-    assertThat(newCase.getEstabUprn()).isEqualTo(sourceCase.getEstabUprn());
     assertThat(newCase.getMetadata().getSecureEstablishment()).isFalse();
 
     verify(caseService).saveCaseAndEmitCaseCreatedEvent(newCase, null);
@@ -355,7 +354,6 @@ public class NewAddressReportedServiceTest {
         .isEqualTo(newAddressCollectionCase.getAddress().getAddressType());
     assertThat(newCase.getLatitude())
         .isEqualTo(newAddressCollectionCase.getAddress().getLatitude());
-    assertThat(newCase.getEstabUprn()).isEqualTo(sourceCase.getEstabUprn());
 
     ArgumentCaptor<Metadata> metadataArgumentCaptor = ArgumentCaptor.forClass(Metadata.class);
 
@@ -458,7 +456,7 @@ public class NewAddressReportedServiceTest {
   }
 
   @Test
-  public void testNewAddressGetsDummyUprn() {
+  public void testNewAddressGetsDummyUprnAndEstabUprn() {
     ReflectionTestUtils.setField(underTest, "dummyUprnPrefix", DUMMY_UPRN_PREFIX);
     ResponseManagementEvent responseManagementEvent = getMinimalValidNewAddress();
     Case casetoEmit = new Case();
@@ -471,6 +469,7 @@ public class NewAddressReportedServiceTest {
     verify(caseService).saveCase(any(Case.class));
 
     assertThat(casetoEmit.getUprn()).isEqualTo(DUMMY_UPRN_PREFIX + casetoEmit.getCaseRef());
+    assertThat(casetoEmit.getEstabUprn()).isEqualTo(DUMMY_UPRN_PREFIX + casetoEmit.getCaseRef());
   }
 
   private ResponseManagementEvent getMinimalValidNewAddress() {

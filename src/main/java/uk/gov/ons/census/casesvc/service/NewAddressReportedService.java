@@ -72,7 +72,7 @@ public class NewAddressReportedService {
 
     skeletonCase = caseService.saveNewCaseAndStampCaseRef(skeletonCase);
     if (StringUtils.isEmpty(skeletonCase.getUprn())) {
-      addDummyUprnToCase(skeletonCase);
+      addDummyUprnAndEstabUprnToCase(skeletonCase);
       sendNewAddressToAims(newAddressEvent, skeletonCase.getUprn());
       caseService.saveCase(skeletonCase);
     }
@@ -99,7 +99,7 @@ public class NewAddressReportedService {
 
     newCaseFromSourceCase = caseService.saveNewCaseAndStampCaseRef(newCaseFromSourceCase);
     if (StringUtils.isEmpty(newCaseFromSourceCase.getUprn())) {
-      addDummyUprnToCase(newCaseFromSourceCase);
+      addDummyUprnAndEstabUprnToCase(newCaseFromSourceCase);
       sendNewAddressToAims(newAddressEvent, newCaseFromSourceCase.getUprn());
     }
 
@@ -303,9 +303,10 @@ public class NewAddressReportedService {
     return newCaseMetadata;
   }
 
-  private void addDummyUprnToCase(Case newCase) {
+  private void addDummyUprnAndEstabUprnToCase(Case newCase) {
     String dummyUprn = String.format("%s%d", dummyUprnPrefix, newCase.getCaseRef());
     newCase.setUprn(dummyUprn);
+    newCase.setEstabUprn(dummyUprn);
   }
 
   private void sendNewAddressToAims(ResponseManagementEvent newAddressEvent, String dummyUprn) {
@@ -365,6 +366,7 @@ public class NewAddressReportedService {
     address.setLongitude(sourceCollectionCase.getAddress().getLongitude());
     address.setRegion(sourceCollectionCase.getAddress().getRegion());
     address.setUprn(dummyUprn);
+    address.setEstabUprn(dummyUprn);
 
     CollectionCase collectionCase = new CollectionCase();
     collectionCase.setId(sourceCollectionCase.getId());

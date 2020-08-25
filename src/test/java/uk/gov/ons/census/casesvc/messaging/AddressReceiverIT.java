@@ -331,6 +331,14 @@ public class AddressReceiverIT {
       assertThat(
               rmEventToAims.getPayload().getNewAddress().getCollectionCase().getAddress().getUprn())
           .startsWith("999");
+      assertThat(
+              rmEventToAims
+                  .getPayload()
+                  .getNewAddress()
+                  .getCollectionCase()
+                  .getAddress()
+                  .getEstabUprn())
+          .startsWith("999");
     }
   }
 
@@ -413,7 +421,7 @@ public class AddressReceiverIT {
       assertThat(actualCase.getUprn()).isEqualTo("999" + actualCase.getCaseRef());
       assertThat(actualCase.getTreatmentCode()).isNull();
 
-      assertThat(actualCase.getEstabUprn()).isEqualTo(sourceCase.getEstabUprn());
+      assertThat(actualCase.getEstabUprn()).isEqualTo("999" + actualCase.getCaseRef());
       assertThat(actualCase.getMetadata().getSecureEstablishment()).isTrue();
 
       assertThat(actualCase.isReceiptReceived()).isFalse();
@@ -434,6 +442,14 @@ public class AddressReceiverIT {
       assertThat(rmEventToAims.getEvent().getType()).isEqualTo(NEW_ADDRESS_ENHANCED);
       assertThat(
               rmEventToAims.getPayload().getNewAddress().getCollectionCase().getAddress().getUprn())
+          .startsWith("999");
+      assertThat(
+              rmEventToAims
+                  .getPayload()
+                  .getNewAddress()
+                  .getCollectionCase()
+                  .getAddress()
+                  .getEstabUprn())
           .startsWith("999");
     }
   }
