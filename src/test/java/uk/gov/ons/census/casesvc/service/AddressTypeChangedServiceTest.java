@@ -7,7 +7,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.OffsetDateTime;
-import java.util.Optional;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,7 +46,7 @@ public class AddressTypeChangedServiceTest {
 
     AddressTypeChangedDetails addressTypeChangedDetails = new AddressTypeChangedDetails();
     addressTypeChanged.setCollectionCase(addressTypeChangedDetails);
-    addressTypeChangedDetails.setCeExpectedCapacity(Optional.of("20"));
+    addressTypeChangedDetails.setCeExpectedCapacity("20");
 
     Address address = new Address();
     addressTypeChangedDetails.setAddress(address);

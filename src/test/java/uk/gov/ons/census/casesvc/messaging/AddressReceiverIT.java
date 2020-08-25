@@ -32,18 +32,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
-import uk.gov.ons.census.casesvc.model.dto.Address;
-import uk.gov.ons.census.casesvc.model.dto.AddressModification;
-import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
-import uk.gov.ons.census.casesvc.model.dto.CollectionCaseCaseId;
-import uk.gov.ons.census.casesvc.model.dto.EventDTO;
-import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
-import uk.gov.ons.census.casesvc.model.dto.InvalidAddress;
-import uk.gov.ons.census.casesvc.model.dto.ModifiedAddress;
-import uk.gov.ons.census.casesvc.model.dto.NewAddress;
-import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
-import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
+import uk.gov.ons.census.casesvc.model.dto.*;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
@@ -53,7 +42,6 @@ import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 import uk.gov.ons.census.casesvc.testutil.PubSubHelper;
 import uk.gov.ons.census.casesvc.testutil.QueueSpy;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
-import uk.gov.ons.census.casesvc.utility.JsonHelper;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -61,6 +49,7 @@ import uk.gov.ons.census.casesvc.utility.JsonHelper;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class AddressReceiverIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
+  private static final UUID NEW_TEST_CASE_ID = UUID.randomUUID();
   private static final String AIMS_SUBSCRIPTION = "aims-subscription";
 
   @Value("${queueconfig.address-inbound-queue}")
@@ -254,17 +243,184 @@ public class AddressReceiverIT {
   }
 
   @Test
-  public void testAddressTypeChangeEventTypeLoggedOnly() throws Exception {
-    PayloadDTO payload = new PayloadDTO();
-    //    payload.setAddressTypeChanged(createTestAddressTypeChangeJson(TEST_CASE_ID));
-    //      TODO - Fix test
+  public void testAddressTypeChangedHappyPath() throws Exception {
+    // GIVEN
+    try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
+      EasyRandom easyRandom = new EasyRandom();
+      Case caze = easyRandom.nextObject(Case.class);
+      caze.setCaseId(TEST_CASE_ID);
+      caze.setCaseType("HH");
+      caze.setSurvey("CENSUS");
+      caze.setUacQidLinks(null);
+      caze.setEvents(null);
+      caze.setAddressInvalid(false);
+      caze.setRegion("W");
+      caze = caseRepository.saveAndFlush(caze);
 
-    testEventTypeLoggedOnly(
-        payload,
-        JsonHelper.convertObjectToJson(payload.getAddressTypeChanged()),
-        ADDRESS_TYPE_CHANGED,
-        EventType.ADDRESS_TYPE_CHANGED,
-        "Address type changed");
+      ResponseManagementEvent rme = new ResponseManagementEvent();
+
+      EventDTO event = new EventDTO();
+      rme.setEvent(event);
+      event.setDateTime(OffsetDateTime.now());
+      event.setType(ADDRESS_TYPE_CHANGED);
+      event.setChannel("CC");
+
+      PayloadDTO payload = new PayloadDTO();
+      rme.setPayload(payload);
+
+      AddressTypeChanged addressTypeChanged = new AddressTypeChanged();
+      payload.setAddressTypeChanged(addressTypeChanged);
+      addressTypeChanged.setNewCaseId(NEW_TEST_CASE_ID);
+
+      AddressTypeChangedDetails addressTypeChangedDetails = new AddressTypeChangedDetails();
+      addressTypeChanged.setCollectionCase(addressTypeChangedDetails);
+      addressTypeChangedDetails.setCeExpectedCapacity("20");
+      addressTypeChangedDetails.setId(TEST_CASE_ID);
+
+      Address address = new Address();
+      addressTypeChangedDetails.setAddress(address);
+      address.setAddressType("SPG");
+
+      String json = convertObjectToJson(rme);
+      Message message =
+          MessageBuilder.withBody(json.getBytes())
+              .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+              .build();
+
+      // WHEN
+      rabbitQueueHelper.sendMessage(addressReceiver, message);
+
+      // THEN
+      ResponseManagementEvent oldCaseEvent = null;
+      ResponseManagementEvent newCaseEvent = null;
+      ResponseManagementEvent actualResponseManagementEvent =
+          rhCaseQueueSpy.checkExpectedMessageReceived();
+      if (actualResponseManagementEvent
+          .getPayload()
+          .getCollectionCase()
+          .getCaseType()
+          .equals("HH")) {
+        oldCaseEvent = actualResponseManagementEvent;
+      } else if (actualResponseManagementEvent
+          .getPayload()
+          .getCollectionCase()
+          .getCaseType()
+          .equals("SPG")) {
+        newCaseEvent = actualResponseManagementEvent;
+      } else {
+        assert (false);
+      }
+      actualResponseManagementEvent = rhCaseQueueSpy.checkExpectedMessageReceived();
+
+      if (oldCaseEvent == null
+          && actualResponseManagementEvent
+              .getPayload()
+              .getCollectionCase()
+              .getCaseType()
+              .equals("HH")) {
+        oldCaseEvent = actualResponseManagementEvent;
+
+      } else if (actualResponseManagementEvent
+          .getPayload()
+          .getCollectionCase()
+          .getCaseType()
+          .equals("SPG")) {
+        newCaseEvent = actualResponseManagementEvent;
+      } else {
+        assert (false);
+      }
+
+      assertThat(oldCaseEvent.getPayload().getCollectionCase().getAddressInvalid()).isTrue();
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getAddressInvalid()).isFalse();
+      assertThat(oldCaseEvent.getPayload().getCollectionCase().getId()).isEqualTo(TEST_CASE_ID);
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getId()).isEqualTo(NEW_TEST_CASE_ID);
+
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getAddressLine1())
+          .isEqualTo(caze.getAddressLine1());
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getAddressLine2())
+          .isEqualTo(caze.getAddressLine2());
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getAddressLine3())
+          .isEqualTo(caze.getAddressLine3());
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getRegion())
+          .isEqualTo(caze.getRegion());
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getCollectionExerciseId())
+          .isEqualTo(caze.getCollectionExerciseId());
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getActionPlanId())
+          .isEqualTo(caze.getActionPlanId());
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getSurvey())
+          .isEqualTo(caze.getSurvey());
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getUprn())
+          .isEqualTo(caze.getUprn());
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getOrganisationName())
+          .isEqualTo(caze.getOrganisationName());
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getTownName())
+          .isEqualTo(caze.getTownName());
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getPostcode())
+          .isEqualTo(caze.getPostcode());
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getLatitude())
+          .isEqualTo(caze.getLatitude());
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getLongitude())
+          .isEqualTo(caze.getLongitude());
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getOa()).isEqualTo(caze.getOa());
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getLsoa()).isEqualTo(caze.getLsoa());
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getMsoa()).isEqualTo(caze.getMsoa());
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getLad()).isEqualTo(caze.getLad());
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getHtcWillingness())
+          .isEqualTo(caze.getHtcWillingness());
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getHtcDigital())
+          .isEqualTo(caze.getHtcDigital());
+
+      assertThat(oldCaseEvent.getEvent().getType()).isEqualTo(CASE_UPDATED);
+      assertThat(newCaseEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_CREATED);
+
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getCeExpectedCapacity())
+          .isEqualTo(20);
+      assertThat(newCaseEvent.getPayload().getCollectionCase().isSkeleton()).isTrue();
+
+      Case oldCase = caseRepository.findById(TEST_CASE_ID).get();
+      assertThat(oldCase.isAddressInvalid()).isTrue();
+
+      Case newCase = caseRepository.findById(NEW_TEST_CASE_ID).get();
+      assertThat(newCase.getAddressLine1()).isEqualTo(caze.getAddressLine1());
+      assertThat(newCase.getAddressLine2()).isEqualTo(caze.getAddressLine2());
+      assertThat(newCase.getAddressLine3()).isEqualTo(caze.getAddressLine3());
+      assertThat(newCase.getRegion()).isEqualTo(caze.getRegion());
+      assertThat(newCase.getCollectionExerciseId()).isEqualTo(caze.getCollectionExerciseId());
+      assertThat(newCase.getActionPlanId()).isEqualTo(caze.getActionPlanId());
+      assertThat(newCase.getSurvey()).isEqualTo(caze.getSurvey());
+      assertThat(newCase.getUprn()).isEqualTo(caze.getUprn());
+      assertThat(newCase.getOrganisationName()).isEqualTo(caze.getOrganisationName());
+      assertThat(newCase.getTownName()).isEqualTo(caze.getTownName());
+      assertThat(newCase.getPostcode()).isEqualTo(caze.getPostcode());
+      assertThat(newCase.getLatitude()).isEqualTo(caze.getLatitude());
+      assertThat(newCase.getLongitude()).isEqualTo(caze.getLongitude());
+      assertThat(newCase.getOa()).isEqualTo(caze.getOa());
+      assertThat(newCase.getLsoa()).isEqualTo(caze.getLsoa());
+      assertThat(newCase.getMsoa()).isEqualTo(caze.getMsoa());
+      assertThat(newCase.getLad()).isEqualTo(caze.getLad());
+      assertThat(newCase.getHtcWillingness()).isEqualTo(caze.getHtcWillingness());
+      assertThat(newCase.getHtcDigital()).isEqualTo(caze.getHtcDigital());
+      assertThat(newCase.getCeExpectedCapacity()).isEqualTo(20);
+      assertThat(newCase.isSkeleton()).isTrue();
+
+      List<Event> events = eventRepository.findAll();
+      assertThat(events.size()).isEqualTo(3);
+      Event addressInvalidEvent = null;
+
+      for (Event eventItem : events) {
+        if (eventItem.getEventType().equals(ADDRESS_NOT_VALID)) {
+          if (addressInvalidEvent == null) {
+            addressInvalidEvent = eventItem;
+          } else {
+            assert (false);
+          }
+        }
+      }
+      assertThat(addressInvalidEvent).isNotNull();
+
+    }
+
+
   }
 
   // TEST FAILING? Try running `gcloud auth application-default revoke`

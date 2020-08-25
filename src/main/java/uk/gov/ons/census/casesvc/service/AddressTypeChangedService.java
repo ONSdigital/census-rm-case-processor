@@ -30,6 +30,11 @@ public class AddressTypeChangedService {
       ResponseManagementEvent responseManagementEvent, OffsetDateTime messageTimestamp) {
     AddressTypeChanged addressTypeChanged =
         responseManagementEvent.getPayload().getAddressTypeChanged();
+
+    if (addressTypeChanged.getCollectionCase().getId().equals(addressTypeChanged.getNewCaseId())) {
+      throw new RuntimeException("Old Case ID cannot equal New Case ID");
+    }
+
     Case oldCase = caseService.getCaseByCaseId(addressTypeChanged.getCollectionCase().getId());
 
     if (oldCase.getCaseType().equals("HI")) {
@@ -75,12 +80,9 @@ public class AddressTypeChangedService {
     newCase.setActionPlanId(oldCase.getActionPlanId());
     newCase.setSurvey(oldCase.getSurvey());
 
-    if (addressTypeChanged.getCollectionCase().getCeExpectedCapacity() != null
-        && addressTypeChanged.getCollectionCase().getCeExpectedCapacity().isPresent()
-        && !StringUtils.isEmpty(
-            addressTypeChanged.getCollectionCase().getCeExpectedCapacity().get())) {
+    if (!StringUtils.isEmpty(addressTypeChanged.getCollectionCase().getCeExpectedCapacity())) {
       newCase.setCeExpectedCapacity(
-          Integer.parseInt(addressTypeChanged.getCollectionCase().getCeExpectedCapacity().get()));
+          Integer.parseInt(addressTypeChanged.getCollectionCase().getCeExpectedCapacity()));
     }
 
     newCase.setUprn(oldCase.getUprn());
