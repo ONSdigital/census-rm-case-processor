@@ -266,17 +266,17 @@ public class AddressReceiverIT {
       PayloadDTO payload = new PayloadDTO();
       rme.setPayload(payload);
 
-      AddressTypeChanged addressTypeChanged = new AddressTypeChanged();
-      payload.setAddressTypeChanged(addressTypeChanged);
-      addressTypeChanged.setNewCaseId(NEW_TEST_CASE_ID);
+      AddressTypeChange addressTypeChange = new AddressTypeChange();
+      payload.setAddressTypeChange(addressTypeChange);
+      addressTypeChange.setNewCaseId(NEW_TEST_CASE_ID);
 
-      AddressTypeChangedDetails addressTypeChangedDetails = new AddressTypeChangedDetails();
-      addressTypeChanged.setCollectionCase(addressTypeChangedDetails);
-      addressTypeChangedDetails.setCeExpectedCapacity("20");
-      addressTypeChangedDetails.setId(TEST_CASE_ID);
+      AddressTypeChangeDetails addressTypeChangeDetails = new AddressTypeChangeDetails();
+      addressTypeChange.setCollectionCase(addressTypeChangeDetails);
+      addressTypeChangeDetails.setCeExpectedCapacity("20");
+      addressTypeChangeDetails.setId(TEST_CASE_ID);
 
       Address address = new Address();
-      addressTypeChangedDetails.setAddress(address);
+      addressTypeChangeDetails.setAddress(address);
       address.setAddressType("SPG");
 
       String json = convertObjectToJson(rme);
@@ -430,14 +430,14 @@ public class AddressReceiverIT {
           .isEqualTo("Address type changed");
 
       JSONAssert.assertEquals(
-          addressInvalidEvent.getEventPayload(), convertObjectToJson(addressTypeChanged), STRICT);
+          addressInvalidEvent.getEventPayload(), convertObjectToJson(addressTypeChange), STRICT);
       JSONAssert.assertEquals(
           oldAddressTypeChangedEvent.getEventPayload(),
-          convertObjectToJson(addressTypeChanged),
+          convertObjectToJson(addressTypeChange),
           STRICT);
       JSONAssert.assertEquals(
           newAddressTypeChangedEvent.getEventPayload(),
-          convertObjectToJson(addressTypeChanged),
+          convertObjectToJson(addressTypeChange),
           STRICT);
     }
   }

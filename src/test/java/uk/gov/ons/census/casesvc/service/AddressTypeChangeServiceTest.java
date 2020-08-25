@@ -22,12 +22,12 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.utility.JsonHelper;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AddressTypeChangedServiceTest {
+public class AddressTypeChangeServiceTest {
   private static final EasyRandom easyRandom = new EasyRandom();
   @Mock private CaseService caseService;
   @Mock private EventLogger eventLogger;
   @Mock private InvalidAddressService invalidAddressService;
-  @InjectMocks private AddressTypeChangedService underTest;
+  @InjectMocks private AddressTypeChangeService underTest;
 
   @Test
   public void testProcessMessageHappyPath() {
@@ -42,16 +42,16 @@ public class AddressTypeChangedServiceTest {
     PayloadDTO payload = new PayloadDTO();
     rme.setPayload(payload);
 
-    AddressTypeChanged addressTypeChanged = new AddressTypeChanged();
-    payload.setAddressTypeChanged(addressTypeChanged);
+    AddressTypeChange addressTypeChange = new AddressTypeChange();
+    payload.setAddressTypeChange(addressTypeChange);
 
-    AddressTypeChangedDetails addressTypeChangedDetails = new AddressTypeChangedDetails();
-    addressTypeChanged.setCollectionCase(addressTypeChangedDetails);
-    addressTypeChangedDetails.setCeExpectedCapacity("20");
-    addressTypeChangedDetails.setId(UUID.randomUUID());
+    AddressTypeChangeDetails addressTypeChangeDetails = new AddressTypeChangeDetails();
+    addressTypeChange.setCollectionCase(addressTypeChangeDetails);
+    addressTypeChangeDetails.setCeExpectedCapacity("20");
+    addressTypeChangeDetails.setId(UUID.randomUUID());
 
     Address address = new Address();
-    addressTypeChangedDetails.setAddress(address);
+    addressTypeChangeDetails.setAddress(address);
     address.setAddressType("SPG");
 
     Case oldCase = easyRandom.nextObject(Case.class);
@@ -65,7 +65,7 @@ public class AddressTypeChangedServiceTest {
 
     // Then
     verify(invalidAddressService)
-        .invalidateCase(eq(rme), eq(messageTimestamp), eq(oldCase), eq(addressTypeChanged));
+        .invalidateCase(eq(rme), eq(messageTimestamp), eq(oldCase), eq(addressTypeChange));
 
     verify(eventLogger)
         .logCaseEvent(
@@ -74,7 +74,7 @@ public class AddressTypeChangedServiceTest {
             eq("Address type changed"),
             eq(EventType.ADDRESS_TYPE_CHANGED),
             eq(rme.getEvent()),
-            eq(JsonHelper.convertObjectToJson(addressTypeChanged)),
+            eq(JsonHelper.convertObjectToJson(addressTypeChange)),
             eq(messageTimestamp));
 
     ArgumentCaptor<Case> newCaseArgCaptor = ArgumentCaptor.forClass(Case.class);
@@ -82,7 +82,7 @@ public class AddressTypeChangedServiceTest {
 
     Case newCase = newCaseArgCaptor.getValue();
     assertThat(newCase.isSkeleton()).isTrue();
-    assertThat(newCase.getCaseId()).isEqualTo(addressTypeChanged.getNewCaseId());
+    assertThat(newCase.getCaseId()).isEqualTo(addressTypeChange.getNewCaseId());
     assertThat(newCase.getCaseType()).isEqualTo("SPG");
     assertThat(newCase.getAddressType()).isEqualTo("SPG");
     assertThat(newCase.getAddressLevel()).isEqualTo("U");
@@ -115,7 +115,7 @@ public class AddressTypeChangedServiceTest {
             eq("Address type changed"),
             eq(EventType.ADDRESS_TYPE_CHANGED),
             eq(rme.getEvent()),
-            eq(JsonHelper.convertObjectToJson(addressTypeChanged)),
+            eq(JsonHelper.convertObjectToJson(addressTypeChange)),
             eq(messageTimestamp));
   }
 
@@ -128,13 +128,13 @@ public class AddressTypeChangedServiceTest {
     PayloadDTO payload = new PayloadDTO();
     rme.setPayload(payload);
 
-    AddressTypeChanged addressTypeChanged = new AddressTypeChanged();
-    payload.setAddressTypeChanged(addressTypeChanged);
-    addressTypeChanged.setNewCaseId(oneUuid);
+    AddressTypeChange addressTypeChange = new AddressTypeChange();
+    payload.setAddressTypeChange(addressTypeChange);
+    addressTypeChange.setNewCaseId(oneUuid);
 
-    AddressTypeChangedDetails addressTypeChangedDetails = new AddressTypeChangedDetails();
-    addressTypeChanged.setCollectionCase(addressTypeChangedDetails);
-    addressTypeChangedDetails.setId(oneUuid);
+    AddressTypeChangeDetails addressTypeChangeDetails = new AddressTypeChangeDetails();
+    addressTypeChange.setCollectionCase(addressTypeChangeDetails);
+    addressTypeChangeDetails.setId(oneUuid);
 
     // When
     underTest.processMessage(rme, null);
@@ -154,12 +154,12 @@ public class AddressTypeChangedServiceTest {
     PayloadDTO payload = new PayloadDTO();
     rme.setPayload(payload);
 
-    AddressTypeChanged addressTypeChanged = new AddressTypeChanged();
-    payload.setAddressTypeChanged(addressTypeChanged);
+    AddressTypeChange addressTypeChange = new AddressTypeChange();
+    payload.setAddressTypeChange(addressTypeChange);
 
-    AddressTypeChangedDetails addressTypeChangedDetails = new AddressTypeChangedDetails();
-    addressTypeChanged.setCollectionCase(addressTypeChangedDetails);
-    addressTypeChangedDetails.setId(UUID.randomUUID());
+    AddressTypeChangeDetails addressTypeChangeDetails = new AddressTypeChangeDetails();
+    addressTypeChange.setCollectionCase(addressTypeChangeDetails);
+    addressTypeChangeDetails.setId(UUID.randomUUID());
 
     Case oldCase = easyRandom.nextObject(Case.class);
     oldCase.setCaseType("HI");
@@ -181,15 +181,15 @@ public class AddressTypeChangedServiceTest {
     PayloadDTO payload = new PayloadDTO();
     rme.setPayload(payload);
 
-    AddressTypeChanged addressTypeChanged = new AddressTypeChanged();
-    payload.setAddressTypeChanged(addressTypeChanged);
+    AddressTypeChange addressTypeChange = new AddressTypeChange();
+    payload.setAddressTypeChange(addressTypeChange);
 
-    AddressTypeChangedDetails addressTypeChangedDetails = new AddressTypeChangedDetails();
-    addressTypeChanged.setCollectionCase(addressTypeChangedDetails);
-    addressTypeChangedDetails.setId(UUID.randomUUID());
+    AddressTypeChangeDetails addressTypeChangeDetails = new AddressTypeChangeDetails();
+    addressTypeChange.setCollectionCase(addressTypeChangeDetails);
+    addressTypeChangeDetails.setId(UUID.randomUUID());
 
     Address address = new Address();
-    addressTypeChangedDetails.setAddress(address);
+    addressTypeChangeDetails.setAddress(address);
     address.setAddressType("HH");
 
     Case oldCase = easyRandom.nextObject(Case.class);
@@ -212,15 +212,15 @@ public class AddressTypeChangedServiceTest {
     PayloadDTO payload = new PayloadDTO();
     rme.setPayload(payload);
 
-    AddressTypeChanged addressTypeChanged = new AddressTypeChanged();
-    payload.setAddressTypeChanged(addressTypeChanged);
+    AddressTypeChange addressTypeChange = new AddressTypeChange();
+    payload.setAddressTypeChange(addressTypeChange);
 
-    AddressTypeChangedDetails addressTypeChangedDetails = new AddressTypeChangedDetails();
-    addressTypeChanged.setCollectionCase(addressTypeChangedDetails);
-    addressTypeChangedDetails.setId(UUID.randomUUID());
+    AddressTypeChangeDetails addressTypeChangeDetails = new AddressTypeChangeDetails();
+    addressTypeChange.setCollectionCase(addressTypeChangeDetails);
+    addressTypeChangeDetails.setId(UUID.randomUUID());
 
     Address address = new Address();
-    addressTypeChangedDetails.setAddress(address);
+    addressTypeChangeDetails.setAddress(address);
     address.setAddressType("SPG");
 
     Case oldCase = easyRandom.nextObject(Case.class);
@@ -243,15 +243,15 @@ public class AddressTypeChangedServiceTest {
     PayloadDTO payload = new PayloadDTO();
     rme.setPayload(payload);
 
-    AddressTypeChanged addressTypeChanged = new AddressTypeChanged();
-    payload.setAddressTypeChanged(addressTypeChanged);
+    AddressTypeChange addressTypeChange = new AddressTypeChange();
+    payload.setAddressTypeChange(addressTypeChange);
 
-    AddressTypeChangedDetails addressTypeChangedDetails = new AddressTypeChangedDetails();
-    addressTypeChanged.setCollectionCase(addressTypeChangedDetails);
-    addressTypeChangedDetails.setId(UUID.randomUUID());
+    AddressTypeChangeDetails addressTypeChangeDetails = new AddressTypeChangeDetails();
+    addressTypeChange.setCollectionCase(addressTypeChangeDetails);
+    addressTypeChangeDetails.setId(UUID.randomUUID());
 
     Address address = new Address();
-    addressTypeChangedDetails.setAddress(address);
+    addressTypeChangeDetails.setAddress(address);
     address.setAddressType("CE");
 
     Case oldCase = easyRandom.nextObject(Case.class);

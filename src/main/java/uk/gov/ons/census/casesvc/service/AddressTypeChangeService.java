@@ -6,18 +6,18 @@ import java.time.OffsetDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
-import uk.gov.ons.census.casesvc.model.dto.AddressTypeChanged;
+import uk.gov.ons.census.casesvc.model.dto.AddressTypeChange;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 
 @Service
-public class AddressTypeChangedService {
+public class AddressTypeChangeService {
   private final CaseService caseService;
   private final EventLogger eventLogger;
   private final InvalidAddressService invalidAddressService;
 
-  public AddressTypeChangedService(
+  public AddressTypeChangeService(
       CaseService caseService,
       EventLogger eventLogger,
       InvalidAddressService invalidAddressService) {
@@ -28,31 +28,31 @@ public class AddressTypeChangedService {
 
   public void processMessage(
       ResponseManagementEvent responseManagementEvent, OffsetDateTime messageTimestamp) {
-    AddressTypeChanged addressTypeChanged =
-        responseManagementEvent.getPayload().getAddressTypeChanged();
+    AddressTypeChange addressTypeChange =
+        responseManagementEvent.getPayload().getAddressTypeChange();
 
-    if (addressTypeChanged.getCollectionCase().getId().equals(addressTypeChanged.getNewCaseId())) {
+    if (addressTypeChange.getCollectionCase().getId().equals(addressTypeChange.getNewCaseId())) {
       throw new RuntimeException("Old Case ID cannot equal New Case ID");
     }
 
-    Case oldCase = caseService.getCaseByCaseId(addressTypeChanged.getCollectionCase().getId());
+    Case oldCase = caseService.getCaseByCaseId(addressTypeChange.getCollectionCase().getId());
 
     if (oldCase.getCaseType().equals("HI")) {
       throw new RuntimeException("Cannot change case of type HI");
     }
-    invalidateOldCase(responseManagementEvent, messageTimestamp, addressTypeChanged, oldCase);
+    invalidateOldCase(responseManagementEvent, messageTimestamp, addressTypeChange, oldCase);
 
-    createNewCase(responseManagementEvent, messageTimestamp, addressTypeChanged, oldCase);
+    createNewCase(responseManagementEvent, messageTimestamp, addressTypeChange, oldCase);
   }
 
   private void invalidateOldCase(
       ResponseManagementEvent responseManagementEvent,
       OffsetDateTime messageTimestamp,
-      AddressTypeChanged addressTypeChanged,
+      AddressTypeChange addressTypeChange,
       Case oldCase) {
 
     invalidAddressService.invalidateCase(
-        responseManagementEvent, messageTimestamp, oldCase, addressTypeChanged);
+        responseManagementEvent, messageTimestamp, oldCase, addressTypeChange);
 
     eventLogger.logCaseEvent(
         oldCase,
@@ -60,29 +60,29 @@ public class AddressTypeChangedService {
         "Address type changed",
         EventType.ADDRESS_TYPE_CHANGED,
         responseManagementEvent.getEvent(),
-        convertObjectToJson(addressTypeChanged),
+        convertObjectToJson(addressTypeChange),
         messageTimestamp);
   }
 
   private void createNewCase(
       ResponseManagementEvent responseManagementEvent,
       OffsetDateTime messageTimestamp,
-      AddressTypeChanged addressTypeChanged,
+      AddressTypeChange addressTypeChange,
       Case oldCase) {
     Case newCase = new Case();
     newCase.setSkeleton(true);
-    newCase.setCaseId(addressTypeChanged.getNewCaseId());
-    newCase.setCaseType(addressTypeChanged.getCollectionCase().getAddress().getAddressType());
-    newCase.setAddressType(addressTypeChanged.getCollectionCase().getAddress().getAddressType());
+    newCase.setCaseId(addressTypeChange.getNewCaseId());
+    newCase.setCaseType(addressTypeChange.getCollectionCase().getAddress().getAddressType());
+    newCase.setAddressType(addressTypeChange.getCollectionCase().getAddress().getAddressType());
     newCase.setAddressLevel(deriveAddressLevel(oldCase.getCaseType(), newCase.getCaseType()));
     newCase.setRegion(oldCase.getRegion());
     newCase.setCollectionExerciseId(oldCase.getCollectionExerciseId());
     newCase.setActionPlanId(oldCase.getActionPlanId());
     newCase.setSurvey(oldCase.getSurvey());
 
-    if (!StringUtils.isEmpty(addressTypeChanged.getCollectionCase().getCeExpectedCapacity())) {
+    if (!StringUtils.isEmpty(addressTypeChange.getCollectionCase().getCeExpectedCapacity())) {
       newCase.setCeExpectedCapacity(
-          Integer.parseInt(addressTypeChanged.getCollectionCase().getCeExpectedCapacity()));
+          Integer.parseInt(addressTypeChange.getCollectionCase().getCeExpectedCapacity()));
     }
 
     newCase.setUprn(oldCase.getUprn());
@@ -110,7 +110,7 @@ public class AddressTypeChangedService {
         "Address type changed",
         EventType.ADDRESS_TYPE_CHANGED,
         responseManagementEvent.getEvent(),
-        convertObjectToJson(addressTypeChanged),
+        convertObjectToJson(addressTypeChange),
         messageTimestamp);
   }
 

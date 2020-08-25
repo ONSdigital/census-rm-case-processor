@@ -3,7 +3,6 @@ package uk.gov.ons.census.casesvc.messaging;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.*;
 import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.*;
-import static uk.gov.ons.census.casesvc.testutil.DataUtils.*;
 import static uk.gov.ons.census.casesvc.testutil.MessageConstructor.constructMessageWithValidTimeStamp;
 
 import java.time.OffsetDateTime;
@@ -34,7 +33,7 @@ public class AddressReceiverTest {
 
   @Mock private NewAddressReportedService newAddressReportedService;
 
-  @Mock private AddressTypeChangedService addressTypeChangedService;
+  @Mock private AddressTypeChangeService addressTypeChangeService;
 
   @InjectMocks AddressReceiver underTest;
 
@@ -126,7 +125,7 @@ public class AddressReceiverTest {
     OffsetDateTime expectedDateTime = MsgDateHelper.getMsgTimeStamp(message);
     underTest.receiveMessage(message);
 
-    verify(addressTypeChangedService).processMessage(eq(rme), eq(expectedDateTime));
+    verify(addressTypeChangeService).processMessage(eq(rme), eq(expectedDateTime));
   }
 
   @Test(expected = RuntimeException.class)

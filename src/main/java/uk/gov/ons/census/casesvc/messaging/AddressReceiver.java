@@ -22,7 +22,7 @@ public class AddressReceiver {
   private final InvalidAddressService invalidAddressService;
   private final AddressModificationService addressModificationService;
   private final NewAddressReportedService newAddressReportedService;
-  private final AddressTypeChangedService addressTypeChangedService;
+  private final AddressTypeChangeService addressTypeChangeService;
   private final CaseService caseService;
   private final EventLogger eventLogger;
 
@@ -30,12 +30,12 @@ public class AddressReceiver {
       InvalidAddressService invalidAddressService,
       AddressModificationService addressModificationService,
       NewAddressReportedService newAddressReportedService,
-      AddressTypeChangedService addressTypeChangedService,
+      AddressTypeChangeService addressTypeChangeService,
       CaseService caseService,
       EventLogger eventLogger) {
     this.addressModificationService = addressModificationService;
     this.newAddressReportedService = newAddressReportedService;
-    this.addressTypeChangedService = addressTypeChangedService;
+    this.addressTypeChangeService = addressTypeChangeService;
     this.caseService = caseService;
     this.eventLogger = eventLogger;
     this.invalidAddressService = invalidAddressService;
@@ -59,7 +59,7 @@ public class AddressReceiver {
         break;
 
       case ADDRESS_TYPE_CHANGED:
-        addressTypeChangedService.processMessage(responseManagementEvent, messageTimestamp);
+        addressTypeChangeService.processMessage(responseManagementEvent, messageTimestamp);
         break;
 
       case NEW_ADDRESS_REPORTED:

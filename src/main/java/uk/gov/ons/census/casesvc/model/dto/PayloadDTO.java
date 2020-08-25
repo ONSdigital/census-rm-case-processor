@@ -25,5 +25,5 @@ public class PayloadDTO {
   private CCSPropertyDTO ccsProperty;
 
   private AddressModification addressModification;
-  private AddressTypeChanged addressTypeChanged;
+  private AddressTypeChange addressTypeChange;
 }
