@@ -24,6 +24,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.ons.census.casesvc.cache.UacQidCache;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
+import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.UacQidDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -58,9 +59,13 @@ public class UacServiceTest {
     uacQidDTO.setQid("01testqid");
     when(uacCache.getUacQidPair(anyInt())).thenReturn(uacQidDTO);
 
+    EventDTO dummyEvent = new EventDTO();
+    dummyEvent.setSource("DUMMY");
+    dummyEvent.setChannel("DUMMY");
+
     // When
     UacQidLink result;
-    result = underTest.buildUacQidLink(caze, 1);
+    result = underTest.buildUacQidLink(caze, 1, null, dummyEvent);
 
     // Then
     assertEquals("01", result.getQid().substring(0, 2));
@@ -197,16 +202,22 @@ public class UacServiceTest {
     expectedCase.setCaseId(TEST_CASE_ID);
     expectedCase.setSurvey("CCS");
 
+    EventDTO dummyEvent = new EventDTO();
+    dummyEvent.setSource("DUMMY");
+    dummyEvent.setChannel("DUMMY");
+
     UacQidDTO expectedUacQidDTO = new UacQidDTO();
     when(uacCache.getUacQidPair(71)).thenReturn(expectedUacQidDTO);
 
     // When
-    UacQidLink actualUacQidLink = underTest.createUacQidLinkedToCCSCase(expectedCase);
+    UacQidLink actualUacQidLink = underTest.createUacQidLinkedToCCSCase(expectedCase, dummyEvent);
 
     // Then
     assertThat(actualUacQidLink.getCaze().getSurvey()).isEqualTo("CCS");
     assertThat(actualUacQidLink.getCaze()).isNotNull();
     assertThat(actualUacQidLink.isCcsCase()).isTrue();
+    assertThat(actualUacQidLink.getMetadata().getChannel()).isEqualTo("DUMMY");
+    assertThat(actualUacQidLink.getMetadata().getSource()).isEqualTo("DUMMY");
 
     Case actualCase = actualUacQidLink.getCaze();
     assertThat(actualCase.getCaseId()).isEqualTo(TEST_CASE_ID);

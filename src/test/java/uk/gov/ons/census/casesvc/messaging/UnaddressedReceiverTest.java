@@ -39,7 +39,9 @@ public class UnaddressedReceiverTest {
     UacQidLink uacQidLink = new UacQidLink();
     Message<CreateUacQid> message = constructMessageWithValidTimeStamp(createUacQid);
     OffsetDateTime expectedDate = MsgDateHelper.getMsgTimeStamp(message);
-    when(uacService.buildUacQidLink(null, 21, createUacQid.getBatchId())).thenReturn(uacQidLink);
+    when(uacService.buildUacQidLink(
+            eq(null), eq(21), eq(createUacQid.getBatchId()), any(EventDTO.class)))
+        .thenReturn(uacQidLink);
     when(uacService.saveAndEmitUacUpdatedEvent(any(UacQidLink.class))).thenReturn(new PayloadDTO());
 
     // When
