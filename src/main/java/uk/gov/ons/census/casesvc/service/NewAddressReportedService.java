@@ -66,17 +66,19 @@ public class NewAddressReportedService {
       ResponseManagementEvent newAddressEvent, OffsetDateTime messageTimestamp) {
     CollectionCase newCollectionCase =
         newAddressEvent.getPayload().getNewAddress().getCollectionCase();
-    checkManadatoryFieldsPresent(newCollectionCase);
+    checkMandatoryFieldsPresent(newCollectionCase);
 
     Case skeletonCase = createSkeletonCase(newCollectionCase);
 
     skeletonCase = caseService.saveNewCaseAndStampCaseRef(skeletonCase);
+
     if (StringUtils.isEmpty(skeletonCase.getUprn())) {
       addDummyUprnAndEstabUprnToSkeletonCase(skeletonCase);
-
       sendNewAddressToAims(newAddressEvent, skeletonCase.getUprn());
-      caseService.saveCase(skeletonCase);
+    } else {
+      skeletonCase.setEstabUprn(skeletonCase.getUprn()); // Set with UPRN from event
     }
+    caseService.saveCase(skeletonCase);
     caseService.emitCaseCreatedEvent(skeletonCase);
 
     eventLogger.logCaseEvent(
@@ -99,7 +101,7 @@ public class NewAddressReportedService {
       ResponseManagementEvent newAddressEvent, OffsetDateTime messageTimestamp, UUID sourceCaseId) {
     CollectionCase newCollectionCase =
         newAddressEvent.getPayload().getNewAddress().getCollectionCase();
-    checkManadatoryFieldsPresent(newCollectionCase);
+    checkMandatoryFieldsPresent(newCollectionCase);
 
     Case sourceCase = caseService.getCaseByCaseId(sourceCaseId);
     Case newCaseFromSourceCase = buildCaseFromSourceCaseAndEvent(newCollectionCase, sourceCase);
@@ -112,8 +114,7 @@ public class NewAddressReportedService {
     }
 
     if (StringUtils.isEmpty(newCaseFromSourceCase.getEstabUprn())) {
-      String dummyEstabUprn = getDummyUprn(newCaseFromSourceCase);
-      newCaseFromSourceCase.setEstabUprn(dummyEstabUprn);
+      newCaseFromSourceCase.setEstabUprn(newCaseFromSourceCase.getUprn());
     }
 
     Metadata metadata =
@@ -184,7 +185,6 @@ public class NewAddressReportedService {
     skeletonCase.setRegion(collectionCase.getAddress().getRegion());
     skeletonCase.setAddressLevel(collectionCase.getAddress().getAddressLevel());
     skeletonCase.setAddressType(collectionCase.getAddress().getAddressType());
-    skeletonCase.setEstabType(collectionCase.getAddress().getEstabType());
     skeletonCase.setOrganisationName(collectionCase.getAddress().getOrganisationName());
     skeletonCase.setFieldCoordinatorId(collectionCase.getFieldCoordinatorId());
     skeletonCase.setFieldOfficerId(collectionCase.getFieldOfficerId());
@@ -202,7 +202,7 @@ public class NewAddressReportedService {
   }
 
   // https://collaborate2.ons.gov.uk/confluence/display/SDC/Handle+New+Address+Reported+Events
-  private void checkManadatoryFieldsPresent(CollectionCase newCollectionCase) {
+  private void checkMandatoryFieldsPresent(CollectionCase newCollectionCase) {
 
     if (StringUtils.isEmpty(newCollectionCase.getId())) {
       throw new RuntimeException("missing id in newAddress CollectionCase");

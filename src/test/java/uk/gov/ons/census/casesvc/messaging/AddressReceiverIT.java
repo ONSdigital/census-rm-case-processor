@@ -315,7 +315,8 @@ public class AddressReceiverIT {
       assertThat(actualCase.getActionPlanId()).isEqualTo(censusActionPlanId);
       assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
       assertThat(actualCase.getCaseType()).isEqualTo("HH");
-      assertThat(actualCase.getEstabUprn()).startsWith("999");
+      assertThat(actualCase.getEstabUprn())
+          .isEqualTo(String.format("%s%d", 999, actualCase.getCaseRef()));
       assertThat(actualCase.isSkeleton()).isTrue().as("Is Skeleton Case In DB");
 
       // check database for log eventDTO
