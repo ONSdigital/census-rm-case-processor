@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
+import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -56,7 +57,10 @@ public class EventService {
           convertObjectToJson(createCaseSample),
           messageTimestamp);
     } else {
-      UacQidLink uacQidLink = uacService.buildUacQidLink(caze, questionnaireType);
+      EventDTO dummyEvent = new EventDTO();
+      dummyEvent.setSource("RM");
+      dummyEvent.setChannel("RM");
+      UacQidLink uacQidLink = uacService.buildUacQidLink(caze, questionnaireType, null, dummyEvent);
       uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
       caseService.saveCaseAndEmitCaseCreatedEvent(caze);
 
@@ -70,7 +74,7 @@ public class EventService {
           messageTimestamp);
 
       if (QuestionnaireTypeHelper.isQuestionnaireWelsh(caze.getTreatmentCode())) {
-        uacQidLink = uacService.buildUacQidLink(caze, 3);
+        uacQidLink = uacService.buildUacQidLink(caze, 3, null, dummyEvent);
         uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
       }
     }

@@ -1,5 +1,6 @@
 package uk.gov.ons.census.casesvc.model.entity;
 
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -13,6 +14,9 @@ import javax.persistence.Table;
 import lombok.Data;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
 import org.hibernate.annotations.UpdateTimestamp;
 
 // The bidirectional relationships with other entities can cause stack overflows with the default
@@ -20,6 +24,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @ToString(onlyExplicitlyIncluded = true)
 @Data
 @Entity
+@TypeDefs({@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)})
 @Table(
     indexes = {
       @Index(name = "qid_idx", columnList = "qid"),
@@ -55,4 +60,8 @@ public class UacQidLink {
   @Column(columnDefinition = "timestamp with time zone")
   @UpdateTimestamp
   private OffsetDateTime lastUpdated;
+
+  @Type(type = "jsonb")
+  @Column(columnDefinition = "jsonb")
+  private UacQidLinkMetadata metadata;
 }
