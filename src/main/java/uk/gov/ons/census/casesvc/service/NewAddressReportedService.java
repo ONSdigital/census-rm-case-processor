@@ -72,7 +72,8 @@ public class NewAddressReportedService {
 
     skeletonCase = caseService.saveNewCaseAndStampCaseRef(skeletonCase);
     if (StringUtils.isEmpty(skeletonCase.getUprn())) {
-      addDummyUprnAndEstabUprnToCase(skeletonCase);
+      addDummyUprnAndEstabUprnToSkeletonCase(skeletonCase);
+
       sendNewAddressToAims(newAddressEvent, skeletonCase.getUprn());
       caseService.saveCase(skeletonCase);
     }
@@ -88,6 +89,12 @@ public class NewAddressReportedService {
         messageTimestamp);
   }
 
+  private void addDummyUprnAndEstabUprnToSkeletonCase(Case skeletonCase) {
+    String dummyUPRN = getDummyUprn(skeletonCase);
+    skeletonCase.setUprn(dummyUPRN);
+    skeletonCase.setEstabUprn(dummyUPRN);
+  }
+
   public void processNewAddressFromSourceId(
       ResponseManagementEvent newAddressEvent, OffsetDateTime messageTimestamp, UUID sourceCaseId) {
     CollectionCase newCollectionCase =
@@ -99,8 +106,14 @@ public class NewAddressReportedService {
 
     newCaseFromSourceCase = caseService.saveNewCaseAndStampCaseRef(newCaseFromSourceCase);
     if (StringUtils.isEmpty(newCaseFromSourceCase.getUprn())) {
-      addDummyUprnAndEstabUprnToCase(newCaseFromSourceCase);
+      String dummyUPRN = getDummyUprn(newCaseFromSourceCase);
+      newCaseFromSourceCase.setUprn(dummyUPRN);
       sendNewAddressToAims(newAddressEvent, newCaseFromSourceCase.getUprn());
+    }
+
+    if (StringUtils.isEmpty(newCaseFromSourceCase.getEstabUprn())) {
+      String dummyEstabUprn = getDummyUprn(newCaseFromSourceCase);
+      newCaseFromSourceCase.setEstabUprn(dummyEstabUprn);
     }
 
     Metadata metadata =
@@ -303,10 +316,8 @@ public class NewAddressReportedService {
     return newCaseMetadata;
   }
 
-  private void addDummyUprnAndEstabUprnToCase(Case newCase) {
-    String dummyUprn = String.format("%s%d", dummyUprnPrefix, newCase.getCaseRef());
-    newCase.setUprn(dummyUprn);
-    newCase.setEstabUprn(dummyUprn);
+  private String getDummyUprn(Case newCase) {
+    return String.format("%s%d", dummyUprnPrefix, newCase.getCaseRef());
   }
 
   private void sendNewAddressToAims(ResponseManagementEvent newAddressEvent, String dummyUprn) {
@@ -366,7 +377,6 @@ public class NewAddressReportedService {
     address.setLongitude(sourceCollectionCase.getAddress().getLongitude());
     address.setRegion(sourceCollectionCase.getAddress().getRegion());
     address.setUprn(dummyUprn);
-    address.setEstabUprn(dummyUprn);
 
     CollectionCase collectionCase = new CollectionCase();
     collectionCase.setId(sourceCollectionCase.getId());
