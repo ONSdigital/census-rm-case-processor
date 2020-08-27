@@ -1,7 +1,12 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static uk.gov.ons.census.casesvc.utility.FieldworkHelper.shouldSendCaseToField;
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
@@ -12,13 +17,6 @@ import uk.gov.ons.census.casesvc.model.dto.RmCaseUpdated;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.CaseMetadata;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
-
-import java.math.BigDecimal;
-import java.time.OffsetDateTime;
-import java.util.Set;
-
-import static uk.gov.ons.census.casesvc.utility.FieldworkHelper.shouldSendCaseToField;
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 @Service
 public class RmCaseUpdatedService {
@@ -37,9 +35,7 @@ public class RmCaseUpdatedService {
     this.estabTypes = estabTypes;
   }
 
-  public void processMessage(
-      Message<ResponseManagementEvent> message, OffsetDateTime messageTimestamp) {
-    ResponseManagementEvent rme = message.getPayload();
+  public void processMessage(ResponseManagementEvent rme, OffsetDateTime messageTimestamp) {
     RmCaseUpdated rmCaseUpdated = rme.getPayload().getRmCaseUpdated();
     Case updatedCase = caseService.getCaseByCaseId(rmCaseUpdated.getCaseId());
 
@@ -85,19 +81,60 @@ public class RmCaseUpdatedService {
     caseToUpdate.setLongitude(rmCaseUpdated.getLongitude());
 
     // Optional update values
-    rmCaseUpdated.getAddressLine1().ifPresent(caseToUpdate::setAddressLine1);
-    rmCaseUpdated.getAddressLine2().ifPresent(caseToUpdate::setAddressLine2);
-    rmCaseUpdated.getAddressLine3().ifPresent(caseToUpdate::setAddressLine3);
-    rmCaseUpdated.getTownName().ifPresent(caseToUpdate::setTownName);
-    rmCaseUpdated.getPostcode().ifPresent(caseToUpdate::setPostcode);
-    rmCaseUpdated.getCeExpectedCapacity().ifPresent(caseToUpdate::setCeExpectedCapacity);
-    rmCaseUpdated.getUprn().ifPresent(caseToUpdate::setUprn);
-    rmCaseUpdated.getEstabUprn().ifPresent(caseToUpdate::setEstabUprn);
-    rmCaseUpdated.getAbpCode().ifPresent(caseToUpdate::setAbpCode);
-    rmCaseUpdated.getOrganisationName().ifPresent(caseToUpdate::setOrganisationName);
-    rmCaseUpdated.getHtcWillingness().ifPresent(caseToUpdate::setHtcWillingness);
-    rmCaseUpdated.getHtcDigital().ifPresent(caseToUpdate::setHtcDigital);
-    rmCaseUpdated.getPrintBatch().ifPresent(caseToUpdate::setPrintBatch);
+    if (rmCaseUpdated.getAddressLine1() != null) {
+      rmCaseUpdated
+          .getAddressLine1()
+          .ifPresentOrElse(
+              caseToUpdate::setAddressLine1,
+              () -> {
+                throw new RuntimeException("Can't null address line 1");
+              });
+    }
+    if (rmCaseUpdated.getAddressLine2() != null) {
+      rmCaseUpdated
+          .getAddressLine2()
+          .ifPresentOrElse(caseToUpdate::setAddressLine2, () -> caseToUpdate.setAddressLine2(null));
+    }
+    if (rmCaseUpdated.getAddressLine3() != null) {
+      rmCaseUpdated
+          .getAddressLine3()
+          .ifPresentOrElse(caseToUpdate::setAddressLine3, () -> caseToUpdate.setAddressLine3(null));
+    }
+    if (rmCaseUpdated.getTownName() != null) {
+      rmCaseUpdated.getTownName().ifPresent(caseToUpdate::setTownName);
+    }
+    if (rmCaseUpdated.getPostcode() != null) {
+      rmCaseUpdated.getPostcode().ifPresent(caseToUpdate::setPostcode);
+    }
+    if (rmCaseUpdated.getCeExpectedCapacity() != null) {
+      rmCaseUpdated.getCeExpectedCapacity().ifPresent(caseToUpdate::setCeExpectedCapacity);
+    }
+    if (rmCaseUpdated.getUprn() != null) {
+      rmCaseUpdated.getUprn().ifPresent(caseToUpdate::setUprn);
+    }
+    if (rmCaseUpdated.getEstabUprn() != null) {
+      rmCaseUpdated.getEstabUprn().ifPresent(caseToUpdate::setEstabUprn);
+    }
+    if (rmCaseUpdated.getAbpCode() != null) {
+      rmCaseUpdated.getAbpCode().ifPresent(caseToUpdate::setAbpCode);
+    }
+    if (rmCaseUpdated.getOrganisationName() != null) {
+      rmCaseUpdated
+          .getOrganisationName()
+          .ifPresentOrElse(
+              caseToUpdate::setOrganisationName, () -> caseToUpdate.setOrganisationName(null));
+    }
+    if (rmCaseUpdated.getHtcWillingness() != null) {
+      rmCaseUpdated.getHtcWillingness().ifPresent(caseToUpdate::setHtcWillingness);
+    }
+    if (rmCaseUpdated.getHtcDigital() != null) {
+      rmCaseUpdated.getHtcDigital().ifPresent(caseToUpdate::setHtcDigital);
+    }
+    if (rmCaseUpdated.getPrintBatch() != null) {
+      rmCaseUpdated
+          .getPrintBatch()
+          .ifPresentOrElse(caseToUpdate::setPrintBatch, () -> caseToUpdate.setPrintBatch(null));
+    }
 
     if (rmCaseUpdated.getSecureEstablishment().isPresent()) {
       CaseMetadata caseMetadata;

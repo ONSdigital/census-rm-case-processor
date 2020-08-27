@@ -22,6 +22,6 @@ public class RmCaseUpdatedReciever {
   @ServiceActivator(inputChannel = "rmCaseUpdatedInputChannel")
   public void receiveMessage(Message<ResponseManagementEvent> message) {
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
-    rmCaseUpdatedService.processMessage(message, messageTimestamp);
+    rmCaseUpdatedService.processMessage(message.getPayload(), messageTimestamp);
   }
 }

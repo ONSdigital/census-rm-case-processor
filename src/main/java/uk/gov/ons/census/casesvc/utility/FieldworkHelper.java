@@ -10,7 +10,8 @@ public class FieldworkHelper {
     if (caze.getRegion().startsWith("N") && caze.getCaseType().equals("CE")) {
       return false;
     }
-    if (caze.getEstabType().equals("TRANSIENT PERSONS") || caze.getEstabType().equals("MIGRANT WORKERS")) {
+    if (caze.getEstabType().equals("TRANSIENT PERSONS")
+        || caze.getEstabType().equals("MIGRANT WORKERS")) {
       return false;
     }
     return true;
