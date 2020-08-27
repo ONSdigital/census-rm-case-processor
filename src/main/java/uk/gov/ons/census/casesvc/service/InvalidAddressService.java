@@ -30,18 +30,23 @@ public class InvalidAddressService {
 
     Case caze = caseService.getCaseByCaseId(invalidAddress.getCollectionCase().getId());
 
+    invalidateCase(invalidAddressEvent, messageTimestamp, caze, invalidAddress);
+  }
+
+  public void invalidateCase(
+      ResponseManagementEvent rmEvent, OffsetDateTime messageTimestamp, Case caze, Object payload) {
+
     caze.setAddressInvalid(true);
 
-    caseService.saveCaseAndEmitCaseUpdatedEvent(
-        caze, buildMetadataForInvalidAddress(invalidAddressEvent));
+    caseService.saveCaseAndEmitCaseUpdatedEvent(caze, buildMetadataForInvalidAddress(rmEvent));
 
     eventLogger.logCaseEvent(
         caze,
-        invalidAddressEvent.getEvent().getDateTime(),
+        rmEvent.getEvent().getDateTime(),
         "Invalid address",
         EventType.ADDRESS_NOT_VALID,
-        invalidAddressEvent.getEvent(),
-        convertObjectToJson(invalidAddress),
+        rmEvent.getEvent(),
+        convertObjectToJson(payload),
         messageTimestamp);
   }
 
