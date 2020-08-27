@@ -80,25 +80,9 @@ public class RmCaseUpdatedService {
     caseToUpdate.setLatitude(rmCaseUpdated.getLatitude());
     caseToUpdate.setLongitude(rmCaseUpdated.getLongitude());
 
-    // Optional update values
+    // Non-nullable Optional update fields
     if (rmCaseUpdated.getAddressLine1() != null) {
-      rmCaseUpdated
-          .getAddressLine1()
-          .ifPresentOrElse(
-              caseToUpdate::setAddressLine1,
-              () -> {
-                throw new RuntimeException("Can't null address line 1");
-              });
-    }
-    if (rmCaseUpdated.getAddressLine2() != null) {
-      rmCaseUpdated
-          .getAddressLine2()
-          .ifPresentOrElse(caseToUpdate::setAddressLine2, () -> caseToUpdate.setAddressLine2(null));
-    }
-    if (rmCaseUpdated.getAddressLine3() != null) {
-      rmCaseUpdated
-          .getAddressLine3()
-          .ifPresentOrElse(caseToUpdate::setAddressLine3, () -> caseToUpdate.setAddressLine3(null));
+      rmCaseUpdated.getAddressLine1().ifPresent(caseToUpdate::setAddressLine1);
     }
     if (rmCaseUpdated.getTownName() != null) {
       rmCaseUpdated.getTownName().ifPresent(caseToUpdate::setTownName);
@@ -118,17 +102,29 @@ public class RmCaseUpdatedService {
     if (rmCaseUpdated.getAbpCode() != null) {
       rmCaseUpdated.getAbpCode().ifPresent(caseToUpdate::setAbpCode);
     }
-    if (rmCaseUpdated.getOrganisationName() != null) {
-      rmCaseUpdated
-          .getOrganisationName()
-          .ifPresentOrElse(
-              caseToUpdate::setOrganisationName, () -> caseToUpdate.setOrganisationName(null));
-    }
     if (rmCaseUpdated.getHtcWillingness() != null) {
       rmCaseUpdated.getHtcWillingness().ifPresent(caseToUpdate::setHtcWillingness);
     }
     if (rmCaseUpdated.getHtcDigital() != null) {
       rmCaseUpdated.getHtcDigital().ifPresent(caseToUpdate::setHtcDigital);
+    }
+
+    // Nullable optional update fields
+    if (rmCaseUpdated.getAddressLine2() != null) {
+      rmCaseUpdated
+          .getAddressLine2()
+          .ifPresentOrElse(caseToUpdate::setAddressLine2, () -> caseToUpdate.setAddressLine2(null));
+    }
+    if (rmCaseUpdated.getAddressLine3() != null) {
+      rmCaseUpdated
+          .getAddressLine3()
+          .ifPresentOrElse(caseToUpdate::setAddressLine3, () -> caseToUpdate.setAddressLine3(null));
+    }
+    if (rmCaseUpdated.getOrganisationName() != null) {
+      rmCaseUpdated
+          .getOrganisationName()
+          .ifPresentOrElse(
+              caseToUpdate::setOrganisationName, () -> caseToUpdate.setOrganisationName(null));
     }
     if (rmCaseUpdated.getPrintBatch() != null) {
       rmCaseUpdated
@@ -136,7 +132,8 @@ public class RmCaseUpdatedService {
           .ifPresentOrElse(caseToUpdate::setPrintBatch, () -> caseToUpdate.setPrintBatch(null));
     }
 
-    if (rmCaseUpdated.getSecureEstablishment().isPresent()) {
+    // Secure establishment flag lives in a metadata block that may or may not exist yet
+    if (rmCaseUpdated.getSecureEstablishment() != null && rmCaseUpdated.getSecureEstablishment().isPresent()) {
       CaseMetadata caseMetadata;
       if (caseToUpdate.getMetadata() != null) {
         caseMetadata = caseToUpdate.getMetadata();
@@ -147,6 +144,7 @@ public class RmCaseUpdatedService {
       caseMetadata.setSecureEstablishment(rmCaseUpdated.getSecureEstablishment().get());
     }
 
+    // Derive hand delivery flag from treatment code
     caseToUpdate.setHandDelivery(
         caseService.isTreatmentCodeDirectDelivered(rmCaseUpdated.getTreatmentCode()));
   }
@@ -161,11 +159,39 @@ public class RmCaseUpdatedService {
         || StringUtils.isEmpty(rmCaseUpdated.getFieldOfficerId())
         || StringUtils.isEmpty(rmCaseUpdated.getLatitude())
         || StringUtils.isEmpty(rmCaseUpdated.getLongitude())) {
-      throw new RuntimeException("Rm Case Updated message missing mandatory field(s)");
+      throw new RuntimeException("RM_CASE_UPDATED message missing mandatory field(s)");
+    }
+
+    if (rmCaseUpdated.getAddressLine1() != null && rmCaseUpdated.getAddressLine1().isEmpty()) {
+      throw new RuntimeException("addressLine1 cannot be null on an RM_CASE_UPDATED event");
+    }
+
+    if (rmCaseUpdated.getTownName() != null && rmCaseUpdated.getTownName().isEmpty()) {
+      throw new RuntimeException("townName cannot be null on an RM_CASE_UPDATED event");
+    }
+
+    if (rmCaseUpdated.getPostcode() != null && rmCaseUpdated.getPostcode().isEmpty()) {
+      throw new RuntimeException("postcode cannot be null on an RM_CASE_UPDATED event");
+    }
+
+    if (rmCaseUpdated.getUprn() != null && rmCaseUpdated.getUprn().isEmpty()) {
+      throw new RuntimeException("uprn cannot be null on an RM_CASE_UPDATED event");
+    }
+
+    if (rmCaseUpdated.getEstabUprn() != null && rmCaseUpdated.getEstabUprn().isEmpty()) {
+      throw new RuntimeException("estabUprn cannot be null on an RM_CASE_UPDATED event");
+    }
+
+    if (rmCaseUpdated.getHtcWillingness() != null && rmCaseUpdated.getHtcWillingness().isEmpty()) {
+      throw new RuntimeException("htcWillingness cannot be null on an RM_CASE_UPDATED event");
+    }
+
+    if (rmCaseUpdated.getHtcDigital() != null && rmCaseUpdated.getHtcDigital().isEmpty()) {
+      throw new RuntimeException("htcDigital cannot be null on an RM_CASE_UPDATED event");
     }
 
     if (!estabTypes.contains(rmCaseUpdated.getEstabType())) {
-      throw new RuntimeException("Estab Type not valid");
+      throw new RuntimeException("estabType not valid on RM_CASE_UPDATED event");
     }
 
     new BigDecimal(rmCaseUpdated.getLatitude());
