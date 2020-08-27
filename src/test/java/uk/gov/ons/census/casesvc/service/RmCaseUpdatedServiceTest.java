@@ -427,59 +427,51 @@ public class RmCaseUpdatedServiceTest {
   }
 
   @Test
-  public void testNullAddressLine1OnMessage() {
+  public void testNullTownNameOnMessage() {
     ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
-    rme.getPayload().getRmCaseUpdated().setAddressLine1(Optional.empty());
+    rme.getPayload().getRmCaseUpdated().setTownName(Optional.empty());
 
-    expectExceptionOnProcessMessage("addressLine1 cannot be null on an RM_CASE_UPDATED event", rme);
+    expectExceptionOnProcessMessage("townName cannot be null on an RM_CASE_UPDATED event", rme);
   }
 
   @Test
-  public void testNullAddressLine1OnMessage() {
+  public void testNullPostcodeOnMessage() {
     ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
-    rme.getPayload().getRmCaseUpdated().setAddressLine1(Optional.empty());
+    rme.getPayload().getRmCaseUpdated().setPostcode(Optional.empty());
 
-    expectExceptionOnProcessMessage("addressLine1 cannot be null on an RM_CASE_UPDATED event", rme);
+    expectExceptionOnProcessMessage("postcode cannot be null on an RM_CASE_UPDATED event", rme);
+  }
+  
+  @Test
+  public void testNullUprnOnMessage() {
+    ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
+    rme.getPayload().getRmCaseUpdated().setUprn(Optional.empty());
+
+    expectExceptionOnProcessMessage("uprn cannot be null on an RM_CASE_UPDATED event", rme);
+  }
+  
+  @Test
+  public void testNullEstabUprnOnMessage() {
+    ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
+    rme.getPayload().getRmCaseUpdated().setEstabUprn(Optional.empty());
+
+    expectExceptionOnProcessMessage("estabUprn cannot be null on an RM_CASE_UPDATED event", rme);
   }
 
   @Test
-  public void testNullAddressLine1OnMessage() {
+  public void testNullHtcWillingnessOnMessage() {
     ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
-    rme.getPayload().getRmCaseUpdated().setAddressLine1(Optional.empty());
+    rme.getPayload().getRmCaseUpdated().setHtcWillingness(Optional.empty());
 
-    expectExceptionOnProcessMessage("addressLine1 cannot be null on an RM_CASE_UPDATED event", rme);
+    expectExceptionOnProcessMessage("htcWillingness cannot be null on an RM_CASE_UPDATED event", rme);
   }
 
   @Test
-  public void testNullAddressLine1OnMessage() {
+  public void testNullHtcDigitalOnMessage() {
     ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
-    rme.getPayload().getRmCaseUpdated().setAddressLine1(Optional.empty());
+    rme.getPayload().getRmCaseUpdated().setHtcDigital(Optional.empty());
 
-    expectExceptionOnProcessMessage("addressLine1 cannot be null on an RM_CASE_UPDATED event", rme);
-  }
-
-  @Test
-  public void testNullAddressLine1OnMessage() {
-    ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
-    rme.getPayload().getRmCaseUpdated().setAddressLine1(Optional.empty());
-
-    expectExceptionOnProcessMessage("addressLine1 cannot be null on an RM_CASE_UPDATED event", rme);
-  }
-
-  @Test
-  public void testNullAddressLine1OnMessage() {
-    ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
-    rme.getPayload().getRmCaseUpdated().setAddressLine1(Optional.empty());
-
-    expectExceptionOnProcessMessage("addressLine1 cannot be null on an RM_CASE_UPDATED event", rme);
-  }
-
-  @Test
-  public void testNullAddressLine1OnMessage() {
-    ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
-    rme.getPayload().getRmCaseUpdated().setAddressLine1(Optional.empty());
-
-    expectExceptionOnProcessMessage("addressLine1 cannot be null on an RM_CASE_UPDATED event", rme);
+    expectExceptionOnProcessMessage("htcDigital cannot be null on an RM_CASE_UPDATED event", rme);
   }
 
 
