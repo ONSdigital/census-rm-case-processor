@@ -133,7 +133,8 @@ public class RmCaseUpdatedService {
     }
 
     // Secure establishment flag lives in a metadata block that may or may not exist yet
-    if (rmCaseUpdated.getSecureEstablishment() != null && rmCaseUpdated.getSecureEstablishment().isPresent()) {
+    if (rmCaseUpdated.getSecureEstablishment() != null
+        && rmCaseUpdated.getSecureEstablishment().isPresent()) {
       CaseMetadata caseMetadata;
       if (caseToUpdate.getMetadata() != null) {
         caseMetadata = caseToUpdate.getMetadata();

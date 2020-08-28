@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
@@ -13,7 +12,6 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -441,7 +439,7 @@ public class RmCaseUpdatedServiceTest {
 
     expectExceptionOnProcessMessage("postcode cannot be null on an RM_CASE_UPDATED event", rme);
   }
-  
+
   @Test
   public void testNullUprnOnMessage() {
     ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
@@ -449,7 +447,7 @@ public class RmCaseUpdatedServiceTest {
 
     expectExceptionOnProcessMessage("uprn cannot be null on an RM_CASE_UPDATED event", rme);
   }
-  
+
   @Test
   public void testNullEstabUprnOnMessage() {
     ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
@@ -463,7 +461,8 @@ public class RmCaseUpdatedServiceTest {
     ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
     rme.getPayload().getRmCaseUpdated().setHtcWillingness(Optional.empty());
 
-    expectExceptionOnProcessMessage("htcWillingness cannot be null on an RM_CASE_UPDATED event", rme);
+    expectExceptionOnProcessMessage(
+        "htcWillingness cannot be null on an RM_CASE_UPDATED event", rme);
   }
 
   @Test
@@ -473,7 +472,6 @@ public class RmCaseUpdatedServiceTest {
 
     expectExceptionOnProcessMessage("htcDigital cannot be null on an RM_CASE_UPDATED event", rme);
   }
-
 
   private void expectExceptionOnProcessMessage(String message, ResponseManagementEvent rme) {
     try {
