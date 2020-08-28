@@ -140,7 +140,7 @@ public class RmCaseUpdatedRecieverIT {
     rmCaseUpdated.setFieldOfficerId("TEST FieldOfficerId CODE");
     rmCaseUpdated.setLatitude("123.456");
     rmCaseUpdated.setLongitude("000.000");
-    rmCaseUpdated.setEstabType("TEST_ESTAB_TYPE");
+    rmCaseUpdated.setEstabType("ROYAL HOUSEHOLD");
     return rme;
   }
 }
