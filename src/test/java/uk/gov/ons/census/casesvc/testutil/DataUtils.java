@@ -124,6 +124,7 @@ public class DataUtils {
     payload.setUac(null);
     payload.setRefusal(null);
     payload.setPrintCaseSelected(null);
+    payload.setRmCaseUpdated(null);
     payload.getCollectionCase().setCeExpectedCapacity(5);
 
     payload.getResponse().setUnreceipt(false);
