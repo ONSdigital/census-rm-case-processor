@@ -106,6 +106,7 @@ public class DataUtils {
     payload.setCollectionCase(null);
     payload.setRefusal(null);
     payload.setPrintCaseSelected(null);
+    payload.setRmCaseUpdated(null);
 
     payload.getResponse().setUnreceipt(false);
 
@@ -145,6 +146,7 @@ public class DataUtils {
     payload.setCollectionCase(null);
     payload.setRefusal(null);
     payload.setPrintCaseSelected(null);
+    payload.setRmCaseUpdated(null);
 
     payload.getResponse().setUnreceipt(true);
 
@@ -164,6 +166,7 @@ public class DataUtils {
     payload.setCollectionCase(null);
     payload.setRefusal(null);
     payload.setPrintCaseSelected(null);
+    payload.setRmCaseUpdated(null);
 
     return managementEvent;
   }
@@ -194,6 +197,7 @@ public class DataUtils {
     payload.setCollectionCase(null);
     payload.setResponse(null);
     payload.setPrintCaseSelected(null);
+    payload.setRmCaseUpdated(null);
 
     RefusalDTO refusal = payload.getRefusal();
     refusal.setType(refusalTypeDTO);
@@ -216,6 +220,7 @@ public class DataUtils {
     payload.setPrintCaseSelected(null);
     payload.setRefusal(null);
     payload.setCcsProperty(null);
+    payload.setRmCaseUpdated(null);
 
     FulfilmentRequestDTO fulfilmentRequest = payload.getFulfilmentRequest();
     fulfilmentRequest.setCaseId(null);
@@ -241,6 +246,7 @@ public class DataUtils {
     payload.setFulfilmentRequest(null);
     payload.setUacQidCreated(null);
     payload.setInvalidAddress(null);
+    payload.setRmCaseUpdated(null);
 
     return managementEvent;
   }
