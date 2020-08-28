@@ -1,8 +1,13 @@
 package uk.gov.ons.census.casesvc.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.ons.census.casesvc.model.dto.ActionInstructionType.CREATE;
+import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.CASE_UPDATED;
+import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.RM_CASE_UPDATED;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToObject;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
+import java.util.List;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,12 +22,16 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
+import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.RmCaseUpdated;
 import uk.gov.ons.census.casesvc.model.entity.Case;
+import uk.gov.ons.census.casesvc.model.entity.Event;
+import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
@@ -63,7 +72,7 @@ public class RmCaseUpdatedRecieverIT {
       UUID testCaseId = UUID.randomUUID();
       Case caze = setUpMinimumGoodSkeletonCase();
       caze.setCaseId(testCaseId);
-      caze = caseRepository.saveAndFlush(caze);
+      caseRepository.saveAndFlush(caze);
 
       ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
       RmCaseUpdated rmCaseUpdated = rme.getPayload().getRmCaseUpdated();
@@ -78,7 +87,25 @@ public class RmCaseUpdatedRecieverIT {
       // WHEN
       rabbitQueueHelper.sendMessage(inboundQueue, message);
 
-      Thread.sleep(2000);
+      ResponseManagementEvent actualEmittedMessage =
+          rhCaseQueueSpy.checkExpectedMessageReceived();
+
+      assertThat(actualEmittedMessage.getEvent().getType()).isEqualTo(CASE_UPDATED);
+      assertThat(actualEmittedMessage.getPayload().getMetadata().getCauseEventType()).isEqualTo(RM_CASE_UPDATED);
+      assertThat(actualEmittedMessage.getPayload().getMetadata().getFieldDecision()).isEqualTo(CREATE);
+
+      CollectionCase actualUpdatedCollectionCase = actualEmittedMessage.getPayload().getCollectionCase();
+      assertThat(actualUpdatedCollectionCase.isSkeleton()).isFalse();
+      assertThat(actualUpdatedCollectionCase.getTreatmentCode()).isEqualTo(rmCaseUpdated.getTreatmentCode());
+      assertThat(actualUpdatedCollectionCase.getOa()).isEqualTo(rmCaseUpdated.getOa());
+      assertThat(actualUpdatedCollectionCase.getMsoa()).isEqualTo(rmCaseUpdated.getMsoa());
+      assertThat(actualUpdatedCollectionCase.getLsoa()).isEqualTo(rmCaseUpdated.getLsoa());
+      assertThat(actualUpdatedCollectionCase.getFieldCoordinatorId())
+          .isEqualTo(rmCaseUpdated.getFieldCoordinatorId());
+      assertThat(actualUpdatedCollectionCase.getFieldOfficerId()).isEqualTo(rmCaseUpdated.getFieldOfficerId());
+      assertThat(actualUpdatedCollectionCase.getAddress().getEstabType()).isEqualTo(rmCaseUpdated.getEstabType());
+      assertThat(actualUpdatedCollectionCase.getAddress().getLatitude()).isEqualTo(rmCaseUpdated.getLatitude());
+      assertThat(actualUpdatedCollectionCase.getAddress().getLongitude()).isEqualTo(rmCaseUpdated.getLongitude());
 
       Case actualUpdatedCase = caseRepository.findById(testCaseId).get();
       assertThat(actualUpdatedCase.isSkeleton()).isFalse();
@@ -92,6 +119,14 @@ public class RmCaseUpdatedRecieverIT {
       assertThat(actualUpdatedCase.getEstabType()).isEqualTo(rmCaseUpdated.getEstabType());
       assertThat(actualUpdatedCase.getLatitude()).isEqualTo(rmCaseUpdated.getLatitude());
       assertThat(actualUpdatedCase.getLongitude()).isEqualTo(rmCaseUpdated.getLongitude());
+
+      List<Event> events = eventRepository.findAll();
+      assertThat(events.size()).isEqualTo(1);
+      Event actualEvent = events.get(0);
+
+      assertThat(actualEvent.getEventType()).isEqualTo(EventType.RM_CASE_UPDATED);
+      RmCaseUpdated actualEventPayload = convertJsonToObject(actualEvent.getEventPayload(), RmCaseUpdated.class);
+      assertThat(actualEventPayload).isEqualToComparingFieldByField(rmCaseUpdated);
     }
   }
 
@@ -121,7 +156,7 @@ public class RmCaseUpdatedRecieverIT {
 
     EventDTO event = new EventDTO();
     event.setChannel("TEST");
-    event.setType(EventTypeDTO.RM_CASE_UPDATED);
+    event.setType(RM_CASE_UPDATED);
     rme.setEvent(event);
 
     PayloadDTO payload = new PayloadDTO();
