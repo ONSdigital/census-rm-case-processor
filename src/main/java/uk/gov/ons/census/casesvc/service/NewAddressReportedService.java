@@ -76,7 +76,7 @@ public class NewAddressReportedService {
       addDummyUprnAndEstabUprnToSkeletonCase(skeletonCase);
       sendNewAddressToAims(newAddressEvent, skeletonCase.getUprn());
     } else {
-      skeletonCase.setEstabUprn(skeletonCase.getUprn()); // Set with UPRN from event
+      skeletonCase.setEstabUprn(skeletonCase.getUprn());
     }
     caseService.saveCase(skeletonCase);
     caseService.emitCaseCreatedEvent(skeletonCase);
