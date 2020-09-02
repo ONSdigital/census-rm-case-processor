@@ -18,7 +18,7 @@ import uk.gov.ons.census.casesvc.service.UacService;
 @MessageEndpoint
 public class DeactivateUacReceiver {
 
-  private static final String DEACTIVATE_UAC = "DEACTIVATED UAC";
+  private static final String DEACTIVATE_UAC = "Deactivated UAC";
   private final UacService uacService;
   private final EventLogger eventLogger;
 

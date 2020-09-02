@@ -70,7 +70,7 @@ public class DeactivateUacReceiverTest {
         .logUacQidEvent(
             eq(uacQidLink),
             any(),
-            eq("DEACTIVATED UAC"),
+            eq("Deactivated UAC"),
             eq(EventType.DEACTIVATE_UAC),
             any(),
             any(),
