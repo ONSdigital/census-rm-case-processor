@@ -8,7 +8,7 @@ import uk.gov.ons.census.casesvc.model.entity.Case;
 public class FieldworkHelperTest {
   @Test
   public void testDoNotSendBackToField() {
-    assertThat(FieldworkHelper.shouldSendCaseToField(null, "FIELD")).isFalse();
+    assertThat(FieldworkHelper.shouldSendUpdatedCaseToField(null, "FIELD")).isFalse();
   }
 
   @Test
@@ -16,7 +16,7 @@ public class FieldworkHelperTest {
     Case caze = new Case();
     caze.setCaseType("CE");
     caze.setRegion("N");
-    assertThat(FieldworkHelper.shouldSendCaseToField(caze, "NOT_FIELD")).isFalse();
+    assertThat(FieldworkHelper.shouldSendUpdatedCaseToField(caze, "NOT_FIELD")).isFalse();
   }
 
   @Test
@@ -25,7 +25,7 @@ public class FieldworkHelperTest {
     caze.setCaseType("HH");
     caze.setRegion("E");
     caze.setEstabType("TRANSIENT PERSONS");
-    assertThat(FieldworkHelper.shouldSendCaseToField(caze, "NOT_FIELD")).isFalse();
+    assertThat(FieldworkHelper.shouldSendUpdatedCaseToField(caze, "NOT_FIELD")).isFalse();
   }
 
   @Test
@@ -34,6 +34,6 @@ public class FieldworkHelperTest {
     caze.setCaseType("HH");
     caze.setRegion("E");
     caze.setEstabType("MIGRANT WORKERS");
-    assertThat(FieldworkHelper.shouldSendCaseToField(caze, "NOT_FIELD")).isFalse();
+    assertThat(FieldworkHelper.shouldSendUpdatedCaseToField(caze, "NOT_FIELD")).isFalse();
   }
 }
