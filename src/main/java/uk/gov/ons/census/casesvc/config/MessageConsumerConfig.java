@@ -84,6 +84,9 @@ public class MessageConsumerConfig {
   @Value("${queueconfig.deactivate-uac-queue}")
   private String deactivateUacQueue;
 
+  @Value("${queueconfig.rm-case-updated-queue}")
+  private String rmCaseUpdatedQueue;
+
   public MessageConsumerConfig(
       ExceptionManagerClient exceptionManagerClient, ConnectionFactory connectionFactory) {
     this.exceptionManagerClient = exceptionManagerClient;
@@ -162,6 +165,11 @@ public class MessageConsumerConfig {
 
   @Bean
   public MessageChannel deactivateUacInputChannel() {
+    return new DirectChannel();
+  }
+
+  @Bean
+  public MessageChannel rmCaseUpdatedInputChannel() {
     return new DirectChannel();
   }
 
@@ -271,6 +279,13 @@ public class MessageConsumerConfig {
   }
 
   @Bean
+  AmqpInboundChannelAdapter rmCaseUpdatedInbound(
+      @Qualifier("rmCaseUpdatedContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("rmCaseUpdatedInputChannel") MessageChannel channel) {
+    return makeAdapter(listenerContainer, channel);
+  }
+
+  @Bean
   public SimpleMessageListenerContainer sampleContainer() {
     return setupListenerContainer(inboundQueue, CreateCaseSample.class);
   }
@@ -343,6 +358,11 @@ public class MessageConsumerConfig {
   @Bean
   public SimpleMessageListenerContainer deactivateUacContainer() {
     return setupListenerContainer(deactivateUacQueue, ResponseManagementEvent.class);
+  }
+
+  @Bean
+  public SimpleMessageListenerContainer rmCaseUpdatedContainer() {
+    return setupListenerContainer(rmCaseUpdatedQueue, ResponseManagementEvent.class);
   }
 
   private SimpleMessageListenerContainer setupListenerContainer(
