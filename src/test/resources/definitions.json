@@ -177,6 +177,16 @@
       }
     },
     {
+      "name": "case.rm.updated",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "delayedRedeliveryExchange",
+        "x-dead-letter-routing-key": "case.rm.updated"
+      }
+    },
+    {
       "name": "survey.launched",
       "vhost": "/",
       "durable": true,
@@ -204,6 +214,16 @@
       "arguments": {
         "x-dead-letter-exchange": "delayedRedeliveryExchange",
         "x-dead-letter-routing-key": "FieldworkAdapter.caseUpdated"
+      }
+    },
+    {
+      "name": "case.deactivate-uac",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "delayedRedeliveryExchange",
+        "x-dead-letter-routing-key": "case.deactivate-uac"
       }
     },
     {

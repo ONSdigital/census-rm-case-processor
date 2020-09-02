@@ -81,6 +81,12 @@ public class MessageConsumerConfig {
   @Value("${queueconfig.field-case-updated-queue}")
   private String fieldCaseUpdatedQueue;
 
+  @Value("${queueconfig.deactivate-uac-queue}")
+  private String deactivateUacQueue;
+
+  @Value("${queueconfig.rm-case-updated-queue}")
+  private String rmCaseUpdatedQueue;
+
   @Value("${queueconfig.rm-revalidate-address-queue}")
   private String rmRevalidateAddressQueue;
 
@@ -162,6 +168,16 @@ public class MessageConsumerConfig {
 
   @Bean
   public MessageChannel rmRevalidateAddressChannel() {
+    return new DirectChannel();
+  }
+
+  @Bean
+  public MessageChannel deactivateUacInputChannel() {
+    return new DirectChannel();
+  }
+
+  @Bean
+  public MessageChannel rmCaseUpdatedInputChannel() {
     return new DirectChannel();
   }
 
@@ -264,7 +280,21 @@ public class MessageConsumerConfig {
   }
 
   @Bean
+  AmqpInboundChannelAdapter deactivateUacInbound(
+      @Qualifier("deactivateUacContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("deactivateUacInputChannel") MessageChannel channel) {
+    return makeAdapter(listenerContainer, channel);
+  }
+
+  @Bean
   AmqpInboundChannelAdapter rmCaseUpdatedInbound(
+      @Qualifier("rmCaseUpdatedContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("rmCaseUpdatedInputChannel") MessageChannel channel) {
+    return makeAdapter(listenerContainer, channel);
+  }
+
+  @Bean
+  AmqpInboundChannelAdapter rmRevalidateAddressInbound(
       @Qualifier("rmRevalidateAddressContainer") SimpleMessageListenerContainer listenerContainer,
       @Qualifier("rmRevalidateAddressChannel") MessageChannel channel) {
     return makeAdapter(listenerContainer, channel);
@@ -338,6 +368,16 @@ public class MessageConsumerConfig {
   @Bean
   public SimpleMessageListenerContainer fieldCaseUpdatedContainer() {
     return setupListenerContainer(fieldCaseUpdatedQueue, ResponseManagementEvent.class);
+  }
+
+  @Bean
+  public SimpleMessageListenerContainer deactivateUacContainer() {
+    return setupListenerContainer(deactivateUacQueue, ResponseManagementEvent.class);
+  }
+
+  @Bean
+  public SimpleMessageListenerContainer rmCaseUpdatedContainer() {
+    return setupListenerContainer(rmCaseUpdatedQueue, ResponseManagementEvent.class);
   }
 
   @Bean

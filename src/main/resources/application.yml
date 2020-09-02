@@ -46,6 +46,8 @@ queueconfig:
   ccs-property-listed-queue: case.ccsPropertyListedQueue
   fulfilment-confirmed-queue: case.fulfilmentConfirmed
   field-case-updated-queue: case.field.update
+  deactivate-uac-queue: case.deactivate-uac
+  rm-case-updated-queue: case.rm.updated
   rm-revalidate-address-queue: case.rm.revalidateAddess
   consumers: 50
   retry-attempts: 3
@@ -108,7 +110,7 @@ estabtypes: >
   YOUTH HOSTEL,
   HOSTEL,
   MILITARY SLA,
-  MILITARY US,
+  MILITARY US SLA,
   RELIGIOUS COMMUNITY,
   RESIDENTIAL CHILDRENS HOME,
   EDUCATION OTHER,
@@ -131,7 +133,9 @@ estabtypes: >
   MILITARY SFA,
   EMBASSY,
   ROYAL HOUSEHOLD,
-  CARAVAN SITE,
+  CARAVAN,
   MARINA,
   TRAVELLING PERSONS,
-  TRANSIENT PERSONS
+  TRANSIENT PERSONS,
+  MIGRANT WORKERS,
+  MILITARY US SFA
