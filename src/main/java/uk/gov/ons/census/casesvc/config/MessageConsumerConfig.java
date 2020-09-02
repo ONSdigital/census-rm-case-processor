@@ -167,7 +167,7 @@ public class MessageConsumerConfig {
   }
 
   @Bean
-  public MessageChannel rmRevalidateAddressChannel() {
+  public MessageChannel rmRevalidateAddressInputChannel() {
     return new DirectChannel();
   }
 
@@ -296,7 +296,7 @@ public class MessageConsumerConfig {
   @Bean
   AmqpInboundChannelAdapter rmRevalidateAddressInbound(
       @Qualifier("rmRevalidateAddressContainer") SimpleMessageListenerContainer listenerContainer,
-      @Qualifier("rmRevalidateAddressChannel") MessageChannel channel) {
+      @Qualifier("rmRevalidateAddressInputChannel") MessageChannel channel) {
     return makeAdapter(listenerContainer, channel);
   }
 

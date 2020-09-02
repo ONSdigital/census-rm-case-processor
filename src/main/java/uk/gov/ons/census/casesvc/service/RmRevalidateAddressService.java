@@ -1,5 +1,6 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static uk.gov.ons.census.casesvc.utility.FieldworkHelper.shouldSendRevalidateAddressCaseToField;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
@@ -20,9 +21,7 @@ public class RmRevalidateAddressService {
 
   private static final String EVENT_DESCRIPTION = "Case address revalidate";
 
-  public RmRevalidateAddressService(
-      CaseService caseService,
-      EventLogger eventLogger) {
+  public RmRevalidateAddressService(CaseService caseService, EventLogger eventLogger) {
     this.caseService = caseService;
     this.eventLogger = eventLogger;
   }
@@ -35,7 +34,8 @@ public class RmRevalidateAddressService {
     revalidateAddressCase.setAddressInvalid(false);
 
     Metadata eventMetadata = null;
-    if (shouldSendRevalidateAddressCaseToField(revalidateAddressCase, rme.getEvent().getChannel())) {
+    if (shouldSendRevalidateAddressCaseToField(
+        revalidateAddressCase, rme.getEvent().getChannel())) {
       eventMetadata = buildMetadata(rme.getEvent().getType(), ActionInstructionType.UPDATE);
     }
 
@@ -50,23 +50,4 @@ public class RmRevalidateAddressService {
         convertObjectToJson(rmRevalidateAddress),
         messageTimestamp);
   }
-
-
-  private boolean shouldSendRevalidateAddressCaseToField(Case caze, String eventChannel){
-    if (eventChannel.equals("FIELD")) {
-      return false;
-    }
-
-    if (caze.getRefusalReceived() != null) {
-      return false;
-    }
-
-    if (caze.getRegion().startsWith("N") && caze.getCaseType().equals("CE")) {
-      return false;
-    }
-
-    return !caze.getEstabType().equals("TRANSIENT PERSONS");
-  }
 }
-
-

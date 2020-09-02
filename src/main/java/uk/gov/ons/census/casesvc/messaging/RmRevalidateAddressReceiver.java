@@ -11,11 +11,11 @@ import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.service.RmRevalidateAddressService;
 
 @MessageEndpoint
-public class RmUninvalidateAddressReceiver {
+public class RmRevalidateAddressReceiver {
 
   private final RmRevalidateAddressService rmRevalidateAddressService;
 
-  public RmUninvalidateAddressReceiver(RmRevalidateAddressService rmRevalidateAddressService) {
+  public RmRevalidateAddressReceiver(RmRevalidateAddressService rmRevalidateAddressService) {
     this.rmRevalidateAddressService = rmRevalidateAddressService;
   }
 
