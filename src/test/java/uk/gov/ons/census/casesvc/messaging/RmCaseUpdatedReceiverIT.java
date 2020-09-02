@@ -40,7 +40,7 @@ import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 @ActiveProfiles("test")
 @SpringBootTest
 @RunWith(SpringJUnit4ClassRunner.class)
-public class RmCaseUpdatedRecieverIT {
+public class RmCaseUpdatedReceiverIT {
   @Value("${queueconfig.rm-case-updated-queue}")
   private String inboundQueue;
 

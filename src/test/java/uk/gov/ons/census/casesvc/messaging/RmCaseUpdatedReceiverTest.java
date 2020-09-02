@@ -16,11 +16,11 @@ import uk.gov.ons.census.casesvc.service.RmCaseUpdatedService;
 import uk.gov.ons.census.casesvc.utility.MsgDateHelper;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RmCaseUpdatedRecieverTest {
+public class RmCaseUpdatedReceiverTest {
 
   @Mock private RmCaseUpdatedService rmCaseUpdatedService;
 
-  @InjectMocks private RmCaseUpdatedReciever underTest;
+  @InjectMocks private RmCaseUpdatedReceiver underTest;
 
   @Test
   public void testReceiveMessage() {

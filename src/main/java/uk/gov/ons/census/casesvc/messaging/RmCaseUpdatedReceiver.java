@@ -11,10 +11,10 @@ import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.service.RmCaseUpdatedService;
 
 @MessageEndpoint
-public class RmCaseUpdatedReciever {
+public class RmCaseUpdatedReceiver {
   private final RmCaseUpdatedService rmCaseUpdatedService;
 
-  public RmCaseUpdatedReciever(RmCaseUpdatedService rmCaseUpdatedService) {
+  public RmCaseUpdatedReceiver(RmCaseUpdatedService rmCaseUpdatedService) {
     this.rmCaseUpdatedService = rmCaseUpdatedService;
   }
 
