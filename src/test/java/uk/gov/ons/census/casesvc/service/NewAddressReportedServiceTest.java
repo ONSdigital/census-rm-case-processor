@@ -313,6 +313,229 @@ public class NewAddressReportedServiceTest {
   }
 
   @Test
+  public void testNewAddressWithUprnForSourceCaseWithoutEstabUprn() {
+    EasyRandom easyRandom = new EasyRandom();
+    Case sourceCase = easyRandom.nextObject(Case.class);
+
+    // Given
+    sourceCase.setCaseId(UUID.randomUUID());
+    sourceCase.setEstabUprn(null);
+
+    ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
+    newAddressEvent.getEvent().setChannel("NOT FIELD");
+
+    String newAddressEventUprn = "1234";
+    newAddressEvent
+        .getPayload()
+        .getNewAddress()
+        .getCollectionCase()
+        .getAddress()
+        .setUprn(newAddressEventUprn);
+
+    OffsetDateTime timeNow = OffsetDateTime.now();
+
+    when(caseService.getCaseByCaseId(any())).thenReturn(sourceCase);
+    when(caseService.saveNewCaseAndStampCaseRef(any())).then(returnsFirstArg());
+
+    // When
+    underTest.processNewAddressFromSourceId(newAddressEvent, timeNow, sourceCase.getCaseId());
+
+    // Then
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseService).saveNewCaseAndStampCaseRef(caseArgumentCaptor.capture());
+    Case newCase = caseArgumentCaptor.getAllValues().get(0);
+
+    assertThat(newCase.getUprn()).isEqualTo(newAddressEventUprn);
+    assertThat(newCase.getEstabUprn()).isEqualTo(newAddressEventUprn);
+
+    assertThat(newCase.getCaseId())
+        .isEqualTo(newAddressEvent.getPayload().getNewAddress().getCollectionCase().getId());
+
+    verify(caseService).saveCaseAndEmitCaseCreatedEvent(newCase, null);
+  }
+
+  @Test
+  public void testNewAddressWithUprnForSourceCaseWithEstabUprn() {
+    EasyRandom easyRandom = new EasyRandom();
+    Case sourceCase = easyRandom.nextObject(Case.class);
+
+    // Given
+    sourceCase.setCaseId(UUID.randomUUID());
+    sourceCase.setEstabUprn("555");
+
+    ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
+    newAddressEvent.getEvent().setChannel("NOT FIELD");
+
+    String newAddressEventUprn = "1234";
+    newAddressEvent
+        .getPayload()
+        .getNewAddress()
+        .getCollectionCase()
+        .getAddress()
+        .setUprn(newAddressEventUprn);
+
+    OffsetDateTime timeNow = OffsetDateTime.now();
+
+    when(caseService.getCaseByCaseId(any())).thenReturn(sourceCase);
+    when(caseService.saveNewCaseAndStampCaseRef(any())).then(returnsFirstArg());
+
+    // When
+    underTest.processNewAddressFromSourceId(newAddressEvent, timeNow, sourceCase.getCaseId());
+
+    // Then
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseService).saveNewCaseAndStampCaseRef(caseArgumentCaptor.capture());
+    Case newCase = caseArgumentCaptor.getAllValues().get(0);
+
+    assertThat(newCase.getUprn()).isEqualTo(newAddressEventUprn);
+    assertThat(newCase.getEstabUprn()).isEqualTo(sourceCase.getEstabUprn());
+
+    assertThat(newCase.getCaseId())
+        .isEqualTo(newAddressEvent.getPayload().getNewAddress().getCollectionCase().getId());
+
+    verify(caseService).saveCaseAndEmitCaseCreatedEvent(newCase, null);
+  }
+
+  @Test
+  public void testNewAddressWithoutUprnForSourceCaseWithoutEstabUprn() {
+    ReflectionTestUtils.setField(underTest, "dummyUprnPrefix", DUMMY_UPRN_PREFIX);
+
+    EasyRandom easyRandom = new EasyRandom();
+    Case sourceCase = easyRandom.nextObject(Case.class);
+
+    // Given
+    sourceCase.setCaseId(UUID.randomUUID());
+    sourceCase.setEstabUprn(null);
+
+    ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
+    newAddressEvent.getEvent().setChannel("NOT FIELD");
+
+    OffsetDateTime timeNow = OffsetDateTime.now();
+
+    when(caseService.getCaseByCaseId(any())).thenReturn(sourceCase);
+    when(pubSubTemplate.publish(any(), any(ResponseManagementEvent.class)))
+        .thenReturn(mockFuture());
+    when(caseService.saveNewCaseAndStampCaseRef(any())).then(returnsFirstArg());
+
+    // When
+    underTest.processNewAddressFromSourceId(newAddressEvent, timeNow, sourceCase.getCaseId());
+
+    // Then
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseService).saveNewCaseAndStampCaseRef(caseArgumentCaptor.capture());
+    Case newCase = caseArgumentCaptor.getAllValues().get(0);
+
+    String expectedDummyUprn = String.format("%s%d", 999, newCase.getCaseRef());
+    assertThat(newCase.getUprn()).isEqualTo(expectedDummyUprn);
+    assertThat(newCase.getEstabUprn()).isEqualTo(expectedDummyUprn);
+
+    assertThat(newCase.getCaseId())
+        .isEqualTo(newAddressEvent.getPayload().getNewAddress().getCollectionCase().getId());
+
+    verify(caseService).saveCaseAndEmitCaseCreatedEvent(newCase, null);
+  }
+
+  @Test
+  public void testNewAddressWithoutUprnForSourceCaseWithEstabUprn() {
+    ReflectionTestUtils.setField(underTest, "dummyUprnPrefix", DUMMY_UPRN_PREFIX);
+
+    EasyRandom easyRandom = new EasyRandom();
+    Case sourceCase = easyRandom.nextObject(Case.class);
+
+    // Given
+    sourceCase.setCaseId(UUID.randomUUID());
+    sourceCase.setEstabUprn("555");
+
+    ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
+    newAddressEvent.getEvent().setChannel("NOT FIELD");
+
+    OffsetDateTime timeNow = OffsetDateTime.now();
+
+    when(caseService.getCaseByCaseId(any())).thenReturn(sourceCase);
+    when(pubSubTemplate.publish(any(), any(ResponseManagementEvent.class)))
+        .thenReturn(mockFuture());
+    when(caseService.saveNewCaseAndStampCaseRef(any())).then(returnsFirstArg());
+
+    // When
+    underTest.processNewAddressFromSourceId(newAddressEvent, timeNow, sourceCase.getCaseId());
+
+    // Then
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseService).saveNewCaseAndStampCaseRef(caseArgumentCaptor.capture());
+    Case newCase = caseArgumentCaptor.getAllValues().get(0);
+
+    String expectedDummyUprn = String.format("%s%d", 999, newCase.getCaseRef());
+    assertThat(newCase.getUprn()).isEqualTo(expectedDummyUprn);
+    assertThat(newCase.getEstabUprn()).isEqualTo(sourceCase.getEstabUprn());
+
+    assertThat(newCase.getCaseId())
+        .isEqualTo(newAddressEvent.getPayload().getNewAddress().getCollectionCase().getId());
+
+    verify(caseService).saveCaseAndEmitCaseCreatedEvent(newCase, null);
+  }
+
+  @Test
+  public void testNewAddressWithUprnWithoutSourceCase() {
+    // Given
+    ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
+    newAddressEvent.getEvent().setChannel("NOT FIELD");
+
+    String newAddressEventUprn = "1234";
+    newAddressEvent
+        .getPayload()
+        .getNewAddress()
+        .getCollectionCase()
+        .getAddress()
+        .setUprn(newAddressEventUprn);
+
+    OffsetDateTime timeNow = OffsetDateTime.now();
+
+    when(caseService.saveNewCaseAndStampCaseRef(any())).then(returnsFirstArg());
+
+    // When
+    underTest.processNewAddress(newAddressEvent, timeNow);
+
+    // Then
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseService).saveNewCaseAndStampCaseRef(caseArgumentCaptor.capture());
+    Case newCase = caseArgumentCaptor.getAllValues().get(0);
+
+    assertThat(newCase.getUprn()).isEqualTo(newAddressEventUprn);
+    assertThat(newCase.getEstabUprn()).isEqualTo(newAddressEventUprn);
+    assertThat(newCase.getCaseId())
+        .isEqualTo(newAddressEvent.getPayload().getNewAddress().getCollectionCase().getId());
+  }
+
+  @Test
+  public void testNewAddressWithoutUprnWithoutSourceCase() {
+    ReflectionTestUtils.setField(underTest, "dummyUprnPrefix", DUMMY_UPRN_PREFIX);
+
+    // Given
+    ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
+    newAddressEvent.getEvent().setChannel("NOT FIELD");
+
+    OffsetDateTime timeNow = OffsetDateTime.now();
+
+    when(caseService.saveNewCaseAndStampCaseRef(any())).then(returnsFirstArg());
+    when(pubSubTemplate.publish(any(), any(ResponseManagementEvent.class)))
+        .thenReturn(mockFuture());
+
+    // When
+    underTest.processNewAddress(newAddressEvent, timeNow);
+
+    // Then
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseService).saveNewCaseAndStampCaseRef(caseArgumentCaptor.capture());
+    Case newCase = caseArgumentCaptor.getAllValues().get(0);
+
+    String expectedDummyUprn = String.format("%s%d", 999, newCase.getCaseRef());
+    assertThat(newCase.getUprn()).isEqualTo(expectedDummyUprn);
+    assertThat(newCase.getEstabUprn()).isEqualTo(expectedDummyUprn);
+    assertThat(newCase.getCaseId())
+        .isEqualTo(newAddressEvent.getPayload().getNewAddress().getCollectionCase().getId());
+  }
+
+  @Test
   public void testMetaDataCreatedAndSentForNewCaseInRightConditions() {
     // Given
     EasyRandom easyRandom = new EasyRandom();

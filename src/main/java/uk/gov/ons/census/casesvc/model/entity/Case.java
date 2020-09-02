@@ -22,7 +22,7 @@ import org.hibernate.annotations.*;
     name = "cases",
     indexes = {
       @Index(name = "cases_case_ref_idx", columnList = "case_ref"),
-      @Index(name = "lsoa_idx", columnList = "lsoa")
+      @Index(name = "lsoa_idx", columnList = "lsoa"),
     })
 public class Case {
 

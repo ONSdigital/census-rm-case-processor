@@ -14,7 +14,7 @@ public class Address {
   private String longitude;
   private String uprn;
   private String estabUprn;
-  private String apbCode;
+  private String abpCode;
   private String addressType;
   private String addressLevel;
   private String estabType;

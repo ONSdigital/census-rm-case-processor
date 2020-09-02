@@ -44,7 +44,7 @@ public class EventServiceTest {
     caze.setCaseType("HH");
     when(caseService.saveCaseSample(createCaseSample)).thenReturn(caze);
     UacQidLink uacQidLink = new UacQidLink();
-    when(uacService.buildUacQidLink(caze, 1)).thenReturn(uacQidLink);
+    when(uacService.buildUacQidLink(eq(caze), eq(1), eq(null), any())).thenReturn(uacQidLink);
     when(uacService.saveAndEmitUacUpdatedEvent(any(UacQidLink.class))).thenReturn(new PayloadDTO());
     when(caseService.saveCaseAndEmitCaseCreatedEvent(any(Case.class))).thenReturn(new PayloadDTO());
 
@@ -55,7 +55,7 @@ public class EventServiceTest {
 
     // Then
     verify(caseService).saveCaseSample(createCaseSample);
-    verify(uacService).buildUacQidLink(eq(caze), eq(1));
+    verify(uacService).buildUacQidLink(eq(caze), eq(1), eq(null), any());
     verify(uacService).saveAndEmitUacUpdatedEvent(uacQidLink);
     verify(caseService).saveCaseAndEmitCaseCreatedEvent(caze);
 
@@ -116,8 +116,8 @@ public class EventServiceTest {
     when(caseService.saveCaseSample(createCaseSample)).thenReturn(caze);
     UacQidLink uacQidLink = new UacQidLink();
     UacQidLink secondUacQidLink = new UacQidLink();
-    when(uacService.buildUacQidLink(caze, 2)).thenReturn(uacQidLink);
-    when(uacService.buildUacQidLink(caze, 3)).thenReturn(secondUacQidLink);
+    when(uacService.buildUacQidLink(eq(caze), eq(2), eq(null), any())).thenReturn(uacQidLink);
+    when(uacService.buildUacQidLink(eq(caze), eq(3), eq(null), any())).thenReturn(secondUacQidLink);
     when(uacService.saveAndEmitUacUpdatedEvent(any(UacQidLink.class))).thenReturn(new PayloadDTO());
     when(caseService.saveCaseAndEmitCaseCreatedEvent(any(Case.class))).thenReturn(new PayloadDTO());
 
@@ -128,7 +128,7 @@ public class EventServiceTest {
 
     // Then
     verify(caseService).saveCaseSample(createCaseSample);
-    verify(uacService, times(1)).buildUacQidLink(eq(caze), eq(2));
+    verify(uacService, times(1)).buildUacQidLink(eq(caze), eq(2), eq(null), any());
     verify(uacService, times(2)).saveAndEmitUacUpdatedEvent(uacQidLink);
     verify(caseService).saveCaseAndEmitCaseCreatedEvent(caze);
 

@@ -11,6 +11,7 @@ import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.CreateUacQid;
+import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
@@ -33,9 +34,15 @@ public class UnaddressedReceiver {
   public void receiveMessage(Message<CreateUacQid> message) {
     CreateUacQid createUacQid = message.getPayload();
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
+    EventDTO dummyEvent = new EventDTO();
+    dummyEvent.setSource("RM");
+    dummyEvent.setChannel("RM");
     UacQidLink uacQidLink =
         uacService.buildUacQidLink(
-            null, Integer.parseInt(createUacQid.getQuestionnaireType()), createUacQid.getBatchId());
+            null,
+            Integer.parseInt(createUacQid.getQuestionnaireType()),
+            createUacQid.getBatchId(),
+            dummyEvent);
     PayloadDTO uacPayloadDTO = uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
     eventLogger.logUacQidEvent(
         uacQidLink,
