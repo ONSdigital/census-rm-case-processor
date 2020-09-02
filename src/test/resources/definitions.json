@@ -217,6 +217,16 @@
       }
     },
     {
+      "name": "case.deactivate-uac",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "delayedRedeliveryExchange",
+        "x-dead-letter-routing-key": "case.deactivate-uac"
+      }
+    },
+    {
       "name": "delayedRedeliveryQueue",
       "vhost": "/",
       "durable": true,
