@@ -46,6 +46,7 @@ queueconfig:
   ccs-property-listed-queue: case.ccsPropertyListedQueue
   fulfilment-confirmed-queue: case.fulfilmentConfirmed
   field-case-updated-queue: case.field.update
+  rm-revalidate-address-queue: case.rm.revalidateAddess
   consumers: 50
   retry-attempts: 3
   retry-delay: 1000 #milliseconds

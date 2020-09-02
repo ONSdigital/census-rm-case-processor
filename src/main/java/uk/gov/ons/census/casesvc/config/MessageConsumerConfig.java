@@ -81,6 +81,9 @@ public class MessageConsumerConfig {
   @Value("${queueconfig.field-case-updated-queue}")
   private String fieldCaseUpdatedQueue;
 
+  @Value("${queueconfig.rm-revalidate-address-queue}")
+  private String rmRevalidateAddressQueue;
+
   public MessageConsumerConfig(
       ExceptionManagerClient exceptionManagerClient, ConnectionFactory connectionFactory) {
     this.exceptionManagerClient = exceptionManagerClient;
@@ -154,6 +157,11 @@ public class MessageConsumerConfig {
 
   @Bean
   public MessageChannel fieldCaseUpdatedInputChannel() {
+    return new DirectChannel();
+  }
+
+  @Bean
+  public MessageChannel rmRevalidateAddressChannel() {
     return new DirectChannel();
   }
 
@@ -256,6 +264,13 @@ public class MessageConsumerConfig {
   }
 
   @Bean
+  AmqpInboundChannelAdapter rmCaseUpdatedInbound(
+      @Qualifier("rmRevalidateAddressContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("rmRevalidateAddressChannel") MessageChannel channel) {
+    return makeAdapter(listenerContainer, channel);
+  }
+
+  @Bean
   public SimpleMessageListenerContainer sampleContainer() {
     return setupListenerContainer(inboundQueue, CreateCaseSample.class);
   }
@@ -323,6 +338,11 @@ public class MessageConsumerConfig {
   @Bean
   public SimpleMessageListenerContainer fieldCaseUpdatedContainer() {
     return setupListenerContainer(fieldCaseUpdatedQueue, ResponseManagementEvent.class);
+  }
+
+  @Bean
+  public SimpleMessageListenerContainer rmRevalidateAddressContainer() {
+    return setupListenerContainer(rmRevalidateAddressQueue, ResponseManagementEvent.class);
   }
 
   private SimpleMessageListenerContainer setupListenerContainer(
