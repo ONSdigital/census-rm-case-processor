@@ -31,9 +31,12 @@ public class FulfilmentRequestServiceTest {
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_ENGLISH_PRINT = "P_OR_I2";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_WALES_WELSH_PRINT = "P_OR_I2W";
   private static final String HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_NI_PRINT = "P_OR_I4";
-  private static final String HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_VIA_EQ_ENGLAND_SMS = "UACITA1";
-  private static final String HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_VIA_EQ_WALES_ENGLISH_SMS = "UACITA2B";
-  private static final String HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_VIA_EQ_NORTHERN_IRELAND_SMS = "UACITA4";
+  private static final String HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_VIA_EQ_ENGLAND_SMS =
+      "UACITA1";
+  private static final String HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_VIA_EQ_WALES_ENGLISH_SMS =
+      "UACITA2B";
+  private static final String
+      HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_VIA_EQ_NORTHERN_IRELAND_SMS = "UACITA4";
 
   @Mock private EventLogger eventLogger;
 
@@ -105,9 +108,9 @@ public class FulfilmentRequestServiceTest {
 
   @Test
   public void testGoodIndividualResponseFulfilmentRequestForUACITA4() {
-    testIndividualResponseCode(HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_VIA_EQ_NORTHERN_IRELAND_SMS);
+    testIndividualResponseCode(
+        HOUSEHOLD_INDIVIDUAL_QUESTIONNAIRE_REQUEST_VIA_EQ_NORTHERN_IRELAND_SMS);
   }
-
 
   @Test
   public void testGoodIndividualResponseFulfilmentRequestForP_OR_I1() {
