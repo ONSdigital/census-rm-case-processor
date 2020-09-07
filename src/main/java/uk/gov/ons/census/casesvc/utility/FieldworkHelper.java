@@ -19,7 +19,7 @@ public class FieldworkHelper {
     return true;
   }
 
-  public static boolean shouldSendRevalidateAddressCaseToField(Case caze, String eventChannel) {
+  public static boolean shouldSendUnInvalidatedAddressCaseToField(Case caze, String eventChannel) {
     if (hasChannelField(eventChannel)) {
       return false;
     }

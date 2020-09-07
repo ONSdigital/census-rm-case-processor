@@ -87,8 +87,8 @@ public class MessageConsumerConfig {
   @Value("${queueconfig.rm-case-updated-queue}")
   private String rmCaseUpdatedQueue;
 
-  @Value("${queueconfig.rm-revalidate-address-queue}")
-  private String rmRevalidateAddressQueue;
+  @Value("${queueconfig.rm-uninvalidate-address-queue}")
+  private String rmUnInvalidateAddressQueue;
 
   public MessageConsumerConfig(
       ExceptionManagerClient exceptionManagerClient, ConnectionFactory connectionFactory) {
@@ -167,7 +167,7 @@ public class MessageConsumerConfig {
   }
 
   @Bean
-  public MessageChannel rmRevalidateAddressInputChannel() {
+  public MessageChannel rmUnInvalidateAddressInputChannel() {
     return new DirectChannel();
   }
 
@@ -294,9 +294,9 @@ public class MessageConsumerConfig {
   }
 
   @Bean
-  AmqpInboundChannelAdapter rmRevalidateAddressInbound(
-      @Qualifier("rmRevalidateAddressContainer") SimpleMessageListenerContainer listenerContainer,
-      @Qualifier("rmRevalidateAddressInputChannel") MessageChannel channel) {
+  AmqpInboundChannelAdapter rmUnInvalidateAddressInbound(
+      @Qualifier("rmUnInvalidateAddressContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("rmUnInvalidateAddressInputChannel") MessageChannel channel) {
     return makeAdapter(listenerContainer, channel);
   }
 
@@ -381,8 +381,8 @@ public class MessageConsumerConfig {
   }
 
   @Bean
-  public SimpleMessageListenerContainer rmRevalidateAddressContainer() {
-    return setupListenerContainer(rmRevalidateAddressQueue, ResponseManagementEvent.class);
+  public SimpleMessageListenerContainer rmUnInvalidateAddressContainer() {
+    return setupListenerContainer(rmUnInvalidateAddressQueue, ResponseManagementEvent.class);
   }
 
   private SimpleMessageListenerContainer setupListenerContainer(

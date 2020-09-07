@@ -3,7 +3,7 @@ package uk.gov.ons.census.casesvc.messaging;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ons.census.casesvc.model.dto.ActionInstructionType.UPDATE;
 import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.CASE_UPDATED;
-import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.RM_REVALIDATE_ADDRESS;
+import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.RM_UNINVALIDATE_ADDRESS;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToObject;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
@@ -26,7 +26,7 @@ import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
-import uk.gov.ons.census.casesvc.model.dto.RmRevalidateAddress;
+import uk.gov.ons.census.casesvc.model.dto.RmUnInvalidateAddress;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
@@ -40,8 +40,8 @@ import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
 @ActiveProfiles("test")
 @SpringBootTest
 @RunWith(SpringJUnit4ClassRunner.class)
-public class RmRevalidateAddressReceiverIT {
-  @Value("${queueconfig.rm-revalidate-address-queue}")
+public class RmUnInvalidateAddressReceiverIT {
+  @Value("${queueconfig.rm-uninvalidate-address-queue}")
   private String inboundQueue;
 
   @Value("${queueconfig.rh-case-queue}")
@@ -94,16 +94,16 @@ public class RmRevalidateAddressReceiverIT {
 
       EventDTO event = new EventDTO();
       event.setChannel("TEST");
-      event.setType(RM_REVALIDATE_ADDRESS);
+      event.setType(RM_UNINVALIDATE_ADDRESS);
       rme.setEvent(event);
 
       PayloadDTO payload = new PayloadDTO();
       rme.setPayload(payload);
 
-      RmRevalidateAddress rmRevalidateAddress = new RmRevalidateAddress();
-      payload.setRmRevalidateAddress(rmRevalidateAddress);
+      RmUnInvalidateAddress rmUnInvalidateAddress = new RmUnInvalidateAddress();
+      payload.setRmUnInvalidateAddress(rmUnInvalidateAddress);
 
-      rmRevalidateAddress.setCaseId(testCaseId);
+      rmUnInvalidateAddress.setCaseId(testCaseId);
 
       String json = convertObjectToJson(rme);
       Message message =
@@ -120,7 +120,7 @@ public class RmRevalidateAddressReceiverIT {
 
       assertThat(actualEmittedMessageToRh.getEvent().getType()).isEqualTo(CASE_UPDATED);
       assertThat(actualEmittedMessageToRh.getPayload().getMetadata().getCauseEventType())
-          .isEqualTo(RM_REVALIDATE_ADDRESS);
+          .isEqualTo(RM_UNINVALIDATE_ADDRESS);
       assertThat(actualEmittedMessageToRh.getPayload().getMetadata().getFieldDecision())
           .isEqualTo(UPDATE);
 
@@ -136,10 +136,10 @@ public class RmRevalidateAddressReceiverIT {
       assertThat(events.size()).isEqualTo(1);
       Event actualEvent = events.get(0);
 
-      assertThat(actualEvent.getEventType()).isEqualTo(EventType.RM_REVALIDATE_ADDRESS);
-      RmRevalidateAddress actualEventPayload =
-          convertJsonToObject(actualEvent.getEventPayload(), RmRevalidateAddress.class);
-      assertThat(actualEventPayload).isEqualToComparingFieldByField(rmRevalidateAddress);
+      assertThat(actualEvent.getEventType()).isEqualTo(EventType.RM_UNINVALIDATE_ADDRESS);
+      RmUnInvalidateAddress actualEventPayload =
+          convertJsonToObject(actualEvent.getEventPayload(), RmUnInvalidateAddress.class);
+      assertThat(actualEventPayload).isEqualToComparingFieldByField(rmUnInvalidateAddress);
     }
   }
 }

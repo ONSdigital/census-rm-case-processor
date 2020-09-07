@@ -8,21 +8,21 @@ import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
-import uk.gov.ons.census.casesvc.service.RmRevalidateAddressService;
+import uk.gov.ons.census.casesvc.service.RmUnInvalidateAddressService;
 
 @MessageEndpoint
-public class RmRevalidateAddressReceiver {
+public class RmUnInvalidateAddressReceiver {
 
-  private final RmRevalidateAddressService rmRevalidateAddressService;
+  private final RmUnInvalidateAddressService rmUnInvalidateAddressService;
 
-  public RmRevalidateAddressReceiver(RmRevalidateAddressService rmRevalidateAddressService) {
-    this.rmRevalidateAddressService = rmRevalidateAddressService;
+  public RmUnInvalidateAddressReceiver(RmUnInvalidateAddressService rmUnInvalidateAddressService) {
+    this.rmUnInvalidateAddressService = rmUnInvalidateAddressService;
   }
 
   @Transactional
-  @ServiceActivator(inputChannel = "rmRevalidateAddressInputChannel")
+  @ServiceActivator(inputChannel = "rmUnInvalidateAddressInputChannel")
   public void receiveMessage(Message<ResponseManagementEvent> message) {
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
-    rmRevalidateAddressService.processMessage(message.getPayload(), messageTimestamp);
+    rmUnInvalidateAddressService.processMessage(message.getPayload(), messageTimestamp);
   }
 }
