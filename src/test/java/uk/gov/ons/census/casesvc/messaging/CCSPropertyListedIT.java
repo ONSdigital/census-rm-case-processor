@@ -25,17 +25,13 @@ import uk.gov.ons.census.casesvc.model.dto.CCSPropertyDTO;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
-import uk.gov.ons.census.casesvc.model.dto.InvalidAddress;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
-import uk.gov.ons.census.casesvc.model.dto.RefusalDTO;
-import uk.gov.ons.census.casesvc.model.dto.RefusalTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.SampleUnitDTO;
 import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
-import uk.gov.ons.census.casesvc.model.entity.RefusalType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
@@ -128,7 +124,6 @@ public class CCSPropertyListedIT {
       qids.add(secondQid);
 
       ResponseManagementEvent responseManagementEvent = getResponseManagementEvent();
-      responseManagementEvent.getPayload().getCcsProperty().setUac(qids);
 
       // When
       rabbitQueueHelper.sendMessage(ccsPropertyListedQueue, responseManagementEvent);
@@ -150,68 +145,6 @@ public class CCSPropertyListedIT {
           actualUacQidLinks.get(1), CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
       testCheckUacQidLinks(
           actualUacQidLinks.get(2), CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
-
-      validateEvents(
-          eventRepository.findAll(), responseManagementEvent.getPayload().getCcsProperty());
-    }
-  }
-
-  @Test
-  public void testCCSListedEventForRefusal() throws Exception {
-    try (QueueSpy queueSpy = rabbitQueueHelper.listen(caseUpdatedQueueName)) {
-      // GIVEN
-      RefusalDTO refusal = new RefusalDTO();
-      refusal.setType(RefusalTypeDTO.HARD_REFUSAL);
-      refusal.setAgentId("test agent");
-      refusal.setReport("test report");
-
-      ResponseManagementEvent responseManagementEvent = getResponseManagementEvent();
-      responseManagementEvent.getPayload().getCcsProperty().setRefusal(refusal);
-
-      // When
-      rabbitQueueHelper.sendMessage(ccsPropertyListedQueue, responseManagementEvent);
-
-      // Then
-      queueSpy.checkMessageIsNotReceived(5);
-
-      Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
-      assertThat(actualCase.getSurvey()).isEqualTo("CCS");
-      assertThat(actualCase.getRefusalReceived()).isEqualTo(RefusalType.HARD_REFUSAL);
-
-      List<UacQidLink> actualUacQidLinks = uacQidLinkRepository.findAll();
-      assertThat(actualUacQidLinks.size()).isEqualTo(1);
-      testCheckUacQidLinks(
-          actualUacQidLinks.get(0), CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
-
-      validateEvents(
-          eventRepository.findAll(), responseManagementEvent.getPayload().getCcsProperty());
-    }
-  }
-
-  @Test
-  public void testCCSListedEventForInvalidAddress() throws Exception {
-    try (QueueSpy queueSpy = rabbitQueueHelper.listen(caseUpdatedQueueName)) {
-      // GIVEN
-      InvalidAddress invalidAddress = new InvalidAddress();
-      invalidAddress.setReason("HOUSE DEMOLISHED");
-
-      ResponseManagementEvent responseManagementEvent = getResponseManagementEvent();
-      responseManagementEvent.getPayload().getCcsProperty().setInvalidAddress(invalidAddress);
-
-      // When
-      rabbitQueueHelper.sendMessage(ccsPropertyListedQueue, responseManagementEvent);
-
-      // Then
-      queueSpy.checkMessageIsNotReceived(5);
-
-      Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
-      assertThat(actualCase.getSurvey()).isEqualTo("CCS");
-      assertThat(actualCase.isAddressInvalid()).isTrue();
-
-      List<UacQidLink> actualUacQidLinks = uacQidLinkRepository.findAll();
-      assertThat(actualUacQidLinks.size()).isEqualTo(1);
-      testCheckUacQidLinks(
-          actualUacQidLinks.get(0), CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
 
       validateEvents(
           eventRepository.findAll(), responseManagementEvent.getPayload().getCcsProperty());

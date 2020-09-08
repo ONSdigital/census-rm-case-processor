@@ -256,9 +256,6 @@ public class DataUtils {
     managementEvent.getEvent().setType(CCS_ADDRESS_LISTED);
     CCSPropertyDTO ccsPropertyDTO = managementEvent.getPayload().getCcsProperty();
     ccsPropertyDTO.getCollectionCase().setId(TEST_CASE_ID);
-    ccsPropertyDTO.setRefusal(null);
-    ccsPropertyDTO.setInvalidAddress(null);
-    ccsPropertyDTO.setUac(null);
     managementEvent.getPayload().setCcsProperty(ccsPropertyDTO);
 
     return managementEvent;

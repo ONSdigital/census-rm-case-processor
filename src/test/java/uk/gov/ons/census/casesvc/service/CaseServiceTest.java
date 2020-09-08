@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.ons.census.casesvc.model.entity.RefusalType.HARD_REFUSAL;
 import static uk.gov.ons.census.casesvc.service.CaseService.CASE_UPDATE_ROUTING_KEY;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 
@@ -197,7 +196,7 @@ public class CaseServiceTest {
             });
 
     // When
-    Case actualCase = underTest.createCCSCase(caseId, sampleUnit, null, false);
+    Case actualCase = underTest.createCCSCase(caseId, sampleUnit);
 
     // Then
     verify(mapperFacade).map(sampleUnit, Case.class);
@@ -228,13 +227,12 @@ public class CaseServiceTest {
             });
 
     // When
-    Case actualCase = underTest.createCCSCase(caseId, sampleUnit, HARD_REFUSAL, false);
+    Case actualCase = underTest.createCCSCase(caseId, sampleUnit);
 
     // Then
     verify(mapperFacade).map(sampleUnit, Case.class);
     assertThat(actualCase.getSurvey()).isEqualTo("CCS");
     assertThat(actualCase.getCaseId()).isEqualTo(caseId);
-    assertThat(actualCase.getRefusalReceived()).isEqualTo(HARD_REFUSAL);
     assertThat(actualCase.getActionPlanId()).isEqualTo(TEST_ACTION_PLAN_ID);
     assertThat(actualCase.getCollectionExerciseId()).isEqualTo(TEST_COLLECTION_EXERCISE_ID);
   }
