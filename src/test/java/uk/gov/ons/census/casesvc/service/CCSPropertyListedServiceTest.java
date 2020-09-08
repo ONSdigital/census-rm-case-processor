@@ -3,9 +3,7 @@ package uk.gov.ons.census.casesvc.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementCCSAddressListedEvent;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
@@ -28,10 +26,6 @@ import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 @RunWith(MockitoJUnitRunner.class)
 public class CCSPropertyListedServiceTest {
 
-  private static final UUID TEST_UAC_QID_LINK_ID = UUID.randomUUID();
-  private static final String TEST_QID_1 = "710000000043";
-  private static final String TEST_QID_2 = "610000000043";
-
   @Mock EventLogger eventLogger;
   @Mock CaseService caseService;
   @Mock UacService uacService;
@@ -45,54 +39,74 @@ public class CCSPropertyListedServiceTest {
     ResponseManagementEvent managementEvent = getTestResponseManagementCCSAddressListedEvent();
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
-    CCSPropertyDTO ccsPropertyDTO = new CCSPropertyDTO();
-    ccsPropertyDTO.setInterviewRequired();
-    ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
+    managementEvent.getPayload().getCcsProperty().setInterviewRequired(false);
 
     Case caze = new Case();
     caze.setCaseId(managementEvent.getPayload().getCollectionCase().getId());
     caze.setSurvey("CCS");
 
-    UacQidLink expectedUacQidLink = new UacQidLink();
-    expectedUacQidLink.setId(TEST_UAC_QID_LINK_ID);
-    expectedUacQidLink.setCcsCase(true);
-    expectedUacQidLink.setCaze(caze);
-
-    when(caseService.createCCSCase(
-            managementEvent.getPayload().getCcsProperty().getCollectionCase().getId(),
-            managementEvent.getPayload().getCcsProperty().getSampleUnit()))
-        .thenReturn(caze);
+    when(caseService.createCCSCase(any(), any())).thenReturn(caze);
 
     // When
     underTest.processCCSPropertyListed(managementEvent, messageTimestamp);
 
-    // Then
-    InOrder inOrder = inOrder(caseService, uacQidLinkRepository, uacService, eventLogger);
-    checkCorrectEventLogging(inOrder, caze, managementEvent, messageTimestamp);
-
-    ArgumentCaptor<Case> caseCaptor = ArgumentCaptor.forClass(Case.class);
-    ArgumentCaptor<Metadata> metadataCaptor = ArgumentCaptor.forClass(Metadata.class);
     verify(caseService)
-        .saveCaseAndEmitCaseCreatedEvent(caseCaptor.capture(), metadataCaptor.capture());
-    Case actualCaseToFieldService = caseCaptor.getValue();
-    assertThat(actualCaseToFieldService.getCaseId())
-        .isEqualTo(UUID.fromString(caze.getCaseId().toString()));
-    assertThat(actualCaseToFieldService.getSurvey()).isEqualTo("CCS");
+        .createCCSCase(
+            managementEvent.getPayload().getCcsProperty().getCollectionCase().getId(),
+            managementEvent.getPayload().getCcsProperty().getSampleUnit());
 
-    Metadata actualMetadata = metadataCaptor.getValue();
-    assertThat(actualMetadata.getCauseEventType()).isEqualTo(managementEvent.getEvent().getType());
-    assertThat(actualMetadata.getFieldDecision()).isEqualTo(ActionInstructionType.CREATE);
+    verify(uacService).createUacQidLinkedToCCSCase(caze, managementEvent.getEvent());
+
+    // Then
+    checkCorrectEventLogging(caze, managementEvent, messageTimestamp);
+
+    verifyNoMoreInteractions(caseService);
   }
 
+  @Test
+  public void testCCSPropertyListedWitInterviewRequireTrueIsSentToField() {
+    // Given
+    ResponseManagementEvent managementEvent = getTestResponseManagementCCSAddressListedEvent();
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+
+    managementEvent.getPayload().getCcsProperty().setInterviewRequired(true);
+
+    Case expectedCase = new Case();
+
+    when(caseService.createCCSCase(any(), any())).thenReturn(expectedCase);
+
+    // When
+    underTest.processCCSPropertyListed(managementEvent, messageTimestamp);
+
+    verify(caseService)
+        .createCCSCase(
+            managementEvent.getPayload().getCcsProperty().getCollectionCase().getId(),
+            managementEvent.getPayload().getCcsProperty().getSampleUnit());
+
+    verify(uacService).createUacQidLinkedToCCSCase(expectedCase, managementEvent.getEvent());
+
+    ArgumentCaptor<Metadata> metadataCaptor = ArgumentCaptor.forClass(Metadata.class);
+
+    verify(caseService).saveCaseAndEmitCaseCreatedEvent(eq(expectedCase), metadataCaptor.capture());
+
+    Metadata actualMetadata = metadataCaptor.getValue();
+
+    assertThat(actualMetadata.getCauseEventType()).isEqualTo(managementEvent.getEvent().getType());
+    assertThat(actualMetadata.getFieldDecision()).isEqualTo(ActionInstructionType.CREATE);
+
+    // Then
+    checkCorrectEventLogging(expectedCase, managementEvent, messageTimestamp);
+
+    verifyNoMoreInteractions(caseService);
+  }
+
+  //
+
   private void checkCorrectEventLogging(
-      InOrder inOrder,
-      Case expectedCase,
-      ResponseManagementEvent managementEvent,
-      OffsetDateTime messageTimestamp) {
+      Case expectedCase, ResponseManagementEvent managementEvent, OffsetDateTime messageTimestamp) {
     ArgumentCaptor<String> ccsPayload = ArgumentCaptor.forClass(String.class);
 
-    inOrder
-        .verify(eventLogger)
+    verify(eventLogger)
         .logCaseEvent(
             eq(expectedCase),
             any(OffsetDateTime.class),
