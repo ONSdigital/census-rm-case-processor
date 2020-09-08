@@ -102,6 +102,8 @@ public class CCSPropertyListedIT {
 
       Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
       assertThat(actualCase.getSurvey()).isEqualTo("CCS");
+      assertThat(actualCase.getRegion()).isEqualTo("Oop North");
+      assertThat(actualCase.getOa()).isEqualTo("008");
 
       List<UacQidLink> actualUacQidLinks = uacQidLinkRepository.findAll();
       assertThat(actualUacQidLinks.size()).isEqualTo(1);
@@ -124,6 +126,8 @@ public class CCSPropertyListedIT {
     sampleUnitDTO.setAddressLine3("swing low");
     sampleUnitDTO.setTownName("upton");
     sampleUnitDTO.setPostcode("UP103UP");
+    sampleUnitDTO.setRegion("Oop North");
+    sampleUnitDTO.setOa("008");
     sampleUnitDTO.setLatitude("50.863849");
     sampleUnitDTO.setLongitude("-1.229710");
     sampleUnitDTO.setFieldCoordinatorId("Field Mouse 1");
