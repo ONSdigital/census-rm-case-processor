@@ -8,19 +8,18 @@ import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManage
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
-import uk.gov.ons.census.casesvc.model.dto.*;
+import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
+import uk.gov.ons.census.casesvc.model.dto.Metadata;
+import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
-import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
 @RunWith(MockitoJUnitRunner.class)

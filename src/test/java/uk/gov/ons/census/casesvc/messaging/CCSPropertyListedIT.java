@@ -5,11 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
-import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,7 +25,6 @@ import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.SampleUnitDTO;
-import uk.gov.ons.census.casesvc.model.dto.UacDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
@@ -49,12 +45,7 @@ public class CCSPropertyListedIT {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
   private static final String CCS_PROPERTY_LISTED_CHANNEL = "FIELD";
   private static final String CCS_PROPERTY_LISTED_SOURCE = "FIELDWORK_GATEWAY";
-  private static final String TEST_QID_1 = "71000000000121";
-  private static final String TEST_QID_2 = "61000000000121";
   private static final String CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES = "71";
-  private static final String CCS_POSTBACK_CONTINUATION_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES = "61";
-
-  EasyRandom easyRandom = new EasyRandom();
 
   @Autowired private RabbitQueueHelper rabbitQueueHelper;
   @Autowired private CaseRepository caseRepository;
@@ -81,7 +72,21 @@ public class CCSPropertyListedIT {
   public void testCCSSubmittedToFieldIT() throws Exception {
     try (QueueSpy queueSpy = rabbitQueueHelper.listen(caseUpdatedQueueName)) {
       // GIVEN
-      ResponseManagementEvent responseManagementEvent = getResponseManagementEvent();
+      CCSPropertyDTO ccsPropertyDTO = getCCSProperty();
+      ccsPropertyDTO.setInterviewRequired(true);
+
+      EventDTO eventDTO = new EventDTO();
+      eventDTO.setType(EventTypeDTO.CCS_ADDRESS_LISTED);
+      eventDTO.setSource("FIELDWORK_GATEWAY");
+      eventDTO.setChannel("FIELD");
+      eventDTO.setDateTime(OffsetDateTime.now());
+      eventDTO.setTransactionId(UUID.randomUUID());
+
+      ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
+      PayloadDTO payload = new PayloadDTO();
+      payload.setCcsProperty(ccsPropertyDTO);
+      responseManagementEvent.setPayload(payload);
+      responseManagementEvent.setEvent(eventDTO);
 
       // When
       rabbitQueueHelper.sendMessage(ccsPropertyListedQueue, responseManagementEvent);
@@ -102,49 +107,6 @@ public class CCSPropertyListedIT {
       assertThat(actualUacQidLinks.size()).isEqualTo(1);
       testCheckUacQidLinks(
           actualUacQidLinks.get(0), CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
-
-      validateEvents(
-          eventRepository.findAll(), responseManagementEvent.getPayload().getCcsProperty());
-    }
-  }
-
-  @Test
-  public void testCCSListedEventWithQidsSet() throws Exception {
-    try (QueueSpy queueSpy = rabbitQueueHelper.listen(caseUpdatedQueueName)) {
-      // GIVEN
-      createUnlinkedUacQid(TEST_QID_1);
-      createUnlinkedUacQid(TEST_QID_2);
-
-      List<UacDTO> qids = new ArrayList<>();
-      UacDTO firstQid = new UacDTO();
-      firstQid.setQuestionnaireId(TEST_QID_1);
-      qids.add(firstQid);
-      UacDTO secondQid = new UacDTO();
-      secondQid.setQuestionnaireId(TEST_QID_2);
-      qids.add(secondQid);
-
-      ResponseManagementEvent responseManagementEvent = getResponseManagementEvent();
-
-      // When
-      rabbitQueueHelper.sendMessage(ccsPropertyListedQueue, responseManagementEvent);
-
-      // Then
-      queueSpy.checkMessageIsNotReceived(5);
-
-      Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
-      assertThat(actualCase.getSurvey()).isEqualTo("CCS");
-
-      List<UacQidLink> actualUacQidLinks = uacQidLinkRepository.findAll();
-      assertThat(actualUacQidLinks.size()).isEqualTo(3); // Including generated UAC/QID in receiver
-
-      actualUacQidLinks.sort(
-          Comparator.comparing(UacQidLink::getQid).thenComparing(UacQidLink::getId));
-      testCheckUacQidLinks(
-          actualUacQidLinks.get(0), CCS_POSTBACK_CONTINUATION_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
-      testCheckUacQidLinks(
-          actualUacQidLinks.get(1), CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
-      testCheckUacQidLinks(
-          actualUacQidLinks.get(2), CCS_INTERVIEWER_HOUSEHOLD_QUESTIONNAIRE_FOR_ENGLAND_AND_WALES);
 
       validateEvents(
           eventRepository.findAll(), responseManagementEvent.getPayload().getCcsProperty());
@@ -186,25 +148,6 @@ public class CCSPropertyListedIT {
     assertThat(actualCCSPropertyDTO).isEqualTo(expectedCCSPropertyDto);
   }
 
-  private ResponseManagementEvent getResponseManagementEvent() {
-    CCSPropertyDTO ccsPropertyDTO = getCCSProperty();
-
-    EventDTO eventDTO = new EventDTO();
-    eventDTO.setType(EventTypeDTO.CCS_ADDRESS_LISTED);
-    eventDTO.setSource("FIELDWORK_GATEWAY");
-    eventDTO.setChannel("FIELD");
-    eventDTO.setDateTime(OffsetDateTime.now());
-    eventDTO.setTransactionId(UUID.randomUUID());
-
-    ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
-    PayloadDTO payload = new PayloadDTO();
-    payload.setCcsProperty(ccsPropertyDTO);
-    responseManagementEvent.setPayload(payload);
-    responseManagementEvent.setEvent(eventDTO);
-
-    return responseManagementEvent;
-  }
-
   private CCSPropertyDTO getCCSProperty() {
     CCSPropertyDTO ccsPropertyDTO = new CCSPropertyDTO();
     CollectionCase collectionCase = new CollectionCase();
@@ -213,15 +156,6 @@ public class CCSPropertyListedIT {
     ccsPropertyDTO.setSampleUnit(setUpSampleUnitDTO());
 
     return ccsPropertyDTO;
-  }
-
-  private void createUnlinkedUacQid(String qid) {
-    UacQidLink uacQidLink = easyRandom.nextObject(UacQidLink.class);
-    uacQidLink.setQid(qid);
-    uacQidLink.setCaze(null);
-    uacQidLink.setCcsCase(true);
-    uacQidLink.setEvents(null);
-    uacQidLinkRepository.save(uacQidLink);
   }
 
   private void testCheckUacQidLinks(UacQidLink uacQidLink, String questionnaireType) {
