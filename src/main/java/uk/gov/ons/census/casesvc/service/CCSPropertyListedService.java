@@ -22,7 +22,6 @@ public class CCSPropertyListedService {
   private final UacService uacService;
   private final EventLogger eventLogger;
   private final CaseService caseService;
-  private final UacQidLinkRepository uacQidLinkRepository;
 
   public CCSPropertyListedService(
       UacService uacService,
@@ -32,7 +31,6 @@ public class CCSPropertyListedService {
     this.uacService = uacService;
     this.eventLogger = eventLogger;
     this.caseService = caseService;
-    this.uacQidLinkRepository = uacQidLinkRepository;
   }
 
   public void processCCSPropertyListed(
