@@ -202,7 +202,6 @@ public class CaseServiceTest {
     verify(mapperFacade).map(sampleUnit, Case.class);
     assertThat(actualCase.getSurvey()).isEqualTo("CCS");
     assertThat(actualCase.getCaseId()).isEqualTo(caseId);
-    assertThat(actualCase.getRefusalReceived()).isNull();
     assertThat(actualCase.getActionPlanId()).isEqualTo(TEST_ACTION_PLAN_ID);
     assertThat(actualCase.getCollectionExerciseId()).isEqualTo(TEST_COLLECTION_EXERCISE_ID);
   }
