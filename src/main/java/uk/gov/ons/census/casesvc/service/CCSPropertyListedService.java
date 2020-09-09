@@ -1,15 +1,19 @@
 package uk.gov.ons.census.casesvc.service;
 
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
-import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
-
-import java.time.OffsetDateTime;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
-import uk.gov.ons.census.casesvc.model.dto.*;
+import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
+import uk.gov.ons.census.casesvc.model.dto.CCSPropertyDTO;
+import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
+import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
+
+import java.time.OffsetDateTime;
+
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
+import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
 @Service
 public class CCSPropertyListedService {
@@ -41,7 +45,7 @@ public class CCSPropertyListedService {
 
     uacService.createUacQidLinkedToCCSCase(caze, ccsPropertyListedEvent.getEvent());
 
-    sendCCSCaseToFieldIdInterviewRequired(caze, ccsProperty.isInterviewRequired());
+    sendCCSCaseToFieldIfInterviewRequired(caze, ccsProperty.isInterviewRequired());
 
     eventLogger.logCaseEvent(
         caze,
@@ -53,7 +57,7 @@ public class CCSPropertyListedService {
         messageTimestamp);
   }
 
-  private void sendCCSCaseToFieldIdInterviewRequired(Case caze, boolean interviewRequired) {
+  private void sendCCSCaseToFieldIfInterviewRequired(Case caze, boolean interviewRequired) {
     if (interviewRequired) {
       caseService.saveCaseAndEmitCaseCreatedEvent(
           caze, buildMetadata(EventTypeDTO.CCS_ADDRESS_LISTED, ActionInstructionType.CREATE));
