@@ -3,46 +3,19 @@ package uk.gov.ons.census.casesvc.utility;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 
 public class FieldworkHelper {
-  public static boolean shouldSendUpdatedCaseToField(Case caze, String eventChannel) {
-    if (hasChannelField(eventChannel)) {
+  public static boolean shouldSendCaseToField(Case caze, String eventChannel) {
+    if (eventChannel.equals("FIELD")) {
       return false;
     }
-
-    if (hasRegionNorthernIrelandAndCECaseType(caze)) {
+    if (caze.getRegion().startsWith("N") && caze.getCaseType().equals("CE")) {
       return false;
     }
-
-    if (caze.getEstabType().equals("TRANSIENT PERSONS")
-        || caze.getEstabType().equals("MIGRANT WORKERS")) {
+    if (caze.getEstabType().equals("TRANSIENT PERSONS")) {
       return false;
     }
-    return true;
-  }
-
-  public static boolean shouldSendUnInvalidatedAddressCaseToField(Case caze, String eventChannel) {
-    if (hasChannelField(eventChannel)) {
-      return false;
-    }
-
-    if (hasRegionNorthernIrelandAndCECaseType(caze)) {
-      return false;
-    }
-
     if (caze.getRefusalReceived() != null) {
       return false;
     }
-
-    if (caze.getEstabType() != null) {
-      return !caze.getEstabType().equals("TRANSIENT PERSONS");
-    }
     return true;
-  }
-
-  private static boolean hasRegionNorthernIrelandAndCECaseType(Case caze) {
-    return caze.getRegion().startsWith("N") && caze.getCaseType().equals("CE");
-  }
-
-  private static boolean hasChannelField(String eventChannel) {
-    return eventChannel.equals("FIELD");
   }
 }

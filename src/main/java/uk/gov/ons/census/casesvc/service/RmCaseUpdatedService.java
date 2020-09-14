@@ -1,6 +1,6 @@
 package uk.gov.ons.census.casesvc.service;
 
-import static uk.gov.ons.census.casesvc.utility.FieldworkHelper.shouldSendUpdatedCaseToField;
+import static uk.gov.ons.census.casesvc.utility.FieldworkHelper.shouldSendCaseToField;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.math.BigDecimal;
@@ -50,7 +50,7 @@ public class RmCaseUpdatedService {
     updatedCase.setSkeleton(false);
 
     Metadata eventMetadata = null;
-    if (shouldSendUpdatedCaseToField(updatedCase, rme.getEvent().getChannel())) {
+    if (shouldSendCaseToField(updatedCase, rme.getEvent().getChannel())) {
       eventMetadata = new Metadata();
       eventMetadata.setCauseEventType(rme.getEvent().getType());
       eventMetadata.setFieldDecision(ActionInstructionType.CREATE);

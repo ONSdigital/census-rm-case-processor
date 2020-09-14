@@ -10,7 +10,7 @@ public class FieldworkHelperTest {
 
   @Test
   public void testDoNotSendBackToField() {
-    assertThat(FieldworkHelper.shouldSendUpdatedCaseToField(null, "FIELD")).isFalse();
+    assertThat(FieldworkHelper.shouldSendCaseToField(null, "FIELD")).isFalse();
   }
 
   @Test
@@ -18,7 +18,7 @@ public class FieldworkHelperTest {
     Case caze = new Case();
     caze.setCaseType("CE");
     caze.setRegion("N");
-    assertThat(FieldworkHelper.shouldSendUpdatedCaseToField(caze, "NOT_FIELD")).isFalse();
+    assertThat(FieldworkHelper.shouldSendCaseToField(caze, "NOT_FIELD")).isFalse();
   }
 
   @Test
@@ -27,48 +27,16 @@ public class FieldworkHelperTest {
     caze.setCaseType("HH");
     caze.setRegion("E");
     caze.setEstabType("TRANSIENT PERSONS");
-    assertThat(FieldworkHelper.shouldSendUpdatedCaseToField(caze, "NOT_FIELD")).isFalse();
+    assertThat(FieldworkHelper.shouldSendCaseToField(caze, "NOT_FIELD")).isFalse();
   }
 
   @Test
-  public void testDoNotSendToMigrantWorkers() {
+  public void testDoNotSendToRefusedCase() {
     Case caze = new Case();
     caze.setCaseType("HH");
     caze.setRegion("E");
-    caze.setEstabType("MIGRANT WORKERS");
-    assertThat(FieldworkHelper.shouldSendUpdatedCaseToField(caze, "NOT_FIELD")).isFalse();
-  }
-
-  @Test
-  public void testUnInvalidateAddressDoNotSendBackToField() {
-    assertThat(FieldworkHelper.shouldSendUnInvalidatedAddressCaseToField(null, "FIELD")).isFalse();
-  }
-
-  @Test
-  public void testUnInvalidateAddressDoNotSendToNorthernIrelandCommunalEstablishments() {
-    Case caze = new Case();
-    caze.setCaseType("CE");
-    caze.setRegion("N");
-    assertThat(FieldworkHelper.shouldSendUnInvalidatedAddressCaseToField(caze, "NOT_FIELD"))
-        .isFalse();
-  }
-
-  @Test
-  public void testUnInvalidateAddressDoNotSendToRefusedCase() {
-    Case caze = new Case();
-    caze.setCaseType("HH");
-    caze.setRegion("E");
+    caze.setEstabType("HOUSEHOLD");
     caze.setRefusalReceived(RefusalType.HARD_REFUSAL);
-    assertThat(FieldworkHelper.shouldSendUnInvalidatedAddressCaseToField(caze, "NOT_FIELD"))
-        .isFalse();
-  }
-
-  @Test
-  public void testUnInvalidateAddressDoNotSendToTransientPersons() {
-    Case caze = new Case();
-    caze.setCaseType("HH");
-    caze.setRegion("E");
-    caze.setEstabType("TRANSIENT PERSONS");
-    assertThat(FieldworkHelper.shouldSendUpdatedCaseToField(caze, "NOT_FIELD")).isFalse();
+    assertThat(FieldworkHelper.shouldSendCaseToField(caze, "NOT_FIELD")).isFalse();
   }
 }

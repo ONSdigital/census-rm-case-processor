@@ -87,6 +87,7 @@ public class RmUnInvalidateAddressReceiverIT {
       invalidAddressCase.setUprn("Dummy");
       invalidAddressCase.setEstabUprn("Dummy");
       invalidAddressCase.setSurvey("CENSUS");
+      invalidAddressCase.setRefusalReceived(null);
 
       caseRepository.saveAndFlush(invalidAddressCase);
 

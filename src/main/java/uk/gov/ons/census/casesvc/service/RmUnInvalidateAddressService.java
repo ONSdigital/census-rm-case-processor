@@ -1,6 +1,6 @@
 package uk.gov.ons.census.casesvc.service;
 
-import static uk.gov.ons.census.casesvc.utility.FieldworkHelper.shouldSendUnInvalidatedAddressCaseToField;
+import static uk.gov.ons.census.casesvc.utility.FieldworkHelper.shouldSendCaseToField;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
@@ -34,8 +34,7 @@ public class RmUnInvalidateAddressService {
     unInvalidateAddressCase.setAddressInvalid(false);
 
     Metadata eventMetadata = null;
-    if (shouldSendUnInvalidatedAddressCaseToField(
-        unInvalidateAddressCase, rme.getEvent().getChannel())) {
+    if (shouldSendCaseToField(unInvalidateAddressCase, rme.getEvent().getChannel())) {
       eventMetadata = buildMetadata(rme.getEvent().getType(), ActionInstructionType.UPDATE);
     }
 
