@@ -12,7 +12,6 @@ import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
-import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
 @Service
 public class CCSPropertyListedService {
@@ -23,10 +22,7 @@ public class CCSPropertyListedService {
   private final CaseService caseService;
 
   public CCSPropertyListedService(
-      UacService uacService,
-      EventLogger eventLogger,
-      CaseService caseService,
-      UacQidLinkRepository uacQidLinkRepository) {
+      UacService uacService, EventLogger eventLogger, CaseService caseService) {
     this.uacService = uacService;
     this.eventLogger = eventLogger;
     this.caseService = caseService;
