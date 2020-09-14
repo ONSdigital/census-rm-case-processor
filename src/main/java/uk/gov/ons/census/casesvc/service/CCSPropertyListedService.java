@@ -42,7 +42,10 @@ public class CCSPropertyListedService {
 
     uacService.createUacQidLinkedToCCSCase(caze, ccsPropertyListedEvent.getEvent());
 
-    sendCCSCaseToFieldIfInterviewRequired(caze, ccsProperty.isInterviewRequired());
+    if (ccsProperty.isInterviewRequired()) {
+      caseService.saveCaseAndEmitCaseCreatedEvent(
+          caze, buildMetadata(EventTypeDTO.CCS_ADDRESS_LISTED, ActionInstructionType.CREATE));
+    }
 
     eventLogger.logCaseEvent(
         caze,
@@ -52,12 +55,5 @@ public class CCSPropertyListedService {
         ccsPropertyListedEvent.getEvent(),
         convertObjectToJson(ccsProperty),
         messageTimestamp);
-  }
-
-  private void sendCCSCaseToFieldIfInterviewRequired(Case caze, boolean interviewRequired) {
-    if (interviewRequired) {
-      caseService.saveCaseAndEmitCaseCreatedEvent(
-          caze, buildMetadata(EventTypeDTO.CCS_ADDRESS_LISTED, ActionInstructionType.CREATE));
-    }
   }
 }
