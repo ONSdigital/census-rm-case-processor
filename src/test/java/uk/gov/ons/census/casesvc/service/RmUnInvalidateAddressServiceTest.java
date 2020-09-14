@@ -45,6 +45,7 @@ public class RmUnInvalidateAddressServiceTest {
     caseToUnInvalidate.setRegion("E");
     caseToUnInvalidate.setCaseType("HH");
     caseToUnInvalidate.setEstabType("HOUSEHOLD");
+    caseToUnInvalidate.setRefusalReceived(null);
 
     ResponseManagementEvent rme = new ResponseManagementEvent();
 
