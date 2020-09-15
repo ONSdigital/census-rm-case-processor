@@ -89,6 +89,7 @@ public class DataUtils {
     // This is here because the integration tests are an abysmal mess - you don't use stuff like
     // EasyRandom for integration tests... it's a unit testing tool
     managementEvent.getPayload().setAddressModification(null);
+    managementEvent.getPayload().setAddressTypeChange(null);
 
     return managementEvent;
   }

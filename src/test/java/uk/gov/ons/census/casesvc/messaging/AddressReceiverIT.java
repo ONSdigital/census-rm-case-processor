@@ -275,9 +275,13 @@ public class AddressReceiverIT {
       addressTypeChangeDetails.setCeExpectedCapacity("20");
       addressTypeChangeDetails.setId(TEST_CASE_ID);
 
-      Address address = new Address();
-      addressTypeChangeDetails.setAddress(address);
+      AddressTypeChangeAddress address = new AddressTypeChangeAddress();
       address.setAddressType("SPG");
+      address.setEstabType(Optional.of("MARINA"));
+      address.setOrganisationName(Optional.of("Happy moorings"));
+      address.setAddressLine3(Optional.empty());
+      addressTypeChangeDetails.setAddress(address);
+      // Update estab type and organisation name, delete address line 3
 
       String json = convertObjectToJson(rme);
       Message message =
@@ -333,12 +337,19 @@ public class AddressReceiverIT {
       assertThat(oldCaseEvent.getPayload().getCollectionCase().getId()).isEqualTo(TEST_CASE_ID);
       assertThat(newCaseEvent.getPayload().getCollectionCase().getId()).isEqualTo(NEW_TEST_CASE_ID);
 
+      // Check modified and deleted fields
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getAddressLine3())
+          .isNull();
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getOrganisationName())
+          .isEqualTo(address.getOrganisationName().get());
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getEstabType())
+          .isEqualTo(address.getEstabType().get());
+
+      // Check fields copied from source case
       assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getAddressLine1())
           .isEqualTo(caze.getAddressLine1());
       assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getAddressLine2())
           .isEqualTo(caze.getAddressLine2());
-      assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getAddressLine3())
-          .isEqualTo(caze.getAddressLine3());
       assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getRegion())
           .isEqualTo(caze.getRegion());
       assertThat(newCaseEvent.getPayload().getCollectionCase().getCollectionExerciseId())
@@ -349,8 +360,6 @@ public class AddressReceiverIT {
           .isEqualTo(caze.getSurvey());
       assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getUprn())
           .isEqualTo(caze.getUprn());
-      assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getOrganisationName())
-          .isEqualTo(caze.getOrganisationName());
       assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getTownName())
           .isEqualTo(caze.getTownName());
       assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getPostcode())
