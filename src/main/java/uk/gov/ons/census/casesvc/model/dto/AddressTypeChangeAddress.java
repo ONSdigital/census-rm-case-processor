@@ -5,7 +5,7 @@ import java.util.Optional;
 import lombok.Data;
 
 @Data
-@JsonInclude(JsonInclude.Include.NON_ABSENT) // Only needed for marshalling (i.e. sending)
+@JsonInclude(JsonInclude.Include.NON_NULL) // Only needed for marshalling (i.e. sending)
 public class AddressTypeChangeAddress {
   private Optional<String> addressLine1;
   private Optional<String> addressLine2;

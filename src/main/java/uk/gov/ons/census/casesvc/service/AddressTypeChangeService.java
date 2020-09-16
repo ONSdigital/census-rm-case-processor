@@ -122,16 +122,24 @@ public class AddressTypeChangeService {
           Integer.parseInt(addressTypeChangeDetails.getCeExpectedCapacity()));
     }
 
+    // Note on deserializing Optionals from JSON:
+    // An Optional.empty value implies we received a null value for that field in the JSON
+    // A null pointer value implies that field was not present in the JSON we received at all
+
+    // We only take estab type from the event, never the old case
     if (addressTypeChangeDetails.getAddress().getEstabType() != null) {
       addressTypeChangeDetails.getAddress().getEstabType().ifPresent(newCase::setEstabType);
     }
 
+    // Address line 1 can be modified from the event if present but we do NOT allow it to be deleted
     if (addressTypeChangeDetails.getAddress().getAddressLine1() != null) {
       addressTypeChangeDetails.getAddress().getAddressLine1().ifPresent(newCase::setAddressLine1);
     } else {
       newCase.setAddressLine1(oldCase.getAddressLine1());
     }
 
+    // Address line 2 & 3 and organisation name can be modified and deleted (with null or empty
+    // strings)
     if (addressTypeChangeDetails.getAddress().getAddressLine2() != null) {
       addressTypeChangeDetails
           .getAddress()
