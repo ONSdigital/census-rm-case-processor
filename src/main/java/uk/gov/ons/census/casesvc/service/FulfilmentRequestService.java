@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.FulfilmentRequestDTO;
@@ -108,6 +109,13 @@ public class FulfilmentRequestService {
       FulfilmentRequestDTO fulfilmentRequestPayload, String eventChannel, Case caze) {
     if (caze.getCaseType().equals("HH")
         && individualResponseRequestCodes.contains(fulfilmentRequestPayload.getFulfilmentCode())) {
+
+      // This check is mostly to help the testers, who often send malformed messages manually.
+      // Can be removed once testing is done exclusively via the *systems* and not handwritten JSON
+      if (StringUtils.isEmpty(fulfilmentRequestPayload.getIndividualCaseId())) {
+        throw new RuntimeException("Individual fulfilment must have an individual case ID");
+      }
+
       Case individualResponseCase =
           caseService.prepareIndividualResponseCaseFromParentCase(
               caze, fulfilmentRequestPayload.getIndividualCaseId(), eventChannel);
