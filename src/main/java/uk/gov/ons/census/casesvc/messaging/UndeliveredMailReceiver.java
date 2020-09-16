@@ -43,9 +43,6 @@ public class UndeliveredMailReceiver {
     Case caze;
     UacQidLink uacQidLink = null;
 
-
-
-
     if (!StringUtils.isEmpty(questionnaireId)) {
       uacQidLink = uacService.findByQid(questionnaireId);
       caze = uacQidLink.getCaze();

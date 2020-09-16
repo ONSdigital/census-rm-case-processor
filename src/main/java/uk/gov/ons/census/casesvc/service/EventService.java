@@ -43,7 +43,8 @@ public class EventService {
             caze.getCaseType(), caze.getRegion(), caze.getAddressLevel());
     if (createCaseSample.isBulkProcessed()) {
       caseService.saveCaseAndEmitCaseCreatedEvent(
-          caze, buildMetadata(EventTypeDTO.CLERICAL_ADDRESS_RESOLUTION, ActionInstructionType.CREATE));
+          caze,
+          buildMetadata(EventTypeDTO.CLERICAL_ADDRESS_RESOLUTION, ActionInstructionType.CREATE));
 
       eventLogger.logCaseEvent(
           caze,
