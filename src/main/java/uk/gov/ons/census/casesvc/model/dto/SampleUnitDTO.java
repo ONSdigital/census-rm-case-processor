@@ -13,6 +13,8 @@ public class SampleUnitDTO {
   private String addressLine3;
   private String townName;
   private String postcode;
+  private String region;
+  private String oa;
   private String latitude;
   private String longitude;
   private String fieldCoordinatorId;

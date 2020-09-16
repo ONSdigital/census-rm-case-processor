@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.ons.census.casesvc.model.entity.RefusalType.HARD_REFUSAL;
 import static uk.gov.ons.census.casesvc.service.CaseService.CASE_UPDATE_ROUTING_KEY;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
 
@@ -178,7 +177,7 @@ public class CaseServiceTest {
   }
 
   @Test
-  public void testCreateCCSCaseWithRefusalNotReceived() {
+  public void testCreateCCSCase() {
     // Given
     UUID caseId = TEST_UUID;
     SampleUnitDTO sampleUnit = new SampleUnitDTO();
@@ -197,44 +196,12 @@ public class CaseServiceTest {
             });
 
     // When
-    Case actualCase = underTest.createCCSCase(caseId, sampleUnit, null, false);
+    Case actualCase = underTest.createCCSCase(caseId, sampleUnit);
 
     // Then
     verify(mapperFacade).map(sampleUnit, Case.class);
     assertThat(actualCase.getSurvey()).isEqualTo("CCS");
     assertThat(actualCase.getCaseId()).isEqualTo(caseId);
-    assertThat(actualCase.getRefusalReceived()).isNull();
-    assertThat(actualCase.getActionPlanId()).isEqualTo(TEST_ACTION_PLAN_ID);
-    assertThat(actualCase.getCollectionExerciseId()).isEqualTo(TEST_COLLECTION_EXERCISE_ID);
-  }
-
-  @Test
-  public void testCreateCCSCaseWithRefusalReceived() {
-    // Given
-    UUID caseId = TEST_UUID;
-    SampleUnitDTO sampleUnit = new SampleUnitDTO();
-
-    ReflectionTestUtils.setField(underTest, "actionPlanId", TEST_ACTION_PLAN_ID);
-    ReflectionTestUtils.setField(underTest, "collectionExerciseId", TEST_COLLECTION_EXERCISE_ID);
-    ReflectionTestUtils.setField(underTest, "caserefgeneratorkey", caserefgeneratorkey);
-
-    // This simulates the DB creating the ID, which it does when the case is persisted
-    when(caseRepository.saveAndFlush(any(Case.class)))
-        .then(
-            invocation -> {
-              Case caze = invocation.getArgument(0);
-              caze.setSecretSequenceNumber(123);
-              return caze;
-            });
-
-    // When
-    Case actualCase = underTest.createCCSCase(caseId, sampleUnit, HARD_REFUSAL, false);
-
-    // Then
-    verify(mapperFacade).map(sampleUnit, Case.class);
-    assertThat(actualCase.getSurvey()).isEqualTo("CCS");
-    assertThat(actualCase.getCaseId()).isEqualTo(caseId);
-    assertThat(actualCase.getRefusalReceived()).isEqualTo(HARD_REFUSAL);
     assertThat(actualCase.getActionPlanId()).isEqualTo(TEST_ACTION_PLAN_ID);
     assertThat(actualCase.getCollectionExerciseId()).isEqualTo(TEST_COLLECTION_EXERCISE_ID);
   }
