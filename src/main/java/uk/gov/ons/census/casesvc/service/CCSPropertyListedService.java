@@ -4,15 +4,14 @@ import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
-import uk.gov.ons.census.casesvc.model.dto.*;
+import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
+import uk.gov.ons.census.casesvc.model.dto.CCSPropertyDTO;
+import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
+import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
-import uk.gov.ons.census.casesvc.model.entity.RefusalType;
-import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
-import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 
 @Service
 public class CCSPropertyListedService {
@@ -21,51 +20,27 @@ public class CCSPropertyListedService {
   private final UacService uacService;
   private final EventLogger eventLogger;
   private final CaseService caseService;
-  private final UacQidLinkRepository uacQidLinkRepository;
 
   public CCSPropertyListedService(
-      UacService uacService,
-      EventLogger eventLogger,
-      CaseService caseService,
-      UacQidLinkRepository uacQidLinkRepository) {
+      UacService uacService, EventLogger eventLogger, CaseService caseService) {
     this.uacService = uacService;
     this.eventLogger = eventLogger;
     this.caseService = caseService;
-    this.uacQidLinkRepository = uacQidLinkRepository;
   }
 
   public void processCCSPropertyListed(
       ResponseManagementEvent ccsPropertyListedEvent, OffsetDateTime messageTimestamp) {
     CCSPropertyDTO ccsProperty = ccsPropertyListedEvent.getPayload().getCcsProperty();
-    boolean isInvalidAddress = ccsProperty.getInvalidAddress() != null;
-    boolean hasOneOrMoreQids = ccsProperty.getUac() != null;
-    RefusalType refusal = null;
-
-    if (ccsProperty.getRefusal() != null) {
-      if (ccsProperty.getRefusal().getType() != RefusalTypeDTO.EXTRAORDINARY_REFUSAL
-          && ccsProperty.getRefusal().getType() != RefusalTypeDTO.HARD_REFUSAL) {
-        throw new RuntimeException("Unexpected refusal type" + ccsProperty.getRefusal().getType());
-      }
-
-      if (ccsProperty.getRefusal().getType() != null) {
-        refusal = RefusalType.valueOf(ccsProperty.getRefusal().getType().name());
-      }
-    }
 
     Case caze =
         caseService.createCCSCase(
-            ccsProperty.getCollectionCase().getId(),
-            ccsProperty.getSampleUnit(),
-            refusal,
-            isInvalidAddress);
+            ccsProperty.getCollectionCase().getId(), ccsProperty.getSampleUnit());
 
-    // always generate a new uac-qid pair even if linking existing pair, this is in case field
-    // worker has to visit address again and launch an EQ
     uacService.createUacQidLinkedToCCSCase(caze, ccsPropertyListedEvent.getEvent());
-    if (hasOneOrMoreQids) {
-      handleUacQidLinksForCase(ccsProperty.getUac(), caze);
-    } else {
-      sendActiveCCSCaseToField(caze);
+
+    if (ccsProperty.isInterviewRequired()) {
+      caseService.saveCaseAndEmitCaseCreatedEvent(
+          caze, buildMetadata(EventTypeDTO.CCS_ADDRESS_LISTED, ActionInstructionType.CREATE));
     }
 
     eventLogger.logCaseEvent(
@@ -76,24 +51,5 @@ public class CCSPropertyListedService {
         ccsPropertyListedEvent.getEvent(),
         convertObjectToJson(ccsProperty),
         messageTimestamp);
-  }
-
-  private void handleUacQidLinksForCase(List<UacDTO> qids, Case caze) {
-    for (UacDTO qid : qids) {
-      addUacLinkForQidAndCase(qid.getQuestionnaireId(), caze);
-    }
-  }
-
-  private void sendActiveCCSCaseToField(Case caze) {
-    if (caze.getRefusalReceived() == null && !caze.isAddressInvalid()) {
-      caseService.saveCaseAndEmitCaseCreatedEvent(
-          caze, buildMetadata(EventTypeDTO.CCS_ADDRESS_LISTED, ActionInstructionType.CREATE));
-    }
-  }
-
-  private void addUacLinkForQidAndCase(String qid, Case caze) {
-    UacQidLink uacQidLink = uacService.findByQid(qid);
-    uacQidLink.setCaze(caze);
-    uacQidLinkRepository.saveAndFlush(uacQidLink);
   }
 }
