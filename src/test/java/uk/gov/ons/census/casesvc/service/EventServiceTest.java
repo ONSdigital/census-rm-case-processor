@@ -83,7 +83,7 @@ public class EventServiceTest {
     when(caseService.saveCaseAndEmitCaseCreatedEvent(any(Case.class), any(Metadata.class)))
         .thenReturn(new PayloadDTO());
     Metadata expectedMetadata =
-        buildMetadata(EventTypeDTO.SAMPLE_LOADED, ActionInstructionType.CREATE);
+        buildMetadata(EventTypeDTO.CLERICAL_ADDRESS_RESOLUTION, ActionInstructionType.CREATE);
 
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
 
@@ -99,7 +99,7 @@ public class EventServiceTest {
             eq(caze),
             any(OffsetDateTime.class),
             eq(CREATE_BULK_CASE_SAMPLE_RECEIVED),
-            eq(EventType.SAMPLE_LOADED),
+            eq(EventType.CLERICAL_ADDRESS_RESOLUTION),
             any(EventDTO.class),
             eq(convertObjectToJson(createCaseSample)),
             eq(messageTimestamp));
