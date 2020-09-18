@@ -171,7 +171,7 @@ public class SampleReceiverIT {
           ActionInstructionType.CREATE,
           responseManagementEventToField.getPayload().getMetadata().getFieldDecision());
       assertEquals(
-          EventTypeDTO.SAMPLE_LOADED,
+          EventTypeDTO.CLERICAL_ADDRESS_RESOLUTION,
           responseManagementEventToField.getPayload().getMetadata().getCauseEventType());
 
       rhUacQueueSpy.checkMessageIsNotReceived(5);
