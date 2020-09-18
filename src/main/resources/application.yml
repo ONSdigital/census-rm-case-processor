@@ -48,6 +48,7 @@ queueconfig:
   field-case-updated-queue: case.field.update
   deactivate-uac-queue: case.deactivate-uac
   rm-case-updated-queue: case.rm.updated
+  rm-uninvalidate-address-queue: case.rm.unInvalidateAddress
   consumers: 50
   retry-attempts: 3
   retry-delay: 1000 #milliseconds

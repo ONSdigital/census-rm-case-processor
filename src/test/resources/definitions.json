@@ -227,6 +227,16 @@
       }
     },
     {
+      "name": "case.rm.unInvalidateAddress",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "delayedRedeliveryExchange",
+        "x-dead-letter-routing-key": "case.rm.unInvalidateAddress"
+      }
+    },
+    {
       "name": "delayedRedeliveryQueue",
       "vhost": "/",
       "durable": true,
