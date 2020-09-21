@@ -153,6 +153,7 @@ public class RmCaseUpdatedReceiverIT {
     caze.setUprn("Dummy");
     caze.setEstabUprn("Dummy");
     caze.setSurvey("CENSUS");
+    caze.setRefusalReceived(null);
     return caze;
   }
 
