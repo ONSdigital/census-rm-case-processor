@@ -276,7 +276,7 @@ public class AddressReceiverIT {
       addressTypeChangeDetails.setId(TEST_CASE_ID);
 
       // Update estab type and organisation name, delete address line 3
-      AddressTypeChangeAddress address = new AddressTypeChangeAddress();
+      ModifiedAddress address = new ModifiedAddress();
       address.setAddressType("SPG");
       address.setEstabType(Optional.of("MARINA"));
       address.setOrganisationName(Optional.of("Happy moorings"));

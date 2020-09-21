@@ -62,7 +62,7 @@ public class AddressTypeChangeServiceTest {
     addressTypeChangeDetails.setCeExpectedCapacity("20");
     addressTypeChangeDetails.setId(UUID.randomUUID());
 
-    AddressTypeChangeAddress address = new AddressTypeChangeAddress();
+    ModifiedAddress address = new ModifiedAddress();
     addressTypeChangeDetails.setAddress(address);
     address.setAddressType("SPG");
 
@@ -152,7 +152,7 @@ public class AddressTypeChangeServiceTest {
     addressTypeChangeDetails.setCeExpectedCapacity("20");
     addressTypeChangeDetails.setId(UUID.randomUUID());
 
-    AddressTypeChangeAddress address = new AddressTypeChangeAddress();
+    ModifiedAddress address = new ModifiedAddress();
     address.setAddressLine1(Optional.of("17"));
     address.setAddressLine2(Optional.of("Park Place"));
     address.setAddressLine3(Optional.of("Some village"));
@@ -252,7 +252,7 @@ public class AddressTypeChangeServiceTest {
     addressTypeChangeDetails.setCeExpectedCapacity("20");
     addressTypeChangeDetails.setId(UUID.randomUUID());
 
-    AddressTypeChangeAddress address = new AddressTypeChangeAddress();
+    ModifiedAddress address = new ModifiedAddress();
     address.setAddressLine2(Optional.empty());
     address.setAddressLine3(Optional.empty());
     address.setOrganisationName(Optional.empty());
@@ -370,7 +370,7 @@ public class AddressTypeChangeServiceTest {
     addressTypeChange.setCollectionCase(addressTypeChangeDetails);
     addressTypeChangeDetails.setId(UUID.randomUUID());
 
-    AddressTypeChangeAddress address = new AddressTypeChangeAddress();
+    ModifiedAddress address = new ModifiedAddress();
     addressTypeChangeDetails.setAddress(address);
     address.setAddressType("HH");
 
@@ -401,7 +401,7 @@ public class AddressTypeChangeServiceTest {
     addressTypeChange.setCollectionCase(addressTypeChangeDetails);
     addressTypeChangeDetails.setId(UUID.randomUUID());
 
-    AddressTypeChangeAddress address = new AddressTypeChangeAddress();
+    ModifiedAddress address = new ModifiedAddress();
     addressTypeChangeDetails.setAddress(address);
     address.setAddressType("SPG");
 
@@ -432,7 +432,7 @@ public class AddressTypeChangeServiceTest {
     addressTypeChange.setCollectionCase(addressTypeChangeDetails);
     addressTypeChangeDetails.setId(UUID.randomUUID());
 
-    AddressTypeChangeAddress address = new AddressTypeChangeAddress();
+    ModifiedAddress address = new ModifiedAddress();
     addressTypeChangeDetails.setAddress(address);
     address.setAddressType("CE");
 
@@ -463,7 +463,7 @@ public class AddressTypeChangeServiceTest {
     addressTypeChange.setCollectionCase(addressTypeChangeDetails);
     addressTypeChangeDetails.setId(UUID.randomUUID());
 
-    AddressTypeChangeAddress address = new AddressTypeChangeAddress();
+    ModifiedAddress address = new ModifiedAddress();
     addressTypeChangeDetails.setAddress(address);
     address.setAddressType("SPG");
     address.setAddressLine1(Optional.empty());
@@ -495,7 +495,7 @@ public class AddressTypeChangeServiceTest {
     addressTypeChange.setCollectionCase(addressTypeChangeDetails);
     addressTypeChangeDetails.setId(UUID.randomUUID());
 
-    AddressTypeChangeAddress address = new AddressTypeChangeAddress();
+    ModifiedAddress address = new ModifiedAddress();
     addressTypeChangeDetails.setAddress(address);
     address.setAddressType("SPG");
     address.setAddressLine1(Optional.of(""));
@@ -527,7 +527,7 @@ public class AddressTypeChangeServiceTest {
     addressTypeChange.setCollectionCase(addressTypeChangeDetails);
     addressTypeChangeDetails.setId(UUID.randomUUID());
 
-    AddressTypeChangeAddress address = new AddressTypeChangeAddress();
+    ModifiedAddress address = new ModifiedAddress();
     addressTypeChangeDetails.setAddress(address);
     address.setAddressType("SPG");
     address.setEstabType(Optional.of(""));
@@ -559,7 +559,7 @@ public class AddressTypeChangeServiceTest {
     addressTypeChange.setCollectionCase(addressTypeChangeDetails);
     addressTypeChangeDetails.setId(UUID.randomUUID());
 
-    AddressTypeChangeAddress address = new AddressTypeChangeAddress();
+    ModifiedAddress address = new ModifiedAddress();
     addressTypeChangeDetails.setAddress(address);
     address.setAddressType("SPG");
     address.setEstabType(Optional.empty());
@@ -591,7 +591,7 @@ public class AddressTypeChangeServiceTest {
     addressTypeChange.setCollectionCase(addressTypeChangeDetails);
     addressTypeChangeDetails.setId(UUID.randomUUID());
 
-    AddressTypeChangeAddress address = new AddressTypeChangeAddress();
+    ModifiedAddress address = new ModifiedAddress();
     addressTypeChangeDetails.setAddress(address);
     address.setAddressType("SPG");
     address.setEstabType(Optional.of("NOT_A_VALID_ESTAB_TYPE"));

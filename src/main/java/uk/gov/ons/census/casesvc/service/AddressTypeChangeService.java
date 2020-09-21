@@ -1,5 +1,6 @@
 package uk.gov.ons.census.casesvc.service;
 
+import static uk.gov.ons.census.casesvc.utility.AddressModificationValidator.validateAddressModification;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.time.OffsetDateTime;
@@ -9,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.AddressTypeChange;
-import uk.gov.ons.census.casesvc.model.dto.AddressTypeChangeAddress;
 import uk.gov.ons.census.casesvc.model.dto.AddressTypeChangeDetails;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -47,7 +47,7 @@ public class AddressTypeChangeService {
     if (oldCase.getCaseType().equals("HI")) {
       throw new RuntimeException("Cannot change case of type HI");
     }
-    validateModification(addressTypeChange.getCollectionCase().getAddress());
+    validateAddressModification(estabTypes, addressTypeChange.getCollectionCase().getAddress());
 
     invalidateOldCase(responseManagementEvent, messageTimestamp, addressTypeChange, oldCase);
 
@@ -122,7 +122,7 @@ public class AddressTypeChangeService {
           Integer.parseInt(addressTypeChangeDetails.getCeExpectedCapacity()));
     }
 
-    // Note on deserializing Optionals from JSON:
+    // Note on deserialized Optionals from JSON:
     // An Optional.empty value implies we received a null value for that field in the JSON
     // A null pointer value implies that field was not present in the JSON we received at all
 
@@ -184,28 +184,6 @@ public class AddressTypeChangeService {
       return "U";
     } else {
       throw new RuntimeException("Invalid Case Type change");
-    }
-  }
-
-  private void validateModification(AddressTypeChangeAddress address) {
-    if (address.getAddressLine1() != null && !address.getAddressLine1().isPresent()) {
-      throw new RuntimeException("Mandatory address line 1 cannot be set to null");
-    }
-
-    if (address.getAddressLine1() != null
-        && address.getAddressLine1().isPresent()
-        && StringUtils.isEmpty(address.getAddressLine1().get())) {
-      throw new RuntimeException("Mandatory address line 1 is empty");
-    }
-
-    if (address.getEstabType() != null && !address.getEstabType().isPresent()) {
-      throw new RuntimeException("Mandatory estab type cannot be set to null");
-    }
-
-    if (address.getEstabType() != null
-        && address.getEstabType().isPresent()
-        && !estabTypes.contains(address.getEstabType().get())) {
-      throw new RuntimeException("Estab Type not valid");
     }
   }
 }

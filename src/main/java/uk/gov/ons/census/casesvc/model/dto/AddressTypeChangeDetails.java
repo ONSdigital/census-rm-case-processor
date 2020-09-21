@@ -7,5 +7,5 @@ import lombok.Data;
 public class AddressTypeChangeDetails {
   private UUID id;
   private String ceExpectedCapacity;
-  private AddressTypeChangeAddress address;
+  private ModifiedAddress address;
 }
