@@ -65,7 +65,7 @@ public class NewAddressReportedServiceTest {
     address.setRegion("W");
     address.setAddressLevel("E");
     address.setAddressType("HH");
-    address.setCeSecureEstablishment(false);
+    address.setSecureType(false);
     collectionCase.setAddress(address);
 
     NewAddress newAddress = new NewAddress();
@@ -125,7 +125,7 @@ public class NewAddressReportedServiceTest {
     address.setRegion("W");
     address.setAddressLevel("E");
     address.setAddressType("CE");
-    address.setCeSecureEstablishment(true);
+    address.setSecureType(true);
 
     collectionCase.setAddress(address);
 
@@ -188,7 +188,7 @@ public class NewAddressReportedServiceTest {
         .getNewAddress()
         .getCollectionCase()
         .getAddress()
-        .setCeSecureEstablishment(true);
+        .setSecureType(true);
     newAddressEvent
         .getPayload()
         .getNewAddress()
@@ -240,7 +240,7 @@ public class NewAddressReportedServiceTest {
     address.setRegion("W");
     address.setAddressLevel("E");
     address.setAddressType("CE");
-    address.setCeSecureEstablishment(false);
+    address.setSecureType(false);
 
     collectionCase.setAddress(address);
 
@@ -303,7 +303,7 @@ public class NewAddressReportedServiceTest {
         .getNewAddress()
         .getCollectionCase()
         .getAddress()
-        .setCeSecureEstablishment(false);
+        .setSecureType(false);
     newAddressEvent
         .getPayload()
         .getNewAddress()
@@ -977,7 +977,7 @@ public class NewAddressReportedServiceTest {
     expectedCase.setCeExpectedCapacity(collectionCase.getCeExpectedCapacity());
 
     CaseMetadata caseMetadata = new CaseMetadata();
-    caseMetadata.setSecureEstablishment(collectionCase.getAddress().isCeSecureEstablishment());
+    caseMetadata.setSecureEstablishment(collectionCase.getAddress().isSecureType());
     expectedCase.setMetadata(caseMetadata);
 
     expectedCase.setActionPlanId(EXPECTED_ACTION_PLAN_ID);

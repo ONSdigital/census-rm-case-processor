@@ -321,8 +321,7 @@ public class NewAddressReportedService {
     newCaseMetadata.setSecureEstablishment(false);
 
     if (newCase.getCaseType().equals("CE")) {
-      newCaseMetadata.setSecureEstablishment(
-          newCollectionCase.getAddress().isCeSecureEstablishment());
+      newCaseMetadata.setSecureEstablishment(newCollectionCase.getAddress().isSecureType());
       return newCaseMetadata;
     }
 
