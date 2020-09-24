@@ -275,9 +275,13 @@ public class AddressReceiverIT {
       addressTypeChangeDetails.setCeExpectedCapacity("20");
       addressTypeChangeDetails.setId(TEST_CASE_ID);
 
-      Address address = new Address();
-      addressTypeChangeDetails.setAddress(address);
+      // Update estab type and organisation name, delete address line 3
+      ModifiedAddress address = new ModifiedAddress();
       address.setAddressType("SPG");
+      address.setEstabType(Optional.of("MARINA"));
+      address.setOrganisationName(Optional.of("Happy moorings"));
+      address.setAddressLine3(Optional.empty());
+      addressTypeChangeDetails.setAddress(address);
 
       String json = convertObjectToJson(rme);
       Message message =
@@ -328,17 +332,34 @@ public class AddressReceiverIT {
         assert (false);
       }
 
-      assertThat(oldCaseEvent.getPayload().getCollectionCase().getAddressInvalid()).isTrue();
-      assertThat(newCaseEvent.getPayload().getCollectionCase().getAddressInvalid()).isFalse();
+      // Check the old case is invalidated in the updated event and database
       assertThat(oldCaseEvent.getPayload().getCollectionCase().getId()).isEqualTo(TEST_CASE_ID);
-      assertThat(newCaseEvent.getPayload().getCollectionCase().getId()).isEqualTo(NEW_TEST_CASE_ID);
+      assertThat(oldCaseEvent.getEvent().getType()).isEqualTo(CASE_UPDATED);
+      assertThat(oldCaseEvent.getPayload().getCollectionCase().getAddressInvalid()).isTrue();
+      Case oldCase = caseRepository.findById(TEST_CASE_ID).get();
+      assertThat(oldCase.isAddressInvalid()).isTrue();
 
+      // Check new case created event is emitted
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getId()).isEqualTo(NEW_TEST_CASE_ID);
+      assertThat(newCaseEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_CREATED);
+      assertThat(newCaseEvent.getPayload().getCollectionCase().isSkeleton()).isTrue();
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getAddressInvalid()).isFalse();
+
+      // Check modified and deleted fields on the new case on emitted event
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getAddressLine3())
+          .isNull();
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getOrganisationName())
+          .isEqualTo(address.getOrganisationName().get());
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getEstabType())
+          .isEqualTo(address.getEstabType().get());
+      assertThat(newCaseEvent.getPayload().getCollectionCase().getCeExpectedCapacity())
+          .isEqualTo(20);
+
+      // Check fields copied from original case on emitted event
       assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getAddressLine1())
           .isEqualTo(caze.getAddressLine1());
       assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getAddressLine2())
           .isEqualTo(caze.getAddressLine2());
-      assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getAddressLine3())
-          .isEqualTo(caze.getAddressLine3());
       assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getRegion())
           .isEqualTo(caze.getRegion());
       assertThat(newCaseEvent.getPayload().getCollectionCase().getCollectionExerciseId())
@@ -349,8 +370,6 @@ public class AddressReceiverIT {
           .isEqualTo(caze.getSurvey());
       assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getUprn())
           .isEqualTo(caze.getUprn());
-      assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getOrganisationName())
-          .isEqualTo(caze.getOrganisationName());
       assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getTownName())
           .isEqualTo(caze.getTownName());
       assertThat(newCaseEvent.getPayload().getCollectionCase().getAddress().getPostcode())
@@ -368,26 +387,24 @@ public class AddressReceiverIT {
       assertThat(newCaseEvent.getPayload().getCollectionCase().getHtcDigital())
           .isEqualTo(caze.getHtcDigital());
 
-      assertThat(oldCaseEvent.getEvent().getType()).isEqualTo(CASE_UPDATED);
-      assertThat(newCaseEvent.getEvent().getType()).isEqualTo(EventTypeDTO.CASE_CREATED);
-
-      assertThat(newCaseEvent.getPayload().getCollectionCase().getCeExpectedCapacity())
-          .isEqualTo(20);
-      assertThat(newCaseEvent.getPayload().getCollectionCase().isSkeleton()).isTrue();
-
-      Case oldCase = caseRepository.findById(TEST_CASE_ID).get();
-      assertThat(oldCase.isAddressInvalid()).isTrue();
-
+      // Check the new case in the database
       Case newCase = caseRepository.findById(NEW_TEST_CASE_ID).get();
+      assertThat(newCase.isSkeleton()).isTrue();
+
+      // Check the new case modified/deleted fields
+      assertThat(newCase.getAddressLine3()).isNull();
+      assertThat(newCase.getOrganisationName()).isEqualTo(address.getOrganisationName().get());
+      assertThat(newCase.getEstabType()).isEqualTo(address.getEstabType().get());
+      assertThat(newCase.getCeExpectedCapacity()).isEqualTo(20);
+
+      // Check the fields copied from the original case
       assertThat(newCase.getAddressLine1()).isEqualTo(caze.getAddressLine1());
       assertThat(newCase.getAddressLine2()).isEqualTo(caze.getAddressLine2());
-      assertThat(newCase.getAddressLine3()).isEqualTo(caze.getAddressLine3());
       assertThat(newCase.getRegion()).isEqualTo(caze.getRegion());
       assertThat(newCase.getCollectionExerciseId()).isEqualTo(caze.getCollectionExerciseId());
       assertThat(newCase.getActionPlanId()).isEqualTo(caze.getActionPlanId());
       assertThat(newCase.getSurvey()).isEqualTo(caze.getSurvey());
       assertThat(newCase.getUprn()).isEqualTo(caze.getUprn());
-      assertThat(newCase.getOrganisationName()).isEqualTo(caze.getOrganisationName());
       assertThat(newCase.getTownName()).isEqualTo(caze.getTownName());
       assertThat(newCase.getPostcode()).isEqualTo(caze.getPostcode());
       assertThat(newCase.getLatitude()).isEqualTo(caze.getLatitude());
@@ -398,8 +415,6 @@ public class AddressReceiverIT {
       assertThat(newCase.getLad()).isEqualTo(caze.getLad());
       assertThat(newCase.getHtcWillingness()).isEqualTo(caze.getHtcWillingness());
       assertThat(newCase.getHtcDigital()).isEqualTo(caze.getHtcDigital());
-      assertThat(newCase.getCeExpectedCapacity()).isEqualTo(20);
-      assertThat(newCase.isSkeleton()).isTrue();
 
       List<Event> events = eventRepository.findAll();
       assertThat(events.size()).isEqualTo(3);

@@ -3,29 +3,27 @@ package uk.gov.ons.census.casesvc.service;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.time.OffsetDateTime;
-import java.util.Set;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.AddressModification;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
+import uk.gov.ons.census.casesvc.utility.AddressModificationValidator;
 
 @Service
 public class AddressModificationService {
   private final CaseService caseService;
   private final EventLogger eventLogger;
-  private final Set<String> estabTypes;
+  private final AddressModificationValidator addressModificationValidator;
 
   public AddressModificationService(
       CaseService caseService,
       EventLogger eventLogger,
-      @Value("${estabtypes}") Set<String> estabTypes) {
+      AddressModificationValidator addressModificationValidator) {
     this.caseService = caseService;
     this.eventLogger = eventLogger;
-    this.estabTypes = estabTypes;
+    this.addressModificationValidator = addressModificationValidator;
   }
 
   public void processMessage(
@@ -35,7 +33,25 @@ public class AddressModificationService {
 
     Case caze = caseService.getCaseByCaseId(addressModification.getCollectionCase().getId());
 
-    validate(addressModification, caze);
+    addressModificationValidator.validate(addressModification.getNewAddress());
+
+    modifyCaseAddress(caze, addressModification);
+    caseService.saveCaseAndEmitCaseUpdatedEvent(caze, null);
+
+    eventLogger.logCaseEvent(
+        caze,
+        responseManagementEvent.getEvent().getDateTime(),
+        "Address modified",
+        EventType.ADDRESS_MODIFIED,
+        responseManagementEvent.getEvent(),
+        convertObjectToJson(addressModification),
+        messageTimestamp);
+  }
+
+  private void modifyCaseAddress(Case caze, AddressModification addressModification) {
+    // Note on deserialized Optionals from JSON:
+    // An Optional.empty value implies we received a null value for that field in the JSON
+    // A null pointer value implies that field was not present in the JSON we received at all
 
     if (addressModification.getNewAddress().getEstabType() != null
         && addressModification.getNewAddress().getEstabType().isPresent()) {
@@ -69,41 +85,6 @@ public class AddressModificationService {
       } else {
         caze.setOrganisationName(null);
       }
-    }
-
-    caseService.saveCaseAndEmitCaseUpdatedEvent(caze, null);
-
-    eventLogger.logCaseEvent(
-        caze,
-        responseManagementEvent.getEvent().getDateTime(),
-        "Address modified",
-        EventType.ADDRESS_MODIFIED,
-        responseManagementEvent.getEvent(),
-        convertObjectToJson(addressModification),
-        messageTimestamp);
-  }
-
-  private void validate(AddressModification addressModification, Case caze) {
-    if (addressModification.getNewAddress().getAddressLine1() != null
-        && !addressModification.getNewAddress().getAddressLine1().isPresent()) {
-      throw new RuntimeException("Mandatory address line 1 cannot be set to null");
-    }
-
-    if (addressModification.getNewAddress().getAddressLine1() != null
-        && addressModification.getNewAddress().getAddressLine1().isPresent()
-        && StringUtils.isEmpty(addressModification.getNewAddress().getAddressLine1().get())) {
-      throw new RuntimeException("Mandatory address line 1 is empty");
-    }
-
-    if (addressModification.getNewAddress().getEstabType() != null
-        && !addressModification.getNewAddress().getEstabType().isPresent()) {
-      throw new RuntimeException("Mandatory estab type cannot be set to null");
-    }
-
-    if (addressModification.getNewAddress().getEstabType() != null
-        && addressModification.getNewAddress().getEstabType().isPresent()
-        && !estabTypes.contains(addressModification.getNewAddress().getEstabType().get())) {
-      throw new RuntimeException("Estab Type not valid");
     }
   }
 }
