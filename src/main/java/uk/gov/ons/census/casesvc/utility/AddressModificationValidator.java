@@ -1,12 +1,11 @@
 package uk.gov.ons.census.casesvc.utility;
 
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import uk.gov.ons.census.casesvc.exception.ValidationException;
 import uk.gov.ons.census.casesvc.model.dto.ModifiedAddress;
-
-import java.util.Set;
 
 @Component
 public class AddressModificationValidator {
@@ -18,7 +17,8 @@ public class AddressModificationValidator {
   }
 
   public void validate(ModifiedAddress modifiedAddress) {
-    if (modifiedAddress.getAddressLine1() != null && !modifiedAddress.getAddressLine1().isPresent()) {
+    if (modifiedAddress.getAddressLine1() != null
+        && !modifiedAddress.getAddressLine1().isPresent()) {
       throw new ValidationException("Mandatory address line 1 cannot be set to null");
     }
 

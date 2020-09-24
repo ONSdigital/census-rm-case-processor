@@ -1,5 +1,8 @@
 package uk.gov.ons.census.casesvc.utility;
 
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -7,10 +10,6 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.exception.ValidationException;
 import uk.gov.ons.census.casesvc.model.dto.ModifiedAddress;
-
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AddressModificationValidatorTest {
