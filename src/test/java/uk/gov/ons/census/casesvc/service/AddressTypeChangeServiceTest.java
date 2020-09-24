@@ -23,6 +23,7 @@ import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.*;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
+import uk.gov.ons.census.casesvc.utility.AddressModificationValidator;
 import uk.gov.ons.census.casesvc.utility.JsonHelper;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -31,13 +32,7 @@ public class AddressTypeChangeServiceTest {
   @Mock private CaseService caseService;
   @Mock private EventLogger eventLogger;
   @Mock private InvalidAddressService invalidAddressService;
-  @Spy private static Set<String> estabTypes;
-
-  static {
-    estabTypes = new HashSet<>();
-    estabTypes.add("HOSPITAL");
-    estabTypes.add("HOUSEHOLD");
-  }
+  @Mock private AddressModificationValidator addressModificationValidator;
 
   @InjectMocks private AddressTypeChangeService underTest;
 
@@ -438,166 +433,6 @@ public class AddressTypeChangeServiceTest {
 
     Case oldCase = easyRandom.nextObject(Case.class);
     oldCase.setCaseType("CE");
-    oldCase.setCaseId(UUID.randomUUID());
-    when(caseService.getCaseByCaseId(any())).thenReturn(oldCase);
-
-    // When, then expected exception is thrown
-    underTest.processMessage(rme, null);
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testCannotChangeAddressLine1ToNull() {
-    // Given
-    ResponseManagementEvent rme = new ResponseManagementEvent();
-
-    EventDTO event = new EventDTO();
-    rme.setEvent(event);
-
-    PayloadDTO payload = new PayloadDTO();
-    rme.setPayload(payload);
-
-    AddressTypeChange addressTypeChange = new AddressTypeChange();
-    payload.setAddressTypeChange(addressTypeChange);
-
-    AddressTypeChangeDetails addressTypeChangeDetails = new AddressTypeChangeDetails();
-    addressTypeChange.setCollectionCase(addressTypeChangeDetails);
-    addressTypeChangeDetails.setId(UUID.randomUUID());
-
-    ModifiedAddress address = new ModifiedAddress();
-    addressTypeChangeDetails.setAddress(address);
-    address.setAddressType("SPG");
-    address.setAddressLine1(Optional.empty());
-
-    Case oldCase = easyRandom.nextObject(Case.class);
-    oldCase.setCaseType("HH");
-    oldCase.setCaseId(UUID.randomUUID());
-    when(caseService.getCaseByCaseId(any())).thenReturn(oldCase);
-
-    // When, then expected exception is thrown
-    underTest.processMessage(rme, null);
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testCannotChangeAddressLine1ToEmptyString() {
-    // Given
-    ResponseManagementEvent rme = new ResponseManagementEvent();
-
-    EventDTO event = new EventDTO();
-    rme.setEvent(event);
-
-    PayloadDTO payload = new PayloadDTO();
-    rme.setPayload(payload);
-
-    AddressTypeChange addressTypeChange = new AddressTypeChange();
-    payload.setAddressTypeChange(addressTypeChange);
-
-    AddressTypeChangeDetails addressTypeChangeDetails = new AddressTypeChangeDetails();
-    addressTypeChange.setCollectionCase(addressTypeChangeDetails);
-    addressTypeChangeDetails.setId(UUID.randomUUID());
-
-    ModifiedAddress address = new ModifiedAddress();
-    addressTypeChangeDetails.setAddress(address);
-    address.setAddressType("SPG");
-    address.setAddressLine1(Optional.of(""));
-
-    Case oldCase = easyRandom.nextObject(Case.class);
-    oldCase.setCaseType("HH");
-    oldCase.setCaseId(UUID.randomUUID());
-    when(caseService.getCaseByCaseId(any())).thenReturn(oldCase);
-
-    // When, then expected exception is thrown
-    underTest.processMessage(rme, null);
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testCannotChangeEstabTypeToEmptyString() {
-    // Given
-    ResponseManagementEvent rme = new ResponseManagementEvent();
-
-    EventDTO event = new EventDTO();
-    rme.setEvent(event);
-
-    PayloadDTO payload = new PayloadDTO();
-    rme.setPayload(payload);
-
-    AddressTypeChange addressTypeChange = new AddressTypeChange();
-    payload.setAddressTypeChange(addressTypeChange);
-
-    AddressTypeChangeDetails addressTypeChangeDetails = new AddressTypeChangeDetails();
-    addressTypeChange.setCollectionCase(addressTypeChangeDetails);
-    addressTypeChangeDetails.setId(UUID.randomUUID());
-
-    ModifiedAddress address = new ModifiedAddress();
-    addressTypeChangeDetails.setAddress(address);
-    address.setAddressType("SPG");
-    address.setEstabType(Optional.of(""));
-
-    Case oldCase = easyRandom.nextObject(Case.class);
-    oldCase.setCaseType("HH");
-    oldCase.setCaseId(UUID.randomUUID());
-    when(caseService.getCaseByCaseId(any())).thenReturn(oldCase);
-
-    // When, then expected exception is thrown
-    underTest.processMessage(rme, null);
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testCannotChangeEstabTypeToNull() {
-    // Given
-    ResponseManagementEvent rme = new ResponseManagementEvent();
-
-    EventDTO event = new EventDTO();
-    rme.setEvent(event);
-
-    PayloadDTO payload = new PayloadDTO();
-    rme.setPayload(payload);
-
-    AddressTypeChange addressTypeChange = new AddressTypeChange();
-    payload.setAddressTypeChange(addressTypeChange);
-
-    AddressTypeChangeDetails addressTypeChangeDetails = new AddressTypeChangeDetails();
-    addressTypeChange.setCollectionCase(addressTypeChangeDetails);
-    addressTypeChangeDetails.setId(UUID.randomUUID());
-
-    ModifiedAddress address = new ModifiedAddress();
-    addressTypeChangeDetails.setAddress(address);
-    address.setAddressType("SPG");
-    address.setEstabType(Optional.empty());
-
-    Case oldCase = easyRandom.nextObject(Case.class);
-    oldCase.setCaseType("HH");
-    oldCase.setCaseId(UUID.randomUUID());
-    when(caseService.getCaseByCaseId(any())).thenReturn(oldCase);
-
-    // When, then expected exception is thrown
-    underTest.processMessage(rme, null);
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testCannotChangeEstabTypeToInvalidValue() {
-    // Given
-    ResponseManagementEvent rme = new ResponseManagementEvent();
-
-    EventDTO event = new EventDTO();
-    rme.setEvent(event);
-
-    PayloadDTO payload = new PayloadDTO();
-    rme.setPayload(payload);
-
-    AddressTypeChange addressTypeChange = new AddressTypeChange();
-    payload.setAddressTypeChange(addressTypeChange);
-
-    AddressTypeChangeDetails addressTypeChangeDetails = new AddressTypeChangeDetails();
-    addressTypeChange.setCollectionCase(addressTypeChangeDetails);
-    addressTypeChangeDetails.setId(UUID.randomUUID());
-
-    ModifiedAddress address = new ModifiedAddress();
-    addressTypeChangeDetails.setAddress(address);
-    address.setAddressType("SPG");
-    address.setEstabType(Optional.of("NOT_A_VALID_ESTAB_TYPE"));
-
-    Case oldCase = easyRandom.nextObject(Case.class);
-    oldCase.setCaseType("HH");
     oldCase.setCaseId(UUID.randomUUID());
     when(caseService.getCaseByCaseId(any())).thenReturn(oldCase);
 

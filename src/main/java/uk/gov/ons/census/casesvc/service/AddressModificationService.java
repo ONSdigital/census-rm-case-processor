@@ -1,31 +1,30 @@
 package uk.gov.ons.census.casesvc.service;
 
-import static uk.gov.ons.census.casesvc.utility.AddressModificationValidator.validateAddressModification;
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
-
-import java.time.OffsetDateTime;
-import java.util.Set;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.AddressModification;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
+import uk.gov.ons.census.casesvc.utility.AddressModificationValidator;
+
+import java.time.OffsetDateTime;
+
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 @Service
 public class AddressModificationService {
   private final CaseService caseService;
   private final EventLogger eventLogger;
-  private final Set<String> estabTypes;
+  private final AddressModificationValidator addressModificationValidator;
 
   public AddressModificationService(
       CaseService caseService,
       EventLogger eventLogger,
-      @Value("${estabtypes}") Set<String> estabTypes) {
+      AddressModificationValidator addressModificationValidator) {
     this.caseService = caseService;
     this.eventLogger = eventLogger;
-    this.estabTypes = estabTypes;
+    this.addressModificationValidator = addressModificationValidator;
   }
 
   public void processMessage(
@@ -35,7 +34,7 @@ public class AddressModificationService {
 
     Case caze = caseService.getCaseByCaseId(addressModification.getCollectionCase().getId());
 
-    validateAddressModification(estabTypes, addressModification.getNewAddress());
+    addressModificationValidator.validate(addressModification.getNewAddress());
 
     modifyCaseAddress(caze, addressModification);
     caseService.saveCaseAndEmitCaseUpdatedEvent(caze, null);

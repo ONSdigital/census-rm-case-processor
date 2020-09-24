@@ -27,21 +27,16 @@ import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
+import uk.gov.ons.census.casesvc.utility.AddressModificationValidator;
 import uk.gov.ons.census.casesvc.utility.JsonHelper;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AddressModificationServiceTest {
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
-  @Spy private static Set<String> estabTypes;
-
-  static {
-    estabTypes = new HashSet<>();
-    estabTypes.add("HOSPITAL");
-    estabTypes.add("HOUSEHOLD");
-  }
 
   @Mock private CaseService caseService;
   @Mock private EventLogger eventLogger;
+  @Mock private AddressModificationValidator addressModificationValidator;
 
   @InjectMocks private AddressModificationService underTest;
 
@@ -199,61 +194,6 @@ public class AddressModificationServiceTest {
             rme.getEvent(),
             JsonHelper.convertObjectToJson(rme.getPayload().getAddressModification()),
             messageTimestamp);
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testProcessMessageAddressLine1Null() {
-    // Given
-    ResponseManagementEvent rme = getEvent();
-    rme.getPayload().getAddressModification().getNewAddress().setAddressLine1(Optional.empty());
-    OffsetDateTime messageTimestamp = OffsetDateTime.now();
-
-    // When
-    underTest.processMessage(rme, messageTimestamp);
-
-    // Then
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testProcessMessageAddressLine1Empty() {
-    // Given
-    ResponseManagementEvent rme = getEvent();
-    rme.getPayload().getAddressModification().getNewAddress().setAddressLine1(Optional.of(" "));
-    OffsetDateTime messageTimestamp = OffsetDateTime.now();
-
-    // When
-    underTest.processMessage(rme, messageTimestamp);
-
-    // Then
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testProcessMessageEstabTypeInvalid() {
-    // Given
-    ResponseManagementEvent rme = getEvent();
-    rme.getPayload()
-        .getAddressModification()
-        .getNewAddress()
-        .setEstabType(Optional.of("SPACE STATION"));
-    OffsetDateTime messageTimestamp = OffsetDateTime.now();
-
-    // When
-    underTest.processMessage(rme, messageTimestamp);
-
-    // Then
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testProcessMessageEstabTypeNull() {
-    // Given
-    ResponseManagementEvent rme = getEvent();
-    rme.getPayload().getAddressModification().getNewAddress().setEstabType(Optional.empty());
-    OffsetDateTime messageTimestamp = OffsetDateTime.now();
-
-    // When
-    underTest.processMessage(rme, messageTimestamp);
-
-    // Then
   }
 
   private ResponseManagementEvent getEvent() {

@@ -1,11 +1,5 @@
 package uk.gov.ons.census.casesvc.service;
 
-import static uk.gov.ons.census.casesvc.utility.AddressModificationValidator.validateAddressModification;
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
-
-import java.time.OffsetDateTime;
-import java.util.Set;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
@@ -14,23 +8,27 @@ import uk.gov.ons.census.casesvc.model.dto.AddressTypeChangeDetails;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
+import uk.gov.ons.census.casesvc.utility.AddressModificationValidator;
+
+import java.time.OffsetDateTime;
+
+import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 @Service
 public class AddressTypeChangeService {
   private final CaseService caseService;
   private final EventLogger eventLogger;
   private final InvalidAddressService invalidAddressService;
-  private final Set<String> estabTypes;
+  private final AddressModificationValidator addressModificationValidator;
 
   public AddressTypeChangeService(
       CaseService caseService,
       EventLogger eventLogger,
-      InvalidAddressService invalidAddressService,
-      @Value("${estabtypes}") Set<String> estabTypes) {
+      InvalidAddressService invalidAddressService,AddressModificationValidator addressModificationValidator) {
     this.caseService = caseService;
     this.eventLogger = eventLogger;
     this.invalidAddressService = invalidAddressService;
-    this.estabTypes = estabTypes;
+    this.addressModificationValidator = addressModificationValidator;
   }
 
   public void processMessage(
@@ -47,7 +45,7 @@ public class AddressTypeChangeService {
     if (oldCase.getCaseType().equals("HI")) {
       throw new RuntimeException("Cannot change case of type HI");
     }
-    validateAddressModification(estabTypes, addressTypeChange.getCollectionCase().getAddress());
+    addressModificationValidator.validate(addressTypeChange.getCollectionCase().getAddress());
 
     invalidateOldCase(responseManagementEvent, messageTimestamp, addressTypeChange, oldCase);
 
