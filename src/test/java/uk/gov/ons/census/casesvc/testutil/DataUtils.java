@@ -328,4 +328,19 @@ public class DataUtils {
 
     return parentNode;
   }
+
+  public static Case getCaseThatWillPassFieldWorkHelper() {
+    Case caze = new Case();
+    caze.setCaseType("CE");
+    caze.setRegion("E");
+    caze.setEstabType("House Of ill repute");
+    caze.setFieldOfficerId("007");
+    caze.setFieldCoordinatorId("M");
+    caze.setOa("OA OA, OA OA");
+    caze.setLatitude("37.2431");
+    caze.setLongitude("115.7930");
+    caze.setEstabUprn("NrpUbatse");
+
+    return caze;
+  }
 }

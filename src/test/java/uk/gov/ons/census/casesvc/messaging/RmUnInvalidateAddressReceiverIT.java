@@ -5,6 +5,7 @@ import static uk.gov.ons.census.casesvc.model.dto.ActionInstructionType.UPDATE;
 import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.CASE_UPDATED;
 import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.RM_UNINVALIDATE_ADDRESS;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToObject;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getCaseThatWillPassFieldWorkHelper;
 import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.util.List;
@@ -66,7 +67,7 @@ public class RmUnInvalidateAddressReceiverIT {
   public void testHappyPath() throws Exception {
     try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
       // Given
-      Case invalidAddressCase = new Case();
+      Case invalidAddressCase = getCaseThatWillPassFieldWorkHelper();
       UUID testCaseId = UUID.randomUUID();
 
       invalidAddressCase.setCaseId(testCaseId);

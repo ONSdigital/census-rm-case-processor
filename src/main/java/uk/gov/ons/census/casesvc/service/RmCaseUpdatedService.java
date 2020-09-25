@@ -50,7 +50,7 @@ public class RmCaseUpdatedService {
     updatedCase.setSkeleton(false);
 
     Metadata eventMetadata = null;
-    if (shouldSendCaseToField(updatedCase, rme.getEvent().getChannel())) {
+    if (shouldSendCaseToField(updatedCase)) {
       eventMetadata = new Metadata();
       eventMetadata.setCauseEventType(rme.getEvent().getType());
       eventMetadata.setFieldDecision(ActionInstructionType.CREATE);
