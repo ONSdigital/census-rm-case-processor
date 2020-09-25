@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Data
 public class CreateCaseSample {
+  private UUID caseId;
   private String uprn;
   private String estabUprn;
   private String addressType;

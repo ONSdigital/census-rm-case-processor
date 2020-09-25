@@ -37,6 +37,11 @@ public class EventService {
 
   public void processSampleReceivedMessage(
       CreateCaseSample createCaseSample, OffsetDateTime messageTimestamp) {
+
+    if (caseService.checkCaseExists(createCaseSample.getCaseId())) {
+      return;
+    }
+
     Case caze = caseService.saveCaseSample(createCaseSample);
     int questionnaireType =
         QuestionnaireTypeHelper.calculateQuestionnaireType(

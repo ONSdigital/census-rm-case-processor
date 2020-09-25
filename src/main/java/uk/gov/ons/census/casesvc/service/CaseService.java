@@ -88,7 +88,7 @@ public class CaseService {
   public Case saveCaseSample(CreateCaseSample createCaseSample) {
     Case caze = mapperFacade.map(createCaseSample, Case.class);
     caze.setCaseType(createCaseSample.getAddressType());
-    caze.setCaseId(UUID.randomUUID());
+    caze.setCaseId(createCaseSample.getCaseId());
     caze.setReceiptReceived(false);
     caze.setSurvey(CENSUS_SURVEY);
     caze.setCeActualResponses(0);
@@ -324,5 +324,9 @@ public class CaseService {
   public void unreceiptCase(Case caze, Metadata metadata) {
     caze.setReceiptReceived(false);
     saveCaseAndEmitCaseUpdatedEvent(caze, metadata);
+  }
+
+  public boolean checkCaseExists(UUID caseId) {
+    return caseRepository.existsById(caseId);
   }
 }
