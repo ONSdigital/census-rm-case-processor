@@ -39,6 +39,8 @@ public class RmCaseUpdatedService {
     RmCaseUpdated rmCaseUpdated = rme.getPayload().getRmCaseUpdated();
     Case updatedCase = caseService.getCaseByCaseId(rmCaseUpdated.getCaseId());
 
+    boolean oaSet = updatedCase.getOa() != null;
+
     validateRmCaseUpdated(rmCaseUpdated);
 
     updateCase(updatedCase, rmCaseUpdated);
@@ -53,7 +55,12 @@ public class RmCaseUpdatedService {
     if (shouldSendCaseToField(updatedCase, rme.getEvent().getChannel())) {
       eventMetadata = new Metadata();
       eventMetadata.setCauseEventType(rme.getEvent().getType());
-      eventMetadata.setFieldDecision(ActionInstructionType.CREATE);
+      // Only send a CREATE on a case that field doesn't already know about
+      if (oaSet) {
+        eventMetadata.setFieldDecision(ActionInstructionType.UPDATE);
+      } else {
+        eventMetadata.setFieldDecision(ActionInstructionType.CREATE);
+      }
     }
 
     caseService.saveCaseAndEmitCaseUpdatedEvent(updatedCase, eventMetadata);

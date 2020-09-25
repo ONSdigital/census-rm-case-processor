@@ -87,6 +87,33 @@ public class RmCaseUpdatedServiceTest {
             any());
   }
 
+  //  @Test
+  //  public void testUpdateActionToField() {
+  //    // Given
+  //    // Set up minimum expected data on a skeleton case
+  //    Case caseToUpdate = setUpMinimumGoodSkeletonCase();
+  //    caseToUpdate.setOa("Test OA");
+  //
+  //    ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
+  //    RmCaseUpdated rmCaseUpdated = rme.getPayload().getRmCaseUpdated();
+  //
+  //    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+  //
+  //    when(caseService.getCaseByCaseId(any())).thenReturn(caseToUpdate);
+  //    when(estabTypes.contains(eq("TEST_ESTAB_TYPE"))).thenReturn(true);
+  //
+  //    // When
+  //    underTest.processMessage(rme, messageTimestamp);
+  //
+  //    // Then
+  //    // UPDATE should be sent if field already know about it (OA value present on original case)
+  //    ArgumentCaptor<Metadata> metadataArgumentCaptor = ArgumentCaptor.forClass(Metadata.class);
+  //    verify(caseService)
+  //        .saveCaseAndEmitCaseUpdatedEvent(eq(caseToUpdate), metadataArgumentCaptor.capture());
+  //    Metadata eventMetadata = metadataArgumentCaptor.getValue();
+  //    assertThat(eventMetadata.getFieldDecision()).isEqualTo(ActionInstructionType.UPDATE);
+  //  }
+
   @Test
   public void testMaximumChanges() {
     // Given
