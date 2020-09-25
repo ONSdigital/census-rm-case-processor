@@ -6,11 +6,12 @@ import java.util.Optional;
 import lombok.Data;
 
 @Data
-@JsonInclude(Include.NON_ABSENT) // Only needed for marshalling (i.e. sending)
+@JsonInclude(Include.NON_NULL) // Only needed for marshalling (i.e. sending)
 public class ModifiedAddress {
   private Optional<String> addressLine1;
   private Optional<String> addressLine2;
   private Optional<String> addressLine3;
   private Optional<String> estabType;
   private Optional<String> organisationName;
+  private String addressType; // Only used for ADDRESS_TYPE_CHANGED
 }
