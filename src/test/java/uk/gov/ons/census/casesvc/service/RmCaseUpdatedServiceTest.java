@@ -527,6 +527,7 @@ public class RmCaseUpdatedServiceTest {
     caze.setAbpCode("7");
     caze.setUprn("Dummy");
     caze.setEstabUprn("Dummy");
+    caze.setRefusalReceived(null);
     return caze;
   }
 }

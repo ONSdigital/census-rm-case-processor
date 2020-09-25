@@ -4,8 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
 import uk.gov.ons.census.casesvc.model.entity.Case;
+import uk.gov.ons.census.casesvc.model.entity.RefusalType;
 
 public class FieldworkHelperTest {
+
   @Test
   public void testDoNotSendBackToField() {
     assertThat(FieldworkHelper.shouldSendCaseToField(null, "FIELD")).isFalse();
@@ -29,11 +31,12 @@ public class FieldworkHelperTest {
   }
 
   @Test
-  public void testDoNotSendToMigrantWorkers() {
+  public void testDoNotSendToRefusedCase() {
     Case caze = new Case();
     caze.setCaseType("HH");
     caze.setRegion("E");
-    caze.setEstabType("MIGRANT WORKERS");
+    caze.setEstabType("HOUSEHOLD");
+    caze.setRefusalReceived(RefusalType.HARD_REFUSAL);
     assertThat(FieldworkHelper.shouldSendCaseToField(caze, "NOT_FIELD")).isFalse();
   }
 }
