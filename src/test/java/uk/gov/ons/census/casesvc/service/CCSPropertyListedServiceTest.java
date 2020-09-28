@@ -20,6 +20,7 @@ import uk.gov.ons.census.casesvc.model.dto.Metadata;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
+import uk.gov.ons.census.casesvc.testutil.DataUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CCSPropertyListedServiceTest {
@@ -68,7 +69,7 @@ public class CCSPropertyListedServiceTest {
 
     managementEvent.getPayload().getCcsProperty().setInterviewRequired(true);
 
-    Case expectedCase = new Case();
+    Case expectedCase = DataUtils.getCaseThatWillPassFieldWorkHelper();
 
     when(caseService.createCCSCase(any(), any())).thenReturn(expectedCase);
 

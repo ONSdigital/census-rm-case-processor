@@ -18,6 +18,7 @@ import uk.gov.ons.census.casesvc.model.dto.*;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
+import uk.gov.ons.census.casesvc.testutil.DataUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EventServiceTest {
@@ -75,10 +76,11 @@ public class EventServiceTest {
     // Given
     CreateCaseSample createCaseSample = new CreateCaseSample();
     createCaseSample.setBulkProcessed(true);
-    Case caze = new Case();
+    Case caze = DataUtils.getCaseThatWillPassFieldWorkHelper();
     caze.setTreatmentCode("HH_LF2R3BE");
     caze.setRegion("E1000");
     caze.setCaseType("HH");
+
     when(caseService.saveCaseSample(createCaseSample)).thenReturn(caze);
     when(caseService.saveCaseAndEmitCaseCreatedEvent(any(Case.class), any(Metadata.class)))
         .thenReturn(new PayloadDTO());

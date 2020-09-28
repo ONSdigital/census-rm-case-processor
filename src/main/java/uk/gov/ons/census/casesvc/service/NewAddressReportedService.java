@@ -30,6 +30,7 @@ import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.CaseMetadata;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
+import uk.gov.ons.census.casesvc.utility.FieldworkHelper;
 import uk.gov.ons.census.casesvc.utility.JsonHelper;
 
 @Component
@@ -150,6 +151,10 @@ public class NewAddressReportedService {
 
     if (newAddressEvent.getPayload().getNewAddress().getCollectionCase().getFieldOfficerId()
         == null) {
+      return null;
+    }
+
+    if(FieldworkHelper.shouldSendCaseToField(caze)) {
       return null;
     }
 

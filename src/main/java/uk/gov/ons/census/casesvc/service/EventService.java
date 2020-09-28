@@ -11,10 +11,12 @@ import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.CreateCaseSample;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
+import uk.gov.ons.census.casesvc.model.dto.Metadata;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
+import uk.gov.ons.census.casesvc.utility.FieldworkHelper;
 import uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper;
 
 @Service
@@ -42,9 +44,7 @@ public class EventService {
         QuestionnaireTypeHelper.calculateQuestionnaireType(
             caze.getCaseType(), caze.getRegion(), caze.getAddressLevel());
     if (createCaseSample.isBulkProcessed()) {
-      caseService.saveCaseAndEmitCaseCreatedEvent(
-          caze,
-          buildMetadata(EventTypeDTO.CLERICAL_ADDRESS_RESOLUTION, ActionInstructionType.CREATE));
+      caseService.saveCaseAndEmitCaseCreatedEvent(caze, buildSendToFieldIfConditionsMet(caze));
 
       eventLogger.logCaseEvent(
           caze,
@@ -79,6 +79,14 @@ public class EventService {
         uacService.saveAndEmitUacUpdatedEvent(uacQidLink);
       }
     }
+  }
+
+  private Metadata buildSendToFieldIfConditionsMet(Case caze) {
+    if (FieldworkHelper.shouldSendCaseToField(caze)) {
+      return buildMetadata(EventTypeDTO.CLERICAL_ADDRESS_RESOLUTION, ActionInstructionType.CREATE);
+    }
+
+    return null;
   }
 
   public void processPrintCaseSelected(
