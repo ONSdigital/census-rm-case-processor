@@ -318,10 +318,10 @@ public class NewAddressReportedService {
   private CaseMetadata getMetadataFromEventOrSourceCase(
       Case newCase, CollectionCase newCollectionCase, CaseMetadata sourceMetadata) {
     CaseMetadata newCaseMetadata = new CaseMetadata();
-    newCaseMetadata.setSecureEstablishment(false);
 
-    if (newCase.getCaseType().equals("CE")) {
-      newCaseMetadata.setSecureEstablishment(newCollectionCase.getAddress().isSecureType());
+    if (newCase.getCaseType().equals("CE")
+        && newCollectionCase.getAddress().getSecureType() != null) {
+      newCaseMetadata.setSecureEstablishment(newCollectionCase.getAddress().getSecureType());
       return newCaseMetadata;
     }
 

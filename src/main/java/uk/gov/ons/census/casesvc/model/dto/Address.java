@@ -19,5 +19,5 @@ public class Address {
   private String addressLevel;
   private String estabType;
   private String organisationName;
-  private boolean secureType;
+  private Boolean secureType;
 }
