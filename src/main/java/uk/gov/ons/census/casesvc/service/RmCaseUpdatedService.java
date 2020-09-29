@@ -39,9 +39,9 @@ public class RmCaseUpdatedService {
     RmCaseUpdated rmCaseUpdated = rme.getPayload().getRmCaseUpdated();
     Case updatedCase = caseService.getCaseByCaseId(rmCaseUpdated.getCaseId());
 
-    boolean oaSet = updatedCase.getOa() != null;
-
     validateRmCaseUpdated(rmCaseUpdated);
+
+    boolean oaPresent = updatedCase.getOa() != null;
 
     updateCase(updatedCase, rmCaseUpdated);
 
@@ -55,8 +55,9 @@ public class RmCaseUpdatedService {
     if (shouldSendCaseToField(updatedCase, rme.getEvent().getChannel())) {
       eventMetadata = new Metadata();
       eventMetadata.setCauseEventType(rme.getEvent().getType());
+
       // Only send a CREATE on a case that field doesn't already know about
-      if (oaSet) {
+      if (oaPresent) {
         eventMetadata.setFieldDecision(ActionInstructionType.UPDATE);
       } else {
         eventMetadata.setFieldDecision(ActionInstructionType.CREATE);
@@ -230,5 +231,9 @@ public class RmCaseUpdatedService {
         || StringUtils.isEmpty(caze.getFieldOfficerId())) {
       throw new RuntimeException("Case missing mandatory fields after RM Case Updated");
     }
+  }
+
+  public boolean isOaPresent(Case originalCase) {
+    return originalCase.getOa() != null;
   }
 }
