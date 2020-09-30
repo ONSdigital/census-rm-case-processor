@@ -41,7 +41,7 @@ public class RmCaseUpdatedService {
 
     validateRmCaseUpdated(rmCaseUpdated);
 
-    boolean oaPresent = updatedCase.getOa() != null;
+    boolean oaPresent = updatedCase.getOa() != null && !updatedCase.getOa().isEmpty();
 
     updateCase(updatedCase, rmCaseUpdated);
 
@@ -57,6 +57,8 @@ public class RmCaseUpdatedService {
       eventMetadata.setCauseEventType(rme.getEvent().getType());
 
       // Only send a CREATE on a case that field doesn't already know about
+      // Disclaimer - we were forced by field to use this hack and it should be refactored
+      // properly when time allows.
       if (oaPresent) {
         eventMetadata.setFieldDecision(ActionInstructionType.UPDATE);
       } else {
@@ -231,9 +233,5 @@ public class RmCaseUpdatedService {
         || StringUtils.isEmpty(caze.getFieldOfficerId())) {
       throw new RuntimeException("Case missing mandatory fields after RM Case Updated");
     }
-  }
-
-  public boolean isOaPresent(Case originalCase) {
-    return originalCase.getOa() != null;
   }
 }
