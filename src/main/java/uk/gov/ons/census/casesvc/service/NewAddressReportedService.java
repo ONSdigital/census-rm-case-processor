@@ -190,6 +190,8 @@ public class NewAddressReportedService {
     skeletonCase.setFieldOfficerId(collectionCase.getFieldOfficerId());
     skeletonCase.setCeExpectedCapacity(collectionCase.getCeExpectedCapacity());
 
+    skeletonCase.setMetadata(getMetadataFromEventOrSourceCase(skeletonCase, collectionCase, null));
+
     skeletonCase.setActionPlanId(censusActionPlanId);
     skeletonCase.setSurvey("CENSUS");
     skeletonCase.setHandDelivery(false);
@@ -277,6 +279,10 @@ public class NewAddressReportedService {
         getEventValOverSource(
             newCollectionCase.getAddress().getAddressType(), newCollectionCase.getCaseType()));
 
+    // If address type is CE, checks if metadata is present and sets secure flag if so
+    newCase.setMetadata(
+        getMetadataFromEventOrSourceCase(newCase, newCollectionCase, sourceCase.getMetadata()));
+
     // Fields that do not come on the event but come from source case
     newCase.setEstabUprn(sourceCase.getEstabUprn());
     newCase.setAbpCode(sourceCase.getAbpCode());
@@ -288,7 +294,6 @@ public class NewAddressReportedService {
     newCase.setOa(sourceCase.getOa());
     newCase.setPrintBatch(sourceCase.getPrintBatch());
     newCase.setSurvey(sourceCase.getSurvey());
-    newCase.setMetadata(metadataFromSourceCase(sourceCase.getMetadata()));
 
     // Fields that need to be set
     newCase.setActionPlanId(censusActionPlanId);
@@ -310,9 +315,19 @@ public class NewAddressReportedService {
     }
   }
 
-  private CaseMetadata metadataFromSourceCase(CaseMetadata sourceMetadata) {
+  private CaseMetadata getMetadataFromEventOrSourceCase(
+      Case newCase, CollectionCase newCollectionCase, CaseMetadata sourceMetadata) {
     CaseMetadata newCaseMetadata = new CaseMetadata();
-    newCaseMetadata.setSecureEstablishment(sourceMetadata.getSecureEstablishment());
+
+    if (newCase.getCaseType().equals("CE")
+        && newCollectionCase.getAddress().getSecureType() != null) {
+      newCaseMetadata.setSecureEstablishment(newCollectionCase.getAddress().getSecureType());
+      return newCaseMetadata;
+    }
+
+    if (sourceMetadata != null) {
+      newCaseMetadata.setSecureEstablishment(sourceMetadata.getSecureEstablishment());
+    }
     return newCaseMetadata;
   }
 

@@ -211,6 +211,11 @@ public class CaseService {
     if (caze.getRegion() != null) {
       address.setRegion(caze.getRegion().substring(0, 1));
     }
+
+    if (caze.getMetadata() != null) {
+      address.setSecureType(caze.getMetadata().getSecureEstablishment());
+    }
+
     return address;
   }
 
