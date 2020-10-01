@@ -2,7 +2,7 @@
   "users": [
     {
       "name": "rmquser",
-      "password_hash": "aQpkvJ2NmkPkbXuur7p+IiuN5C0kQXV6QfZdHXO8o8hHUuAT",
+      "password_hash": "GcfNCxmUK1BNqhtFEL2q1MSd2nODkCSJlW6Luqj0d010KRED",
       "hashing_algorithm": "rabbit_password_hashing_sha256",
       "tags": "administrator"
     }

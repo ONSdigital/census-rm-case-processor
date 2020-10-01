@@ -21,7 +21,7 @@ spring:
 
   rabbitmq:
     username: rmquser
-    password: rmqp455w0rd
+    password: qpassword
     host: localhost
     port: 6672
     virtualhost: /

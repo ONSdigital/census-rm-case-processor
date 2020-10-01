@@ -19,7 +19,7 @@ services:
       - "46672:15672"
     environment:
       - RABBITMQ_DEFAULT_USER=rmquser
-      - RABBITMQ_DEFAULT_PASS=rmqp455w0rd
+      - RABBITMQ_DEFAULT_PASS=qpassword
       - RABBITMQ_CONFIG_FILE=/etc/rabbitmq/rabbitmq.conf
     volumes:
       - ./definitions.json:/opt/definitions.json
