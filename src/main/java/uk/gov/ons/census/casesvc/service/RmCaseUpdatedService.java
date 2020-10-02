@@ -41,6 +41,8 @@ public class RmCaseUpdatedService {
 
     validateRmCaseUpdated(rmCaseUpdated);
 
+    boolean oaPresent = !StringUtils.isEmpty(updatedCase.getOa());
+
     updateCase(updatedCase, rmCaseUpdated);
 
     // Check the case now has all mandatory fields
@@ -53,7 +55,18 @@ public class RmCaseUpdatedService {
     if (shouldSendCaseToField(updatedCase, rme.getEvent().getChannel())) {
       eventMetadata = new Metadata();
       eventMetadata.setCauseEventType(rme.getEvent().getType());
-      eventMetadata.setFieldDecision(ActionInstructionType.CREATE);
+
+      // We don't want to send an UPDATE for cases which FWMT-G already know about,
+      // but the only way we've got of **guessing** that is by looking to see if an OA is on the
+      // case or not. We imagine that OA would only be set on cases which FWMT-G know about,
+      // so we have been forced to use it as an ugly kludge, because of time pressure.
+      // TODO: This should be refactored/done properly. It's tech debt.
+
+      if (oaPresent) {
+        eventMetadata.setFieldDecision(ActionInstructionType.UPDATE);
+      } else {
+        eventMetadata.setFieldDecision(ActionInstructionType.CREATE);
+      }
     }
 
     caseService.saveCaseAndEmitCaseUpdatedEvent(updatedCase, eventMetadata);
