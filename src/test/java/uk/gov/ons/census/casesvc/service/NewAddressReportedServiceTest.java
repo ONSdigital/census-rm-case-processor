@@ -241,7 +241,6 @@ public class NewAddressReportedServiceTest {
     address.setAddressLevel("E");
     address.setAddressType("CE");
     address.setSecureType(false);
-
     collectionCase.setAddress(address);
 
     NewAddress newAddress = new NewAddress();
