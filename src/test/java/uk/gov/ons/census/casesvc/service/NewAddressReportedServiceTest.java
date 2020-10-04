@@ -65,7 +65,7 @@ public class NewAddressReportedServiceTest {
     address.setRegion("W");
     address.setAddressLevel("E");
     address.setAddressType("HH");
-    address.setSecureType(null);
+    address.setSecureType(false);
     collectionCase.setAddress(address);
 
     NewAddress newAddress = new NewAddress();
@@ -240,7 +240,7 @@ public class NewAddressReportedServiceTest {
     address.setRegion("W");
     address.setAddressLevel("E");
     address.setAddressType("CE");
-    address.setSecureType(null);
+    address.setSecureType(false);
 
     collectionCase.setAddress(address);
 
