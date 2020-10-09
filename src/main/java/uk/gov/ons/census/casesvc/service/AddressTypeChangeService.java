@@ -98,10 +98,6 @@ public class AddressTypeChangeService {
     newCase.setHtcWillingness(oldCase.getHtcWillingness());
     newCase.setHtcDigital(oldCase.getHtcDigital());
 
-    if (newCase.getCaseType().equals("CE")) {
-      newCase.setCeActualResponses(0);
-    }
-
     setModifiableFieldsOnNewCase(addressTypeChange.getCollectionCase(), oldCase, newCase);
 
     newCase = caseService.saveNewCaseAndStampCaseRef(newCase);
