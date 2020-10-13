@@ -106,7 +106,7 @@ public class AddressModificationValidatorTest {
   }
 
   // ****************** HERE BE DRAGONS!!!! *******************
-  // See comment above. Deliberately repeated here, because of kludginess spreading through
+  // See comment elsewhere deliberately repeated here, because of kludginess spreading through
   // codebase.
   //
   // Because of reasons of almost unimaginable awfulness, we are forced to accept this
