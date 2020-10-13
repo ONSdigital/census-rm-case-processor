@@ -33,7 +33,8 @@ public class AddressModificationService {
 
     Case caze = caseService.getCaseByCaseId(addressModification.getCollectionCase().getId());
 
-    addressModificationValidator.validate(addressModification.getNewAddress());
+    addressModificationValidator.validate(
+        addressModification.getNewAddress(), responseManagementEvent.getEvent().getChannel());
 
     modifyCaseAddress(caze, addressModification);
     caseService.saveCaseAndEmitCaseUpdatedEvent(caze, null);

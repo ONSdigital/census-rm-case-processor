@@ -38,7 +38,7 @@ public class AddressModificationValidatorTest {
     modifiedAddress.setAddressType("HH");
 
     // When, then no exception
-    underTest.validate(modifiedAddress);
+    underTest.validate(modifiedAddress, "RH");
   }
 
   @Test
@@ -48,7 +48,7 @@ public class AddressModificationValidatorTest {
     modifiedAddress.setAddressType("HH");
 
     // When, then no exception
-    underTest.validate(modifiedAddress);
+    underTest.validate(modifiedAddress, "RH");
   }
 
   @Test
@@ -60,7 +60,7 @@ public class AddressModificationValidatorTest {
     modifiedAddress.setOrganisationName(Optional.empty());
 
     // When, then no exception
-    underTest.validate(modifiedAddress);
+    underTest.validate(modifiedAddress, "RH");
   }
 
   @Test
@@ -105,9 +105,35 @@ public class AddressModificationValidatorTest {
     checkValidationFailureThrown(modifiedAddress);
   }
 
+  // ****************** HERE BE DRAGONS!!!! *******************
+  // See comment above. Deliberately repeated here, because of kludginess spreading through
+  // codebase.
+  //
+  // Because of reasons of almost unimaginable awfulness, we are forced to accept this
+  // late-breaking kludge, which allows Contact Centre to use "OTHER" as the estab type
+  // instead of one of the vast number of specific ones which are allowed.
+  //
+  // See this card for more details: https://trello.com/c/ZUuPMYuQ
+  //
+  // This test proves that we allow OTHER estab type from CC without throwing an exception, and it
+  // exists purely to document this highly undesirable behaviour, although functionally it does
+  // nothing, and a programmer without this knowledge would  no doubt optimise it away.
+  //
+  // Sorry.
+  @Test
+  public void testOtherEstabTypeFromContactCentreIsAllowed() {
+    // Given
+    ModifiedAddress modifiedAddress = new ModifiedAddress();
+    modifiedAddress.setAddressType("HH");
+    modifiedAddress.setEstabType(Optional.of("OTHER"));
+
+    // When, then no exception
+    underTest.validate(modifiedAddress, "CC");
+  }
+
   private void checkValidationFailureThrown(ModifiedAddress modifiedAddress) {
     try {
-      underTest.validate(modifiedAddress);
+      underTest.validate(modifiedAddress, "RH");
       fail("Expected validation failure RuntimeException not thrown");
     } catch (RuntimeException e) {
       assertThat(e.getMessage()).startsWith("Validation Failure: ");
