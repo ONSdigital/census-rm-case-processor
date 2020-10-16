@@ -131,6 +131,18 @@ public class AddressModificationValidatorTest {
     underTest.validate(modifiedAddress, "CC");
   }
 
+  // See "here be dragons" comments elsewhere. Sorry.
+  @Test
+  public void testOtherEstabTypeNotFromContactCentreIsNotAllowed() {
+    // Given
+    ModifiedAddress modifiedAddress = new ModifiedAddress();
+    modifiedAddress.setAddressType("HH");
+    modifiedAddress.setEstabType(Optional.of("OTHER"));
+
+    // When, then exception
+    checkValidationFailureThrown(modifiedAddress);
+  }
+
   private void checkValidationFailureThrown(ModifiedAddress modifiedAddress) {
     try {
       underTest.validate(modifiedAddress, "RH");
