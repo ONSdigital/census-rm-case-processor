@@ -37,41 +37,50 @@ public class RmCaseUpdatedService {
 
   public void processMessage(ResponseManagementEvent rme, OffsetDateTime messageTimestamp) {
     RmCaseUpdated rmCaseUpdated = rme.getPayload().getRmCaseUpdated();
-    Case updatedCase = caseService.getCaseByCaseId(rmCaseUpdated.getCaseId());
+    Case caze = caseService.getCaseByCaseId(rmCaseUpdated.getCaseId());
 
     validateRmCaseUpdated(rmCaseUpdated);
 
-    boolean oaPresent = !StringUtils.isEmpty(updatedCase.getOa());
+    boolean oaPresentOnOriginalCase = !StringUtils.isEmpty(caze.getOa());
+    boolean fieldCoordinatorIdPresentOnOriginalCase =
+        !StringUtils.isEmpty(caze.getFieldCoordinatorId());
 
-    updateCase(updatedCase, rmCaseUpdated);
+    updateCase(caze, rmCaseUpdated);
 
     // Check the case now has all mandatory fields
-    validateCase(updatedCase);
+    validateCase(caze);
 
     // Only remove the skeleton flag once the case has passed validation
-    updatedCase.setSkeleton(false);
+    caze.setSkeleton(false);
 
     Metadata eventMetadata = null;
-    if (shouldSendCaseToField(updatedCase, rme.getEvent().getChannel())) {
+    if (shouldSendCaseToField(caze, rme.getEvent().getChannel())) {
       eventMetadata = new Metadata();
       eventMetadata.setCauseEventType(rme.getEvent().getType());
 
-      // We don't want to send an UPDATE for cases which FWMT-G already know about,
-      // but the only way we've got of **guessing** that is by looking to see if an OA is on the
-      // case or not. We imagine that OA would only be set on cases which FWMT-G know about,
-      // so we have been forced to use it as an ugly kludge, because of time pressure.
-      // TODO: This should be refactored/done properly. It's tech debt.
-
-      if (oaPresent) {
+      // **** HERE BE DRAGONS ****
+      // Apologies, but a hack on top of a hack has been forced onto RM. We have been forced into
+      // implementing the following:
+      //
+      // "The logic we need is:
+      // if (case before update had OA) or (case before update didn't have field coordinator ID):
+      // send field UPDATE
+      // else: send field CREATE"
+      //
+      // Literally quoted from the ticket:
+      // https://trello.com/c/i6xdQWau/1628-field-address-update-create-update-decision-hack-13
+      //
+      // Sorry.
+      if (oaPresentOnOriginalCase || !fieldCoordinatorIdPresentOnOriginalCase) {
         eventMetadata.setFieldDecision(ActionInstructionType.UPDATE);
       } else {
         eventMetadata.setFieldDecision(ActionInstructionType.CREATE);
       }
     }
 
-    caseService.saveCaseAndEmitCaseUpdatedEvent(updatedCase, eventMetadata);
+    caseService.saveCaseAndEmitCaseUpdatedEvent(caze, eventMetadata);
     eventLogger.logCaseEvent(
-        updatedCase,
+        caze,
         rme.getEvent().getDateTime(),
         EVENT_DESCRIPTION,
         EventType.RM_CASE_UPDATED,
