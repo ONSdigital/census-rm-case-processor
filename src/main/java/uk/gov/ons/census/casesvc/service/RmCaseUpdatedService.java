@@ -41,9 +41,9 @@ public class RmCaseUpdatedService {
 
     validateRmCaseUpdated(rmCaseUpdated);
 
-    boolean oaPresentOnOriginalCase = !StringUtils.isEmpty(caze.getOa());
-    boolean fieldCoordinatorIdPresentOnOriginalCase =
-        !StringUtils.isEmpty(caze.getFieldCoordinatorId());
+    boolean oaNotPresentOnOriginalCase = StringUtils.isEmpty(caze.getOa());
+    boolean fieldCoordinatorIdNotPresentOnOriginalCase =
+        StringUtils.isEmpty(caze.getFieldCoordinatorId());
 
     updateCase(caze, rmCaseUpdated);
 
@@ -63,18 +63,18 @@ public class RmCaseUpdatedService {
       // implementing the following:
       //
       // "The logic we need is:
-      // if (case before update had OA) or (case before update didn't have field coordinator ID):
-      // send field UPDATE
-      // else: send field CREATE"
+      // if (case before update didn't have OA) or (case before update didn't have field coord ID):
+      // send field CREATE
+      // else: send field UPDATE"
       //
       // Literally quoted from the ticket:
       // https://trello.com/c/i6xdQWau/1628-field-address-update-create-update-decision-hack-13
       //
       // Sorry.
-      if (oaPresentOnOriginalCase || !fieldCoordinatorIdPresentOnOriginalCase) {
-        eventMetadata.setFieldDecision(ActionInstructionType.UPDATE);
-      } else {
+      if (oaNotPresentOnOriginalCase || fieldCoordinatorIdNotPresentOnOriginalCase) {
         eventMetadata.setFieldDecision(ActionInstructionType.CREATE);
+      } else {
+        eventMetadata.setFieldDecision(ActionInstructionType.UPDATE);
       }
     }
 

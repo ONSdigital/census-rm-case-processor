@@ -73,7 +73,7 @@ public class RmCaseUpdatedServiceTest {
     verify(caseService)
         .saveCaseAndEmitCaseUpdatedEvent(eq(caseToUpdate), metadataArgumentCaptor.capture());
     Metadata eventMetadata = metadataArgumentCaptor.getValue();
-    assertThat(eventMetadata.getFieldDecision()).isEqualTo(ActionInstructionType.UPDATE);
+    assertThat(eventMetadata.getFieldDecision()).isEqualTo(ActionInstructionType.CREATE);
     assertThat(eventMetadata.getCauseEventType()).isEqualTo(EventTypeDTO.RM_CASE_UPDATED);
 
     verify(eventLogger)
@@ -111,7 +111,7 @@ public class RmCaseUpdatedServiceTest {
     verify(caseService)
         .saveCaseAndEmitCaseUpdatedEvent(eq(caseToUpdate), metadataArgumentCaptor.capture());
     Metadata eventMetadata = metadataArgumentCaptor.getValue();
-    assertThat(eventMetadata.getFieldDecision()).isEqualTo(ActionInstructionType.UPDATE);
+    assertThat(eventMetadata.getFieldDecision()).isEqualTo(ActionInstructionType.CREATE);
   }
 
   @Test
@@ -184,7 +184,7 @@ public class RmCaseUpdatedServiceTest {
     verify(caseService)
         .saveCaseAndEmitCaseUpdatedEvent(eq(caseToUpdate), metadataArgumentCaptor.capture());
     Metadata eventMetadata = metadataArgumentCaptor.getValue();
-    assertThat(eventMetadata.getFieldDecision()).isEqualTo(ActionInstructionType.UPDATE);
+    assertThat(eventMetadata.getFieldDecision()).isEqualTo(ActionInstructionType.CREATE);
     assertThat(eventMetadata.getCauseEventType()).isEqualTo(EventTypeDTO.RM_CASE_UPDATED);
 
     verify(eventLogger)

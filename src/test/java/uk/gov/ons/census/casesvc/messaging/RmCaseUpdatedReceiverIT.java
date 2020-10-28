@@ -1,7 +1,7 @@
 package uk.gov.ons.census.casesvc.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.ons.census.casesvc.model.dto.ActionInstructionType.UPDATE;
+import static uk.gov.ons.census.casesvc.model.dto.ActionInstructionType.CREATE;
 import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.CASE_UPDATED;
 import static uk.gov.ons.census.casesvc.model.dto.EventTypeDTO.RM_CASE_UPDATED;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.convertJsonToObject;
@@ -89,7 +89,7 @@ public class RmCaseUpdatedReceiverIT {
       assertThat(actualEmittedMessage.getPayload().getMetadata().getCauseEventType())
           .isEqualTo(RM_CASE_UPDATED);
       assertThat(actualEmittedMessage.getPayload().getMetadata().getFieldDecision())
-          .isEqualTo(UPDATE);
+          .isEqualTo(CREATE);
 
       CollectionCase actualUpdatedCollectionCase =
           actualEmittedMessage.getPayload().getCollectionCase();
