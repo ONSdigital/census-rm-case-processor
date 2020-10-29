@@ -560,6 +560,7 @@ public class AddressReceiverIT {
       EventDTO eventDTO = new EventDTO();
       eventDTO.setType(NEW_ADDRESS_REPORTED);
       eventDTO.setDateTime(OffsetDateTime.now());
+      eventDTO.setChannel("FIELD");
 
       ResponseManagementEvent responseManagementEvent = new ResponseManagementEvent();
       responseManagementEvent.setEvent(eventDTO);

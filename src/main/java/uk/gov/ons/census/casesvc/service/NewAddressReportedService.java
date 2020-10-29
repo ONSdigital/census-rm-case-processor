@@ -136,25 +136,15 @@ public class NewAddressReportedService {
   private Metadata getMetaDataToCreateFieldCaseIfConditionsMet(
       Case caze, ResponseManagementEvent newAddressEvent) {
 
-    if (!caze.getCaseType().equals("SPG") && !caze.getCaseType().equals("CE")) {
-      return null;
-    }
-
     if (!newAddressEvent.getEvent().getChannel().equals("FIELD")) {
       return null;
     }
 
-    if (newAddressEvent.getPayload().getNewAddress().getCollectionCase().getFieldCoordinatorId()
-        == null) {
+    if (newAddressEvent.getPayload().getNewAddress().getSourceCaseId() == null) {
       return null;
     }
 
-    if (newAddressEvent.getPayload().getNewAddress().getCollectionCase().getFieldOfficerId()
-        == null) {
-      return null;
-    }
-
-    if(FieldworkHelper.shouldSendCaseToField(caze)) {
+    if (!FieldworkHelper.shouldSendCaseToField(caze)) {
       return null;
     }
 

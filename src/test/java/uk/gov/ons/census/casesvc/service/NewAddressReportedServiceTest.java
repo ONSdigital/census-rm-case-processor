@@ -552,6 +552,7 @@ public class NewAddressReportedServiceTest {
     collectionCase.setFieldOfficerId("2342345");
 
     newAddressEvent.getEvent().setChannel("FIELD");
+    newAddressEvent.getPayload().getNewAddress().setSourceCaseId(UUID.randomUUID());
 
     OffsetDateTime timeNow = OffsetDateTime.now();
 
@@ -592,34 +593,6 @@ public class NewAddressReportedServiceTest {
     Metadata actualMetadata = metadataArgumentCaptor.getValue();
     assertThat(actualMetadata.getCauseEventType()).isEqualTo(EventTypeDTO.NEW_ADDRESS_REPORTED);
     assertThat(actualMetadata.getFieldDecision()).isEqualTo(ActionInstructionType.CREATE);
-  }
-
-  @Test
-  public void testNoMetaDataWhenCaseTypeNotCEorSPG() {
-    // Given
-    EasyRandom easyRandom = new EasyRandom();
-    Case sourceCase = easyRandom.nextObject(Case.class);
-    sourceCase.setCaseId(UUID.randomUUID());
-    ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
-    CollectionCase collectionCase =
-        newAddressEvent.getPayload().getNewAddress().getCollectionCase();
-    collectionCase.getAddress().setAddressLine1("666");
-    collectionCase.setCaseType("HH");
-    collectionCase.setFieldCoordinatorId("0123435");
-    collectionCase.setFieldOfficerId("2342345");
-
-    newAddressEvent.getEvent().setChannel("FIELD");
-
-    when(pubSubTemplate.publish(any(), any(ResponseManagementEvent.class)))
-        .thenReturn(mockFuture());
-    when(caseService.getCaseByCaseId(any())).thenReturn(sourceCase);
-    when(caseService.saveNewCaseAndStampCaseRef(any())).then(returnsFirstArg());
-    OffsetDateTime timeNow = OffsetDateTime.now();
-
-    // When
-    underTest.processNewAddressFromSourceId(newAddressEvent, timeNow, sourceCase.getCaseId());
-
-    verify(caseService).saveCaseAndEmitCaseCreatedEvent(any(), eq(null));
   }
 
   @Test
