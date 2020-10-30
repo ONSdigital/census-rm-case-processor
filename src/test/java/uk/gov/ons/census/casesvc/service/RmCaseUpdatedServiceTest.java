@@ -350,7 +350,6 @@ public class RmCaseUpdatedServiceTest {
 
   @Test
   public void testMissingEstabUprnOnCase() {
-
     Case caseToUpdate = setUpMinimumGoodSkeletonCase();
     caseToUpdate.setEstabUprn(null);
 
