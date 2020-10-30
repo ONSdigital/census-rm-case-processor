@@ -40,10 +40,11 @@ public class RmCaseUpdatedServiceTest {
   @InjectMocks private RmCaseUpdatedService underTest;
 
   @Test
-  public void testMinimumChanges() {
+  public void testMinimumChangesProducesCreate() {
     // Given
     // Set up minimum expected data on a skeleton case
     Case caseToUpdate = setUpMinimumGoodSkeletonCase();
+    caseToUpdate.setFieldCoordinatorId("M");
 
     ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
     RmCaseUpdated rmCaseUpdated = rme.getPayload().getRmCaseUpdated();
@@ -88,6 +89,55 @@ public class RmCaseUpdatedServiceTest {
   }
 
   @Test
+  public void testMinimumChangesProducesUpdate() {
+    // Given
+    // Set up minimum expected data on a skeleton case
+    Case caseToUpdate = setUpMinimumGoodSkeletonCase();
+    caseToUpdate.setOa("OA OA");
+
+    ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
+    RmCaseUpdated rmCaseUpdated = rme.getPayload().getRmCaseUpdated();
+
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+
+    when(caseService.getCaseByCaseId(any())).thenReturn(caseToUpdate);
+    when(estabTypes.contains(eq("TEST_ESTAB_TYPE"))).thenReturn(true);
+
+    // When
+    underTest.processMessage(rme, messageTimestamp);
+
+    // Then
+    assertThat(caseToUpdate.isSkeleton()).isFalse();
+    assertThat(caseToUpdate.getTreatmentCode()).isEqualTo(rmCaseUpdated.getTreatmentCode());
+    assertThat(caseToUpdate.getOa()).isEqualTo(rmCaseUpdated.getOa());
+    assertThat(caseToUpdate.getMsoa()).isEqualTo(rmCaseUpdated.getMsoa());
+    assertThat(caseToUpdate.getLsoa()).isEqualTo(rmCaseUpdated.getLsoa());
+    assertThat(caseToUpdate.getFieldCoordinatorId())
+        .isEqualTo(rmCaseUpdated.getFieldCoordinatorId());
+    assertThat(caseToUpdate.getFieldOfficerId()).isEqualTo(rmCaseUpdated.getFieldOfficerId());
+    assertThat(caseToUpdate.getEstabType()).isEqualTo(rmCaseUpdated.getEstabType());
+    assertThat(caseToUpdate.getLatitude()).isEqualTo(rmCaseUpdated.getLatitude());
+    assertThat(caseToUpdate.getLongitude()).isEqualTo(rmCaseUpdated.getLongitude());
+
+    ArgumentCaptor<Metadata> metadataArgumentCaptor = ArgumentCaptor.forClass(Metadata.class);
+    verify(caseService)
+        .saveCaseAndEmitCaseUpdatedEvent(eq(caseToUpdate), metadataArgumentCaptor.capture());
+    Metadata eventMetadata = metadataArgumentCaptor.getValue();
+    assertThat(eventMetadata.getFieldDecision()).isEqualTo(ActionInstructionType.UPDATE);
+    assertThat(eventMetadata.getCauseEventType()).isEqualTo(EventTypeDTO.RM_CASE_UPDATED);
+
+    verify(eventLogger)
+        .logCaseEvent(
+            eq(caseToUpdate),
+            any(),
+            eq("Case details updated"),
+            eq(EventType.RM_CASE_UPDATED),
+            eq(rme.getEvent()),
+            eq(convertObjectToJson(rmCaseUpdated)),
+            any());
+  }
+
+  @Test
   public void testMaximumChanges() {
     // Given
     // Set up with absolute minimum data
@@ -99,6 +149,7 @@ public class RmCaseUpdatedServiceTest {
     caseToUpdate.setAddressLevel("E");
     caseToUpdate.setCaseRef(123456789L);
     caseToUpdate.setRegion("Enonsensenumbers");
+    caseToUpdate.setFieldCoordinatorId("M");
 
     ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
     RmCaseUpdated rmCaseUpdated = rme.getPayload().getRmCaseUpdated();
@@ -173,6 +224,8 @@ public class RmCaseUpdatedServiceTest {
 
   @Test
   public void testMissingTreatmentCodeOnMessage() {
+    Case caseToUpdate = setUpMinimumGoodSkeletonCase();
+    when(caseService.getCaseByCaseId(any())).thenReturn(caseToUpdate);
     ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
     rme.getPayload().getRmCaseUpdated().setTreatmentCode(null);
 
@@ -181,6 +234,8 @@ public class RmCaseUpdatedServiceTest {
 
   @Test
   public void testMissingOaOnMessage() {
+    Case caseToUpdate = setUpMinimumGoodSkeletonCase();
+    when(caseService.getCaseByCaseId(any())).thenReturn(caseToUpdate);
     ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
     rme.getPayload().getRmCaseUpdated().setOa(null);
 
@@ -189,6 +244,8 @@ public class RmCaseUpdatedServiceTest {
 
   @Test
   public void testMissingLsoaOnMessage() {
+    Case caseToUpdate = setUpMinimumGoodSkeletonCase();
+    when(caseService.getCaseByCaseId(any())).thenReturn(caseToUpdate);
     ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
     rme.getPayload().getRmCaseUpdated().setLsoa(null);
 
@@ -197,6 +254,8 @@ public class RmCaseUpdatedServiceTest {
 
   @Test
   public void testMissingMsoaOnMessage() {
+    Case caseToUpdate = setUpMinimumGoodSkeletonCase();
+    when(caseService.getCaseByCaseId(any())).thenReturn(caseToUpdate);
     ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
     rme.getPayload().getRmCaseUpdated().setMsoa(null);
 
@@ -205,6 +264,8 @@ public class RmCaseUpdatedServiceTest {
 
   @Test
   public void testMissingLadOnMessage() {
+    Case caseToUpdate = setUpMinimumGoodSkeletonCase();
+    when(caseService.getCaseByCaseId(any())).thenReturn(caseToUpdate);
     ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
     rme.getPayload().getRmCaseUpdated().setLad(null);
 
@@ -213,6 +274,8 @@ public class RmCaseUpdatedServiceTest {
 
   @Test
   public void testMissingFieldCoordinatorIdOnMessage() {
+    Case caseToUpdate = setUpMinimumGoodSkeletonCase();
+    when(caseService.getCaseByCaseId(any())).thenReturn(caseToUpdate);
     ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
     rme.getPayload().getRmCaseUpdated().setFieldCoordinatorId(null);
 
@@ -221,6 +284,8 @@ public class RmCaseUpdatedServiceTest {
 
   @Test
   public void testMissingFieldOfficerIdOnMessage() {
+    Case caseToUpdate = setUpMinimumGoodSkeletonCase();
+    when(caseService.getCaseByCaseId(any())).thenReturn(caseToUpdate);
     ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
     rme.getPayload().getRmCaseUpdated().setFieldOfficerId(null);
 
@@ -229,6 +294,8 @@ public class RmCaseUpdatedServiceTest {
 
   @Test
   public void testMissingLatitudeOnMessage() {
+    Case caseToUpdate = setUpMinimumGoodSkeletonCase();
+    when(caseService.getCaseByCaseId(any())).thenReturn(caseToUpdate);
     ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
     rme.getPayload().getRmCaseUpdated().setLatitude(null);
 
@@ -237,6 +304,8 @@ public class RmCaseUpdatedServiceTest {
 
   @Test
   public void testMissingLongitudeOnMessage() {
+    Case caseToUpdate = setUpMinimumGoodSkeletonCase();
+    when(caseService.getCaseByCaseId(any())).thenReturn(caseToUpdate);
     ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
     rme.getPayload().getRmCaseUpdated().setLongitude(null);
 
@@ -245,6 +314,8 @@ public class RmCaseUpdatedServiceTest {
 
   @Test
   public void testInvalidEstabTypeOnMessage() {
+    Case caseToUpdate = setUpMinimumGoodSkeletonCase();
+    when(caseService.getCaseByCaseId(any())).thenReturn(caseToUpdate);
     ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
     rme.getPayload().getRmCaseUpdated().setEstabType("INVALID_TYPE");
 
@@ -253,6 +324,8 @@ public class RmCaseUpdatedServiceTest {
 
   @Test
   public void testInvalidLatitudeOnMessage() {
+    Case caseToUpdate = setUpMinimumGoodSkeletonCase();
+    when(caseService.getCaseByCaseId(any())).thenReturn(caseToUpdate);
     ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
     when(estabTypes.contains(any())).thenReturn(true);
     rme.getPayload().getRmCaseUpdated().setLatitude("n");
@@ -264,6 +337,8 @@ public class RmCaseUpdatedServiceTest {
 
   @Test
   public void testInvalidLongitudeOnMessage() {
+    Case caseToUpdate = setUpMinimumGoodSkeletonCase();
+    when(caseService.getCaseByCaseId(any())).thenReturn(caseToUpdate);
     ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
     when(estabTypes.contains(any())).thenReturn(true);
     rme.getPayload().getRmCaseUpdated().setLongitude("x");
@@ -275,6 +350,7 @@ public class RmCaseUpdatedServiceTest {
 
   @Test
   public void testMissingEstabUprnOnCase() {
+
     Case caseToUpdate = setUpMinimumGoodSkeletonCase();
     caseToUpdate.setEstabUprn(null);
 
@@ -418,6 +494,8 @@ public class RmCaseUpdatedServiceTest {
 
   @Test
   public void testNullAddressLine1OnMessage() {
+    Case caseToUpdate = setUpMinimumGoodSkeletonCase();
+    when(caseService.getCaseByCaseId(any())).thenReturn(caseToUpdate);
     ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
     rme.getPayload().getRmCaseUpdated().setAddressLine1(Optional.empty());
 
@@ -426,6 +504,8 @@ public class RmCaseUpdatedServiceTest {
 
   @Test
   public void testNullTownNameOnMessage() {
+    Case caseToUpdate = setUpMinimumGoodSkeletonCase();
+    when(caseService.getCaseByCaseId(any())).thenReturn(caseToUpdate);
     ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
     rme.getPayload().getRmCaseUpdated().setTownName(Optional.empty());
 
@@ -434,6 +514,8 @@ public class RmCaseUpdatedServiceTest {
 
   @Test
   public void testNullPostcodeOnMessage() {
+    Case caseToUpdate = setUpMinimumGoodSkeletonCase();
+    when(caseService.getCaseByCaseId(any())).thenReturn(caseToUpdate);
     ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
     rme.getPayload().getRmCaseUpdated().setPostcode(Optional.empty());
 
@@ -442,6 +524,8 @@ public class RmCaseUpdatedServiceTest {
 
   @Test
   public void testNullUprnOnMessage() {
+    Case caseToUpdate = setUpMinimumGoodSkeletonCase();
+    when(caseService.getCaseByCaseId(any())).thenReturn(caseToUpdate);
     ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
     rme.getPayload().getRmCaseUpdated().setUprn(Optional.empty());
 
@@ -450,6 +534,8 @@ public class RmCaseUpdatedServiceTest {
 
   @Test
   public void testNullEstabUprnOnMessage() {
+    Case caseToUpdate = setUpMinimumGoodSkeletonCase();
+    when(caseService.getCaseByCaseId(any())).thenReturn(caseToUpdate);
     ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
     rme.getPayload().getRmCaseUpdated().setEstabUprn(Optional.empty());
 
@@ -458,6 +544,8 @@ public class RmCaseUpdatedServiceTest {
 
   @Test
   public void testNullHtcWillingnessOnMessage() {
+    Case caseToUpdate = setUpMinimumGoodSkeletonCase();
+    when(caseService.getCaseByCaseId(any())).thenReturn(caseToUpdate);
     ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
     rme.getPayload().getRmCaseUpdated().setHtcWillingness(Optional.empty());
 
@@ -467,6 +555,8 @@ public class RmCaseUpdatedServiceTest {
 
   @Test
   public void testNullHtcDigitalOnMessage() {
+    Case caseToUpdate = setUpMinimumGoodSkeletonCase();
+    when(caseService.getCaseByCaseId(any())).thenReturn(caseToUpdate);
     ResponseManagementEvent rme = setUpMinimumGoodRmCaseUpdatedEvent();
     rme.getPayload().getRmCaseUpdated().setHtcDigital(Optional.empty());
 
@@ -507,6 +597,7 @@ public class RmCaseUpdatedServiceTest {
     rmCaseUpdated.setLatitude("123.456");
     rmCaseUpdated.setLongitude("000.000");
     rmCaseUpdated.setEstabType("TEST_ESTAB_TYPE");
+
     return rme;
   }
 

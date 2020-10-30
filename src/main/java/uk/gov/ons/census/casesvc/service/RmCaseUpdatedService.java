@@ -37,28 +37,29 @@ public class RmCaseUpdatedService {
 
   public void processMessage(ResponseManagementEvent rme, OffsetDateTime messageTimestamp) {
     RmCaseUpdated rmCaseUpdated = rme.getPayload().getRmCaseUpdated();
-    Case updatedCase = caseService.getCaseByCaseId(rmCaseUpdated.getCaseId());
+    Case caseToUpdate = caseService.getCaseByCaseId(rmCaseUpdated.getCaseId());
+    ActionInstructionType createOrUpdate = getCreateOrUpdateForField(caseToUpdate);
 
     validateRmCaseUpdated(rmCaseUpdated);
 
-    updateCase(updatedCase, rmCaseUpdated);
+    updateCase(caseToUpdate, rmCaseUpdated);
 
     // Check the case now has all mandatory fields
-    validateCase(updatedCase);
+    validateCase(caseToUpdate);
 
     // Only remove the skeleton flag once the case has passed validation
-    updatedCase.setSkeleton(false);
+    caseToUpdate.setSkeleton(false);
 
     Metadata eventMetadata = null;
-    if (shouldSendCaseToField(updatedCase)) {
+    if (shouldSendCaseToField(caseToUpdate)) {
       eventMetadata = new Metadata();
       eventMetadata.setCauseEventType(rme.getEvent().getType());
-      eventMetadata.setFieldDecision(ActionInstructionType.CREATE);
+      eventMetadata.setFieldDecision(createOrUpdate);
     }
 
-    caseService.saveCaseAndEmitCaseUpdatedEvent(updatedCase, eventMetadata);
+    caseService.saveCaseAndEmitCaseUpdatedEvent(caseToUpdate, eventMetadata);
     eventLogger.logCaseEvent(
-        updatedCase,
+        caseToUpdate,
         rme.getEvent().getDateTime(),
         EVENT_DESCRIPTION,
         EventType.RM_CASE_UPDATED,
@@ -223,5 +224,13 @@ public class RmCaseUpdatedService {
         || StringUtils.isEmpty(caze.getFieldOfficerId())) {
       throw new RuntimeException("Case missing mandatory fields after RM Case Updated");
     }
+  }
+
+  private ActionInstructionType getCreateOrUpdateForField(Case caze) {
+    if (caze.getOa() != null || caze.getFieldCoordinatorId() == null) {
+      return ActionInstructionType.UPDATE;
+    }
+
+    return ActionInstructionType.CREATE;
   }
 }
