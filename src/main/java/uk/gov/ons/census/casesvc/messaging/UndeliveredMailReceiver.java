@@ -1,6 +1,5 @@
 package uk.gov.ons.census.casesvc.messaging;
 
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 import static uk.gov.ons.census.casesvc.utility.MsgDateHelper.getMsgTimeStamp;
 
@@ -64,7 +63,7 @@ public class UndeliveredMailReceiver {
           LOG_EVENT_DESCRIPTION,
           EventType.UNDELIVERED_MAIL_REPORTED,
           event.getEvent(),
-          convertObjectToJson(event.getPayload().getFulfilmentInformation()),
+          event.getPayload().getFulfilmentInformation(),
           messageTimestamp);
     } else {
       eventLogger.logCaseEvent(
@@ -73,7 +72,7 @@ public class UndeliveredMailReceiver {
           LOG_EVENT_DESCRIPTION,
           EventType.UNDELIVERED_MAIL_REPORTED,
           event.getEvent(),
-          convertObjectToJson(event.getPayload().getFulfilmentInformation()),
+          event.getPayload().getFulfilmentInformation(),
           messageTimestamp);
     }
   }

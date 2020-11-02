@@ -75,7 +75,7 @@ public class InvalidAddressServiceTest {
             eq("Invalid address"),
             eq(EventType.ADDRESS_NOT_VALID),
             eq(managementEvent.getEvent()),
-            anyString(),
+            any(),
             eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
   }

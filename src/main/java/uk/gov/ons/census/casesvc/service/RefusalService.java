@@ -2,7 +2,6 @@ package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.model.entity.RefusalType.EXTRAORDINARY_REFUSAL;
 import static uk.gov.ons.census.casesvc.utility.EventHelper.isEventChannelField;
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
 import java.time.OffsetDateTime;
@@ -82,7 +81,7 @@ public class RefusalService {
         description,
         EventType.REFUSAL_RECEIVED,
         refusalEvent.getEvent(),
-        convertObjectToJson(refusalEvent.getPayload().getRefusal()),
+        refusalEvent.getPayload().getRefusal(),
         messageTimestamp);
   }
 }

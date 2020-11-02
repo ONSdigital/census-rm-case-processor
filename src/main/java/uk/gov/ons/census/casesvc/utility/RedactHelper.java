@@ -7,8 +7,9 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 
 public class RedactHelper {
+  private static final String REDACTION_FAILURE = "Failed to redact sensitive data";
   private static final String REDACTION_TARGET = "setUac";
-  private static final String REDACT_TO_THIS_VALUE = "XxxxREDACTEDxxxX";
+  private static final String REDACT_TO_THIS_VALUE = "REDACTED";
   private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
 
   public static Object redact(Object rootObjectToRedact) {
@@ -16,10 +17,13 @@ public class RedactHelper {
       Object rootObjectToRedactDeepCopy =
           objectMapper.readValue(
               objectMapper.writeValueAsString(rootObjectToRedact), rootObjectToRedact.getClass());
-      recursivelyRedact(rootObjectToRedactDeepCopy, REDACTION_TARGET, rootObjectToRedactDeepCopy.getClass().getPackageName());
+      recursivelyRedact(
+          rootObjectToRedactDeepCopy,
+          REDACTION_TARGET,
+          rootObjectToRedactDeepCopy.getClass().getPackageName());
       return rootObjectToRedactDeepCopy;
     } catch (JsonProcessingException e) {
-      throw new RuntimeException("Failed to redact sensitive data", e);
+      throw new RuntimeException(REDACTION_FAILURE, e);
     }
   }
 
@@ -36,7 +40,7 @@ public class RedactHelper {
                     recursivelyRedact(invokeResult, methodTofind, packageName);
                   }
                 } catch (IllegalAccessException | InvocationTargetException e) {
-                  // Ignored
+                  throw new RuntimeException(REDACTION_FAILURE, e);
                 }
               }
 
@@ -45,7 +49,7 @@ public class RedactHelper {
                 try {
                   method.invoke(object, REDACT_TO_THIS_VALUE);
                 } catch (IllegalAccessException | InvocationTargetException e) {
-                  // Ignored
+                  throw new RuntimeException(REDACTION_FAILURE, e);
                 }
               }
             });

@@ -21,7 +21,6 @@ import uk.gov.ons.census.casesvc.model.dto.*;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.utility.AddressModificationValidator;
-import uk.gov.ons.census.casesvc.utility.JsonHelper;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AddressTypeChangeServiceTest {
@@ -78,7 +77,7 @@ public class AddressTypeChangeServiceTest {
             eq("Address type changed"),
             eq(EventType.ADDRESS_TYPE_CHANGED),
             eq(rme.getEvent()),
-            eq(JsonHelper.convertObjectToJson(addressTypeChange)),
+            eq(addressTypeChange),
             eq(messageTimestamp));
 
     ArgumentCaptor<Case> newCaseArgCaptor = ArgumentCaptor.forClass(Case.class);
@@ -119,7 +118,7 @@ public class AddressTypeChangeServiceTest {
             eq("Address type changed"),
             eq(EventType.ADDRESS_TYPE_CHANGED),
             eq(rme.getEvent()),
-            eq(JsonHelper.convertObjectToJson(addressTypeChange)),
+            eq(addressTypeChange),
             eq(messageTimestamp));
   }
 
@@ -173,7 +172,7 @@ public class AddressTypeChangeServiceTest {
             eq("Address type changed"),
             eq(EventType.ADDRESS_TYPE_CHANGED),
             eq(rme.getEvent()),
-            eq(JsonHelper.convertObjectToJson(addressTypeChange)),
+            eq(addressTypeChange),
             eq(messageTimestamp));
 
     ArgumentCaptor<Case> newCaseArgCaptor = ArgumentCaptor.forClass(Case.class);
@@ -219,7 +218,7 @@ public class AddressTypeChangeServiceTest {
             eq("Address type changed"),
             eq(EventType.ADDRESS_TYPE_CHANGED),
             eq(rme.getEvent()),
-            eq(JsonHelper.convertObjectToJson(addressTypeChange)),
+            eq(addressTypeChange),
             eq(messageTimestamp));
   }
 
@@ -271,7 +270,7 @@ public class AddressTypeChangeServiceTest {
             eq("Address type changed"),
             eq(EventType.ADDRESS_TYPE_CHANGED),
             eq(rme.getEvent()),
-            eq(JsonHelper.convertObjectToJson(addressTypeChange)),
+            eq(addressTypeChange),
             eq(messageTimestamp));
 
     ArgumentCaptor<Case> newCaseArgCaptor = ArgumentCaptor.forClass(Case.class);
@@ -292,7 +291,7 @@ public class AddressTypeChangeServiceTest {
             eq("Address type changed"),
             eq(EventType.ADDRESS_TYPE_CHANGED),
             eq(rme.getEvent()),
-            eq(JsonHelper.convertObjectToJson(addressTypeChange)),
+            eq(addressTypeChange),
             eq(messageTimestamp));
   }
 

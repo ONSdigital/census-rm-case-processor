@@ -20,10 +20,10 @@ public class RedactHelperTest {
 
     // WHEN
     // Cast is required for the test, but when we use this we only want Object anyway
-    ResponseManagementEvent rmeDeepCopy = (ResponseManagementEvent)RedactHelper.redact(rme);
+    ResponseManagementEvent rmeDeepCopy = (ResponseManagementEvent) RedactHelper.redact(rme);
 
     // THEN
-    assertThat(rmeDeepCopy.getPayload().getUacQidCreated().getUac()).isEqualTo("XxxxREDACTEDxxxX");
+    assertThat(rmeDeepCopy.getPayload().getUacQidCreated().getUac()).isEqualTo("REDACTED");
 
     // Extra check to make sure the original object wasn't accidentally mutated
     assertThat(rme.getPayload().getUacQidCreated().getUac())

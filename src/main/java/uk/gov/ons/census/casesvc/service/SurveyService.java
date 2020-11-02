@@ -1,7 +1,5 @@
 package uk.gov.ons.census.casesvc.service;
 
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
-
 import java.time.OffsetDateTime;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
@@ -46,7 +44,7 @@ public class SurveyService {
         "Survey launched",
         EventType.SURVEY_LAUNCHED,
         surveyEvent.getEvent(),
-        convertObjectToJson(surveyEvent.getPayload().getResponse()),
+        surveyEvent.getPayload().getResponse(),
         messageTimestamp);
   }
 
@@ -82,7 +80,7 @@ public class SurveyService {
         logEventDescription,
         logEventType,
         surveyEvent.getEvent(),
-        convertObjectToJson(logEventPayload),
+        logEventPayload,
         messageTimestamp);
 
     return false;

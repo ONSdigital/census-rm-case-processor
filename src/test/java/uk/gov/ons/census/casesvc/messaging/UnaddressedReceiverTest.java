@@ -56,7 +56,7 @@ public class UnaddressedReceiverTest {
             eq("Unaddressed UAC/QID pair created"),
             any(EventType.class),
             any(EventDTO.class),
-            anyString(),
+            any(),
             eq(expectedDate));
   }
 }

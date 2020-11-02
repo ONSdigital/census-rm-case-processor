@@ -156,7 +156,7 @@ public class FulfilmentRequestReceiverIT {
         UacCreatedDTO actualUacCreated = payload.getFulfilmentRequest().getUacQidCreated();
         assertThat(actualUacCreated.getCaseId()).isEqualTo(TEST_CASE_ID);
         assertThat(actualUacCreated.getQid()).isEqualTo("123");
-        assertThat(actualUacCreated.getUac()).isEqualTo(uacQidCreated.getUac());
+        assertThat(actualUacCreated.getUac()).isEqualTo("REDACTED");
         remainingMatches--;
       } else {
         fail("Unexpected event logged");
@@ -288,7 +288,7 @@ public class FulfilmentRequestReceiverIT {
           UacCreatedDTO actualUacCreated = payload.getFulfilmentRequest().getUacQidCreated();
           assertThat(actualUacCreated.getCaseId()).isEqualTo(TEST_INDIVIDUAL_CASE_ID);
           assertThat(actualUacCreated.getQid()).isEqualTo("123");
-          assertThat(actualUacCreated.getUac()).isEqualTo(uacQidCreated.getUac());
+          assertThat(actualUacCreated.getUac()).isEqualTo("REDACTED");
           remainingMatches--;
         } else {
           fail("Unexpected event loggeed");

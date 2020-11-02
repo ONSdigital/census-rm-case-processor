@@ -1,7 +1,6 @@
 package uk.gov.ons.census.casesvc.messaging;
 
 import static uk.gov.ons.census.casesvc.utility.EventHelper.createEventDTO;
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import static uk.gov.ons.census.casesvc.utility.MsgDateHelper.getMsgTimeStamp;
 
 import java.time.OffsetDateTime;
@@ -50,7 +49,7 @@ public class UnaddressedReceiver {
         "Unaddressed UAC/QID pair created",
         EventType.UAC_UPDATED,
         createEventDTO(EventTypeDTO.UAC_UPDATED),
-        convertObjectToJson(uacPayloadDTO),
+        uacPayloadDTO,
         messageTimestamp);
   }
 }
