@@ -37,28 +37,50 @@ public class RmCaseUpdatedService {
 
   public void processMessage(ResponseManagementEvent rme, OffsetDateTime messageTimestamp) {
     RmCaseUpdated rmCaseUpdated = rme.getPayload().getRmCaseUpdated();
-    Case updatedCase = caseService.getCaseByCaseId(rmCaseUpdated.getCaseId());
+    Case caze = caseService.getCaseByCaseId(rmCaseUpdated.getCaseId());
 
     validateRmCaseUpdated(rmCaseUpdated);
 
-    updateCase(updatedCase, rmCaseUpdated);
+    boolean oaNotPresentOnOriginalCase = StringUtils.isEmpty(caze.getOa());
+    boolean fieldCoordinatorIdNotPresentOnOriginalCase =
+        StringUtils.isEmpty(caze.getFieldCoordinatorId());
+
+    updateCase(caze, rmCaseUpdated);
 
     // Check the case now has all mandatory fields
-    validateCase(updatedCase);
+    validateCase(caze);
 
     // Only remove the skeleton flag once the case has passed validation
-    updatedCase.setSkeleton(false);
+    caze.setSkeleton(false);
 
     Metadata eventMetadata = null;
-    if (shouldSendCaseToField(updatedCase, rme.getEvent().getChannel())) {
+    if (shouldSendCaseToField(caze, rme.getEvent().getChannel())) {
       eventMetadata = new Metadata();
       eventMetadata.setCauseEventType(rme.getEvent().getType());
-      eventMetadata.setFieldDecision(ActionInstructionType.CREATE);
+
+      // **** HERE BE DRAGONS ****
+      // Apologies, but a hack on top of a hack has been forced onto RM. We have been forced into
+      // implementing the following:
+      //
+      // "The logic we need is:
+      // if (case before update didn't have OA) or (case before update didn't have field coord ID):
+      // send field CREATE
+      // else: send field UPDATE"
+      //
+      // Literally quoted from the ticket:
+      // https://trello.com/c/i6xdQWau/1628-field-address-update-create-update-decision-hack-13
+      //
+      // Sorry.
+      if (oaNotPresentOnOriginalCase || fieldCoordinatorIdNotPresentOnOriginalCase) {
+        eventMetadata.setFieldDecision(ActionInstructionType.CREATE);
+      } else {
+        eventMetadata.setFieldDecision(ActionInstructionType.UPDATE);
+      }
     }
 
-    caseService.saveCaseAndEmitCaseUpdatedEvent(updatedCase, eventMetadata);
+    caseService.saveCaseAndEmitCaseUpdatedEvent(caze, eventMetadata);
     eventLogger.logCaseEvent(
-        updatedCase,
+        caze,
         rme.getEvent().getDateTime(),
         EVENT_DESCRIPTION,
         EventType.RM_CASE_UPDATED,

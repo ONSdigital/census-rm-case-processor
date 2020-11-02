@@ -27,4 +27,5 @@ public class PayloadDTO {
   private AddressModification addressModification;
   private AddressTypeChange addressTypeChange;
   private RmCaseUpdated rmCaseUpdated;
+  private RmUnInvalidateAddress rmUnInvalidateAddress;
 }

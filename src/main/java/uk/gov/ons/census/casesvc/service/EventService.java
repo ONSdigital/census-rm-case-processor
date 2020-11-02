@@ -43,15 +43,16 @@ public class EventService {
             caze.getCaseType(), caze.getRegion(), caze.getAddressLevel());
     if (createCaseSample.isBulkProcessed()) {
       caseService.saveCaseAndEmitCaseCreatedEvent(
-          caze, buildMetadata(EventTypeDTO.SAMPLE_LOADED, ActionInstructionType.CREATE));
+          caze,
+          buildMetadata(EventTypeDTO.CLERICAL_ADDRESS_RESOLUTION, ActionInstructionType.CREATE));
 
       eventLogger.logCaseEvent(
           caze,
           OffsetDateTime.now(),
           CREATE_BULK_CASE_SAMPLE_RECEIVED,
-          EventType.SAMPLE_LOADED,
+          EventType.CLERICAL_ADDRESS_RESOLUTION,
           createEventDTO(
-              EventTypeDTO.SAMPLE_LOADED,
+              EventTypeDTO.CLERICAL_ADDRESS_RESOLUTION,
               BULK_PROCESSING_EVENT_CHANNEL,
               BULK_PROCESSING_EVENT_SOURCE),
           convertObjectToJson(createCaseSample),

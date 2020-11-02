@@ -35,6 +35,7 @@ import uk.gov.ons.census.casesvc.model.dto.NewAddress;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
+import uk.gov.ons.census.casesvc.model.entity.CaseMetadata;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.utility.JsonHelper;
 
@@ -64,6 +65,7 @@ public class NewAddressReportedServiceTest {
     address.setRegion("W");
     address.setAddressLevel("E");
     address.setAddressType("HH");
+    address.setSecureType(false);
     collectionCase.setAddress(address);
 
     NewAddress newAddress = new NewAddress();
@@ -108,6 +110,235 @@ public class NewAddressReportedServiceTest {
             eq(eventDTO),
             eq(JsonHelper.convertObjectToJson(newAddressEvent.getPayload().getNewAddress())),
             eq(expectedDateTime));
+  }
+
+  @Test
+  public void testNoSourceIdCeCaseTypeSecureEstablishmentIsTrue() {
+    // given
+    EasyRandom easyRandom = new EasyRandom();
+    CollectionCase collectionCase = easyRandom.nextObject(CollectionCase.class);
+    collectionCase.setId(UUID.randomUUID());
+    collectionCase.setCaseRef(null);
+    collectionCase.setCaseType("CE");
+
+    Address address = collectionCase.getAddress();
+    address.setRegion("W");
+    address.setAddressLevel("E");
+    address.setAddressType("CE");
+    address.setSecureType(true);
+
+    collectionCase.setAddress(address);
+
+    NewAddress newAddress = new NewAddress();
+    newAddress.setCollectionCase(collectionCase);
+
+    PayloadDTO payloadDTO = new PayloadDTO();
+    payloadDTO.setNewAddress(newAddress);
+    ResponseManagementEvent newAddressEvent = new ResponseManagementEvent();
+    newAddressEvent.setPayload(payloadDTO);
+    EventDTO eventDTO = new EventDTO();
+    eventDTO.setDateTime(OffsetDateTime.now().minusSeconds(10));
+    newAddressEvent.setEvent(eventDTO);
+
+    Case casetoEmit = new Case();
+    ReflectionTestUtils.setField(underTest, "censusActionPlanId", EXPECTED_ACTION_PLAN_ID);
+
+    when(pubSubTemplate.publish(any(), any(ResponseManagementEvent.class)))
+        .thenReturn(mockFuture());
+    when(caseService.saveNewCaseAndStampCaseRef(any(Case.class))).thenReturn(casetoEmit);
+    OffsetDateTime expectedDateTime = OffsetDateTime.now();
+
+    // When
+    underTest.processNewAddress(newAddressEvent, expectedDateTime);
+
+    // Then
+    Case expectedCase = getExpectedCase(collectionCase);
+
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseService).saveNewCaseAndStampCaseRef(caseArgumentCaptor.capture());
+    Case actualCase = caseArgumentCaptor.getValue();
+    actualCase.setCreatedDateTime(expectedCase.getCreatedDateTime());
+    assertThat(actualCase).isEqualToComparingFieldByFieldRecursively(expectedCase);
+
+    verify(caseService).emitCaseCreatedEvent(casetoEmit);
+
+    verify(eventLogger)
+        .logCaseEvent(
+            eq(casetoEmit),
+            eq(eventDTO.getDateTime()),
+            eq("New Address reported"),
+            eq(EventType.NEW_ADDRESS_REPORTED),
+            eq(eventDTO),
+            eq(JsonHelper.convertObjectToJson(newAddressEvent.getPayload().getNewAddress())),
+            eq(expectedDateTime));
+  }
+
+  @Test
+  public void testSourceIdCeCaseTypeSecureEstablishmentIsTrueOnEvent() {
+    ReflectionTestUtils.setField(underTest, "dummyUprnPrefix", DUMMY_UPRN_PREFIX);
+
+    EasyRandom easyRandom = new EasyRandom();
+    Case sourceCase = easyRandom.nextObject(Case.class);
+    sourceCase.setCaseId(UUID.randomUUID());
+    sourceCase.getMetadata().setSecureEstablishment(false);
+
+    ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
+    newAddressEvent
+        .getPayload()
+        .getNewAddress()
+        .getCollectionCase()
+        .getAddress()
+        .setSecureType(true);
+    newAddressEvent
+        .getPayload()
+        .getNewAddress()
+        .getCollectionCase()
+        .getAddress()
+        .setAddressType("CE");
+    newAddressEvent.getPayload().getNewAddress().getCollectionCase().getAddress().setUprn("TEST");
+    OffsetDateTime timeNow = OffsetDateTime.now();
+    newAddressEvent.getEvent().setChannel("FIELD");
+
+    when(caseService.getCaseByCaseId(any())).thenReturn(sourceCase);
+    when(caseService.saveNewCaseAndStampCaseRef(any())).then(returnsFirstArg());
+
+    underTest.processNewAddressFromSourceId(newAddressEvent, timeNow, sourceCase.getCaseId());
+
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseService).saveNewCaseAndStampCaseRef(caseArgumentCaptor.capture());
+    Case newCase = caseArgumentCaptor.getAllValues().get(0);
+
+    CollectionCase newAddressCollectionCase =
+        newAddressEvent.getPayload().getNewAddress().getCollectionCase();
+
+    assertThat(newCase.isSkeleton()).isTrue();
+    assertThat(newCase.getAddressLine1()).isEqualTo(sourceCase.getAddressLine1());
+    assertThat(newCase.getAddressLine2()).isEqualTo(sourceCase.getAddressLine2());
+    assertThat(newCase.getAddressLine3()).isEqualTo(sourceCase.getAddressLine3());
+
+    assertThat(newCase.getCaseId()).isEqualTo(newAddressCollectionCase.getId());
+    assertThat(newCase.getAddressType())
+        .isEqualTo(newAddressCollectionCase.getAddress().getAddressType());
+
+    assertThat(newCase.getEstabUprn()).isEqualTo(sourceCase.getEstabUprn());
+    assertThat(newCase.getMetadata().getSecureEstablishment()).isTrue();
+
+    assertThat(newCase.getLongitude()).isEqualTo(sourceCase.getLongitude());
+    assertThat(newCase.getLatitude()).isEqualTo(sourceCase.getLatitude());
+  }
+
+  @Test
+  public void testNoSourceIdCeCaseTypeSecureEstablishmentIsFalse() {
+    // given
+    EasyRandom easyRandom = new EasyRandom();
+    CollectionCase collectionCase = easyRandom.nextObject(CollectionCase.class);
+    collectionCase.setId(UUID.randomUUID());
+    collectionCase.setCaseRef(null);
+    collectionCase.setCaseType("CE");
+
+    Address address = collectionCase.getAddress();
+    address.setRegion("W");
+    address.setAddressLevel("E");
+    address.setAddressType("CE");
+    address.setSecureType(false);
+    collectionCase.setAddress(address);
+
+    NewAddress newAddress = new NewAddress();
+    newAddress.setCollectionCase(collectionCase);
+
+    PayloadDTO payloadDTO = new PayloadDTO();
+    payloadDTO.setNewAddress(newAddress);
+    ResponseManagementEvent newAddressEvent = new ResponseManagementEvent();
+    newAddressEvent.setPayload(payloadDTO);
+    EventDTO eventDTO = new EventDTO();
+    eventDTO.setDateTime(OffsetDateTime.now().minusSeconds(10));
+    newAddressEvent.setEvent(eventDTO);
+
+    Case casetoEmit = new Case();
+    ReflectionTestUtils.setField(underTest, "censusActionPlanId", EXPECTED_ACTION_PLAN_ID);
+
+    when(pubSubTemplate.publish(any(), any(ResponseManagementEvent.class)))
+        .thenReturn(mockFuture());
+    when(caseService.saveNewCaseAndStampCaseRef(any(Case.class))).thenReturn(casetoEmit);
+    OffsetDateTime expectedDateTime = OffsetDateTime.now();
+
+    // When
+    underTest.processNewAddress(newAddressEvent, expectedDateTime);
+
+    // Then
+    Case expectedCase = getExpectedCase(collectionCase);
+
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseService).saveNewCaseAndStampCaseRef(caseArgumentCaptor.capture());
+    Case actualCase = caseArgumentCaptor.getValue();
+    actualCase.setCreatedDateTime(expectedCase.getCreatedDateTime());
+    assertThat(actualCase).isEqualToComparingFieldByFieldRecursively(expectedCase);
+
+    verify(caseService).emitCaseCreatedEvent(casetoEmit);
+
+    verify(eventLogger)
+        .logCaseEvent(
+            eq(casetoEmit),
+            eq(eventDTO.getDateTime()),
+            eq("New Address reported"),
+            eq(EventType.NEW_ADDRESS_REPORTED),
+            eq(eventDTO),
+            eq(JsonHelper.convertObjectToJson(newAddressEvent.getPayload().getNewAddress())),
+            eq(expectedDateTime));
+  }
+
+  @Test
+  public void testSourceIdCeCaseTypeSecureEstablishmentIsFalseOnEvent() {
+    ReflectionTestUtils.setField(underTest, "dummyUprnPrefix", DUMMY_UPRN_PREFIX);
+
+    EasyRandom easyRandom = new EasyRandom();
+    Case sourceCase = easyRandom.nextObject(Case.class);
+    sourceCase.setCaseId(UUID.randomUUID());
+    sourceCase.getMetadata().setSecureEstablishment(true);
+
+    ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
+    newAddressEvent
+        .getPayload()
+        .getNewAddress()
+        .getCollectionCase()
+        .getAddress()
+        .setSecureType(false);
+    newAddressEvent
+        .getPayload()
+        .getNewAddress()
+        .getCollectionCase()
+        .getAddress()
+        .setAddressType("CE");
+    newAddressEvent.getPayload().getNewAddress().getCollectionCase().getAddress().setUprn("TEST");
+    OffsetDateTime timeNow = OffsetDateTime.now();
+    newAddressEvent.getEvent().setChannel("FIELD");
+
+    when(caseService.getCaseByCaseId(any())).thenReturn(sourceCase);
+    when(caseService.saveNewCaseAndStampCaseRef(any())).then(returnsFirstArg());
+
+    underTest.processNewAddressFromSourceId(newAddressEvent, timeNow, sourceCase.getCaseId());
+
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseService).saveNewCaseAndStampCaseRef(caseArgumentCaptor.capture());
+    Case newCase = caseArgumentCaptor.getAllValues().get(0);
+
+    CollectionCase newAddressCollectionCase =
+        newAddressEvent.getPayload().getNewAddress().getCollectionCase();
+
+    assertThat(newCase.isSkeleton()).isTrue();
+    assertThat(newCase.getAddressLine1()).isEqualTo(sourceCase.getAddressLine1());
+    assertThat(newCase.getAddressLine2()).isEqualTo(sourceCase.getAddressLine2());
+    assertThat(newCase.getAddressLine3()).isEqualTo(sourceCase.getAddressLine3());
+
+    assertThat(newCase.getCaseId()).isEqualTo(newAddressCollectionCase.getId());
+    assertThat(newCase.getAddressType())
+        .isEqualTo(newAddressCollectionCase.getAddress().getAddressType());
+
+    assertThat(newCase.getEstabUprn()).isEqualTo(sourceCase.getEstabUprn());
+    assertThat(newCase.getMetadata().getSecureEstablishment()).isFalse();
+
+    assertThat(newCase.getLongitude()).isEqualTo(sourceCase.getLongitude());
+    assertThat(newCase.getLatitude()).isEqualTo(sourceCase.getLatitude());
   }
 
   @Test
@@ -197,7 +428,7 @@ public class NewAddressReportedServiceTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void testMssingRegion() {
+  public void testMissingRegion() {
     ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
     newAddressEvent.getPayload().getNewAddress().getCollectionCase().getAddress().setRegion(null);
 
@@ -743,6 +974,10 @@ public class NewAddressReportedServiceTest {
     expectedCase.setFieldCoordinatorId(collectionCase.getFieldCoordinatorId());
     expectedCase.setFieldOfficerId(collectionCase.getFieldOfficerId());
     expectedCase.setCeExpectedCapacity(collectionCase.getCeExpectedCapacity());
+
+    CaseMetadata caseMetadata = new CaseMetadata();
+    caseMetadata.setSecureEstablishment(collectionCase.getAddress().getSecureType());
+    expectedCase.setMetadata(caseMetadata);
 
     expectedCase.setActionPlanId(EXPECTED_ACTION_PLAN_ID);
     expectedCase.setSurvey("CENSUS");

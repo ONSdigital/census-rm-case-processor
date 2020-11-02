@@ -19,7 +19,6 @@ import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.dto.SampleUnitDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.CaseMetadata;
-import uk.gov.ons.census.casesvc.model.entity.RefusalType;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.utility.CaseRefGenerator;
 import uk.gov.ons.census.casesvc.utility.EventHelper;
@@ -106,15 +105,12 @@ public class CaseService {
     return directDeliveryTreatmentCodes.contains(treatmentCode);
   }
 
-  public Case createCCSCase(
-      UUID caseId, SampleUnitDTO sampleUnit, RefusalType refusal, boolean isInvalidAddress) {
+  public Case createCCSCase(UUID caseId, SampleUnitDTO sampleUnit) {
     Case caze = mapperFacade.map(sampleUnit, Case.class);
     caze.setCaseType(sampleUnit.getAddressType());
     caze.setCaseId(caseId);
     caze.setActionPlanId(actionPlanId);
     caze.setCollectionExerciseId(collectionExerciseId);
-    caze.setRefusalReceived(refusal);
-    caze.setAddressInvalid(isInvalidAddress);
     caze.setSurvey(CCS_SURVEY);
 
     return saveNewCaseAndStampCaseRef(caze);
@@ -215,6 +211,11 @@ public class CaseService {
     if (caze.getRegion() != null) {
       address.setRegion(caze.getRegion().substring(0, 1));
     }
+
+    if (caze.getMetadata() != null) {
+      address.setSecureType(caze.getMetadata().getSecureEstablishment());
+    }
+
     return address;
   }
 
