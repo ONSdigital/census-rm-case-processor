@@ -333,7 +333,7 @@ public class DataUtils {
     Case caze = new Case();
     caze.setCaseType("CE");
     caze.setRegion("E");
-    caze.setEstabType("House Of ill repute");
+    caze.setEstabType("The Elect");
     caze.setFieldOfficerId("007");
     caze.setFieldCoordinatorId("M");
     caze.setOa("OA OA, OA OA");

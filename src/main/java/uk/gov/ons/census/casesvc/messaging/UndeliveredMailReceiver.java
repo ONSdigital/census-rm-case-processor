@@ -18,6 +18,7 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.service.CaseService;
 import uk.gov.ons.census.casesvc.service.UacService;
+import uk.gov.ons.census.casesvc.utility.FieldworkHelper;
 
 @MessageEndpoint
 public class UndeliveredMailReceiver {
@@ -52,7 +53,7 @@ public class UndeliveredMailReceiver {
               Long.parseLong(event.getPayload().getFulfilmentInformation().getCaseRef()));
     }
 
-    if (shouldEmitCaseUpdated(caze)) {
+    if (FieldworkHelper.shouldSendCaseToField(caze)) {
       caseService.saveCaseAndEmitCaseUpdatedEvent(
           caze, buildMetadata(event.getEvent().getType(), ActionInstructionType.UPDATE));
     }
@@ -76,13 +77,5 @@ public class UndeliveredMailReceiver {
           convertObjectToJson(event.getPayload().getFulfilmentInformation()),
           messageTimestamp);
     }
-  }
-
-  private boolean shouldEmitCaseUpdated(Case caze) {
-    return caze.getRefusalReceived() == null
-        && !caze.isAddressInvalid()
-        && !caze.isReceiptReceived()
-        && !(caze.getRegion().startsWith("N") && caze.getCaseType().equals("CE"))
-        && !StringUtils.isEmpty(caze.getFieldCoordinatorId());
   }
 }

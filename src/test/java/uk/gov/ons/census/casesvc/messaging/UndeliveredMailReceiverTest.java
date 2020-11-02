@@ -24,6 +24,7 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.service.CaseService;
 import uk.gov.ons.census.casesvc.service.UacService;
+import uk.gov.ons.census.casesvc.testutil.DataUtils;
 import uk.gov.ons.census.casesvc.utility.MsgDateHelper;
 
 public class UndeliveredMailReceiverTest {
@@ -197,7 +198,7 @@ public class UndeliveredMailReceiverTest {
     event.getPayload().setFulfilmentInformation(new FulfilmentInformation());
     event.getPayload().getFulfilmentInformation().setCaseRef(Long.toString(TEST_CASE_REF));
 
-    Case caze = new Case();
+    Case caze = DataUtils.getCaseThatWillPassFieldWorkHelper();
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setCaze(caze);
 
@@ -209,15 +210,16 @@ public class UndeliveredMailReceiverTest {
     Message<ResponseManagementEvent> message = constructMessageWithValidTimeStamp(event);
 
     // Given
-    when(caseService.getCaseByCaseRef(eq(TEST_CASE_REF))).thenReturn(caze);
-
-    // When
     caze.setReceiptReceived(false);
     caze.setRefusalReceived(null);
     caze.setAddressInvalid(false);
     caze.setRegion("E123456");
     caze.setCaseType("CE");
     caze.setFieldCoordinatorId("fieldCord123");
+
+    when(caseService.getCaseByCaseRef(eq(TEST_CASE_REF))).thenReturn(caze);
+
+    // When
     underTest.receiveMessage(message);
 
     // Then
