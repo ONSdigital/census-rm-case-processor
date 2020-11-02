@@ -45,7 +45,9 @@ public class AddressTypeChangeService {
     if (oldCase.getCaseType().equals("HI")) {
       throw new RuntimeException("Cannot change case of type HI");
     }
-    addressModificationValidator.validate(addressTypeChange.getCollectionCase().getAddress());
+    addressModificationValidator.validate(
+        addressTypeChange.getCollectionCase().getAddress(),
+        responseManagementEvent.getEvent().getChannel());
 
     invalidateOldCase(responseManagementEvent, messageTimestamp, addressTypeChange, oldCase);
 

@@ -37,29 +37,50 @@ public class RmCaseUpdatedService {
 
   public void processMessage(ResponseManagementEvent rme, OffsetDateTime messageTimestamp) {
     RmCaseUpdated rmCaseUpdated = rme.getPayload().getRmCaseUpdated();
-    Case caseToUpdate = caseService.getCaseByCaseId(rmCaseUpdated.getCaseId());
-    ActionInstructionType createOrUpdate = getCreateOrUpdateForField(caseToUpdate);
+    Case caze = caseService.getCaseByCaseId(rmCaseUpdated.getCaseId());
 
     validateRmCaseUpdated(rmCaseUpdated);
 
-    updateCase(caseToUpdate, rmCaseUpdated);
+    boolean oaNotPresentOnOriginalCase = StringUtils.isEmpty(caze.getOa());
+    boolean fieldCoordinatorIdNotPresentOnOriginalCase =
+        StringUtils.isEmpty(caze.getFieldCoordinatorId());
+
+    updateCase(caze, rmCaseUpdated);
 
     // Check the case now has all mandatory fields
-    validateCase(caseToUpdate);
+    validateCase(caze);
 
     // Only remove the skeleton flag once the case has passed validation
-    caseToUpdate.setSkeleton(false);
+    caze.setSkeleton(false);
 
     Metadata eventMetadata = null;
-    if (shouldSendCaseToField(caseToUpdate)) {
+    if (shouldSendCaseToField(caze, rme.getEvent().getChannel())) {
       eventMetadata = new Metadata();
       eventMetadata.setCauseEventType(rme.getEvent().getType());
-      eventMetadata.setFieldDecision(createOrUpdate);
+
+      // **** HERE BE DRAGONS ****
+      // Apologies, but a hack on top of a hack has been forced onto RM. We have been forced into
+      // implementing the following:
+      //
+      // "The logic we need is:
+      // if (case before update didn't have OA) or (case before update didn't have field coord ID):
+      // send field CREATE
+      // else: send field UPDATE"
+      //
+      // Literally quoted from the ticket:
+      // https://trello.com/c/i6xdQWau/1628-field-address-update-create-update-decision-hack-13
+      //
+      // Sorry.
+      if (oaNotPresentOnOriginalCase || fieldCoordinatorIdNotPresentOnOriginalCase) {
+        eventMetadata.setFieldDecision(ActionInstructionType.CREATE);
+      } else {
+        eventMetadata.setFieldDecision(ActionInstructionType.UPDATE);
+      }
     }
 
-    caseService.saveCaseAndEmitCaseUpdatedEvent(caseToUpdate, eventMetadata);
+    caseService.saveCaseAndEmitCaseUpdatedEvent(caze, eventMetadata);
     eventLogger.logCaseEvent(
-        caseToUpdate,
+        caze,
         rme.getEvent().getDateTime(),
         EVENT_DESCRIPTION,
         EventType.RM_CASE_UPDATED,
@@ -224,13 +245,5 @@ public class RmCaseUpdatedService {
         || StringUtils.isEmpty(caze.getFieldOfficerId())) {
       throw new RuntimeException("Case missing mandatory fields after RM Case Updated");
     }
-  }
-
-  private ActionInstructionType getCreateOrUpdateForField(Case caze) {
-    if (caze.getOa() != null || caze.getFieldCoordinatorId() == null) {
-      return ActionInstructionType.UPDATE;
-    }
-
-    return ActionInstructionType.CREATE;
   }
 }
