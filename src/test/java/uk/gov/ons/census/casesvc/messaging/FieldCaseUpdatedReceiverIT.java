@@ -65,7 +65,7 @@ public class FieldCaseUpdatedReceiverIT {
     caze.setUacQidLinks(null);
     caze.setEvents(null);
     caze.setCaseType("CE");
-    caze.setAddressLevel("E");
+    caze.setAddressLevel("U");
     caze.setCeActualResponses(5);
     caze.setCeExpectedCapacity(8);
     caze.setAddressInvalid(false);
@@ -75,7 +75,7 @@ public class FieldCaseUpdatedReceiverIT {
   }
 
   @Test
-  public void testNoCancelSentWhenCeExpectedCapacityUpdated() throws Exception {
+  public void testUpdateSentWhenCeExpectedCapacityUpdated() throws Exception {
     try (QueueSpy fieldOutboundQueue = rabbitQueueHelper.listen(caseUpdatedQueueName)) {
 
       ResponseManagementEvent managementEvent = getTestResponseManagementFieldUpdatedEvent();
@@ -102,8 +102,10 @@ public class FieldCaseUpdatedReceiverIT {
       assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID);
       assertThat(actualCollectionCase.getCeExpectedCapacity()).isEqualTo(6);
 
-      // check the metadata does NOT have a CANCEL decision
-      assertThat(responseManagementEvent.getPayload().getMetadata().getFieldDecision()).isNull();
+      // check the metadata has a UPDATE decision
+      // check the metadata is included with field UPDATE decision
+      assertThat(responseManagementEvent.getPayload().getMetadata().getFieldDecision())
+          .isEqualTo(ActionInstructionType.UPDATE);
       assertThat(responseManagementEvent.getPayload().getMetadata().getCauseEventType())
           .isEqualTo(EventTypeDTO.FIELD_CASE_UPDATED);
 
