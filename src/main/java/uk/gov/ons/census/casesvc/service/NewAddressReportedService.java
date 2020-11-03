@@ -118,7 +118,7 @@ public class NewAddressReportedService {
     }
 
     Metadata metadata =
-        getMetaDataToCreateFieldCaseIfConditionsMet(newCaseFromSourceCase, newAddressEvent);
+        getMetaDataToCreateFieldCaseIfConditionsMet(newAddressEvent);
 
     caseService.saveCaseAndEmitCaseCreatedEvent(newCaseFromSourceCase, metadata);
 
@@ -132,12 +132,7 @@ public class NewAddressReportedService {
         messageTimestamp);
   }
 
-  private Metadata getMetaDataToCreateFieldCaseIfConditionsMet(
-      Case caze, ResponseManagementEvent newAddressEvent) {
-
-    if (!caze.getCaseType().equals("SPG") && !caze.getCaseType().equals("CE")) {
-      return null;
-    }
+  private Metadata getMetaDataToCreateFieldCaseIfConditionsMet(ResponseManagementEvent newAddressEvent) {
 
     if (!newAddressEvent.getEvent().getChannel().equals("FIELD")) {
       return null;

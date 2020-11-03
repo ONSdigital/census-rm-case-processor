@@ -850,7 +850,32 @@ public class NewAddressReportedServiceTest {
     // When
     underTest.processNewAddressFromSourceId(newAddressEvent, timeNow, sourceCase.getCaseId());
 
-    verify(caseService).saveCaseAndEmitCaseCreatedEvent(any(), eq(null));
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseService).saveNewCaseAndStampCaseRef(caseArgumentCaptor.capture());
+    Case newCase = caseArgumentCaptor.getAllValues().get(0);
+
+    CollectionCase newAddressCollectionCase =
+        newAddressEvent.getPayload().getNewAddress().getCollectionCase();
+
+    assertThat(newCase.getAddressLine1())
+        .isEqualTo(newAddressCollectionCase.getAddress().getAddressLine1());
+    assertThat(newCase.getCaseId()).isEqualTo(newAddressCollectionCase.getId());
+    assertThat(newCase.getAddressType())
+        .isEqualTo(newAddressCollectionCase.getAddress().getAddressType());
+    assertThat(newCase.getEstabUprn()).isEqualTo(sourceCase.getEstabUprn());
+
+    ArgumentCaptor<Metadata> metadataArgumentCaptor = ArgumentCaptor.forClass(Metadata.class);
+
+    verify(caseService)
+        .saveCaseAndEmitCaseCreatedEvent(
+            caseArgumentCaptor.capture(), metadataArgumentCaptor.capture());
+
+    assertThat(caseArgumentCaptor.getValue().getCaseId())
+        .isEqualTo(newAddressCollectionCase.getId());
+
+    Metadata actualMetadata = metadataArgumentCaptor.getValue();
+    assertThat(actualMetadata.getCauseEventType()).isEqualTo(EventTypeDTO.NEW_ADDRESS_REPORTED);
+    assertThat(actualMetadata.getFieldDecision()).isEqualTo(ActionInstructionType.CREATE);
   }
 
   @Test

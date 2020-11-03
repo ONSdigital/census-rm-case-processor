@@ -7,6 +7,11 @@ spring:
     initialization-mode: always
     hikari:
       maximumPoolSize: 50
+  cloud:
+    gcp:
+      pubsub:
+        emulator-host: localhost:8538
+        project-id: aims-new-address-project
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQL94Dialect
