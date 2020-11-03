@@ -7,6 +7,7 @@ spring:
     initialization-mode: always
     hikari:
       maximumPoolSize: 50
+
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQL94Dialect
     hibernate:
