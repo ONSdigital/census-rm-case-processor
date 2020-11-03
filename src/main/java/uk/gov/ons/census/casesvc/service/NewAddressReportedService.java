@@ -117,8 +117,7 @@ public class NewAddressReportedService {
       newCaseFromSourceCase.setEstabUprn(newCaseFromSourceCase.getUprn());
     }
 
-    Metadata metadata =
-        getMetaDataToCreateFieldCaseIfConditionsMet(newAddressEvent);
+    Metadata metadata = getMetaDataToCreateFieldCaseIfConditionsMet(newAddressEvent);
 
     caseService.saveCaseAndEmitCaseCreatedEvent(newCaseFromSourceCase, metadata);
 
@@ -132,7 +131,8 @@ public class NewAddressReportedService {
         messageTimestamp);
   }
 
-  private Metadata getMetaDataToCreateFieldCaseIfConditionsMet(ResponseManagementEvent newAddressEvent) {
+  private Metadata getMetaDataToCreateFieldCaseIfConditionsMet(
+      ResponseManagementEvent newAddressEvent) {
 
     if (!newAddressEvent.getEvent().getChannel().equals("FIELD")) {
       return null;
