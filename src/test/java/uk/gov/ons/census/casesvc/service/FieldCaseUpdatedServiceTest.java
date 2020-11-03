@@ -17,16 +17,11 @@ import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.*;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
-import uk.gov.ons.census.casesvc.utility.MetadataHelper;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FieldCaseUpdatedServiceTest {
 
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
-  private static final String EXCEPTION_MESSAGE =
-      String.format(
-          "Failed to get row for field case updates, row is probably locked and this should resolve itself: %s",
-          TEST_CASE_ID);
 
   @Mock private CaseService caseService;
 
@@ -34,12 +29,10 @@ public class FieldCaseUpdatedServiceTest {
 
   @Mock private CaseRepository caseRepository;
 
-  @Mock private MetadataHelper metadataHelper;
-
   @InjectMocks FieldCaseUpdatedService underTest;
 
   @Test
-  public void testProcessFieldCaseUpdatedEventHappyPath() {
+  public void testProcessFieldCaseUpdatedEventResultsInFieldCancel() {
 
     // Given
     ResponseManagementEvent managementEvent = getTestResponseManagementFieldUpdatedEvent();
@@ -50,6 +43,7 @@ public class FieldCaseUpdatedServiceTest {
     Case testCase = getRandomCase();
     testCase.setCaseId(TEST_CASE_ID);
     testCase.setCaseType("CE");
+    testCase.setAddressLevel("U");
     testCase.setCeExpectedCapacity(9);
     testCase.setCeActualResponses(8);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
@@ -82,7 +76,8 @@ public class FieldCaseUpdatedServiceTest {
   }
 
   @Test
-  public void testProcessFieldCaseUpdatedEventNoCancelSent() {
+  public void testProcessFieldCaseUpdatedEventResultsInFieldUpdate() {
+
     // Given
     ResponseManagementEvent managementEvent = getTestResponseManagementFieldUpdatedEvent();
 
@@ -92,6 +87,50 @@ public class FieldCaseUpdatedServiceTest {
     Case testCase = getRandomCase();
     testCase.setCaseId(TEST_CASE_ID);
     testCase.setCaseType("CE");
+    testCase.setAddressLevel("U");
+    testCase.setCeExpectedCapacity(9);
+    testCase.setCeActualResponses(3);
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+
+    when(caseService.getCaseAndLockIt(eq(TEST_CASE_ID))).thenReturn(testCase);
+
+    // When
+    underTest.processFieldCaseUpdatedEvent(managementEvent, messageTimestamp);
+
+    // Then
+
+    InOrder inOrder = Mockito.inOrder(caseRepository, eventLogger, caseService);
+
+    inOrder.verify(caseService).getCaseAndLockIt(any(UUID.class));
+
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    ArgumentCaptor<Metadata> metadataArgumentCaptor = ArgumentCaptor.forClass(Metadata.class);
+
+    inOrder
+        .verify(caseService)
+        .saveCaseAndEmitCaseUpdatedEvent(
+            caseArgumentCaptor.capture(), metadataArgumentCaptor.capture());
+    Case caze = caseArgumentCaptor.getValue();
+    Metadata metadata = metadataArgumentCaptor.getValue();
+
+    assertThat(caze.getCeExpectedCapacity()).isEqualTo(5);
+
+    assertThat(metadata.getFieldDecision()).isEqualTo(ActionInstructionType.UPDATE);
+    assertThat(metadata.getCauseEventType()).isEqualTo(EventTypeDTO.FIELD_CASE_UPDATED);
+  }
+
+  @Test
+  public void testProcessFieldCaseUpdatedEventOnEstabDoesNotSendToField() {
+    // Given
+    ResponseManagementEvent managementEvent = getTestResponseManagementFieldUpdatedEvent();
+
+    CollectionCase collectionCase = managementEvent.getPayload().getCollectionCase();
+    collectionCase.setId(TEST_CASE_ID);
+
+    Case testCase = getRandomCase();
+    testCase.setCaseId(TEST_CASE_ID);
+    testCase.setCaseType("CE");
+    testCase.setAddressLevel("E");
     testCase.setCeExpectedCapacity(9);
     testCase.setCeActualResponses(3);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();

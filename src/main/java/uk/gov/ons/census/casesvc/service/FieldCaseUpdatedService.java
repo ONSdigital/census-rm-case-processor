@@ -61,11 +61,17 @@ public class FieldCaseUpdatedService {
 
   private Metadata buildMetadataForFieldCaseUpdated(
       Case caze, ResponseManagementEvent fieldCaseUpdatedPayload) {
-    if (fieldCaseUpdatedPayload.getPayload().getCollectionCase().getCeExpectedCapacity()
-        <= caze.getCeActualResponses()) {
-      return buildMetadata(
-          fieldCaseUpdatedPayload.getEvent().getType(), ActionInstructionType.CANCEL);
+    ActionInstructionType actionInstructionType = null;
+
+    if ("CE".equals(caze.getCaseType()) && "U".equals(caze.getAddressLevel())) {
+      if (fieldCaseUpdatedPayload.getPayload().getCollectionCase().getCeExpectedCapacity()
+          <= caze.getCeActualResponses()) {
+        actionInstructionType = ActionInstructionType.CANCEL;
+      } else {
+        actionInstructionType = ActionInstructionType.UPDATE;
+      }
     }
-    return buildMetadata(fieldCaseUpdatedPayload.getEvent().getType(), null);
+
+    return buildMetadata(fieldCaseUpdatedPayload.getEvent().getType(), actionInstructionType);
   }
 }
