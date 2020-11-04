@@ -841,6 +841,7 @@ public class NewAddressReportedServiceTest {
     collectionCase.setFieldOfficerId("2342345");
 
     newAddressEvent.getEvent().setChannel("FIELD");
+    newAddressEvent.getPayload().getNewAddress().setSourceCaseId(sourceCase.getCaseId());
 
     when(pubSubTemplate.publish(any(), any(ResponseManagementEvent.class)))
         .thenReturn(mockFuture());

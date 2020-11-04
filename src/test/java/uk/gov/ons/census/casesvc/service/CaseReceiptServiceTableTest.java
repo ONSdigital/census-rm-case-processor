@@ -115,8 +115,8 @@ public class CaseReceiptServiceTableTest {
     caze.setFieldOfficerId("007");
     caze.setFieldCoordinatorId("M");
     caze.setOa("Oa Oa");
-    caze.setLatitude("sunny");
-    caze.setLongitude("short man attitude");
+    caze.setLatitude("sunny climes");
+    caze.setLongitude("shortatitude");
     caze.setEstabUprn("Unique People Require Nothing");
 
     UacQidLink uacQidLink = new UacQidLink();
