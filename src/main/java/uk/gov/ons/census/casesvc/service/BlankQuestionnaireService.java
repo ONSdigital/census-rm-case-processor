@@ -57,7 +57,6 @@ public class BlankQuestionnaireService {
         Metadata metadata = null;
 
         if (FieldworkHelper.shouldSendCaseToField(caze)) {
-          // Only send to fieldwork if the case is not refused or address invalid
           metadata = buildMetadata(causeEventType, ActionInstructionType.UPDATE, true);
         }
 
