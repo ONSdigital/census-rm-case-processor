@@ -111,7 +111,7 @@ public class RmCaseUpdatedServiceTest {
     verify(caseService)
         .saveCaseAndEmitCaseUpdatedEvent(eq(caseToUpdate), metadataArgumentCaptor.capture());
     Metadata eventMetadata = metadataArgumentCaptor.getValue();
-    assertThat(eventMetadata.getFieldDecision()).isEqualTo(ActionInstructionType.UPDATE);
+    assertThat(eventMetadata.getFieldDecision()).isEqualTo(ActionInstructionType.CREATE);
   }
 
   @Test
