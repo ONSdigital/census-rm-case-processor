@@ -44,7 +44,6 @@ public class FieldworkHelperTest {
     assertThat(FieldworkHelper.shouldSendCaseToField(caze)).isFalse();
   }
 
-  //  Case is marked refused AND there is no NC flag set (not yet delivered)
   @Test
   public void doNotSendCazeMarkedExtraRefused() {
     Case caze = getCaseThatWillPassFieldWorkHelper();
@@ -52,18 +51,12 @@ public class FieldworkHelperTest {
     assertThat(FieldworkHelper.shouldSendCaseToField(caze)).isFalse();
   }
 
-  //  Case is marked refused AND there is no NC flag set (not yet delivered)
   @Test
   public void doNotSendToHArdRefusedCase() {
     Case caze = getCaseThatWillPassFieldWorkHelper();
     caze.setRefusalReceived(RefusalType.HARD_REFUSAL);
     assertThat(FieldworkHelper.shouldSendCaseToField(caze)).isFalse();
   }
-
-  /*  Case is marked as receipted AND case is not a CE E  <<  (Receipting 'engine')
-  //  Discuss > CE E case is marked as receipted AND AR >= ER << (Shouldn't this be picked up by
-  // receipting..  don't want to send letters either)
-   */
 
   @Test
   public void doNotSendHICase() {
