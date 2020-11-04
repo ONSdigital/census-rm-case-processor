@@ -827,6 +827,59 @@ public class NewAddressReportedServiceTest {
   }
 
   @Test
+  public void testNoMetaDataWhenCaseTypeNotCEorSPG() {
+    // Given
+    EasyRandom easyRandom = new EasyRandom();
+    Case sourceCase = easyRandom.nextObject(Case.class);
+    sourceCase.setCaseId(UUID.randomUUID());
+    ResponseManagementEvent newAddressEvent = getMinimalValidNewAddress();
+    CollectionCase collectionCase =
+        newAddressEvent.getPayload().getNewAddress().getCollectionCase();
+    collectionCase.getAddress().setAddressLine1("666");
+    collectionCase.setCaseType("HH");
+    collectionCase.setFieldCoordinatorId("0123435");
+    collectionCase.setFieldOfficerId("2342345");
+
+    newAddressEvent.getEvent().setChannel("FIELD");
+
+    when(pubSubTemplate.publish(any(), any(ResponseManagementEvent.class)))
+        .thenReturn(mockFuture());
+    when(caseService.getCaseByCaseId(any())).thenReturn(sourceCase);
+    when(caseService.saveNewCaseAndStampCaseRef(any())).then(returnsFirstArg());
+    OffsetDateTime timeNow = OffsetDateTime.now();
+
+    // When
+    underTest.processNewAddressFromSourceId(newAddressEvent, timeNow, sourceCase.getCaseId());
+
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseService).saveNewCaseAndStampCaseRef(caseArgumentCaptor.capture());
+    Case newCase = caseArgumentCaptor.getAllValues().get(0);
+
+    CollectionCase newAddressCollectionCase =
+        newAddressEvent.getPayload().getNewAddress().getCollectionCase();
+
+    assertThat(newCase.getAddressLine1())
+        .isEqualTo(newAddressCollectionCase.getAddress().getAddressLine1());
+    assertThat(newCase.getCaseId()).isEqualTo(newAddressCollectionCase.getId());
+    assertThat(newCase.getAddressType())
+        .isEqualTo(newAddressCollectionCase.getAddress().getAddressType());
+    assertThat(newCase.getEstabUprn()).isEqualTo(sourceCase.getEstabUprn());
+
+    ArgumentCaptor<Metadata> metadataArgumentCaptor = ArgumentCaptor.forClass(Metadata.class);
+
+    verify(caseService)
+        .saveCaseAndEmitCaseCreatedEvent(
+            caseArgumentCaptor.capture(), metadataArgumentCaptor.capture());
+
+    assertThat(caseArgumentCaptor.getValue().getCaseId())
+        .isEqualTo(newAddressCollectionCase.getId());
+
+    Metadata actualMetadata = metadataArgumentCaptor.getValue();
+    assertThat(actualMetadata.getCauseEventType()).isEqualTo(EventTypeDTO.NEW_ADDRESS_REPORTED);
+    assertThat(actualMetadata.getFieldDecision()).isEqualTo(ActionInstructionType.CREATE);
+  }
+
+  @Test
   public void testNoMetaDataWhenNoFieldOfficerId() {
     // Given
     EasyRandom easyRandom = new EasyRandom();

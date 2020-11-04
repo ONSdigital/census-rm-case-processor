@@ -542,6 +542,8 @@ public class AddressReceiverIT {
       sourceCase.setRefusalReceived(null);
       sourceCase.setCollectionExerciseId(censuscollectionExerciseId);
       sourceCase.getMetadata().setSecureEstablishment(true);
+      sourceCase.setFieldCoordinatorId("FIELD_COORDINATOR_ID");
+      sourceCase.setFieldOfficerId("FIELD_OFFICER_ID");
       sourceCase = caseRepository.saveAndFlush(sourceCase);
 
       Address address = new Address();
@@ -552,6 +554,8 @@ public class AddressReceiverIT {
       CollectionCase collectionCase = new CollectionCase();
       collectionCase.setId(UUID.randomUUID());
       collectionCase.setAddress(address);
+      collectionCase.setFieldCoordinatorId("FIELD_COORDINATOR_ID");
+      collectionCase.setFieldOfficerId("FIELD_OFFICER_ID");
 
       NewAddress newAddress = new NewAddress();
       newAddress.setCollectionCase(collectionCase);
@@ -613,6 +617,11 @@ public class AddressReceiverIT {
       assertThat(actualCase.getRefusalReceived()).isNull();
       assertThat(actualCase.isAddressInvalid()).isFalse();
       assertThat(actualCase.isHandDelivery()).isFalse();
+
+      assertThat(actualResponseManagementEvent.getPayload().getMetadata().getFieldDecision())
+          .isEqualTo(ActionInstructionType.CREATE);
+      assertThat(actualResponseManagementEvent.getPayload().getMetadata().getCauseEventType())
+          .isEqualTo(NEW_ADDRESS_REPORTED);
 
       // check database for log eventDTO
       List<Event> events = eventRepository.findAll();
