@@ -1,7 +1,5 @@
 package uk.gov.ons.census.casesvc.service;
 
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
-
 import java.time.OffsetDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -69,7 +67,7 @@ public class AddressTypeChangeService {
         "Address type changed",
         EventType.ADDRESS_TYPE_CHANGED,
         responseManagementEvent.getEvent(),
-        convertObjectToJson(addressTypeChange),
+        addressTypeChange,
         messageTimestamp);
   }
 
@@ -111,7 +109,7 @@ public class AddressTypeChangeService {
         "Address type changed",
         EventType.ADDRESS_TYPE_CHANGED,
         responseManagementEvent.getEvent(),
-        convertObjectToJson(addressTypeChange),
+        addressTypeChange,
         messageTimestamp);
   }
 

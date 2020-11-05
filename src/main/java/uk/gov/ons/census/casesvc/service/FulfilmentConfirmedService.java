@@ -1,7 +1,5 @@
 package uk.gov.ons.census.casesvc.service;
 
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
-
 import java.time.OffsetDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -43,7 +41,7 @@ public class FulfilmentConfirmedService {
           String.format(FULFILMENT_CONFIRMED_RECEIVED, fulfilmentInformation.getFulfilmentCode()),
           EventType.FULFILMENT_CONFIRMED,
           fulfilmentRequestEvent,
-          convertObjectToJson(fulfilmentInformation),
+          fulfilmentInformation,
           messageTimestamp);
     } else {
       UacQidLink uacQidLink = uacService.findByQid(fulfilmentInformation.getQuestionnaireId());
@@ -53,7 +51,7 @@ public class FulfilmentConfirmedService {
           String.format(FULFILMENT_CONFIRMED_RECEIVED, fulfilmentInformation.getFulfilmentCode()),
           EventType.FULFILMENT_CONFIRMED,
           fulfilmentRequestEvent,
-          convertObjectToJson(fulfilmentInformation),
+          fulfilmentInformation,
           messageTimestamp);
     }
   }

@@ -1,7 +1,5 @@
 package uk.gov.ons.census.casesvc.service;
 
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
-
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import java.time.OffsetDateTime;
@@ -70,7 +68,7 @@ public class QidReceiptService {
         QID_RECEIPTED,
         EventType.RESPONSE_RECEIVED,
         receiptEvent.getEvent(),
-        convertObjectToJson(receiptPayload),
+        receiptPayload,
         messageTimestamp);
   }
 
@@ -99,7 +97,7 @@ public class QidReceiptService {
         BLANK_QUESTIONNAIRE_RECEIVED,
         EventType.RESPONSE_RECEIVED,
         unreceiptEvent.getEvent(),
-        convertObjectToJson(receiptPayload),
+        receiptPayload,
         messageTimestamp);
   }
 

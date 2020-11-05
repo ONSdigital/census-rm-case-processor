@@ -2,7 +2,6 @@ package uk.gov.ons.census.casesvc.service;
 
 import static org.mockito.Mockito.*;
 import static uk.gov.ons.census.casesvc.service.EventService.CREATE_CASE_SAMPLE_RECEIVED;
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
 import java.time.OffsetDateTime;
@@ -66,7 +65,7 @@ public class EventServiceTest {
             eq(CREATE_CASE_SAMPLE_RECEIVED),
             eq(EventType.SAMPLE_LOADED),
             any(EventDTO.class),
-            eq(convertObjectToJson(createCaseSample)),
+            eq(createCaseSample),
             eq(messageTimestamp));
   }
 
@@ -101,7 +100,7 @@ public class EventServiceTest {
             eq(CREATE_BULK_CASE_SAMPLE_RECEIVED),
             eq(EventType.CLERICAL_ADDRESS_RESOLUTION),
             any(EventDTO.class),
-            eq(convertObjectToJson(createCaseSample)),
+            eq(createCaseSample),
             eq(messageTimestamp));
   }
 
@@ -139,7 +138,7 @@ public class EventServiceTest {
             eq(CREATE_CASE_SAMPLE_RECEIVED),
             eq(EventType.SAMPLE_LOADED),
             any(EventDTO.class),
-            eq(convertObjectToJson(createCaseSample)),
+            eq(createCaseSample),
             eq(messageTimestamp));
   }
 
@@ -184,13 +183,7 @@ public class EventServiceTest {
             eq("Case sent to printer with pack code Test packCode"),
             eq(EventType.PRINT_CASE_SELECTED),
             eq(event),
-            eq(
-                "{\"printCaseSelected\":{\"caseRef\":1234567890,\"packCode\":\"Test packCode\","
-                    + "\"actionRuleId\":\""
-                    + TEST_ACTION_RULE_ID.toString()
-                    + "\",\"batchId\":\""
-                    + TEST_BATCH_ID
-                    + "\"}}"),
+            eq(responseManagementEvent.getPayload()),
             eq(messageTimestamp));
   }
 
@@ -233,8 +226,7 @@ public class EventServiceTest {
             eq("Case sent for fieldwork followup"),
             eq(EventType.FIELD_CASE_SELECTED),
             eq(event),
-            eq(
-                "{\"fieldCaseSelected\":{\"caseRef\":1234567890,\"actionRuleId\":\"8faa551c-c04a-4b8a-a164-50c6f3d9d52a\"}}"),
+            eq(responseManagementEvent.getPayload()),
             eq(messageTimestamp));
   }
 }

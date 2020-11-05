@@ -1,7 +1,6 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.utility.FieldworkHelper.shouldSendCaseToField;
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
 import java.time.OffsetDateTime;
@@ -46,7 +45,7 @@ public class RmUnInvalidateAddressService {
         EVENT_DESCRIPTION,
         EventType.RM_UNINVALIDATE_ADDRESS,
         rme.getEvent(),
-        convertObjectToJson(rmUnInvalidateAddress),
+        rmUnInvalidateAddress,
         messageTimestamp);
   }
 }

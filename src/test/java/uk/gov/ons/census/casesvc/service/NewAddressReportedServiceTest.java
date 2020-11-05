@@ -37,7 +37,6 @@ import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.CaseMetadata;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
-import uk.gov.ons.census.casesvc.utility.JsonHelper;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NewAddressReportedServiceTest {
@@ -108,7 +107,7 @@ public class NewAddressReportedServiceTest {
             eq("New Address reported"),
             eq(EventType.NEW_ADDRESS_REPORTED),
             eq(eventDTO),
-            eq(JsonHelper.convertObjectToJson(newAddressEvent.getPayload().getNewAddress())),
+            eq(newAddressEvent.getPayload().getNewAddress()),
             eq(expectedDateTime));
   }
 
@@ -169,7 +168,7 @@ public class NewAddressReportedServiceTest {
             eq("New Address reported"),
             eq(EventType.NEW_ADDRESS_REPORTED),
             eq(eventDTO),
-            eq(JsonHelper.convertObjectToJson(newAddressEvent.getPayload().getNewAddress())),
+            eq(newAddressEvent.getPayload().getNewAddress()),
             eq(expectedDateTime));
   }
 
@@ -283,7 +282,7 @@ public class NewAddressReportedServiceTest {
             eq("New Address reported"),
             eq(EventType.NEW_ADDRESS_REPORTED),
             eq(eventDTO),
-            eq(JsonHelper.convertObjectToJson(newAddressEvent.getPayload().getNewAddress())),
+            eq(newAddressEvent.getPayload().getNewAddress()),
             eq(expectedDateTime));
   }
 

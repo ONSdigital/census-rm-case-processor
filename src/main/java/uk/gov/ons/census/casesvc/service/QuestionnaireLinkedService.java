@@ -1,6 +1,5 @@
 package uk.gov.ons.census.casesvc.service;
 
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import static uk.gov.ons.census.casesvc.utility.QuestionnaireTypeHelper.isIndividualQuestionnaireType;
 
 import com.godaddy.logging.Logger;
@@ -84,7 +83,7 @@ public class QuestionnaireLinkedService {
         QUESTIONNAIRE_LINKED,
         EventType.QUESTIONNAIRE_LINKED,
         questionnaireLinkedEvent.getEvent(),
-        convertObjectToJson(uac),
+        uac,
         messageTimestamp);
   }
 
@@ -102,7 +101,7 @@ public class QuestionnaireLinkedService {
           eventDescription,
           EventType.QUESTIONNAIRE_UNLINKED,
           questionnaireLinkedEvent.getEvent(),
-          convertObjectToJson(uac),
+          uac,
           messageTimestamp);
     }
   }
