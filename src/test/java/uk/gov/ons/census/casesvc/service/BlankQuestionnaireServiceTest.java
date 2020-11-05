@@ -215,6 +215,7 @@ public class BlankQuestionnaireServiceTest {
     caze.setRefusalReceived(null);
     caze.setAddressInvalid(false);
     caze.setReceiptReceived(true);
+    caze.setEstabType("Moon base");
 
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setQid(qid);

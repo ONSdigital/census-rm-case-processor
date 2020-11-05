@@ -23,6 +23,24 @@ public class FieldworkHelper {
       return false;
     }
 
+    //    Case is marked as receipted AND case is not a CE E
+    if (caze.isReceiptReceived()) {
+      if (!caze.getCaseType().equals("CE")) {
+        return false;
+      }
+
+      if (!caze.getAddressLevel().equals("E")) {
+        return false;
+      }
+    }
+
+    if (caze.isReceiptReceived()
+        && caze.getCaseType().equals("CE")
+        && caze.getAddressLevel().equals("E")
+        && (caze.getCeActualResponses() >= caze.getCeExpectedCapacity())) {
+      return false;
+    }
+
     if (caze.getCaseType().equals("HI")) {
       return false;
     }
@@ -36,9 +54,9 @@ public class FieldworkHelper {
       return false;
     }
 
-    if (StringUtils.isEmpty(caze.getOa())) {
-      return false;
-    }
+    //    if (StringUtils.isEmpty(caze.getOa())) {
+    //      return false;
+    //    }
 
     if (StringUtils.isEmpty(caze.getLatitude()) || StringUtils.isEmpty(caze.getLongitude())) {
       return false;

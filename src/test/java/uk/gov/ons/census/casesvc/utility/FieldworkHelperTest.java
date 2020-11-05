@@ -89,13 +89,6 @@ public class FieldworkHelperTest {
   }
 
   @Test
-  public void doNotSendIfOAisEmpty() {
-    Case caze = getCaseThatWillPassFieldWorkHelper();
-    caze.setOa("");
-    assertThat(FieldworkHelper.shouldSendCaseToField(caze)).isFalse();
-  }
-
-  @Test
   public void doNotSendIfLatisEmpty() {
     Case caze = getCaseThatWillPassFieldWorkHelper();
     caze.setLatitude("");
@@ -115,5 +108,49 @@ public class FieldworkHelperTest {
     caze.setEstabUprn("");
     caze.setCaseType("CE");
     assertThat(FieldworkHelper.shouldSendCaseToField(caze)).isFalse();
+  }
+
+  //  Do Not send if Case is marked as receipted AND case is not a CE E
+  @Test
+  public void sendIfReceiptedAndCaseNotACE_E() {
+    Case caze = getCaseThatWillPassFieldWorkHelper();
+    caze.setReceiptReceived(true);
+    caze.setCaseType("CE");
+    caze.setAddressLevel("E");
+    assertThat(FieldworkHelper.shouldSendCaseToField(caze)).isTrue();
+  }
+
+  //  Do Not send if Case is marked as receipted AND case is not a CE E
+  @Test
+  public void doNotSendIfReceiptedAndCaseNotACE_E() {
+    Case caze = getCaseThatWillPassFieldWorkHelper();
+    caze.setReceiptReceived(true);
+    caze.setCaseType("CE");
+    caze.setAddressLevel("U");
+    assertThat(FieldworkHelper.shouldSendCaseToField(caze)).isFalse();
+  }
+
+  //    Do Not send if  CE E case is marked as receipted AND AR >= ER
+  @Test
+  public void doNotSendIfCE_E_And_AR_EqualToOrGreaterThan_ER() {
+    Case caze = getCaseThatWillPassFieldWorkHelper();
+    caze.setReceiptReceived(true);
+    caze.setCaseType("CE");
+    caze.setAddressLevel("E");
+    caze.setCeExpectedCapacity(5);
+    caze.setCeActualResponses(5);
+    assertThat(FieldworkHelper.shouldSendCaseToField(caze)).isFalse();
+  }
+
+  //    Do Not send if  CE E case is marked as receipted AND AR >= ER
+  @Test
+  public void dotSendIfCE_E_And_ARLessThan_ER() {
+    Case caze = getCaseThatWillPassFieldWorkHelper();
+    caze.setReceiptReceived(true);
+    caze.setCaseType("CE");
+    caze.setAddressLevel("E");
+    caze.setCeExpectedCapacity(5);
+    caze.setCeActualResponses(4);
+    assertThat(FieldworkHelper.shouldSendCaseToField(caze)).isTrue();
   }
 }

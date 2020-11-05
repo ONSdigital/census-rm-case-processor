@@ -332,6 +332,7 @@ public class DataUtils {
   public static Case getCaseThatWillPassFieldWorkHelper() {
     Case caze = new Case();
     caze.setCaseType("CE");
+    caze.setAddressLevel("E");
     caze.setRegion("E");
     caze.setEstabType("The Elect");
     caze.setFieldOfficerId("007");
@@ -340,6 +341,8 @@ public class DataUtils {
     caze.setLatitude("37.2431");
     caze.setLongitude("115.7930");
     caze.setEstabUprn("NrpUbatse");
+    caze.setCeExpectedCapacity(100);
+    caze.setCeActualResponses(1);
 
     return caze;
   }

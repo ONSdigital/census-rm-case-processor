@@ -56,6 +56,7 @@ public class BlankQuestionnaireService {
       (caze, causeEventType) -> {
         Metadata metadata = null;
 
+        caze.setReceiptReceived(false);
         if (FieldworkHelper.shouldSendCaseToField(caze)) {
           metadata = buildMetadata(causeEventType, ActionInstructionType.UPDATE, true);
         }
