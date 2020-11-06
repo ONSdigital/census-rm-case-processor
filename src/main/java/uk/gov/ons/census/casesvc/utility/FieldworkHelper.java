@@ -3,6 +3,9 @@ package uk.gov.ons.census.casesvc.utility;
 import org.springframework.util.StringUtils;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 
+/*
+ https://collaborate2.ons.gov.uk/confluence/pages/viewpage.action?spaceKey=SDC&title=Rules+for+Field+Notifications
+*/
 public class FieldworkHelper {
   public static boolean shouldSendCaseToField(Case caze) {
 
@@ -36,6 +39,7 @@ public class FieldworkHelper {
     if (caze.isReceiptReceived()
         && caze.getCaseType().equals("CE")
         && caze.getAddressLevel().equals("E")
+        && caze.getCeExpectedCapacity() != null
         && (caze.getCeActualResponses() >= caze.getCeExpectedCapacity())) {
       return false;
     }
