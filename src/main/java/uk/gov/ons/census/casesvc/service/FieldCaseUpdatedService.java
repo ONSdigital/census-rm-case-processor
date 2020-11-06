@@ -1,6 +1,5 @@
 package uk.gov.ons.census.casesvc.service;
 
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
 import java.time.OffsetDateTime;
@@ -56,7 +55,7 @@ public class FieldCaseUpdatedService {
         FIELD_CASE_UPDATED_DESCRIPTION,
         EventType.FIELD_CASE_UPDATED,
         responseManagementEvent.getEvent(),
-        convertObjectToJson(responseManagementEvent.getPayload()),
+        responseManagementEvent.getPayload(),
         messageTimestamp);
   }
 

@@ -25,7 +25,6 @@ import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.utility.AddressModificationValidator;
-import uk.gov.ons.census.casesvc.utility.JsonHelper;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AddressModificationServiceTest {
@@ -96,7 +95,7 @@ public class AddressModificationServiceTest {
             "Address modified",
             EventType.ADDRESS_MODIFIED,
             rme.getEvent(),
-            JsonHelper.convertObjectToJson(rme.getPayload().getAddressModification()),
+            rme.getPayload().getAddressModification(),
             messageTimestamp);
   }
 
@@ -144,7 +143,7 @@ public class AddressModificationServiceTest {
             "Address modified",
             EventType.ADDRESS_MODIFIED,
             rme.getEvent(),
-            JsonHelper.convertObjectToJson(rme.getPayload().getAddressModification()),
+            rme.getPayload().getAddressModification(),
             messageTimestamp);
   }
 
@@ -189,7 +188,7 @@ public class AddressModificationServiceTest {
             "Address modified",
             EventType.ADDRESS_MODIFIED,
             rme.getEvent(),
-            JsonHelper.convertObjectToJson(rme.getPayload().getAddressModification()),
+            rme.getPayload().getAddressModification(),
             messageTimestamp);
   }
 

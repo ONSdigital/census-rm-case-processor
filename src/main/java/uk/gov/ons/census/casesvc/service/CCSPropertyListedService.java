@@ -1,6 +1,5 @@
 package uk.gov.ons.census.casesvc.service;
 
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
 import java.time.OffsetDateTime;
@@ -50,7 +49,7 @@ public class CCSPropertyListedService {
         CCS_ADDRESS_LISTED,
         EventType.CCS_ADDRESS_LISTED,
         ccsPropertyListedEvent.getEvent(),
-        convertObjectToJson(ccsProperty),
+        ccsProperty,
         messageTimestamp);
   }
 }

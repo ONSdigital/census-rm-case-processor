@@ -61,7 +61,7 @@ public class FulfilmentConfirmedServiceTest {
             eq("Fulfilment Confirmed Received for pack code ABC_XYZ_123"),
             eq(EventType.FULFILMENT_CONFIRMED),
             eq(managementEvent.getEvent()),
-            anyString(),
+            any(),
             eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
   }
@@ -95,7 +95,7 @@ public class FulfilmentConfirmedServiceTest {
             eq("Fulfilment Confirmed Received for pack code ABC_XYZ_123"),
             eq(EventType.FULFILMENT_CONFIRMED),
             eq(managementEvent.getEvent()),
-            anyString(),
+            any(),
             eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
   }

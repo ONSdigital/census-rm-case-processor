@@ -1,7 +1,6 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.utility.EventHelper.createEventDTO;
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
 import java.time.OffsetDateTime;
@@ -55,7 +54,7 @@ public class EventService {
               EventTypeDTO.CLERICAL_ADDRESS_RESOLUTION,
               BULK_PROCESSING_EVENT_CHANNEL,
               BULK_PROCESSING_EVENT_SOURCE),
-          convertObjectToJson(createCaseSample),
+          createCaseSample,
           messageTimestamp);
     } else {
       EventDTO dummyEvent = new EventDTO();
@@ -71,7 +70,7 @@ public class EventService {
           CREATE_CASE_SAMPLE_RECEIVED,
           EventType.SAMPLE_LOADED,
           createEventDTO(EventTypeDTO.SAMPLE_LOADED),
-          convertObjectToJson(createCaseSample),
+          createCaseSample,
           messageTimestamp);
 
       if (QuestionnaireTypeHelper.isQuestionnaireWelsh(caze.getTreatmentCode())) {
@@ -125,7 +124,7 @@ public class EventService {
         eventDescription,
         eventType,
         responseManagementEvent.getEvent(),
-        convertObjectToJson(responseManagementEvent.getPayload()),
+        responseManagementEvent.getPayload(),
         messageTimestamp);
   }
 }

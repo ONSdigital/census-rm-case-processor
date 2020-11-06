@@ -1,7 +1,6 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.utility.FieldworkHelper.shouldSendCaseToField;
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -85,7 +84,7 @@ public class RmCaseUpdatedService {
         EVENT_DESCRIPTION,
         EventType.RM_CASE_UPDATED,
         rme.getEvent(),
-        convertObjectToJson(rmCaseUpdated),
+        rmCaseUpdated,
         messageTimestamp);
   }
 

@@ -83,7 +83,7 @@ public class QidReceiptServiceTest {
             eq(QID_RECEIPTED),
             eq(EventType.RESPONSE_RECEIVED),
             eq(managementEvent.getEvent()),
-            anyString(),
+            any(),
             eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
   }
@@ -139,7 +139,7 @@ public class QidReceiptServiceTest {
             eq("Blank questionnaire received"),
             eq(EventType.RESPONSE_RECEIVED),
             eq(managementEvent.getEvent()),
-            anyString(),
+            any(),
             eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
   }

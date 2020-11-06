@@ -1,7 +1,6 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.utility.EventHelper.isEventChannelField;
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
 import java.time.OffsetDateTime;
@@ -46,7 +45,7 @@ public class InvalidAddressService {
         "Invalid address",
         EventType.ADDRESS_NOT_VALID,
         rmEvent.getEvent(),
-        convertObjectToJson(payload),
+        payload,
         messageTimestamp);
   }
 

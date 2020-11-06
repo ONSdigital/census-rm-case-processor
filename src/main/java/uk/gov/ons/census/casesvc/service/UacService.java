@@ -2,7 +2,6 @@ package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.utility.FormTypeHelper.CONT_FORM_TYPE;
 import static uk.gov.ons.census.casesvc.utility.FormTypeHelper.mapQuestionnaireTypeToFormType;
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -152,7 +151,7 @@ public class UacService {
         "RM UAC QID pair created",
         EventType.RM_UAC_CREATED,
         responseManagementEvent.getEvent(),
-        convertObjectToJson(responseManagementEvent.getPayload()),
+        responseManagementEvent.getPayload(),
         messageTimestamp);
   }
 

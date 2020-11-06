@@ -1,7 +1,6 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static uk.gov.ons.census.casesvc.model.entity.EventType.FULFILMENT_REQUESTED;
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.time.OffsetDateTime;
 import java.util.Arrays;
@@ -90,7 +89,7 @@ public class FulfilmentRequestService {
         FULFILMENT_REQUEST_RECEIVED,
         FULFILMENT_REQUESTED,
         fulfilmentRequestEvent,
-        convertObjectToJson(fulfilmentRequestPayload),
+        fulfilmentRequestPayload,
         messageTimestamp);
   }
 

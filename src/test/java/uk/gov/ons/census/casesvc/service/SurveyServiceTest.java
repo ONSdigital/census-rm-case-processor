@@ -2,10 +2,8 @@ package uk.gov.ons.census.casesvc.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -18,8 +16,6 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
@@ -89,7 +85,7 @@ public class SurveyServiceTest {
             eq("Survey launched"),
             eq(EventType.SURVEY_LAUNCHED),
             eq(managementEvent.getEvent()),
-            anyString(),
+            any(),
             eq(messageTimestamp));
 
     verifyNoMoreInteractions(uacService);
@@ -134,7 +130,7 @@ public class SurveyServiceTest {
             eq("Survey launched"),
             eq(EventType.SURVEY_LAUNCHED),
             eq(managementEvent.getEvent()),
-            anyString(),
+            any(),
             eq(messageTimestamp));
 
     verifyNoMoreInteractions(uacService);
@@ -183,13 +179,8 @@ public class SurveyServiceTest {
             eq("Respondent authenticated"),
             eq(EventType.RESPONDENT_AUTHENTICATED),
             eq(managementEvent.getEvent()),
-            respondentAuthenticatedCaptor.capture(),
+            eq(response),
             eq(messageTimestamp));
-
-    String expectedEventPayloadJson = convertObjectToJson(response);
-    String actualEventPayloadJson = respondentAuthenticatedCaptor.getValue();
-    JSONAssert.assertEquals(
-        actualEventPayloadJson, expectedEventPayloadJson, JSONCompareMode.STRICT);
 
     verifyNoMoreInteractions(uacService);
     verifyNoMoreInteractions(eventLogger);

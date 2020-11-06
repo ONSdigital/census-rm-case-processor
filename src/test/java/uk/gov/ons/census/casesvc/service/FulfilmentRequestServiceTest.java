@@ -72,7 +72,7 @@ public class FulfilmentRequestServiceTest {
             eq("Fulfilment Request Received"),
             eq(FULFILMENT_REQUESTED),
             eq(managementEvent.getEvent()),
-            anyString(),
+            any(),
             eq(messageTimestamp));
   }
 
@@ -171,7 +171,7 @@ public class FulfilmentRequestServiceTest {
             eq("Fulfilment Request Received"),
             eq(FULFILMENT_REQUESTED),
             eq(managementEvent.getEvent()),
-            anyString(),
+            any(),
             eq(messageTimestamp));
   }
 
@@ -210,7 +210,7 @@ public class FulfilmentRequestServiceTest {
             eq("Fulfilment Request Received"),
             eq(FULFILMENT_REQUESTED),
             eq(managementEvent.getEvent()),
-            anyString(),
+            any(),
             eq(messageTimestamp));
 
     ArgumentCaptor<FulfilmentRequestDTO> fulfilmentRequestArgumentCaptor =
@@ -257,7 +257,7 @@ public class FulfilmentRequestServiceTest {
             eq("Fulfilment Request Received"),
             eq(FULFILMENT_REQUESTED),
             eq(managementEvent.getEvent()),
-            anyString(),
+            any(),
             eq(messageTimestamp));
 
     verify(caseService).emitCaseCreatedEvent(childCase);

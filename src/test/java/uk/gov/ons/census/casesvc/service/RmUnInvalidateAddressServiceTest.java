@@ -84,7 +84,7 @@ public class RmUnInvalidateAddressServiceTest {
             eq("Case address un-invalidate"),
             eq(EventType.RM_UNINVALIDATE_ADDRESS),
             eq(rme.getEvent()),
-            eq(convertObjectToJson(rmUnInvalidateAddress)),
+            eq(rmUnInvalidateAddress),
             any());
   }
 }

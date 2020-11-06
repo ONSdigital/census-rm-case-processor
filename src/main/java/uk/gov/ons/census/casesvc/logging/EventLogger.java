@@ -9,6 +9,8 @@ import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
+import uk.gov.ons.census.casesvc.utility.JsonHelper;
+import uk.gov.ons.census.casesvc.utility.RedactHelper;
 
 @Component
 public class EventLogger {
@@ -25,7 +27,7 @@ public class EventLogger {
       String eventDescription,
       EventType eventType,
       EventDTO event,
-      String eventPayload,
+      Object eventPayload,
       OffsetDateTime messageTimestamp) {
     Event loggedEvent =
         buildEvent(eventDate, eventDescription, eventType, event, eventPayload, messageTimestamp);
@@ -40,7 +42,7 @@ public class EventLogger {
       String eventDescription,
       EventType eventType,
       EventDTO event,
-      String eventPayload,
+      Object eventPayload,
       OffsetDateTime messageTimestamp) {
     Event loggedEvent =
         buildEvent(eventDate, eventDescription, eventType, event, eventPayload, messageTimestamp);
@@ -54,7 +56,7 @@ public class EventLogger {
       String eventDescription,
       EventType eventType,
       EventDTO event,
-      String eventPayload,
+      Object eventPayload,
       OffsetDateTime messageTimestamp) {
     Event loggedEvent = new Event();
 
@@ -66,8 +68,12 @@ public class EventLogger {
     loggedEvent.setEventChannel(event.getChannel());
     loggedEvent.setEventSource(event.getSource());
     loggedEvent.setEventTransactionId(event.getTransactionId());
-    loggedEvent.setEventPayload(eventPayload);
     loggedEvent.setMessageTimestamp(messageTimestamp);
+
+    // Redact sensitive data like UACs
+    Object redactedEventPayload = RedactHelper.redact(eventPayload);
+    loggedEvent.setEventPayload(JsonHelper.convertObjectToJson(redactedEventPayload));
+
     return loggedEvent;
   }
 }
