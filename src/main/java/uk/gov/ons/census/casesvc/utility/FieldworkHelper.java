@@ -23,7 +23,6 @@ public class FieldworkHelper {
       return false;
     }
 
-    //    Case is marked as receipted AND case is not a CE E
     if (caze.isReceiptReceived()) {
       if (!caze.getCaseType().equals("CE")) {
         return false;
@@ -53,10 +52,6 @@ public class FieldworkHelper {
     if (StringUtils.isEmpty(caze.getFieldCoordinatorId())) {
       return false;
     }
-
-    //    if (StringUtils.isEmpty(caze.getOa())) {
-    //      return false;
-    //    }
 
     if (StringUtils.isEmpty(caze.getLatitude()) || StringUtils.isEmpty(caze.getLongitude())) {
       return false;
