@@ -31,7 +31,6 @@ import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.CaseMetadata;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.utility.FieldworkHelper;
-import uk.gov.ons.census.casesvc.utility.JsonHelper;
 
 @Component
 public class NewAddressReportedService {
