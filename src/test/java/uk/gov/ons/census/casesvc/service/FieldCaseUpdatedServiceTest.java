@@ -76,50 +76,6 @@ public class FieldCaseUpdatedServiceTest {
   }
 
   @Test
-  public void testProcessFieldCaseUpdatedEventResultsInFieldUpdate() {
-
-    // Given
-    ResponseManagementEvent managementEvent = getTestResponseManagementFieldUpdatedEvent();
-
-    CollectionCase collectionCase = managementEvent.getPayload().getCollectionCase();
-    collectionCase.setId(TEST_CASE_ID);
-
-    Case testCase = getRandomCase();
-    testCase.setCaseId(TEST_CASE_ID);
-    testCase.setCaseType("CE");
-    testCase.setAddressLevel("U");
-    testCase.setCeExpectedCapacity(9);
-    testCase.setCeActualResponses(3);
-    OffsetDateTime messageTimestamp = OffsetDateTime.now();
-
-    when(caseService.getCaseAndLockIt(eq(TEST_CASE_ID))).thenReturn(testCase);
-
-    // When
-    underTest.processFieldCaseUpdatedEvent(managementEvent, messageTimestamp);
-
-    // Then
-
-    InOrder inOrder = Mockito.inOrder(caseRepository, eventLogger, caseService);
-
-    inOrder.verify(caseService).getCaseAndLockIt(any(UUID.class));
-
-    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
-    ArgumentCaptor<Metadata> metadataArgumentCaptor = ArgumentCaptor.forClass(Metadata.class);
-
-    inOrder
-        .verify(caseService)
-        .saveCaseAndEmitCaseUpdatedEvent(
-            caseArgumentCaptor.capture(), metadataArgumentCaptor.capture());
-    Case caze = caseArgumentCaptor.getValue();
-    Metadata metadata = metadataArgumentCaptor.getValue();
-
-    assertThat(caze.getCeExpectedCapacity()).isEqualTo(5);
-
-    assertThat(metadata.getFieldDecision()).isEqualTo(ActionInstructionType.UPDATE);
-    assertThat(metadata.getCauseEventType()).isEqualTo(EventTypeDTO.FIELD_CASE_UPDATED);
-  }
-
-  @Test
   public void testProcessFieldCaseUpdatedEventOnEstabDoesNotSendToField() {
     // Given
     ResponseManagementEvent managementEvent = getTestResponseManagementFieldUpdatedEvent();
