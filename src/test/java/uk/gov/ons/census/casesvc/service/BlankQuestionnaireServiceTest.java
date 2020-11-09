@@ -25,6 +25,7 @@ import uk.gov.ons.census.casesvc.model.dto.Metadata;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
+import uk.gov.ons.census.casesvc.testutil.DataUtils;
 
 @RunWith(Parameterized.class)
 public class BlankQuestionnaireServiceTest {
@@ -147,7 +148,7 @@ public class BlankQuestionnaireServiceTest {
     UacService uacService = mock(UacService.class);
     BlankQuestionnaireService underTest = new BlankQuestionnaireService(caseService);
 
-    Case caze = new Case();
+    Case caze = DataUtils.getCaseThatWillPassFieldWorkHelper();
     caze.setCaseType(caseType);
     caze.setAddressLevel(addressLevel);
     caze.setCaseId(UUID.randomUUID());
@@ -207,13 +208,14 @@ public class BlankQuestionnaireServiceTest {
     UacService uacService = mock(UacService.class);
     BlankQuestionnaireService underTest = new BlankQuestionnaireService(caseService);
 
-    Case caze = new Case();
+    Case caze = DataUtils.getCaseThatWillPassFieldWorkHelper();
     caze.setCaseType(caseType);
     caze.setAddressLevel(addressLevel);
     caze.setCaseId(UUID.randomUUID());
     caze.setRefusalReceived(null);
     caze.setAddressInvalid(false);
     caze.setReceiptReceived(true);
+    caze.setEstabType("Moon base");
 
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setQid(qid);

@@ -14,9 +14,11 @@ import org.springframework.stereotype.Component;
 import uk.gov.ons.census.casesvc.model.dto.ActionInstructionType;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
+import uk.gov.ons.census.casesvc.model.dto.Metadata;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
+import uk.gov.ons.census.casesvc.utility.FieldworkHelper;
 
 @Component
 public class CaseReceiptService {
@@ -140,8 +142,13 @@ public class CaseReceiptService {
   BiFunction<Case, EventTypeDTO, Case> incrementAndUpdate =
       (caze, causeEventType) -> {
         Case updatedCase = incrementNoReceipt(caze);
-        caseService.saveCaseAndEmitCaseUpdatedEvent(
-            updatedCase, buildMetadata(causeEventType, ActionInstructionType.UPDATE));
+
+        Metadata metadata = null;
+        if (FieldworkHelper.shouldSendCaseToField(caze)) {
+          metadata = buildMetadata(causeEventType, ActionInstructionType.UPDATE);
+        }
+
+        caseService.saveCaseAndEmitCaseUpdatedEvent(updatedCase, metadata);
         return caze;
       };
 
