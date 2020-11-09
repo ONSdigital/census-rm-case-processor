@@ -63,13 +63,11 @@ public class FieldCaseUpdatedService {
       Case caze, ResponseManagementEvent fieldCaseUpdatedPayload) {
     ActionInstructionType actionInstructionType = null;
 
-    if ("CE".equals(caze.getCaseType()) && "U".equals(caze.getAddressLevel())) {
-      if (fieldCaseUpdatedPayload.getPayload().getCollectionCase().getCeExpectedCapacity()
-          <= caze.getCeActualResponses()) {
-        actionInstructionType = ActionInstructionType.CANCEL;
-      } else {
-        actionInstructionType = ActionInstructionType.UPDATE;
-      }
+    if ("CE".equals(caze.getCaseType())
+        && "U".equals(caze.getAddressLevel())
+        && fieldCaseUpdatedPayload.getPayload().getCollectionCase().getCeExpectedCapacity()
+            <= caze.getCeActualResponses()) {
+      actionInstructionType = ActionInstructionType.CANCEL;
     }
 
     return buildMetadata(fieldCaseUpdatedPayload.getEvent().getType(), actionInstructionType);
