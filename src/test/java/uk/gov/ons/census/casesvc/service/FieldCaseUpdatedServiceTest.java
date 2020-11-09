@@ -17,16 +17,11 @@ import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.*;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
-import uk.gov.ons.census.casesvc.utility.MetadataHelper;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FieldCaseUpdatedServiceTest {
 
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
-  private static final String EXCEPTION_MESSAGE =
-      String.format(
-          "Failed to get row for field case updates, row is probably locked and this should resolve itself: %s",
-          TEST_CASE_ID);
 
   @Mock private CaseService caseService;
 
@@ -34,12 +29,10 @@ public class FieldCaseUpdatedServiceTest {
 
   @Mock private CaseRepository caseRepository;
 
-  @Mock private MetadataHelper metadataHelper;
-
   @InjectMocks FieldCaseUpdatedService underTest;
 
   @Test
-  public void testProcessFieldCaseUpdatedEventHappyPath() {
+  public void testProcessFieldCaseUpdatedEventResultsInFieldCancel() {
 
     // Given
     ResponseManagementEvent managementEvent = getTestResponseManagementFieldUpdatedEvent();
@@ -50,6 +43,7 @@ public class FieldCaseUpdatedServiceTest {
     Case testCase = getRandomCase();
     testCase.setCaseId(TEST_CASE_ID);
     testCase.setCaseType("CE");
+    testCase.setAddressLevel("U");
     testCase.setCeExpectedCapacity(9);
     testCase.setCeActualResponses(8);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();
@@ -82,7 +76,7 @@ public class FieldCaseUpdatedServiceTest {
   }
 
   @Test
-  public void testProcessFieldCaseUpdatedEventNoCancelSent() {
+  public void testProcessFieldCaseUpdatedEventOnEstabDoesNotSendToField() {
     // Given
     ResponseManagementEvent managementEvent = getTestResponseManagementFieldUpdatedEvent();
 
@@ -92,6 +86,7 @@ public class FieldCaseUpdatedServiceTest {
     Case testCase = getRandomCase();
     testCase.setCaseId(TEST_CASE_ID);
     testCase.setCaseType("CE");
+    testCase.setAddressLevel("E");
     testCase.setCeExpectedCapacity(9);
     testCase.setCeActualResponses(3);
     OffsetDateTime messageTimestamp = OffsetDateTime.now();

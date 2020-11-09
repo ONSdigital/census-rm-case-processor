@@ -1,7 +1,5 @@
 package uk.gov.ons.census.casesvc.service;
 
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
-
 import java.time.OffsetDateTime;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
@@ -33,7 +31,8 @@ public class AddressModificationService {
 
     Case caze = caseService.getCaseByCaseId(addressModification.getCollectionCase().getId());
 
-    addressModificationValidator.validate(addressModification.getNewAddress());
+    addressModificationValidator.validate(
+        addressModification.getNewAddress(), responseManagementEvent.getEvent().getChannel());
 
     modifyCaseAddress(caze, addressModification);
     caseService.saveCaseAndEmitCaseUpdatedEvent(caze, null);
@@ -44,7 +43,7 @@ public class AddressModificationService {
         "Address modified",
         EventType.ADDRESS_MODIFIED,
         responseManagementEvent.getEvent(),
-        convertObjectToJson(addressModification),
+        addressModification,
         messageTimestamp);
   }
 

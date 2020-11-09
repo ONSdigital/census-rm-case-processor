@@ -30,7 +30,6 @@ import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.CaseMetadata;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
-import uk.gov.ons.census.casesvc.utility.JsonHelper;
 
 @Component
 public class NewAddressReportedService {
@@ -87,7 +86,7 @@ public class NewAddressReportedService {
         "New Address reported",
         EventType.NEW_ADDRESS_REPORTED,
         newAddressEvent.getEvent(),
-        JsonHelper.convertObjectToJson(newAddressEvent.getPayload().getNewAddress()),
+        newAddressEvent.getPayload().getNewAddress(),
         messageTimestamp);
   }
 
@@ -117,8 +116,7 @@ public class NewAddressReportedService {
       newCaseFromSourceCase.setEstabUprn(newCaseFromSourceCase.getUprn());
     }
 
-    Metadata metadata =
-        getMetaDataToCreateFieldCaseIfConditionsMet(newCaseFromSourceCase, newAddressEvent);
+    Metadata metadata = getMetaDataToCreateFieldCaseIfConditionsMet(newAddressEvent);
 
     caseService.saveCaseAndEmitCaseCreatedEvent(newCaseFromSourceCase, metadata);
 
@@ -128,16 +126,12 @@ public class NewAddressReportedService {
         "New Address reported",
         EventType.NEW_ADDRESS_REPORTED,
         newAddressEvent.getEvent(),
-        JsonHelper.convertObjectToJson(newAddressEvent.getPayload()),
+        newAddressEvent.getPayload(),
         messageTimestamp);
   }
 
   private Metadata getMetaDataToCreateFieldCaseIfConditionsMet(
-      Case caze, ResponseManagementEvent newAddressEvent) {
-
-    if (!caze.getCaseType().equals("SPG") && !caze.getCaseType().equals("CE")) {
-      return null;
-    }
+      ResponseManagementEvent newAddressEvent) {
 
     if (!newAddressEvent.getEvent().getChannel().equals("FIELD")) {
       return null;

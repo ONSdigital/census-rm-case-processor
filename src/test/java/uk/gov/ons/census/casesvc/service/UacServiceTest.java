@@ -191,7 +191,7 @@ public class UacServiceTest {
             eq("RM UAC QID pair created"),
             eq(EventType.RM_UAC_CREATED),
             eq(uacCreatedEvent.getEvent()),
-            anyString(),
+            any(),
             eq(messageTimestamp));
   }
 

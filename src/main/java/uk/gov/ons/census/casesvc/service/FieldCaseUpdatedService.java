@@ -1,6 +1,5 @@
 package uk.gov.ons.census.casesvc.service;
 
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import static uk.gov.ons.census.casesvc.utility.MetadataHelper.buildMetadata;
 
 import java.time.OffsetDateTime;
@@ -56,17 +55,21 @@ public class FieldCaseUpdatedService {
         FIELD_CASE_UPDATED_DESCRIPTION,
         EventType.FIELD_CASE_UPDATED,
         responseManagementEvent.getEvent(),
-        convertObjectToJson(responseManagementEvent.getPayload()),
+        responseManagementEvent.getPayload(),
         messageTimestamp);
   }
 
   private Metadata buildMetadataForFieldCaseUpdated(
       Case caze, ResponseManagementEvent fieldCaseUpdatedPayload) {
-    if (fieldCaseUpdatedPayload.getPayload().getCollectionCase().getCeExpectedCapacity()
-        <= caze.getCeActualResponses()) {
-      return buildMetadata(
-          fieldCaseUpdatedPayload.getEvent().getType(), ActionInstructionType.CANCEL);
+    ActionInstructionType actionInstructionType = null;
+
+    if ("CE".equals(caze.getCaseType())
+        && "U".equals(caze.getAddressLevel())
+        && fieldCaseUpdatedPayload.getPayload().getCollectionCase().getCeExpectedCapacity()
+            <= caze.getCeActualResponses()) {
+      actionInstructionType = ActionInstructionType.CANCEL;
     }
-    return buildMetadata(fieldCaseUpdatedPayload.getEvent().getType(), null);
+
+    return buildMetadata(fieldCaseUpdatedPayload.getEvent().getType(), actionInstructionType);
   }
 }

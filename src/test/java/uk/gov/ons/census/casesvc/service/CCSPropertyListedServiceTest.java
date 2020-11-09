@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getTestResponseManagementCCSAddressListedEvent;
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.time.OffsetDateTime;
 import org.junit.Test;
@@ -97,12 +96,8 @@ public class CCSPropertyListedServiceTest {
     verifyNoMoreInteractions(caseService);
   }
 
-  //
-
   private void checkCorrectEventLogging(
       Case expectedCase, ResponseManagementEvent managementEvent, OffsetDateTime messageTimestamp) {
-    ArgumentCaptor<String> ccsPayload = ArgumentCaptor.forClass(String.class);
-
     verify(eventLogger)
         .logCaseEvent(
             eq(expectedCase),
@@ -110,11 +105,7 @@ public class CCSPropertyListedServiceTest {
             eq("CCS Address Listed"),
             eq(EventType.CCS_ADDRESS_LISTED),
             eq(managementEvent.getEvent()),
-            ccsPayload.capture(),
+            eq(managementEvent.getPayload().getCcsProperty()),
             eq(messageTimestamp));
-
-    String actualLoggedPayload = ccsPayload.getValue();
-    assertThat(actualLoggedPayload)
-        .isEqualTo(convertObjectToJson(managementEvent.getPayload().getCcsProperty()));
   }
 }

@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -83,7 +82,7 @@ public class RmUnInvalidateAddressServiceTest {
             eq("Case address un-invalidate"),
             eq(EventType.RM_UNINVALIDATE_ADDRESS),
             eq(rme.getEvent()),
-            eq(convertObjectToJson(rmUnInvalidateAddress)),
+            eq(rmUnInvalidateAddress),
             any());
   }
 }

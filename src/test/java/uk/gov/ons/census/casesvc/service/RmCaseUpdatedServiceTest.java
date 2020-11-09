@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -83,7 +82,7 @@ public class RmCaseUpdatedServiceTest {
             eq("Case details updated"),
             eq(EventType.RM_CASE_UPDATED),
             eq(rme.getEvent()),
-            eq(convertObjectToJson(rmCaseUpdated)),
+            eq(rmCaseUpdated),
             any());
   }
 
@@ -111,7 +110,7 @@ public class RmCaseUpdatedServiceTest {
     verify(caseService)
         .saveCaseAndEmitCaseUpdatedEvent(eq(caseToUpdate), metadataArgumentCaptor.capture());
     Metadata eventMetadata = metadataArgumentCaptor.getValue();
-    assertThat(eventMetadata.getFieldDecision()).isEqualTo(ActionInstructionType.UPDATE);
+    assertThat(eventMetadata.getFieldDecision()).isEqualTo(ActionInstructionType.CREATE);
   }
 
   @Test
@@ -194,7 +193,7 @@ public class RmCaseUpdatedServiceTest {
             eq("Case details updated"),
             eq(EventType.RM_CASE_UPDATED),
             eq(rme.getEvent()),
-            eq(convertObjectToJson(rmCaseUpdated)),
+            eq(rmCaseUpdated),
             any());
   }
 

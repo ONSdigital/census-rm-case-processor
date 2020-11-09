@@ -21,7 +21,6 @@ import uk.gov.ons.census.casesvc.model.dto.*;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.utility.AddressModificationValidator;
-import uk.gov.ons.census.casesvc.utility.JsonHelper;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AddressTypeChangeServiceTest {
@@ -78,7 +77,7 @@ public class AddressTypeChangeServiceTest {
             eq("Address type changed"),
             eq(EventType.ADDRESS_TYPE_CHANGED),
             eq(rme.getEvent()),
-            eq(JsonHelper.convertObjectToJson(addressTypeChange)),
+            eq(addressTypeChange),
             eq(messageTimestamp));
 
     ArgumentCaptor<Case> newCaseArgCaptor = ArgumentCaptor.forClass(Case.class);
@@ -119,7 +118,7 @@ public class AddressTypeChangeServiceTest {
             eq("Address type changed"),
             eq(EventType.ADDRESS_TYPE_CHANGED),
             eq(rme.getEvent()),
-            eq(JsonHelper.convertObjectToJson(addressTypeChange)),
+            eq(addressTypeChange),
             eq(messageTimestamp));
   }
 
@@ -173,7 +172,7 @@ public class AddressTypeChangeServiceTest {
             eq("Address type changed"),
             eq(EventType.ADDRESS_TYPE_CHANGED),
             eq(rme.getEvent()),
-            eq(JsonHelper.convertObjectToJson(addressTypeChange)),
+            eq(addressTypeChange),
             eq(messageTimestamp));
 
     ArgumentCaptor<Case> newCaseArgCaptor = ArgumentCaptor.forClass(Case.class);
@@ -219,7 +218,7 @@ public class AddressTypeChangeServiceTest {
             eq("Address type changed"),
             eq(EventType.ADDRESS_TYPE_CHANGED),
             eq(rme.getEvent()),
-            eq(JsonHelper.convertObjectToJson(addressTypeChange)),
+            eq(addressTypeChange),
             eq(messageTimestamp));
   }
 
@@ -271,7 +270,7 @@ public class AddressTypeChangeServiceTest {
             eq("Address type changed"),
             eq(EventType.ADDRESS_TYPE_CHANGED),
             eq(rme.getEvent()),
-            eq(JsonHelper.convertObjectToJson(addressTypeChange)),
+            eq(addressTypeChange),
             eq(messageTimestamp));
 
     ArgumentCaptor<Case> newCaseArgCaptor = ArgumentCaptor.forClass(Case.class);
@@ -292,7 +291,7 @@ public class AddressTypeChangeServiceTest {
             eq("Address type changed"),
             eq(EventType.ADDRESS_TYPE_CHANGED),
             eq(rme.getEvent()),
-            eq(JsonHelper.convertObjectToJson(addressTypeChange)),
+            eq(addressTypeChange),
             eq(messageTimestamp));
   }
 
@@ -435,5 +434,51 @@ public class AddressTypeChangeServiceTest {
 
     // When, then expected exception is thrown
     underTest.processMessage(rme, null);
+  }
+
+  @Test
+  public void testNewCeCaseDefaultsCeActualResponsesToZero() {
+    // Given
+    ResponseManagementEvent rme = new ResponseManagementEvent();
+
+    EventDTO event = new EventDTO();
+    rme.setEvent(event);
+    event.setDateTime(OffsetDateTime.now());
+
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+    PayloadDTO payload = new PayloadDTO();
+    rme.setPayload(payload);
+
+    AddressTypeChange addressTypeChange = new AddressTypeChange();
+    payload.setAddressTypeChange(addressTypeChange);
+
+    AddressTypeChangeDetails addressTypeChangeDetails = new AddressTypeChangeDetails();
+    addressTypeChange.setCollectionCase(addressTypeChangeDetails);
+    addressTypeChangeDetails.setCeExpectedCapacity("20");
+    addressTypeChangeDetails.setId(UUID.randomUUID());
+
+    ModifiedAddress address = new ModifiedAddress();
+    addressTypeChangeDetails.setAddress(address);
+    address.setAddressType("CE");
+
+    Case oldCase = easyRandom.nextObject(Case.class);
+    oldCase.setCaseType("SPG");
+    oldCase.setCaseId(UUID.randomUUID());
+    when(caseService.getCaseByCaseId(any())).thenReturn(oldCase);
+    when(caseService.saveNewCaseAndStampCaseRef(any())).thenAnswer(i -> i.getArguments()[0]);
+
+    // When
+    underTest.processMessage(rme, messageTimestamp);
+
+    // Then
+    ArgumentCaptor<Case> newCaseArgCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseService).saveNewCaseAndStampCaseRef(newCaseArgCaptor.capture());
+
+    Case newCase = newCaseArgCaptor.getValue();
+    assertThat(newCase.getCaseType()).isEqualTo("CE");
+    assertThat(newCase.getAddressType()).isEqualTo("CE");
+    assertThat(newCase.getAddressLevel()).isEqualTo("E");
+    assertThat(newCase.getCeExpectedCapacity()).isEqualTo(20);
+    assertThat(newCase.getCeActualResponses()).isEqualTo(0);
   }
 }

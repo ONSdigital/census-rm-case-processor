@@ -1,7 +1,5 @@
 package uk.gov.ons.census.casesvc.service;
 
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
-
 import java.time.OffsetDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -45,7 +43,9 @@ public class AddressTypeChangeService {
     if (oldCase.getCaseType().equals("HI")) {
       throw new RuntimeException("Cannot change case of type HI");
     }
-    addressModificationValidator.validate(addressTypeChange.getCollectionCase().getAddress());
+    addressModificationValidator.validate(
+        addressTypeChange.getCollectionCase().getAddress(),
+        responseManagementEvent.getEvent().getChannel());
 
     invalidateOldCase(responseManagementEvent, messageTimestamp, addressTypeChange, oldCase);
 
@@ -67,7 +67,7 @@ public class AddressTypeChangeService {
         "Address type changed",
         EventType.ADDRESS_TYPE_CHANGED,
         responseManagementEvent.getEvent(),
-        convertObjectToJson(addressTypeChange),
+        addressTypeChange,
         messageTimestamp);
   }
 
@@ -109,7 +109,7 @@ public class AddressTypeChangeService {
         "Address type changed",
         EventType.ADDRESS_TYPE_CHANGED,
         responseManagementEvent.getEvent(),
-        convertObjectToJson(addressTypeChange),
+        addressTypeChange,
         messageTimestamp);
   }
 

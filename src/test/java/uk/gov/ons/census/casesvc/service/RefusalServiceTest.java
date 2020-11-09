@@ -76,7 +76,7 @@ public class RefusalServiceTest {
             eq(REFUSAL_RECEIVED),
             eq(EventType.REFUSAL_RECEIVED),
             eq(managementEvent.getEvent()),
-            anyString(),
+            any(),
             eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
   }
@@ -125,7 +125,7 @@ public class RefusalServiceTest {
             eq(REFUSAL_RECEIVED),
             eq(EventType.REFUSAL_RECEIVED),
             eq(managementEvent.getEvent()),
-            anyString(),
+            any(),
             eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
   }
@@ -174,7 +174,7 @@ public class RefusalServiceTest {
             eq(REFUSAL_RECEIVED),
             eq(EventType.REFUSAL_RECEIVED),
             eq(managementEvent.getEvent()),
-            anyString(),
+            any(),
             eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
   }
@@ -208,7 +208,7 @@ public class RefusalServiceTest {
             eq("Hard Refusal Received for case already marked Extraordinary refused"),
             eq(EventType.REFUSAL_RECEIVED),
             eq(managementEvent.getEvent()),
-            anyString(),
+            any(),
             eq(messageTimestamp));
   }
 }

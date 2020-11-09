@@ -95,7 +95,7 @@ public class QuestionnaireLinkedServiceTest {
             eq("Questionnaire Linked"),
             eq(EventType.QUESTIONNAIRE_LINKED),
             eq(managementEvent.getEvent()),
-            anyString(),
+            any(),
             eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
   }
@@ -157,7 +157,7 @@ public class QuestionnaireLinkedServiceTest {
             eq("Questionnaire Linked"),
             eq(EventType.QUESTIONNAIRE_LINKED),
             eq(managementEvent.getEvent()),
-            anyString(),
+            any(),
             eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
   }
@@ -231,7 +231,7 @@ public class QuestionnaireLinkedServiceTest {
             eq("Questionnaire Linked"),
             eq(EventType.QUESTIONNAIRE_LINKED),
             eq(managementEvent.getEvent()),
-            anyString(),
+            any(),
             eq(messageTimestamp));
 
     verifyNoMoreInteractions(eventLogger);
@@ -282,7 +282,7 @@ public class QuestionnaireLinkedServiceTest {
             eq("Questionnaire Linked"),
             eq(EventType.QUESTIONNAIRE_LINKED),
             eq(managementEvent.getEvent()),
-            anyString(),
+            any(),
             eq(messageTimestamp));
 
     verify(eventLogger)
@@ -292,7 +292,7 @@ public class QuestionnaireLinkedServiceTest {
             eq("Questionnaire unlinked from case with QID " + TEST_HH_QID),
             eq(EventType.QUESTIONNAIRE_UNLINKED),
             eq(managementEvent.getEvent()),
-            anyString(),
+            any(),
             eq(messageTimestamp));
 
     verifyNoMoreInteractions(eventLogger);
@@ -358,7 +358,7 @@ public class QuestionnaireLinkedServiceTest {
             eq("Questionnaire Linked"),
             eq(EventType.QUESTIONNAIRE_LINKED),
             eq(managementEvent.getEvent()),
-            anyString(),
+            any(),
             eq(messageTimestamp));
 
     verifyNoMoreInteractions(caseService);
@@ -427,7 +427,7 @@ public class QuestionnaireLinkedServiceTest {
             eq("Questionnaire Linked"),
             eq(EventType.QUESTIONNAIRE_LINKED),
             eq(linkingEvent.getEvent()),
-            anyString(),
+            any(),
             eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
   }
@@ -579,7 +579,7 @@ public class QuestionnaireLinkedServiceTest {
             eq("Questionnaire Linked"),
             eq(EventType.QUESTIONNAIRE_LINKED),
             eq(managementEvent.getEvent()),
-            anyString(),
+            any(),
             eq(messageTimestamp));
     verifyNoMoreInteractions(eventLogger);
   }
@@ -655,7 +655,7 @@ public class QuestionnaireLinkedServiceTest {
             eq("Questionnaire Linked"),
             eq(EventType.QUESTIONNAIRE_LINKED),
             eq(managementEvent.getEvent()),
-            anyString(),
+            any(),
             eq(messageTimestamp));
 
     verifyNoMoreInteractions(eventLogger);

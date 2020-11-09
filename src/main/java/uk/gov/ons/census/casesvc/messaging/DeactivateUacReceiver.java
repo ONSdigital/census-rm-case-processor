@@ -1,6 +1,5 @@
 package uk.gov.ons.census.casesvc.messaging;
 
-import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import static uk.gov.ons.census.casesvc.utility.MsgDateHelper.getMsgTimeStamp;
 
 import java.time.OffsetDateTime;
@@ -44,7 +43,7 @@ public class DeactivateUacReceiver {
         DEACTIVATE_UAC,
         EventType.DEACTIVATE_UAC,
         message.getPayload().getEvent(),
-        convertObjectToJson(message.getPayload()),
+        message.getPayload(),
         messageTimestamp);
   }
 }

@@ -15,7 +15,7 @@ public class AddressModificationValidator {
     this.estabTypes = estabTypes;
   }
 
-  public void validate(ModifiedAddress modifiedAddress) {
+  public void validate(ModifiedAddress modifiedAddress, String eventChannel) {
     if (modifiedAddress.getAddressLine1() != null
         && !modifiedAddress.getAddressLine1().isPresent()) {
       throw new RuntimeException(
@@ -32,10 +32,24 @@ public class AddressModificationValidator {
       throw new RuntimeException("Validation Failure: Mandatory estab type cannot be set to null");
     }
 
-    if (modifiedAddress.getEstabType() != null
-        && modifiedAddress.getEstabType().isPresent()
-        && !estabTypes.contains(modifiedAddress.getEstabType().get())) {
-      throw new RuntimeException("Validation Failure: Estab Type not valid");
+    if (modifiedAddress.getEstabType() != null && modifiedAddress.getEstabType().isPresent()) {
+
+      if ("CC".equals(eventChannel) && "OTHER".equals(modifiedAddress.getEstabType().get())) {
+        // ****************** HERE BE DRAGONS!!!! *******************
+        // Because of reasons of almost unimaginable awfulness, we are forced to accept this
+        // late-breaking kludge, which allows Contact Centre to use "OTHER" as the estab type
+        // instead of one of the vast number of specific ones which are allowed.
+        //
+        // See this card for more details: https://trello.com/c/ZUuPMYuQ
+        //
+        // This clause allows OTHER estab type from CC without throwing an exception, and it
+        // exists purely to document this highly undesirable behaviour, although functionally
+        // it does nothing, and a programmer without this knowledge would no doubt optimise it away.
+        //
+        // Sorry.
+      } else if (!estabTypes.contains(modifiedAddress.getEstabType().get())) {
+        throw new RuntimeException("Validation Failure: Estab Type not valid");
+      }
     }
   }
 }

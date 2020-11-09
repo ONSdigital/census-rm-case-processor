@@ -15,7 +15,6 @@ import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.service.*;
-import uk.gov.ons.census.casesvc.utility.JsonHelper;
 
 @MessageEndpoint
 public class AddressReceiver {
@@ -100,7 +99,7 @@ public class AddressReceiver {
         eventDescription,
         eventType,
         event,
-        JsonHelper.convertObjectToJson(eventPayload),
+        eventPayload,
         messageTimestamp);
   }
 

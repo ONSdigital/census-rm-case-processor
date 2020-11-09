@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
 import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
+import uk.gov.ons.census.casesvc.model.dto.UacQidDTO;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
@@ -34,13 +35,17 @@ public class EventLoggerTest {
     eventDTO.setSource("Test source");
     eventDTO.setChannel("Test channel");
 
+    UacQidDTO redactMe = new UacQidDTO();
+    redactMe.setQid("TEST QID");
+    redactMe.setUac("SECRET UAC");
+
     underTest.logCaseEvent(
         caze,
         eventTime,
         "Test description",
         EventType.UAC_UPDATED,
         eventDTO,
-        "{\"test\":\"json\"}",
+        redactMe,
         messageTime);
 
     ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
@@ -53,7 +58,8 @@ public class EventLoggerTest {
     assertThat("Test channel").isEqualTo(actualEvent.getEventChannel());
     assertThat(EventType.UAC_UPDATED).isEqualTo(actualEvent.getEventType());
     assertThat("Test description").isEqualTo(actualEvent.getEventDescription());
-    assertThat("{\"test\":\"json\"}").isEqualTo(actualEvent.getEventPayload());
+    assertThat("{\"uac\":\"REDACTED\",\"qid\":\"TEST QID\"}")
+        .isEqualTo(actualEvent.getEventPayload());
     assertThat(eventDTO.getTransactionId()).isEqualTo(actualEvent.getEventTransactionId());
     assertThat(messageTime).isEqualTo(actualEvent.getMessageTimestamp());
   }
@@ -67,13 +73,17 @@ public class EventLoggerTest {
     eventDTO.setSource("Test source");
     eventDTO.setChannel("Test channel");
 
+    UacQidDTO redactMe = new UacQidDTO();
+    redactMe.setQid("TEST QID");
+    redactMe.setUac("SECRET UAC");
+
     underTest.logUacQidEvent(
         uacQidLink,
         eventTime,
         "Test description",
         EventType.UAC_UPDATED,
         eventDTO,
-        "{\"test\":\"json\"}",
+        redactMe,
         messageTime);
 
     ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
@@ -86,7 +96,8 @@ public class EventLoggerTest {
     assertThat("Test channel").isEqualTo(actualEvent.getEventChannel());
     assertThat(EventType.UAC_UPDATED).isEqualTo(actualEvent.getEventType());
     assertThat("Test description").isEqualTo(actualEvent.getEventDescription());
-    assertThat("{\"test\":\"json\"}").isEqualTo(actualEvent.getEventPayload());
+    assertThat("{\"uac\":\"REDACTED\",\"qid\":\"TEST QID\"}")
+        .isEqualTo(actualEvent.getEventPayload());
     assertThat(eventDTO.getTransactionId()).isEqualTo(actualEvent.getEventTransactionId());
     assertThat(messageTime).isEqualTo(actualEvent.getMessageTimestamp());
   }

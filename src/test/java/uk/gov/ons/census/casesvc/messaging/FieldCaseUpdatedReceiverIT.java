@@ -65,58 +65,13 @@ public class FieldCaseUpdatedReceiverIT {
     caze.setUacQidLinks(null);
     caze.setEvents(null);
     caze.setCaseType("CE");
-    caze.setAddressLevel("E");
+    caze.setAddressLevel("U");
     caze.setCeActualResponses(5);
     caze.setCeExpectedCapacity(8);
     caze.setAddressInvalid(false);
     caze.setRefusalReceived(null);
     caze.setSkeleton(false);
     caseRepository.saveAndFlush(caze);
-  }
-
-  @Test
-  public void testNoCancelSentWhenCeExpectedCapacityUpdated() throws Exception {
-    try (QueueSpy fieldOutboundQueue = rabbitQueueHelper.listen(caseUpdatedQueueName)) {
-
-      ResponseManagementEvent managementEvent = getTestResponseManagementFieldUpdatedEvent();
-      managementEvent.getEvent().setTransactionId(UUID.randomUUID());
-      managementEvent.getPayload().getCollectionCase().setId(TEST_CASE_ID);
-      managementEvent.getPayload().getCollectionCase().setCeExpectedCapacity(6);
-
-      String json = convertObjectToJson(managementEvent);
-      Message message =
-          MessageBuilder.withBody(json.getBytes())
-              .setContentType(MessageProperties.CONTENT_TYPE_JSON)
-              .build();
-
-      // When
-      rabbitQueueHelper.sendMessage(inboundQueue, message);
-
-      // Then
-
-      // check messages sent
-      ResponseManagementEvent responseManagementEvent =
-          fieldOutboundQueue.checkExpectedMessageReceived();
-      CollectionCase actualCollectionCase =
-          responseManagementEvent.getPayload().getCollectionCase();
-      assertThat(actualCollectionCase.getId()).isEqualTo(TEST_CASE_ID);
-      assertThat(actualCollectionCase.getCeExpectedCapacity()).isEqualTo(6);
-
-      // check the metadata does NOT have a CANCEL decision
-      assertThat(responseManagementEvent.getPayload().getMetadata().getFieldDecision()).isNull();
-      assertThat(responseManagementEvent.getPayload().getMetadata().getCauseEventType())
-          .isEqualTo(EventTypeDTO.FIELD_CASE_UPDATED);
-
-      Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
-      assertThat(actualCase.getSurvey()).isEqualTo("CENSUS");
-      assertThat(actualCase.getCeExpectedCapacity()).isEqualTo(6);
-
-      // check database for log eventDTO
-      List<Event> events = eventRepository.findAll();
-      assertThat(events.size()).isEqualTo(1);
-      Event event = events.get(0);
-      assertThat(event.getEventDescription()).isEqualTo("Field case update received");
-    }
   }
 
   @Test
