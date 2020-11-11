@@ -10,10 +10,6 @@ import static uk.gov.ons.census.casesvc.utility.JsonHelper.convertObjectToJson;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,7 +32,6 @@ import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.model.repository.UacQidLinkRepository;
 import uk.gov.ons.census.casesvc.testutil.QueueSpy;
 import uk.gov.ons.census.casesvc.testutil.RabbitQueueHelper;
-import uk.gov.ons.census.casesvc.utility.ObjectMapperFactory;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -45,7 +40,6 @@ import uk.gov.ons.census.casesvc.utility.ObjectMapperFactory;
 public class RefusalReceiverIT {
 
   private static final UUID TEST_CASE_ID = UUID.randomUUID();
-  private static final ObjectMapper objectMapper = ObjectMapperFactory.objectMapper();
 
   @Value("${queueconfig.refusal-response-inbound-queue}")
   private String inboundQueue;
@@ -198,9 +192,9 @@ public class RefusalReceiverIT {
     }
   }
 
-
   @Test
-  public void testRefusalWithIsHouseholderAsTrueContainsContactAndAddressInfo() throws Exception {
+  public void testHardRefusalWithIsHouseholderAsTrueContainsContactAndAddressInfo()
+      throws Exception {
     try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
       // GIVEN
       Case caze = getRandomCase();
@@ -213,47 +207,38 @@ public class RefusalReceiverIT {
       caseRepository.saveAndFlush(caze);
 
       ResponseManagementEvent managementEvent =
-              getTestResponseManagementRefusalEvent(RefusalTypeDTO.HARD_REFUSAL);
+          getTestResponseManagementRefusalEvent(RefusalTypeDTO.HARD_REFUSAL);
       managementEvent.getEvent().setTransactionId(UUID.randomUUID());
       RefusalDTO expectedRefusal = managementEvent.getPayload().getRefusal();
       expectedRefusal.getCollectionCase().setId(TEST_CASE_ID);
       expectedRefusal.setHouseholder(true);
 
-      ObjectNode contactNode =
-              objectMapper
-                      .createObjectNode()
-                      .put("title", "Mr")
-                      .put("forename", "Testy")
-                      .put("surname", "Test");
+      Contact contactHouseholder = managementEvent.getPayload().getRefusal().getContact();
+      contactHouseholder.setTitle("Mr");
+      contactHouseholder.setForename("Testy");
+      contactHouseholder.setSurname("Test");
 
-      ObjectNode addressNode =
-              objectMapper
-                      .createObjectNode()
-                      .put("addressLine1", "1a main street")
-                      .put("addressLine2", "upper upperingham")
-                      .put("addressLine3", "")
-                      .put("townName", "upton")
-                      .put("postcode", "UP103UP")
-                      .put("region", "E")
-                      .put("uprn", "123456789");
-
-      ObjectNode parentNode = objectMapper.createObjectNode();
-      parentNode.set("contact", contactNode);
-      parentNode.set("address", addressNode);
-
+      Address addressHouseholder = managementEvent.getPayload().getRefusal().getAddress();
+      addressHouseholder.setAddressLine1("1a main street");
+      addressHouseholder.setAddressLine2("upper upperingham");
+      addressHouseholder.setAddressLine3("");
+      addressHouseholder.setTownName("upton");
+      addressHouseholder.setPostcode("UP103UP");
+      addressHouseholder.setRegion("E");
+      addressHouseholder.setUprn("123456789");
 
       String json = convertObjectToJson(managementEvent);
       Message message =
-              MessageBuilder.withBody(json.getBytes())
-                      .setContentType(MessageProperties.CONTENT_TYPE_JSON)
-                      .build();
+          MessageBuilder.withBody(json.getBytes())
+              .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+              .build();
 
       // WHEN
       rabbitQueueHelper.sendMessage(inboundQueue, message);
 
       // THEN
       ResponseManagementEvent responseManagementEvent =
-              rhCaseQueueSpy.checkExpectedMessageReceived();
+          rhCaseQueueSpy.checkExpectedMessageReceived();
 
       Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
       OffsetDateTime cazeCreatedTime = actualCase.getCreatedDateTime();
@@ -271,31 +256,38 @@ public class RefusalReceiverIT {
 
       assertThat(actualCase.getRefusalReceived()).isEqualTo(RefusalType.HARD_REFUSAL);
 
-
       // check the metadata is included with field CANCEL decision
       assertThat(responseManagementEvent.getPayload().getMetadata().getFieldDecision())
-              .isEqualTo(ActionInstructionType.CANCEL);
+          .isEqualTo(ActionInstructionType.CANCEL);
       assertThat(responseManagementEvent.getPayload().getMetadata().getCauseEventType())
-              .isEqualTo(EventTypeDTO.REFUSAL_RECEIVED);
+          .isEqualTo(EventTypeDTO.REFUSAL_RECEIVED);
 
       List<Event> events = eventRepository.findAll();
       assertThat(events.size()).isEqualTo(1);
 
       RefusalDTO actualRefusal =
-              convertJsonToObject(events.get(0).getEventPayload(), RefusalDTO.class);
+          convertJsonToObject(events.get(0).getEventPayload(), RefusalDTO.class);
       assertThat(actualRefusal.getType()).isEqualTo(expectedRefusal.getType());
       assertThat(actualRefusal.getAgentId()).isEqualTo(expectedRefusal.getAgentId());
       assertThat(actualRefusal.getCallId()).isEqualTo(expectedRefusal.getCallId());
       assertThat(actualRefusal.getCollectionCase().getId())
-              .isEqualTo(expectedRefusal.getCollectionCase().getId());
+          .isEqualTo(expectedRefusal.getCollectionCase().getId());
       assertThat(actualRefusal.isHouseholder()).isEqualTo(true);
-//      assertThat(actualRefusal.getCollectionCase().getAddress().getAddressLine1()).isEqualTo()
-//      assertThat(actualRefusal.getContact()).isEqualTo();
+
+      assertThat(actualRefusal.getContact().getTitle()).isEqualTo(contactHouseholder.getTitle());
+      assertThat(actualRefusal.getContact().getForename())
+          .isEqualTo(contactHouseholder.getForename());
+      assertThat(actualRefusal.getContact().getSurname())
+          .isEqualTo(contactHouseholder.getSurname());
+
+      assertThat(actualRefusal.getAddress().getAddressLine1())
+          .isEqualTo(addressHouseholder.getAddressLine1());
     }
   }
 
   @Test
-  public void testRefusalWithIsHouseholderAsTrueDoesNotContainContactAndAddressInfo() throws Exception {
+  public void testHardRefusalWithIsHouseholderAsFalseDoesNotContainContactAndAddressInfo()
+      throws Exception {
     try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
       // GIVEN
       Case caze = getRandomCase();
@@ -308,24 +300,26 @@ public class RefusalReceiverIT {
       caseRepository.saveAndFlush(caze);
 
       ResponseManagementEvent managementEvent =
-              getTestResponseManagementRefusalEvent(RefusalTypeDTO.HARD_REFUSAL);
+          getTestResponseManagementRefusalEvent(RefusalTypeDTO.HARD_REFUSAL);
       managementEvent.getEvent().setTransactionId(UUID.randomUUID());
       RefusalDTO expectedRefusal = managementEvent.getPayload().getRefusal();
       expectedRefusal.getCollectionCase().setId(TEST_CASE_ID);
       expectedRefusal.setHouseholder(false);
+      expectedRefusal.setContact(null);
+      expectedRefusal.setAddress(null);
 
       String json = convertObjectToJson(managementEvent);
       Message message =
-              MessageBuilder.withBody(json.getBytes())
-                      .setContentType(MessageProperties.CONTENT_TYPE_JSON)
-                      .build();
+          MessageBuilder.withBody(json.getBytes())
+              .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+              .build();
 
       // WHEN
       rabbitQueueHelper.sendMessage(inboundQueue, message);
 
       // THEN
       ResponseManagementEvent responseManagementEvent =
-              rhCaseQueueSpy.checkExpectedMessageReceived();
+          rhCaseQueueSpy.checkExpectedMessageReceived();
 
       Case actualCase = caseRepository.findById(TEST_CASE_ID).get();
       OffsetDateTime cazeCreatedTime = actualCase.getCreatedDateTime();
@@ -345,23 +339,25 @@ public class RefusalReceiverIT {
 
       // check the metadata is included with field CANCEL decision
       assertThat(responseManagementEvent.getPayload().getMetadata().getFieldDecision())
-              .isEqualTo(ActionInstructionType.CANCEL);
+          .isEqualTo(ActionInstructionType.CANCEL);
       assertThat(responseManagementEvent.getPayload().getMetadata().getCauseEventType())
-              .isEqualTo(EventTypeDTO.REFUSAL_RECEIVED);
+          .isEqualTo(EventTypeDTO.REFUSAL_RECEIVED);
 
       List<Event> events = eventRepository.findAll();
       assertThat(events.size()).isEqualTo(1);
 
       RefusalDTO actualRefusal =
-              convertJsonToObject(events.get(0).getEventPayload(), RefusalDTO.class);
+          convertJsonToObject(events.get(0).getEventPayload(), RefusalDTO.class);
       assertThat(actualRefusal.getType()).isEqualTo(expectedRefusal.getType());
       assertThat(actualRefusal.getAgentId()).isEqualTo(expectedRefusal.getAgentId());
       assertThat(actualRefusal.getCallId()).isEqualTo(expectedRefusal.getCallId());
       assertThat(actualRefusal.getCollectionCase().getId())
-              .isEqualTo(expectedRefusal.getCollectionCase().getId());
+          .isEqualTo(expectedRefusal.getCollectionCase().getId());
       assertThat(actualRefusal.isHouseholder()).isEqualTo(false);
-//      assertThat(actualRefusal.getCollectionCase().getAddress().getAddressLine1()).isEmpty();
-//      assertThat(actualRefusal.getContact().getForename()).isEmpty();
+
+      assertThat(actualRefusal.getContact()).isNull();
+
+      assertThat(actualRefusal.getAddress()).isNull();
     }
   }
 }
