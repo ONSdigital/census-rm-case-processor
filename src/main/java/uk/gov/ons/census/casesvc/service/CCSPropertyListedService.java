@@ -11,6 +11,7 @@ import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
+import uk.gov.ons.census.casesvc.utility.FieldworkHelper;
 
 @Service
 public class CCSPropertyListedService {
@@ -37,7 +38,7 @@ public class CCSPropertyListedService {
 
     uacService.createUacQidLinkedToCCSCase(caze, ccsPropertyListedEvent.getEvent());
 
-    if (ccsProperty.isInterviewRequired()) {
+    if (FieldworkHelper.shouldSendCaseToField(caze) && ccsProperty.isInterviewRequired()) {
       caseService.saveCaseAndEmitCaseCreatedEvent(
           caze, buildMetadata(EventTypeDTO.CCS_ADDRESS_LISTED, ActionInstructionType.CREATE));
     }

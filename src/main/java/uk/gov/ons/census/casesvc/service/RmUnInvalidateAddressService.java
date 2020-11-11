@@ -33,7 +33,7 @@ public class RmUnInvalidateAddressService {
     unInvalidateAddressCase.setAddressInvalid(false);
 
     Metadata eventMetadata = null;
-    if (shouldSendCaseToField(unInvalidateAddressCase, rme.getEvent().getChannel())) {
+    if (shouldSendCaseToField(unInvalidateAddressCase)) {
       eventMetadata = buildMetadata(rme.getEvent().getType(), ActionInstructionType.UPDATE);
     }
 

@@ -110,6 +110,14 @@ public class CaseReceiptServiceTableTest {
     caze.setCeActualResponses(0);
     caze.setTreatmentCode(treatmentCode);
     caze.setCeExpectedCapacity(capacity);
+    caze.setEstabType("SpeakEasy");
+    caze.setRegion("E");
+    caze.setFieldOfficerId("007");
+    caze.setFieldCoordinatorId("M");
+    caze.setOa("Oa Oa");
+    caze.setLatitude("sunny climes");
+    caze.setLongitude("shortatitude");
+    caze.setEstabUprn("Unique People Require Nothing");
 
     UacQidLink uacQidLink = new UacQidLink();
     uacQidLink.setQid(qid);

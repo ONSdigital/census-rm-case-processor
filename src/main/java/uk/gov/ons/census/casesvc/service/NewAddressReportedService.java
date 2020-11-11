@@ -30,6 +30,7 @@ import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.CaseMetadata;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
+import uk.gov.ons.census.casesvc.utility.FieldworkHelper;
 
 @Component
 public class NewAddressReportedService {
@@ -116,7 +117,8 @@ public class NewAddressReportedService {
       newCaseFromSourceCase.setEstabUprn(newCaseFromSourceCase.getUprn());
     }
 
-    Metadata metadata = getMetaDataToCreateFieldCaseIfConditionsMet(newAddressEvent);
+    Metadata metadata =
+        getMetaDataToCreateFieldCaseIfConditionsMet(newCaseFromSourceCase, newAddressEvent);
 
     caseService.saveCaseAndEmitCaseCreatedEvent(newCaseFromSourceCase, metadata);
 
@@ -131,19 +133,17 @@ public class NewAddressReportedService {
   }
 
   private Metadata getMetaDataToCreateFieldCaseIfConditionsMet(
-      ResponseManagementEvent newAddressEvent) {
+      Case caze, ResponseManagementEvent newAddressEvent) {
 
     if (!newAddressEvent.getEvent().getChannel().equals("FIELD")) {
       return null;
     }
 
-    if (newAddressEvent.getPayload().getNewAddress().getCollectionCase().getFieldCoordinatorId()
-        == null) {
+    if (newAddressEvent.getPayload().getNewAddress().getSourceCaseId() == null) {
       return null;
     }
 
-    if (newAddressEvent.getPayload().getNewAddress().getCollectionCase().getFieldOfficerId()
-        == null) {
+    if (!FieldworkHelper.shouldSendCaseToField(caze)) {
       return null;
     }
 

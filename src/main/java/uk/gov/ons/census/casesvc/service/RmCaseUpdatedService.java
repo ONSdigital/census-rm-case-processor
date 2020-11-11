@@ -53,7 +53,7 @@ public class RmCaseUpdatedService {
     caze.setSkeleton(false);
 
     Metadata eventMetadata = null;
-    if (shouldSendCaseToField(caze, rme.getEvent().getChannel())) {
+    if (shouldSendCaseToField(caze)) {
       eventMetadata = new Metadata();
       eventMetadata.setCauseEventType(rme.getEvent().getType());
 

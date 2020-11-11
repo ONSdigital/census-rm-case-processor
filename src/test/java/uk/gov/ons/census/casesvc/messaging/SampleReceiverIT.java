@@ -151,6 +151,14 @@ public class SampleReceiverIT {
       createCaseSample.setCeExpectedCapacity(null);
       createCaseSample.setSecureEstablishment(0);
       createCaseSample.setBulkProcessed(true);
+      createCaseSample.setEstabType("SECRET MARS BASE TYPE 4F");
+      createCaseSample.setFieldOfficerId("007");
+      createCaseSample.setFieldCoordinatorId("M");
+      createCaseSample.setOa("Please repurpose this field for field");
+      createCaseSample.setLatitude("37.2431");
+      createCaseSample.setLongitude("115.7930");
+      createCaseSample.setEstabUprn("NrpUbatse");
+
       // WHEN
       rabbitQueueHelper.sendMessage(inboundQueue, createCaseSample);
 

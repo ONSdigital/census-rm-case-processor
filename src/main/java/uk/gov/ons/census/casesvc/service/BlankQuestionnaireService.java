@@ -16,6 +16,7 @@ import uk.gov.ons.census.casesvc.model.dto.EventTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.Metadata;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.UacQidLink;
+import uk.gov.ons.census.casesvc.utility.FieldworkHelper;
 
 @Component
 public class BlankQuestionnaireService {
@@ -54,8 +55,9 @@ public class BlankQuestionnaireService {
   BiFunction<Case, EventTypeDTO, Case> unreceiptCaseAndSendToField =
       (caze, causeEventType) -> {
         Metadata metadata = null;
-        if (caze.getRefusalReceived() == null && !caze.isAddressInvalid()) {
-          // Only send to fieldwork if the case is not refused or address invalid
+
+        caze.setReceiptReceived(false);
+        if (FieldworkHelper.shouldSendCaseToField(caze)) {
           metadata = buildMetadata(causeEventType, ActionInstructionType.UPDATE, true);
         }
 

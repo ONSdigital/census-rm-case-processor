@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.ons.census.casesvc.testutil.DataUtils.getCaseThatWillPassFieldWorkHelper;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -37,7 +38,7 @@ public class RmUnInvalidateAddressServiceTest {
   @Test
   public void testUnInvalidateAddressHappyPath() {
     // Given
-    Case caseToUnInvalidate = new Case();
+    Case caseToUnInvalidate = getCaseThatWillPassFieldWorkHelper();
     UUID expectedCaseId = UUID.randomUUID();
     caseToUnInvalidate.setCaseId(expectedCaseId);
     caseToUnInvalidate.setAddressInvalid(true);
