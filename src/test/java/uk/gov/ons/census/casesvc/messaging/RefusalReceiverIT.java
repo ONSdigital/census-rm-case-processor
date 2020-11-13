@@ -211,21 +211,12 @@ public class RefusalReceiverIT {
       managementEvent.getEvent().setTransactionId(UUID.randomUUID());
       RefusalDTO expectedRefusal = managementEvent.getPayload().getRefusal();
       expectedRefusal.getCollectionCase().setId(TEST_CASE_ID);
-      expectedRefusal.setHouseholder(true);
+      expectedRefusal.setIsHouseholder(true);
 
       Contact contactHouseholder = managementEvent.getPayload().getRefusal().getContact();
       contactHouseholder.setTitle("Mr");
       contactHouseholder.setForename("Testy");
       contactHouseholder.setSurname("Test");
-
-      Address addressHouseholder = managementEvent.getPayload().getRefusal().getAddress();
-      addressHouseholder.setAddressLine1("1a main street");
-      addressHouseholder.setAddressLine2("upper upperingham");
-      addressHouseholder.setAddressLine3("");
-      addressHouseholder.setTownName("upton");
-      addressHouseholder.setPostcode("UP103UP");
-      addressHouseholder.setRegion("E");
-      addressHouseholder.setUprn("123456789");
 
       String json = convertObjectToJson(managementEvent);
       Message message =
@@ -272,7 +263,7 @@ public class RefusalReceiverIT {
       assertThat(actualRefusal.getCallId()).isEqualTo(expectedRefusal.getCallId());
       assertThat(actualRefusal.getCollectionCase().getId())
           .isEqualTo(expectedRefusal.getCollectionCase().getId());
-      assertThat(actualRefusal.isHouseholder()).isEqualTo(true);
+      assertThat(actualRefusal.getIsHouseholder()).isEqualTo(true);
 
       assertThat(actualRefusal.getContact().getTitle()).isEqualTo(contactHouseholder.getTitle());
       assertThat(actualRefusal.getContact().getForename())
@@ -281,13 +272,12 @@ public class RefusalReceiverIT {
           .isEqualTo(contactHouseholder.getSurname());
 
       assertThat(actualRefusal.getAddress().getAddressLine1())
-          .isEqualTo(addressHouseholder.getAddressLine1());
+          .isEqualTo(expectedRefusal.getAddress().getAddressLine1());
     }
   }
 
   @Test
-  public void testHardRefusalWithIsHouseholderAsFalseDoesNotContainContactAndAddressInfo()
-      throws Exception {
+  public void testHardRefusalWithIsHouseholderNotSetReturnsFalse() throws Exception {
     try (QueueSpy rhCaseQueueSpy = rabbitQueueHelper.listen(rhCaseQueue)) {
       // GIVEN
       Case caze = getRandomCase();
@@ -304,9 +294,6 @@ public class RefusalReceiverIT {
       managementEvent.getEvent().setTransactionId(UUID.randomUUID());
       RefusalDTO expectedRefusal = managementEvent.getPayload().getRefusal();
       expectedRefusal.getCollectionCase().setId(TEST_CASE_ID);
-      expectedRefusal.setHouseholder(false);
-      expectedRefusal.setContact(null);
-      expectedRefusal.setAddress(null);
 
       String json = convertObjectToJson(managementEvent);
       Message message =
@@ -353,11 +340,7 @@ public class RefusalReceiverIT {
       assertThat(actualRefusal.getCallId()).isEqualTo(expectedRefusal.getCallId());
       assertThat(actualRefusal.getCollectionCase().getId())
           .isEqualTo(expectedRefusal.getCollectionCase().getId());
-      assertThat(actualRefusal.isHouseholder()).isEqualTo(false);
-
-      assertThat(actualRefusal.getContact()).isNull();
-
-      assertThat(actualRefusal.getAddress()).isNull();
+      assertThat(actualRefusal.getIsHouseholder()).isEqualTo(false);
     }
   }
 }

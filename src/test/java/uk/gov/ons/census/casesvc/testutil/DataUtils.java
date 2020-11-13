@@ -202,7 +202,7 @@ public class DataUtils {
 
     RefusalDTO refusal = payload.getRefusal();
     refusal.setType(refusalTypeDTO);
-    refusal.setHouseholder(false);
+    refusal.setIsHouseholder(null);
 
     return managementEvent;
   }
