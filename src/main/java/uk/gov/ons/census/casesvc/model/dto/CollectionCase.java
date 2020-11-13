@@ -21,7 +21,7 @@ public class CollectionCase {
   private RefusalTypeDTO refusalReceived;
   private OffsetDateTime createdDateTime;
   private OffsetDateTime lastUpdated;
-  private NoneCompliancelTypeDTO nonComplianceStatus;
+  private NonCompliancelTypeDTO nonComplianceStatus;
 
   // Below this line is extra data potentially needed by Action Scheduler - can be ignored by RH
   private UUID actionPlanId;

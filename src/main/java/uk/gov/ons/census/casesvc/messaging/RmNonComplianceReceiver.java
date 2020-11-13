@@ -36,7 +36,7 @@ public class RmNonComplianceReceiver {
 
     Case caze = caseService.getCaseByCaseId(collectionCase.getId());
     caze.setMetadata(getCaseMetaData(caze));
-    caze.getMetadata().setNoneCompliance(collectionCase.getNonComplianceStatus());
+    caze.getMetadata().setNonCompliance(collectionCase.getNonComplianceStatus());
 
     if (!StringUtils.isEmpty(collectionCase.getFieldOfficerId())) {
       caze.setFieldOfficerId(collectionCase.getFieldOfficerId());

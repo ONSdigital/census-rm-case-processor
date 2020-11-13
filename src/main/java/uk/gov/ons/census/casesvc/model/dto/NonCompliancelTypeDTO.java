@@ -1,6 +1,6 @@
 package uk.gov.ons.census.casesvc.model.dto;
 
-public enum NoneCompliancelTypeDTO {
+public enum NonCompliancelTypeDTO {
   NCL,
   NCF
 }
