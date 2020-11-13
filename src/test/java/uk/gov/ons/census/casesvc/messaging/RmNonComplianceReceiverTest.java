@@ -27,7 +27,7 @@ import uk.gov.ons.census.casesvc.service.CaseService;
 import uk.gov.ons.census.casesvc.utility.MsgDateHelper;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RmNoneComplianceReceiverTest {
+public class RmNonComplianceReceiverTest {
 
   public static final String FIELD_CORDINATOR_ID = "M";
   public static final String FIELD_OFFICER_ID = "007";
@@ -35,7 +35,7 @@ public class RmNoneComplianceReceiverTest {
 
   @Mock private EventLogger eventLogger;
 
-  @InjectMocks private RmNoneComplianceReceiver underTest;
+  @InjectMocks private RmNonComplianceReceiver underTest;
 
   @Test
   public void testReceiveMessageWithNoFieldOfficerOrCordUpdatesNCF() {
@@ -75,7 +75,7 @@ public class RmNoneComplianceReceiverTest {
             eq(caze),
             any(),
             eq("None Compliance"),
-            eq(EventType.NON_COMPLIANCE),
+            eq(EventType.SELECTED_FOR_NON_COMPLIANCE),
             any(),
             any(),
             eq(expectedDateTime));
@@ -119,7 +119,7 @@ public class RmNoneComplianceReceiverTest {
             eq(caze),
             any(),
             eq("None Compliance"),
-            eq(EventType.NON_COMPLIANCE),
+            eq(EventType.SELECTED_FOR_NON_COMPLIANCE),
             any(),
             any(),
             eq(expectedDateTime));
@@ -168,7 +168,7 @@ public class RmNoneComplianceReceiverTest {
             eq(caze),
             any(),
             eq("None Compliance"),
-            eq(EventType.NON_COMPLIANCE),
+            eq(EventType.SELECTED_FOR_NON_COMPLIANCE),
             any(),
             any(),
             eq(expectedDateTime));

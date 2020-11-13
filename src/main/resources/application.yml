@@ -49,6 +49,7 @@ queueconfig:
   deactivate-uac-queue: case.deactivate-uac
   rm-case-updated-queue: case.rm.updated
   rm-uninvalidate-address-queue: case.rm.unInvalidateAddress
+  rm-non-compliance-queue: case.rm.nonCompliance
   consumers: 50
   retry-attempts: 3
   retry-delay: 1000 #milliseconds

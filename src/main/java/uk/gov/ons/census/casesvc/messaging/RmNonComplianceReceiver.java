@@ -17,12 +17,12 @@ import uk.gov.ons.census.casesvc.model.entity.EventType;
 import uk.gov.ons.census.casesvc.service.CaseService;
 
 @MessageEndpoint
-public class RmNoneComplianceReceiver {
+public class RmNonComplianceReceiver {
 
   private final CaseService caseService;
   private final EventLogger eventLogger;
 
-  public RmNoneComplianceReceiver(CaseService caseService, EventLogger eventLogger) {
+  public RmNonComplianceReceiver(CaseService caseService, EventLogger eventLogger) {
     this.caseService = caseService;
     this.eventLogger = eventLogger;
   }
@@ -52,7 +52,7 @@ public class RmNoneComplianceReceiver {
         caze,
         responseManagementEvent.getEvent().getDateTime(),
         "None Compliance",
-        EventType.NON_COMPLIANCE,
+        EventType.SELECTED_FOR_NON_COMPLIANCE,
         responseManagementEvent.getEvent(),
         responseManagementEvent.getPayload().getCollectionCase(),
         messageTimestamp);
