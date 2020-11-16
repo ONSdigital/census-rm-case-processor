@@ -36,10 +36,6 @@ public class RefusalService {
       return;
     }
 
-    if (refusalDto.getIsHouseholder() == null) {
-      refusalDto.setIsHouseholder(false);
-    }
-
     refusedCase.setRefusalReceived(
         uk.gov.ons.census.casesvc.model.entity.RefusalType.valueOf(refusalDto.getType().name()));
     caseService.saveCaseAndEmitCaseUpdatedEvent(refusedCase, buildMetadataForRefusal(refusalEvent));

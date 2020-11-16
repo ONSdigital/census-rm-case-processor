@@ -12,7 +12,7 @@ public class RefusalDTO {
   private RefusalTypeDTO type;
   private String agentId;
   private String callId;
-  private Boolean isHouseholder;
+  private boolean isHouseholder;
   private CollectionCase collectionCase;
   private Contact contact;
   private Address address;

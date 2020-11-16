@@ -211,7 +211,7 @@ public class RefusalReceiverIT {
       managementEvent.getEvent().setTransactionId(UUID.randomUUID());
       RefusalDTO expectedRefusal = managementEvent.getPayload().getRefusal();
       expectedRefusal.getCollectionCase().setId(TEST_CASE_ID);
-      expectedRefusal.setIsHouseholder(true);
+      expectedRefusal.setHouseholder(true);
 
       Contact contactHouseholder = managementEvent.getPayload().getRefusal().getContact();
       contactHouseholder.setTitle("Mr");
@@ -263,7 +263,7 @@ public class RefusalReceiverIT {
       assertThat(actualRefusal.getCallId()).isEqualTo(expectedRefusal.getCallId());
       assertThat(actualRefusal.getCollectionCase().getId())
           .isEqualTo(expectedRefusal.getCollectionCase().getId());
-      assertThat(actualRefusal.getIsHouseholder()).isEqualTo(true);
+      assertThat(actualRefusal.isHouseholder()).isEqualTo(true);
 
       assertThat(actualRefusal.getContact().getTitle()).isEqualTo(contactHouseholder.getTitle());
       assertThat(actualRefusal.getContact().getForename())
@@ -340,7 +340,7 @@ public class RefusalReceiverIT {
       assertThat(actualRefusal.getCallId()).isEqualTo(expectedRefusal.getCallId());
       assertThat(actualRefusal.getCollectionCase().getId())
           .isEqualTo(expectedRefusal.getCollectionCase().getId());
-      assertThat(actualRefusal.getIsHouseholder()).isEqualTo(false);
+      assertThat(actualRefusal.isHouseholder()).isEqualTo(false);
     }
   }
 }
