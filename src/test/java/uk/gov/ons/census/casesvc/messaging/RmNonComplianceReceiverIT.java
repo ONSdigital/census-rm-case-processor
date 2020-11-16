@@ -110,32 +110,4 @@ public class RmNonComplianceReceiverIT {
       assertThat(loggedEvent.getEventType()).isEqualTo(EventType.SELECTED_FOR_NON_COMPLIANCE);
     }
   }
-
-  private ResponseManagementEvent setUpMinimumGoodRmCaseUpdatedEvent() {
-    ResponseManagementEvent rme = new ResponseManagementEvent();
-
-    EventDTO event = new EventDTO();
-    event.setChannel("TEST");
-    event.setType(RM_CASE_UPDATED);
-    rme.setEvent(event);
-
-    PayloadDTO payload = new PayloadDTO();
-    rme.setPayload(payload);
-
-    RmCaseUpdated rmCaseUpdated = new RmCaseUpdated();
-    payload.setRmCaseUpdated(rmCaseUpdated);
-
-    // Set up mandatory data on rm case updated event
-    rmCaseUpdated.setTreatmentCode("TEST TreatmentCode CODE");
-    rmCaseUpdated.setOa("TEST Oa CODE");
-    rmCaseUpdated.setLsoa("TEST Lsoa CODE");
-    rmCaseUpdated.setMsoa("TEST Msoa CODE");
-    rmCaseUpdated.setLad("TEST Lad CODE");
-    rmCaseUpdated.setFieldCoordinatorId("TEST FieldCoordinatorId CODE");
-    rmCaseUpdated.setFieldOfficerId("TEST FieldOfficerId CODE");
-    rmCaseUpdated.setLatitude("123.456");
-    rmCaseUpdated.setLongitude("000.000");
-    rmCaseUpdated.setEstabType("ROYAL HOUSEHOLD");
-    return rme;
-  }
 }
