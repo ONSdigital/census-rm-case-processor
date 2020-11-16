@@ -263,7 +263,7 @@ public class RefusalReceiverIT {
       assertThat(actualRefusal.getCallId()).isEqualTo(expectedRefusal.getCallId());
       assertThat(actualRefusal.getCollectionCase().getId())
           .isEqualTo(expectedRefusal.getCollectionCase().getId());
-      assertThat(actualRefusal.isHouseholder()).isEqualTo(true);
+      assertThat(actualRefusal.getIsHouseholder()).isEqualTo(true);
 
       assertThat(actualRefusal.getContact().getTitle()).isEqualTo(contactHouseholder.getTitle());
       assertThat(actualRefusal.getContact().getForename())
@@ -340,7 +340,7 @@ public class RefusalReceiverIT {
       assertThat(actualRefusal.getCallId()).isEqualTo(expectedRefusal.getCallId());
       assertThat(actualRefusal.getCollectionCase().getId())
           .isEqualTo(expectedRefusal.getCollectionCase().getId());
-      assertThat(actualRefusal.isHouseholder()).isEqualTo(false);
+      assertThat(actualRefusal.getIsHouseholder()).isEqualTo(false);
     }
   }
 }
