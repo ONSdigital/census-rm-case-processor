@@ -97,6 +97,43 @@ public class CCSPropertyListedServiceTest {
     verifyNoMoreInteractions(caseService);
   }
 
+  @Test
+  public void testCCSPropertyListedGarbageInGarbageOut() {
+    // Given
+    ResponseManagementEvent managementEvent = getTestResponseManagementCCSAddressListedEvent();
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+
+    managementEvent.getPayload().getCcsProperty().setInterviewRequired(true);
+
+    Case garbageCase = new Case();
+
+    when(caseService.createCCSCase(any(), any())).thenReturn(garbageCase);
+
+    // When
+    underTest.processCCSPropertyListed(managementEvent, messageTimestamp);
+
+    verify(caseService)
+        .createCCSCase(
+            managementEvent.getPayload().getCcsProperty().getCollectionCase().getId(),
+            managementEvent.getPayload().getCcsProperty().getSampleUnit());
+
+    verify(uacService).createUacQidLinkedToCCSCase(garbageCase, managementEvent.getEvent());
+
+    ArgumentCaptor<Metadata> metadataCaptor = ArgumentCaptor.forClass(Metadata.class);
+
+    verify(caseService).saveCaseAndEmitCaseCreatedEvent(eq(garbageCase), metadataCaptor.capture());
+
+    Metadata actualMetadata = metadataCaptor.getValue();
+
+    assertThat(actualMetadata.getCauseEventType()).isEqualTo(managementEvent.getEvent().getType());
+    assertThat(actualMetadata.getFieldDecision()).isEqualTo(ActionInstructionType.CREATE);
+
+    // Then
+    checkCorrectEventLogging(garbageCase, managementEvent, messageTimestamp);
+
+    verifyNoMoreInteractions(caseService);
+  }
+
   private void checkCorrectEventLogging(
       Case expectedCase, ResponseManagementEvent managementEvent, OffsetDateTime messageTimestamp) {
     verify(eventLogger)
