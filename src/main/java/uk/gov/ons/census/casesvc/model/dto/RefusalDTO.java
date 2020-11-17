@@ -14,7 +14,8 @@ public class RefusalDTO {
   private String callId;
   private boolean isHouseholder;
 
-//  need to define getter here or else isHouseholder flag will default to householder in event JSON and it wont work
+  //  need to define getter here or else isHouseholder flag will default to householder in event
+  // JSON and it wont work
   public boolean getIsHouseholder() {
     return this.isHouseholder;
   }
