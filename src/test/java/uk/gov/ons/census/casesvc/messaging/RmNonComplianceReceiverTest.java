@@ -18,7 +18,7 @@ import org.springframework.messaging.Message;
 import uk.gov.ons.census.casesvc.logging.EventLogger;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
-import uk.gov.ons.census.casesvc.model.dto.NonCompliancelTypeDTO;
+import uk.gov.ons.census.casesvc.model.dto.NonComplianceTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -43,7 +43,7 @@ public class RmNonComplianceReceiverTest {
     ResponseManagementEvent managementEvent = new ResponseManagementEvent();
     CollectionCase collectionCase = new CollectionCase();
     collectionCase.setId(UUID.randomUUID());
-    collectionCase.setNonComplianceStatus(NonCompliancelTypeDTO.NCF);
+    collectionCase.setNonComplianceStatus(NonComplianceTypeDTO.NCF);
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setCollectionCase(collectionCase);
     managementEvent.setPayload(payloadDTO);
@@ -68,7 +68,7 @@ public class RmNonComplianceReceiverTest {
     Case savedCase = caseArgumentCaptor.getValue();
 
     assertThat(savedCase.getCaseId()).isEqualTo(collectionCase.getId());
-    assertThat(savedCase.getMetadata().getNonCompliance()).isEqualTo(NonCompliancelTypeDTO.NCF);
+    assertThat(savedCase.getMetadata().getNonCompliance()).isEqualTo(NonComplianceTypeDTO.NCF);
 
     verify(eventLogger)
         .logCaseEvent(
@@ -87,7 +87,7 @@ public class RmNonComplianceReceiverTest {
     ResponseManagementEvent managementEvent = new ResponseManagementEvent();
     CollectionCase collectionCase = new CollectionCase();
     collectionCase.setId(UUID.randomUUID());
-    collectionCase.setNonComplianceStatus(NonCompliancelTypeDTO.NCL);
+    collectionCase.setNonComplianceStatus(NonComplianceTypeDTO.NCL);
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setCollectionCase(collectionCase);
     managementEvent.setPayload(payloadDTO);
@@ -112,7 +112,7 @@ public class RmNonComplianceReceiverTest {
     Case savedCase = caseArgumentCaptor.getValue();
 
     assertThat(savedCase.getCaseId()).isEqualTo(collectionCase.getId());
-    assertThat(savedCase.getMetadata().getNonCompliance()).isEqualTo(NonCompliancelTypeDTO.NCL);
+    assertThat(savedCase.getMetadata().getNonCompliance()).isEqualTo(NonComplianceTypeDTO.NCL);
 
     verify(eventLogger)
         .logCaseEvent(
@@ -131,7 +131,7 @@ public class RmNonComplianceReceiverTest {
     ResponseManagementEvent managementEvent = new ResponseManagementEvent();
     CollectionCase collectionCase = new CollectionCase();
     collectionCase.setId(UUID.randomUUID());
-    collectionCase.setNonComplianceStatus(NonCompliancelTypeDTO.NCL);
+    collectionCase.setNonComplianceStatus(NonComplianceTypeDTO.NCL);
     collectionCase.setFieldOfficerId(FIELD_OFFICER_ID);
     collectionCase.setFieldCoordinatorId(FIELD_CORDINATOR_ID);
 
@@ -159,7 +159,7 @@ public class RmNonComplianceReceiverTest {
     Case savedCase = caseArgumentCaptor.getValue();
 
     assertThat(savedCase.getCaseId()).isEqualTo(collectionCase.getId());
-    assertThat(savedCase.getMetadata().getNonCompliance()).isEqualTo(NonCompliancelTypeDTO.NCL);
+    assertThat(savedCase.getMetadata().getNonCompliance()).isEqualTo(NonComplianceTypeDTO.NCL);
     assertThat(savedCase.getFieldOfficerId()).isEqualTo(FIELD_OFFICER_ID);
     assertThat(savedCase.getFieldCoordinatorId()).isEqualTo(FIELD_CORDINATOR_ID);
 

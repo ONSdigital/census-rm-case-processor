@@ -22,7 +22,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.casesvc.model.dto.CollectionCase;
 import uk.gov.ons.census.casesvc.model.dto.EventDTO;
-import uk.gov.ons.census.casesvc.model.dto.NonCompliancelTypeDTO;
+import uk.gov.ons.census.casesvc.model.dto.NonComplianceTypeDTO;
 import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
@@ -82,7 +82,7 @@ public class RmNonComplianceReceiverIT {
       CollectionCase collectionCase = new CollectionCase();
       payloadDTO.setCollectionCase(collectionCase);
       collectionCase.setId(testCaseId);
-      collectionCase.setNonComplianceStatus(NonCompliancelTypeDTO.NCF);
+      collectionCase.setNonComplianceStatus(NonComplianceTypeDTO.NCF);
 
       String json = convertObjectToJson(responseManagementEvent);
 
@@ -101,7 +101,7 @@ public class RmNonComplianceReceiverIT {
           actualEmittedMessage.getPayload().getCollectionCase();
       assertThat(actualUpdatedCollectionCase.getId()).isEqualTo(testCaseId);
       assertThat(actualUpdatedCollectionCase.getMetadata().getNonCompliance())
-          .isEqualTo(NonCompliancelTypeDTO.NCF);
+          .isEqualTo(NonComplianceTypeDTO.NCF);
 
       List<Event> events = eventRepository.findAll();
       assertThat(events.size()).isEqualTo(1);
