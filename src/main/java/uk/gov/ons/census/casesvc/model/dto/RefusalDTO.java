@@ -2,7 +2,6 @@ package uk.gov.ons.census.casesvc.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,7 +14,6 @@ public class RefusalDTO {
   private String callId;
   private boolean isHouseholder;
 
-  @JsonProperty("isHouseholder")
   public boolean getIsHouseholder() {
     return this.isHouseholder;
   }
