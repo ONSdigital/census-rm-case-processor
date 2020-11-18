@@ -23,6 +23,7 @@ import uk.gov.ons.census.casesvc.model.dto.PayloadDTO;
 import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
+import uk.gov.ons.census.casesvc.model.entity.NonComplianceType;
 import uk.gov.ons.census.casesvc.service.CaseService;
 import uk.gov.ons.census.casesvc.utility.MsgDateHelper;
 
@@ -68,7 +69,7 @@ public class RmNonComplianceReceiverTest {
     Case savedCase = caseArgumentCaptor.getValue();
 
     assertThat(savedCase.getCaseId()).isEqualTo(collectionCase.getId());
-    assertThat(savedCase.getMetadata().getNonCompliance()).isEqualTo(NonComplianceTypeDTO.NCF);
+    assertThat(savedCase.getMetadata().getNonCompliance()).isEqualTo(NonComplianceType.NCF);
 
     verify(eventLogger)
         .logCaseEvent(
@@ -112,7 +113,7 @@ public class RmNonComplianceReceiverTest {
     Case savedCase = caseArgumentCaptor.getValue();
 
     assertThat(savedCase.getCaseId()).isEqualTo(collectionCase.getId());
-    assertThat(savedCase.getMetadata().getNonCompliance()).isEqualTo(NonComplianceTypeDTO.NCL);
+    assertThat(savedCase.getMetadata().getNonCompliance()).isEqualTo(NonComplianceType.NCL);
 
     verify(eventLogger)
         .logCaseEvent(
@@ -159,7 +160,7 @@ public class RmNonComplianceReceiverTest {
     Case savedCase = caseArgumentCaptor.getValue();
 
     assertThat(savedCase.getCaseId()).isEqualTo(collectionCase.getId());
-    assertThat(savedCase.getMetadata().getNonCompliance()).isEqualTo(NonComplianceTypeDTO.NCL);
+    assertThat(savedCase.getMetadata().getNonCompliance()).isEqualTo(NonComplianceType.NCL);
     assertThat(savedCase.getFieldOfficerId()).isEqualTo(FIELD_OFFICER_ID);
     assertThat(savedCase.getFieldCoordinatorId()).isEqualTo(FIELD_CORDINATOR_ID);
 

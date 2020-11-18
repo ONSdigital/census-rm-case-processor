@@ -28,6 +28,7 @@ import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.Event;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
+import uk.gov.ons.census.casesvc.model.entity.NonComplianceType;
 import uk.gov.ons.census.casesvc.model.repository.CaseRepository;
 import uk.gov.ons.census.casesvc.model.repository.EventRepository;
 import uk.gov.ons.census.casesvc.testutil.QueueSpy;
@@ -101,7 +102,7 @@ public class RmNonComplianceReceiverIT {
           actualEmittedMessage.getPayload().getCollectionCase();
       assertThat(actualUpdatedCollectionCase.getId()).isEqualTo(testCaseId);
       assertThat(actualUpdatedCollectionCase.getMetadata().getNonCompliance())
-          .isEqualTo(NonComplianceTypeDTO.NCF);
+          .isEqualTo(NonComplianceType.NCF);
 
       List<Event> events = eventRepository.findAll();
       assertThat(events.size()).isEqualTo(1);

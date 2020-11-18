@@ -14,6 +14,7 @@ import uk.gov.ons.census.casesvc.model.dto.ResponseManagementEvent;
 import uk.gov.ons.census.casesvc.model.entity.Case;
 import uk.gov.ons.census.casesvc.model.entity.CaseMetadata;
 import uk.gov.ons.census.casesvc.model.entity.EventType;
+import uk.gov.ons.census.casesvc.model.entity.NonComplianceType;
 import uk.gov.ons.census.casesvc.service.CaseService;
 
 @MessageEndpoint
@@ -36,7 +37,10 @@ public class RmNonComplianceReceiver {
 
     Case caze = caseService.getCaseByCaseId(collectionCase.getId());
     caze.setMetadata(getCaseMetaData(caze));
-    caze.getMetadata().setNonCompliance(collectionCase.getNonComplianceStatus());
+
+    caze.getMetadata()
+        .setNonCompliance(
+            NonComplianceType.valueOf(collectionCase.getNonComplianceStatus().name()));
 
     if (!StringUtils.isEmpty(collectionCase.getFieldOfficerId())) {
       caze.setFieldOfficerId(collectionCase.getFieldOfficerId());
