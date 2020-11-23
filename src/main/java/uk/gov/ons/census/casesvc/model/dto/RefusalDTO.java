@@ -10,8 +10,17 @@ import lombok.NoArgsConstructor;
 @JsonInclude(Include.NON_NULL)
 public class RefusalDTO {
   private RefusalTypeDTO type;
-  private String report;
   private String agentId;
   private String callId;
+  private boolean isHouseholder;
+
+  //  need to define getter here or else isHouseholder flag will default to householder in event
+  // JSON and it wont work
+  public boolean getIsHouseholder() {
+    return this.isHouseholder;
+  }
+
   private CollectionCase collectionCase;
+  private Contact contact;
+  private Address address;
 }
