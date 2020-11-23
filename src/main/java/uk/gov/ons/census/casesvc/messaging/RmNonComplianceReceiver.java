@@ -55,7 +55,7 @@ public class RmNonComplianceReceiver {
     eventLogger.logCaseEvent(
         caze,
         responseManagementEvent.getEvent().getDateTime(),
-        "None Compliance",
+        "Non Compliance",
         EventType.SELECTED_FOR_NON_COMPLIANCE,
         responseManagementEvent.getEvent(),
         responseManagementEvent.getPayload().getCollectionCase(),

@@ -75,7 +75,7 @@ public class RmNonComplianceReceiverTest {
         .logCaseEvent(
             eq(caze),
             any(),
-            eq("None Compliance"),
+            eq("Non Compliance"),
             eq(EventType.SELECTED_FOR_NON_COMPLIANCE),
             any(),
             any(),
@@ -119,7 +119,7 @@ public class RmNonComplianceReceiverTest {
         .logCaseEvent(
             eq(caze),
             any(),
-            eq("None Compliance"),
+            eq("Non Compliance"),
             eq(EventType.SELECTED_FOR_NON_COMPLIANCE),
             any(),
             any(),
@@ -168,7 +168,7 @@ public class RmNonComplianceReceiverTest {
         .logCaseEvent(
             eq(caze),
             any(),
-            eq("None Compliance"),
+            eq("Non Compliance"),
             eq(EventType.SELECTED_FOR_NON_COMPLIANCE),
             any(),
             any(),
