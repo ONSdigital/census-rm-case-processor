@@ -87,7 +87,7 @@ public class NewAddressReportedService {
         "New Address reported",
         EventType.NEW_ADDRESS_REPORTED,
         newAddressEvent.getEvent(),
-        newAddressEvent.getPayload().getNewAddress(),
+        newAddressEvent.getPayload(),
         messageTimestamp);
   }
 
