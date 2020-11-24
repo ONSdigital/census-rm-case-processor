@@ -90,6 +90,9 @@ public class MessageConsumerConfig {
   @Value("${queueconfig.rm-uninvalidate-address-queue}")
   private String rmUnInvalidateAddressQueue;
 
+  @Value("${queueconfig.rm-non-compliance-queue}")
+  private String rmNonComplianceQueue;
+
   public MessageConsumerConfig(
       ExceptionManagerClient exceptionManagerClient, ConnectionFactory connectionFactory) {
     this.exceptionManagerClient = exceptionManagerClient;
@@ -178,6 +181,11 @@ public class MessageConsumerConfig {
 
   @Bean
   public MessageChannel rmCaseUpdatedInputChannel() {
+    return new DirectChannel();
+  }
+
+  @Bean
+  public MessageChannel rmNonComplianceInputChannel() {
     return new DirectChannel();
   }
 
@@ -301,6 +309,13 @@ public class MessageConsumerConfig {
   }
 
   @Bean
+  AmqpInboundChannelAdapter rmNonComplianceInbound(
+      @Qualifier("rmNonComplianceContainer") SimpleMessageListenerContainer listenerContainer,
+      @Qualifier("rmNonComplianceInputChannel") MessageChannel channel) {
+    return makeAdapter(listenerContainer, channel);
+  }
+
+  @Bean
   public SimpleMessageListenerContainer sampleContainer() {
     return setupListenerContainer(inboundQueue, CreateCaseSample.class);
   }
@@ -383,6 +398,11 @@ public class MessageConsumerConfig {
   @Bean
   public SimpleMessageListenerContainer rmUnInvalidateAddressContainer() {
     return setupListenerContainer(rmUnInvalidateAddressQueue, ResponseManagementEvent.class);
+  }
+
+  @Bean
+  public SimpleMessageListenerContainer rmNonComplianceContainer() {
+    return setupListenerContainer(rmNonComplianceQueue, ResponseManagementEvent.class);
   }
 
   private SimpleMessageListenerContainer setupListenerContainer(

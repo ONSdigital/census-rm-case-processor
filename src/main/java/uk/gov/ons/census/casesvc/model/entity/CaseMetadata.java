@@ -7,4 +7,5 @@ public class CaseMetadata {
 
   private Boolean secureEstablishment;
   private String channel;
+  private NonComplianceType nonCompliance;
 }
