@@ -107,7 +107,7 @@ public class NewAddressReportedServiceTest {
             eq("New Address reported"),
             eq(EventType.NEW_ADDRESS_REPORTED),
             eq(eventDTO),
-            eq(newAddressEvent.getPayload().getNewAddress()),
+            eq(newAddressEvent.getPayload()),
             eq(expectedDateTime));
   }
 
@@ -168,7 +168,7 @@ public class NewAddressReportedServiceTest {
             eq("New Address reported"),
             eq(EventType.NEW_ADDRESS_REPORTED),
             eq(eventDTO),
-            eq(newAddressEvent.getPayload().getNewAddress()),
+            eq(newAddressEvent.getPayload()),
             eq(expectedDateTime));
   }
 
@@ -282,7 +282,7 @@ public class NewAddressReportedServiceTest {
             eq("New Address reported"),
             eq(EventType.NEW_ADDRESS_REPORTED),
             eq(eventDTO),
-            eq(newAddressEvent.getPayload().getNewAddress()),
+            eq(newAddressEvent.getPayload()),
             eq(expectedDateTime));
   }
 
