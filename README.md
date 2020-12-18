@@ -1,3 +1,5 @@
+Just testing signed commits
+
 # census-rm-case-processor 
 
 [![Build Status](https://travis-ci.com/ONSdigital/census-rm-case-processor.svg?branch=master)](https://travis-ci.com/ONSdigital/census-rm-case-processor)
