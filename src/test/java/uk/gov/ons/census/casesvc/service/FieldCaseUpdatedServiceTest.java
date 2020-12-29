@@ -144,5 +144,4 @@ public class FieldCaseUpdatedServiceTest {
       throw e;
     }
   }
-
 }

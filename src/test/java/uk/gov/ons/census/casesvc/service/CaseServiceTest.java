@@ -288,7 +288,9 @@ public class CaseServiceTest {
     when(caseRepository.getCaseAndLockByCaseId(TEST_UUID)).thenReturn(Optional.empty());
 
     String expectedErrorMessage =
-        String.format("Could not lock row for update on case: %s", TEST_UUID);
+        String.format(
+            "Could not lock row for update on case: %s, this could be a clash or the case might not exist",
+            TEST_UUID);
 
     try {
       // WHEN
