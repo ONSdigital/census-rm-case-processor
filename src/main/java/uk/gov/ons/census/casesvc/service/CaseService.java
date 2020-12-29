@@ -160,7 +160,9 @@ public class CaseService {
 
     if (!oCase.isPresent()) {
       throw new RuntimeException(
-          String.format("Could not lock row for update on case: %s", caseId));
+          String.format(
+              "Could not lock row for update on case: %s, this could be a clash or the case might not exist",
+              caseId));
     }
 
     return oCase.get();

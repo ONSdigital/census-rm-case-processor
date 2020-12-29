@@ -50,6 +50,8 @@ public class RmNonComplianceReceiver {
       caze.setFieldCoordinatorId(collectionCase.getFieldCoordinatorId());
     }
 
+    
+
     caseService.saveCaseAndEmitCaseUpdatedEvent(caze, null);
 
     eventLogger.logCaseEvent(
