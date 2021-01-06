@@ -236,7 +236,6 @@ public class CaseReceiptServiceTableTest {
         case "Y AR > ER":
           expectedCaseAlreadyReceipted = true;
           expectedReceipt = true;
-          expectedCapacity = 0;
           break;
 
         case "N AR < ER":
