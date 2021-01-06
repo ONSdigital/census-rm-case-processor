@@ -54,10 +54,12 @@ public class CaseReceiptServiceTableTest {
       {new Key("CE", "E", "Ind"), new Expectation("Y", "N", UPDATE)},
       {new Key("CE", "E", "CE1"), new Expectation("N", "Y", UPDATE)},
       {new Key("CE", "E", "Cont"), new Expectation("N", "N", null)},
-      {new Key("CE", "U", "HH"), new Expectation("Y", "Y AR >= ER", CANCEL)},
+      {new Key("CE", "U", "HH"), new Expectation("Y", "Y AR = ER", CANCEL)},
+      {new Key("CE", "U", "HH"), new Expectation("Y", "Y AR > ER", null)},
       {new Key("CE", "U", "HH"), new Expectation("Y", "N AR < ER", UPDATE)},
       {new Key("CE", "U", "HH"), new Expectation("Y", "N ER = null", UPDATE)},
-      {new Key("CE", "U", "Ind"), new Expectation("Y", "Y AR >= ER", CANCEL)},
+      {new Key("CE", "U", "Ind"), new Expectation("Y", "Y AR = ER", CANCEL)},
+      {new Key("CE", "U", "Ind"), new Expectation("Y", "Y AR > ER", null)},
       {new Key("CE", "U", "Ind"), new Expectation("Y", "N AR < ER", UPDATE)},
       {new Key("CE", "U", "Ind"), new Expectation("Y", "N ER = null", UPDATE)},
       {new Key("CE", "U", "CE1"), new Expectation("N", "N", null)},
@@ -85,7 +87,8 @@ public class CaseReceiptServiceTableTest {
         this.expectation.expectIncrement,
         this.expectation.expectedReceipt,
         this.expectation.expectedFieldInstruction,
-        this.expectation.expectedCapacity);
+        this.expectation.expectedCapacity,
+        this.expectation.expectedCaseAlreadyReceipted);
   }
 
   private void runReceiptingTest(
@@ -96,7 +99,8 @@ public class CaseReceiptServiceTableTest {
       boolean expectIncrement,
       boolean expectReceipt,
       ActionInstructionType expectedFieldInstruction,
-      Integer capacity) {
+      Integer capacity,
+      boolean receiptReceived) {
 
     CaseService caseService = mock(CaseService.class);
     CaseRepository caseRepository = mock(CaseRepository.class);
@@ -106,7 +110,7 @@ public class CaseReceiptServiceTableTest {
     caze.setCaseType(caseType);
     caze.setAddressLevel(addressLevel);
     caze.setCaseId(UUID.randomUUID());
-    caze.setReceiptReceived(false);
+    caze.setReceiptReceived(receiptReceived);
     caze.setCeActualResponses(0);
     caze.setTreatmentCode(treatmentCode);
     caze.setCeExpectedCapacity(capacity);
@@ -201,6 +205,7 @@ public class CaseReceiptServiceTableTest {
   }
 
   private static class Expectation {
+    public boolean expectedCaseAlreadyReceipted = false;
     boolean expectIncrement;
     boolean expectedReceipt;
     ActionInstructionType expectedFieldInstruction;
@@ -223,9 +228,15 @@ public class CaseReceiptServiceTableTest {
           expectedReceipt = false;
           break;
 
-        case "Y AR >= ER":
+        case "Y AR = ER":
           expectedReceipt = true;
           expectedCapacity = 1;
+          break;
+
+        case "Y AR > ER":
+          expectedCaseAlreadyReceipted = true;
+          expectedReceipt = true;
+          expectedCapacity = 0;
           break;
 
         case "N AR < ER":
