@@ -156,7 +156,7 @@ public class CaseReceiptService {
       (caze, causeEventType) -> {
         Case lockedCase = incrementNoReceipt(caze);
 
-        ActionInstructionType fieldInstruction = decideWhatToSendToField(lockedCase);
+        ActionInstructionType fieldInstruction = decideWhatToSendToFieldAndWhetherToReceiptCase(lockedCase);
 
         caseService.saveCaseAndEmitCaseUpdatedEvent(
             lockedCase, buildMetadata(causeEventType, fieldInstruction));
@@ -175,7 +175,7 @@ public class CaseReceiptService {
     private String formType;
   }
 
-  private ActionInstructionType decideWhatToSendToField(Case caze) {
+  private ActionInstructionType decideWhatToSendToFieldAndWhetherToReceiptCase(Case caze) {
 
     ActionInstructionType fieldInstruction = null;
 
