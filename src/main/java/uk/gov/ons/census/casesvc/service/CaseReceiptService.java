@@ -154,14 +154,10 @@ public class CaseReceiptService {
 
   BiFunction<Case, EventTypeDTO, Case> ceUnitRule =
       (caze, causeEventType) -> {
-        ActionInstructionType fieldInstruction = ActionInstructionType.UPDATE;
-
         Case lockedCase = incrementNoReceipt(caze);
 
-        if (hasCeUnitResponsesMetExpected(lockedCase)) {
-          lockedCase.setReceiptReceived(true);
-          fieldInstruction = ActionInstructionType.CANCEL;
-        }
+        ActionInstructionType fieldInstruction =
+            decideWhatToSendToFieldAndWhetherToReceiptCase(lockedCase);
 
         caseService.saveCaseAndEmitCaseUpdatedEvent(
             lockedCase, buildMetadata(causeEventType, fieldInstruction));
@@ -180,9 +176,27 @@ public class CaseReceiptService {
     private String formType;
   }
 
-  private boolean hasCeUnitResponsesMetExpected(Case caze) {
-    return caze.getCeExpectedCapacity() != null
-        && !caze.isReceiptReceived()
-        && caze.getCeActualResponses() >= caze.getCeExpectedCapacity();
+  private ActionInstructionType decideWhatToSendToFieldAndWhetherToReceiptCase(Case caze) {
+
+    ActionInstructionType fieldInstruction = null;
+
+    // If case is already receipted we dont need to tell Field about any more responses
+    if (!caze.isReceiptReceived()) {
+
+      // If we are still expecting some responses or we dont know how many responses we are due to
+      // receive, UPDATE field
+      if (caze.getCeExpectedCapacity() == null
+          || caze.getCeActualResponses() < caze.getCeExpectedCapacity()) {
+        fieldInstruction = ActionInstructionType.UPDATE;
+      } else {
+
+        // We now have all responses expected so tell Field to CANCEL the case and mark case as
+        // receipted
+        caze.setReceiptReceived(true);
+        fieldInstruction = ActionInstructionType.CANCEL;
+      }
+    }
+
+    return fieldInstruction;
   }
 }
