@@ -179,7 +179,7 @@ public class CaseReceiptService {
 
     ActionInstructionType fieldInstruction = null;
 
-    // If case is already receipted we dont ned to tell Field about any more responses
+    // If case is already receipted we dont need to tell Field about any more responses
     if (!caze.isReceiptReceived()) {
 
       // If we are still expecting some responses or we dont know how many responses we are due to
