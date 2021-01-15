@@ -9,7 +9,7 @@ services:
 
   rabbitmq:
     container_name: rabbitmq-case-it
-    image: rabbitmq:3.6.10-management
+    image: rabbitmq:3.8-management
     ports:
       - "34369:4369"
       - "55672:25672"
@@ -17,9 +17,11 @@ services:
       - "35672:5672"
       - "46671:15671"
       - "46672:15672"
+    environment:
+      - RABBITMQ_CONFIG_FILE=/etc/rabbitmq/rabbitmq.conf
     volumes:
-      - ./rabbitmq.config:/etc/rabbitmq/rabbitmq.config:ro
-      - ./definitions.json:/opt/definitions.json:ro
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./definitions.json:/opt/definitions.json
 
   pubsub-emulator:
     container_name: pubsub-emulator-case-it

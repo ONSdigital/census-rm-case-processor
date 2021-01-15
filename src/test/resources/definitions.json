@@ -1,16 +1,10 @@
 {
-  "rabbit_version": "3.6.10",
   "users": [
     {
       "name": "guest",
       "password_hash": "pLp57gHAKtlBTfp0HTq5Gnn/UXdhQNrj1OplYY5uJ0kzDEFY",
       "hashing_algorithm": "rabbit_password_hashing_sha256",
       "tags": "administrator"
-    }
-  ],
-  "vhosts": [
-    {
-      "name": "/"
     }
   ],
   "permissions": [
@@ -22,9 +16,6 @@
       "read": ".*"
     }
   ],
-  "parameters": [],
-  "global_parameters": [],
-  "policies": [],
   "queues": [
     {
       "name": "case.rh.case",
