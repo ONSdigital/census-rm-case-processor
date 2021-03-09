@@ -115,6 +115,10 @@ public class FulfilmentRequestService {
         throw new RuntimeException("Individual fulfilment must have an individual case ID");
       }
 
+      if (caseService.getCaseByCaseId(fulfilmentRequestPayload.getIndividualCaseId()) != null) {
+        throw new RuntimeException("Duplicate message");
+      }
+
       Case individualResponseCase =
           caseService.prepareIndividualResponseCaseFromParentCase(
               caze, fulfilmentRequestPayload.getIndividualCaseId(), eventChannel);
