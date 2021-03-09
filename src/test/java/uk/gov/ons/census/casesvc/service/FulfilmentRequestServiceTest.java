@@ -140,7 +140,8 @@ public class FulfilmentRequestServiceTest {
 
   @Test
   public void tesIndividualResponseFulfilmentDuplicateCaseIdBlowsUp() {
-    testIndividualResponseCodeDuplicateIndivdualCaseId(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_PRINT);
+    testIndividualResponseCodeDuplicateIndivdualCaseId(
+        HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_PRINT);
   }
 
   @Test
@@ -294,9 +295,9 @@ public class FulfilmentRequestServiceTest {
       underTest.processFulfilmentRequest(managementEvent, messageTimestamp);
       fail("Expected exception not thrown");
     } catch (RuntimeException runtimeException) {
-      if (!runtimeException.getMessage().equals("Individual case ID "
-          + childCaseId
-          + " already present in database")) {
+      if (!runtimeException
+          .getMessage()
+          .equals("Individual case ID " + childCaseId + " already present in database")) {
         fail("Unexpected exception thrown");
       }
     }
