@@ -41,7 +41,6 @@ public class FulfilmentRequestReceiverIT {
   private static final String TEST_REPLACEMENT_FULFILMENT_CODE = "UACHHT1";
   private static final String TEST_INDIVIDUAL_RESPONSE_FULFILMENT_CODE = "P_OR_I1";
   private static final String TEST_INDIVIDUAL_RESPONSE_FULFILMENT_CODE_SMS = "UACIT1";
-  private static final UUID TEST_INDIVIDUAL_CASE_ID = UUID.randomUUID();
 
   @Value("${queueconfig.fulfilment-request-inbound-queue}")
   private String inboundQueue;
@@ -180,7 +179,8 @@ public class FulfilmentRequestReceiverIT {
 
       ResponseManagementEvent sourceEvent = getTestResponseManagementFulfilmentRequestedEvent();
       sourceEvent.getPayload().getFulfilmentRequest().setCaseId(TEST_CASE_ID);
-      sourceEvent.getPayload().getFulfilmentRequest().setIndividualCaseId(TEST_INDIVIDUAL_CASE_ID);
+      UUID testIndividualCaseId = UUID.randomUUID();
+      sourceEvent.getPayload().getFulfilmentRequest().setIndividualCaseId(testIndividualCaseId);
       sourceEvent
           .getPayload()
           .getFulfilmentRequest()
@@ -218,7 +218,7 @@ public class FulfilmentRequestReceiverIT {
       assertThat(cases.size()).isEqualTo(2);
 
       Case actualParentCase = caseRepository.findById(parentCase.getCaseId()).get();
-      Case actualChildCase = caseRepository.findById(TEST_INDIVIDUAL_CASE_ID).get();
+      Case actualChildCase = caseRepository.findById(testIndividualCaseId).get();
 
       checkIndividualFulfilmentChildCase(
           actualParentCase, actualChildCase, sourceEvent, resultEvent);
@@ -239,7 +239,8 @@ public class FulfilmentRequestReceiverIT {
 
       ResponseManagementEvent sourceEvent = getTestResponseManagementFulfilmentRequestedEvent();
       sourceEvent.getPayload().getFulfilmentRequest().setCaseId(TEST_CASE_ID);
-      sourceEvent.getPayload().getFulfilmentRequest().setIndividualCaseId(TEST_INDIVIDUAL_CASE_ID);
+      UUID testIndividualCaseId = UUID.randomUUID();
+      sourceEvent.getPayload().getFulfilmentRequest().setIndividualCaseId(testIndividualCaseId);
       sourceEvent
           .getPayload()
           .getFulfilmentRequest()
@@ -247,7 +248,7 @@ public class FulfilmentRequestReceiverIT {
       sourceEvent.getEvent().setTransactionId(UUID.randomUUID());
 
       UacCreatedDTO uacQidCreated = new UacCreatedDTO();
-      uacQidCreated.setCaseId(TEST_INDIVIDUAL_CASE_ID);
+      uacQidCreated.setCaseId(testIndividualCaseId);
       uacQidCreated.setQid("123");
       uacQidCreated.setUac(UUID.randomUUID().toString());
       sourceEvent.getPayload().getFulfilmentRequest().setUacQidCreated(uacQidCreated);
@@ -286,7 +287,7 @@ public class FulfilmentRequestReceiverIT {
         } else if (event.getEventType() == EventType.RM_UAC_CREATED) {
           PayloadDTO payload = convertJsonToObject(event.getEventPayload(), PayloadDTO.class);
           UacCreatedDTO actualUacCreated = payload.getFulfilmentRequest().getUacQidCreated();
-          assertThat(actualUacCreated.getCaseId()).isEqualTo(TEST_INDIVIDUAL_CASE_ID);
+          assertThat(actualUacCreated.getCaseId()).isEqualTo(testIndividualCaseId);
           assertThat(actualUacCreated.getQid()).isEqualTo("123");
           assertThat(actualUacCreated.getUac()).isEqualTo("REDACTED");
           remainingMatches--;
@@ -301,7 +302,7 @@ public class FulfilmentRequestReceiverIT {
       assertThat(cases.size()).isEqualTo(2);
 
       Case actualParentCase = caseRepository.findById(parentCase.getCaseId()).get();
-      Case actualChildCase = caseRepository.findById(TEST_INDIVIDUAL_CASE_ID).get();
+      Case actualChildCase = caseRepository.findById(testIndividualCaseId).get();
 
       checkIndividualFulfilmentChildCase(
           actualParentCase, actualChildCase, sourceEvent, resultEvent);
@@ -322,7 +323,8 @@ public class FulfilmentRequestReceiverIT {
 
       ResponseManagementEvent sourceEvent = getTestResponseManagementFulfilmentRequestedEvent();
       sourceEvent.getPayload().getFulfilmentRequest().setCaseId(TEST_CASE_ID);
-      sourceEvent.getPayload().getFulfilmentRequest().setIndividualCaseId(TEST_INDIVIDUAL_CASE_ID);
+      UUID testIndividualCaseId = UUID.randomUUID();
+      sourceEvent.getPayload().getFulfilmentRequest().setIndividualCaseId(testIndividualCaseId);
       sourceEvent
           .getPayload()
           .getFulfilmentRequest()
@@ -357,7 +359,7 @@ public class FulfilmentRequestReceiverIT {
       assertThat(cases.size()).isEqualTo(2);
 
       Case actualParentCase = caseRepository.findById(parentCase.getCaseId()).get();
-      Case actualChildCase = caseRepository.findById(TEST_INDIVIDUAL_CASE_ID).get();
+      Case actualChildCase = caseRepository.findById(testIndividualCaseId).get();
 
       checkIndividualFulfilmentChildCase(
           actualParentCase, actualChildCase, sourceEvent, resultEvent);

@@ -116,7 +116,10 @@ public class FulfilmentRequestService {
       }
 
       if (caseService.getCaseByCaseId(fulfilmentRequestPayload.getIndividualCaseId()) != null) {
-        throw new RuntimeException("Duplicate message");
+        throw new RuntimeException(
+            "Individual case ID "
+                + fulfilmentRequestPayload.getIndividualCaseId()
+                + " already present in database");
       }
 
       Case individualResponseCase =
