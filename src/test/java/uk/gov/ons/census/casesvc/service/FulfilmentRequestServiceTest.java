@@ -1,6 +1,7 @@
 package uk.gov.ons.census.casesvc.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 import static uk.gov.ons.census.casesvc.model.entity.EventType.FULFILMENT_REQUESTED;
 import static uk.gov.ons.census.casesvc.testutil.DataUtils.getRandomCase;
@@ -138,6 +139,12 @@ public class FulfilmentRequestServiceTest {
   }
 
   @Test
+  public void tesIndividualResponseFulfilmentDuplicateCaseIdBlowsUp() {
+    testIndividualResponseCodeDuplicateIndivdualCaseId(
+        HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_PRINT);
+  }
+
+  @Test
   public void testIndividalResponseFulfilmentRequestForNonHHIsJustLogged() {
     // Given
     Case parentCase = getRandomCase();
@@ -261,5 +268,51 @@ public class FulfilmentRequestServiceTest {
             eq(messageTimestamp));
 
     verify(caseService).emitCaseCreatedEvent(childCase);
+  }
+
+  private void testIndividualResponseCodeDuplicateIndivdualCaseId(String individualResponseCode) {
+    // Given
+    Case parentCase = getRandomCase();
+    parentCase.setUacQidLinks(new ArrayList<>());
+    parentCase.setEvents(new ArrayList<>());
+    parentCase.setCaseType("HH");
+
+    ResponseManagementEvent managementEvent = getTestResponseManagementEvent();
+    FulfilmentRequestDTO expectedFulfilmentRequest =
+        managementEvent.getPayload().getFulfilmentRequest();
+    expectedFulfilmentRequest.setCaseId(parentCase.getCaseId());
+    expectedFulfilmentRequest.setFulfilmentCode(individualResponseCode);
+    expectedFulfilmentRequest.setIndividualCaseId(UUID.randomUUID());
+    OffsetDateTime messageTimestamp = OffsetDateTime.now();
+
+    when(caseService.getCaseByCaseId(expectedFulfilmentRequest.getCaseId())).thenReturn(parentCase);
+    when(caseService.checkIfCaseIdExists(any())).thenReturn(true);
+
+    UUID childCaseId = managementEvent.getPayload().getFulfilmentRequest().getIndividualCaseId();
+
+    // when
+    try {
+      underTest.processFulfilmentRequest(managementEvent, messageTimestamp);
+      fail("Expected exception not thrown");
+    } catch (RuntimeException runtimeException) {
+      if (!runtimeException
+          .getMessage()
+          .equals("Individual case ID " + childCaseId + " already present in database")) {
+        fail("Unexpected exception thrown");
+      }
+    }
+
+    // then
+    verify(eventLogger, never())
+        .logCaseEvent(
+            eq(parentCase),
+            eq(managementEvent.getEvent().getDateTime()),
+            eq("Fulfilment Request Received"),
+            eq(FULFILMENT_REQUESTED),
+            eq(managementEvent.getEvent()),
+            any(),
+            eq(messageTimestamp));
+
+    verify(caseService, never()).emitCaseCreatedEvent(any());
   }
 }

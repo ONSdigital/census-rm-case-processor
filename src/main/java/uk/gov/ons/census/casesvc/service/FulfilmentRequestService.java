@@ -115,6 +115,13 @@ public class FulfilmentRequestService {
         throw new RuntimeException("Individual fulfilment must have an individual case ID");
       }
 
+      if (caseService.checkIfCaseIdExists(fulfilmentRequestPayload.getIndividualCaseId())) {
+        throw new RuntimeException(
+            "Individual case ID "
+                + fulfilmentRequestPayload.getIndividualCaseId()
+                + " already present in database");
+      }
+
       Case individualResponseCase =
           caseService.prepareIndividualResponseCaseFromParentCase(
               caze, fulfilmentRequestPayload.getIndividualCaseId(), eventChannel);
