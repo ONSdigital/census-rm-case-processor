@@ -115,7 +115,7 @@ public class FulfilmentRequestService {
         throw new RuntimeException("Individual fulfilment must have an individual case ID");
       }
 
-      if (caseService.getCaseByCaseId(fulfilmentRequestPayload.getIndividualCaseId()) != null) {
+      if (caseService.checkIfCaseIdExists(fulfilmentRequestPayload.getIndividualCaseId())) {
         throw new RuntimeException(
             "Individual case ID "
                 + fulfilmentRequestPayload.getIndividualCaseId()

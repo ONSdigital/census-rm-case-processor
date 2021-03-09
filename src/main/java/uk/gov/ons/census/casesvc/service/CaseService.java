@@ -314,6 +314,16 @@ public class CaseService {
     return cazeResult.get();
   }
 
+  public boolean checkIfCaseIdExists(UUID caseId) {
+    Optional<Case> cazeResult = caseRepository.findById(caseId);
+
+    if (cazeResult.isEmpty()) {
+      return false;
+    }
+
+    return true;
+  }
+
   public Case getCaseByCaseRef(long caseRef) {
     Optional<Case> caseOptional = caseRepository.findByCaseRef(caseRef);
 
