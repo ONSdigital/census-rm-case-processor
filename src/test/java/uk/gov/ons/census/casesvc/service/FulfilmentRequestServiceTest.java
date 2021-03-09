@@ -139,7 +139,7 @@ public class FulfilmentRequestServiceTest {
   }
 
   @Test
-  public void testGoodIndividualResponseFulfilmentDuplicateCaseIdBlowsUp() {
+  public void tesIndividualResponseFulfilmentDuplicateCaseIdBlowsUp() {
     testIndividualResponseCodeDuplicateIndivdualCaseId(HOUSEHOLD_INDIVIDUAL_RESPONSE_REQUEST_ENGLAND_PRINT);
   }
 
