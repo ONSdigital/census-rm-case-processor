@@ -106,6 +106,10 @@ public class CaseService {
   }
 
   public Case createCCSCase(UUID caseId, SampleUnitDTO sampleUnit) {
+    if (checkIfCaseIdExists(caseId)) {
+      throw new RuntimeException("CCS case ID " + caseId + " already present in database");
+    }
+
     Case caze = mapperFacade.map(sampleUnit, Case.class);
     caze.setCaseType(sampleUnit.getAddressType());
     caze.setCaseId(caseId);
@@ -315,13 +319,7 @@ public class CaseService {
   }
 
   public boolean checkIfCaseIdExists(UUID caseId) {
-    Optional<Case> cazeResult = caseRepository.findById(caseId);
-
-    if (cazeResult.isEmpty()) {
-      return false;
-    }
-
-    return true;
+    return caseRepository.existsById(caseId);
   }
 
   public Case getCaseByCaseRef(long caseRef) {

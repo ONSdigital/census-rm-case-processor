@@ -76,6 +76,11 @@ public class AddressTypeChangeService {
       OffsetDateTime messageTimestamp,
       AddressTypeChange addressTypeChange,
       Case oldCase) {
+    if (caseService.checkIfCaseIdExists(addressTypeChange.getNewCaseId())) {
+      throw new RuntimeException(
+          "New case ID " + addressTypeChange.getNewCaseId() + " already present in database");
+    }
+
     Case newCase = new Case();
     newCase.setSkeleton(true);
     newCase.setCaseId(addressTypeChange.getNewCaseId());

@@ -151,6 +151,11 @@ public class NewAddressReportedService {
   }
 
   private Case createSkeletonCase(CollectionCase collectionCase) {
+    if (caseService.checkIfCaseIdExists(collectionCase.getId())) {
+      throw new RuntimeException(
+          "New case ID " + collectionCase.getId() + " already present in database");
+    }
+
     Case skeletonCase = new Case();
     skeletonCase.setSkeleton(true);
     skeletonCase.setCaseId(collectionCase.getId());
@@ -218,6 +223,10 @@ public class NewAddressReportedService {
   }
 
   private Case buildCaseFromSourceCaseAndEvent(CollectionCase newCollectionCase, Case sourceCase) {
+    if (caseService.checkIfCaseIdExists(newCollectionCase.getId())) {
+      throw new RuntimeException(
+          "New case ID " + newCollectionCase.getId() + " already present in database");
+    }
 
     Case newCase = new Case();
 
