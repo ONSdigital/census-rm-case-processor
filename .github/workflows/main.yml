@@ -21,5 +21,12 @@ jobs:
       with:
         java-version: '11'
         distribution: adopt
-    - name: Run Tests
-      run: mvn verify jacoco:report
+    - name: Cache local Maven repository
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+    - name: Run fmt
+      run: mvn fmt:check
