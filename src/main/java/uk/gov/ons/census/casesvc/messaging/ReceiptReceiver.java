@@ -23,6 +23,7 @@ public class ReceiptReceiver {
   @ServiceActivator(inputChannel = "receiptInputChannel")
   public void receiveMessage(Message<ResponseManagementEvent> message) {
     OffsetDateTime messageTimestamp = getMsgTimeStamp(message);
-    qidReceiptService.processReceipt(message.getPayload(), messageTimestamp);
+    qidReceiptService.
+            processReceipt(message.getPayload(), messageTimestamp);
   }
 }
