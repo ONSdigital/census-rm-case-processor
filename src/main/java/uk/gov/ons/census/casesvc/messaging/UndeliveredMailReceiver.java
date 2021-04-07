@@ -52,7 +52,8 @@ public class UndeliveredMailReceiver {
               Long.parseLong(event.getPayload().getFulfilmentInformation().getCaseRef()));
     }
 
-    if (FieldworkHelper.shouldSendCaseToField(caze)) {
+    // caze can be null if the uacQid is unlinked
+    if (caze != null && FieldworkHelper.shouldSendCaseToField(caze)) {
       caseService.saveCaseAndEmitCaseUpdatedEvent(
           caze, buildMetadata(event.getEvent().getType(), ActionInstructionType.UPDATE));
     }
