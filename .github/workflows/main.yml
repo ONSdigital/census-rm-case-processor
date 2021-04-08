@@ -8,9 +8,6 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-env:
-  IMAGE: case-processor
-  REGISTRY_HOSTNAME: eu.gcr.io
 jobs:
   build:
 
