@@ -7,5 +7,5 @@ steps:
     args: [ 'package','-Dmaven.test.skip=true' ]
   - name: gcr.io/cloud-builders/docker
     args: [ 'build', '-t', 'eu.gcr.io/census-rm-ryangrundy/rm/census-rm-case-processor:test_cloud', '--build-arg=JAR_FILE=target/census-rm-case-processor.jar', '.' ]
-  images:
-    - 'eu.gcr.io/census-rm-ryangrundy/rm/census-rm-case-processor:test_cloud'
+images:
+  - 'eu.gcr.io/census-rm-ryangrundy/rm/census-rm-case-processor:test_cloud'
