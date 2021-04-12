@@ -1,6 +1,8 @@
 steps:
   - name: bash
-    args: [ 'echo', '$_TESTING_REPO' ]
+    args: [ 'echo', '${_TESTING_REPO}' ]
+  - name: bash
+    args: [ 'echo', '${_TESTING_DEPLOY}' ]
 substitutions:
-    _TESTING_REPO: This_should_not_be_seen
+    _TESTING_REPO: $_TESTING_REPO
     _TESTING_DEPLOY: $_TESTING_DEPLOY
