@@ -1,10 +1,7 @@
 steps:
   - name: bash
     args: [ 'echo', '${_TESTING_REPO}' ]
-  - name: bash
-    args: [ 'echo', '${_TESTING_DEPLOY}' ]
 substitutions:
     _TESTING_REPO: $_TESTING_REPO
-    _TESTING_DEPLOY: $_TESTING_DEPLOY
 options:
    dynamic_substitutions: true
