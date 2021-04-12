@@ -5,3 +5,4 @@ substitutions:
     _TESTING_REPO: $_TESTING_REPO
 options:
    dynamic_substitutions: true
+   substitution_option: 'ALLOW_LOOSE'
