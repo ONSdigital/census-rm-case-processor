@@ -268,4 +268,47 @@ public class UndeliveredMailReceiverTest {
     // Then
     verify(caseService, never()).saveCaseAndEmitCaseUpdatedEvent(any(), any());
   }
+
+  @Test
+  public void testReceiveMessageWithUnlinkedQid() {
+    ResponseManagementEvent event = new ResponseManagementEvent();
+    event.setEvent(new EventDTO());
+    event.getEvent().setDateTime(OffsetDateTime.now());
+    event.getEvent().setType(EventTypeDTO.UNDELIVERED_MAIL_REPORTED);
+    event.setPayload(new PayloadDTO());
+    event.getPayload().setFulfilmentInformation(new FulfilmentInformation());
+    event.getPayload().getFulfilmentInformation().setQuestionnaireId("76543");
+
+    UacQidLink uacQidLink = new UacQidLink();
+
+    UacService uacService = mock(UacService.class);
+    CaseService caseService = mock(CaseService.class);
+    EventLogger eventLogger = mock(EventLogger.class);
+
+    UndeliveredMailReceiver underTest =
+        new UndeliveredMailReceiver(uacService, caseService, eventLogger);
+    Message<ResponseManagementEvent> message = constructMessageWithValidTimeStamp(event);
+    OffsetDateTime expectedDate = MsgDateHelper.getMsgTimeStamp(message);
+
+    // Given
+    when(uacService.findByQid(eq("76543"))).thenReturn(uacQidLink);
+
+    // When
+    underTest.receiveMessage(message);
+
+    // Then
+    verify(eventLogger)
+        .logUacQidEvent(
+            eq(uacQidLink),
+            eq(event.getEvent().getDateTime()),
+            eq("Undelivered mail reported"),
+            eq(EventType.UNDELIVERED_MAIL_REPORTED),
+            eq(event.getEvent()),
+            eq(event.getPayload().getFulfilmentInformation()),
+            eq(expectedDate));
+
+    verify(caseService, never()).saveCaseAndEmitCaseUpdatedEvent(any(), any());
+    verify(caseService, never()).getCaseByCaseRef(anyInt());
+    verify(eventLogger, never()).logCaseEvent(any(), any(), any(), any(), any(), any(), any());
+  }
 }
