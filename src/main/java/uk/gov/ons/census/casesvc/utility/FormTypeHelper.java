@@ -50,6 +50,7 @@ public class FormTypeHelper {
       case 14:
         // CCS Continuation
       case 61:
+      case 62:
       case 63:
         return CONT_FORM_TYPE;
       default:
