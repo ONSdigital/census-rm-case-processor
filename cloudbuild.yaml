@@ -1,0 +1,15 @@
+steps:
+  - name: maven:3-jdk-11
+    entrypoint: mvn
+    args: [ '--version' ]
+  - name: maven:3-jdk-11
+    entrypoint: mvn
+    args: [ 'package','-Dmaven.test.skip=true' ]
+  - name: gcr.io/cloud-builders/docker
+    args: [ 'tag', 'eu.gcr.io/census-rm-ci/rm/census-rm-case-processor:latest','eu.gcr.io/census-rm-ryangrundy/rm/census-rm-case-processor:test_cloud']
+  - name: gcr.io/cloud-builders/docker
+    args: [ 'push', 'eu.gcr.io/census-rm-ryangrundy/rm/census-rm-case-processor:test_cloud' ]
+  - name: bash
+    args: ['echo', '${_TESTING_REPO}']
+images:
+  - 'eu.gcr.io/census-rm-ryangrundy/rm/census-rm-case-processor:test_cloud'
