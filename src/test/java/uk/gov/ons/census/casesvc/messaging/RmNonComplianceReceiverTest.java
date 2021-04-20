@@ -127,6 +127,50 @@ public class RmNonComplianceReceiverTest {
   }
 
   @Test
+  public void testReceiveMessageWithNoFieldOfficerOrCordUpdatesNCFW() {
+    // Given
+    ResponseManagementEvent managementEvent = new ResponseManagementEvent();
+    CollectionCase collectionCase = new CollectionCase();
+    collectionCase.setId(UUID.randomUUID());
+    collectionCase.setNonComplianceStatus(NonComplianceTypeDTO.NCFW);
+    PayloadDTO payloadDTO = new PayloadDTO();
+    payloadDTO.setCollectionCase(collectionCase);
+    managementEvent.setPayload(payloadDTO);
+
+    EventDTO eventDTO = new EventDTO();
+    eventDTO.setDateTime(OffsetDateTime.now());
+    managementEvent.setEvent(eventDTO);
+
+    Message<ResponseManagementEvent> message = constructMessageWithValidTimeStamp(managementEvent);
+    OffsetDateTime expectedDateTime = MsgDateHelper.getMsgTimeStamp(message);
+
+    Case caze = new Case();
+    caze.setCaseId(collectionCase.getId());
+    when(caseService.getCaseByCaseId(any())).thenReturn(caze);
+
+    // When
+    underTest.receiveMessage(message);
+
+    // Then
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseService).saveCaseAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture(), isNull());
+    Case savedCase = caseArgumentCaptor.getValue();
+
+    assertThat(savedCase.getCaseId()).isEqualTo(collectionCase.getId());
+    assertThat(savedCase.getMetadata().getNonCompliance()).isEqualTo(NonComplianceType.NCFW);
+
+    verify(eventLogger)
+        .logCaseEvent(
+            eq(caze),
+            any(),
+            eq("Non Compliance"),
+            eq(EventType.SELECTED_FOR_NON_COMPLIANCE),
+            any(),
+            any(),
+            eq(expectedDateTime));
+  }
+
+  @Test
   public void testFieldCordAndOfficerIdsUpdated() {
     // Given
     ResponseManagementEvent managementEvent = new ResponseManagementEvent();
