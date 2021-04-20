@@ -258,13 +258,13 @@ public class RmNonComplianceReceiverTest {
     assertThat(savedCase.getFieldCoordinatorId()).isEqualTo(FIELD_CORDINATOR_ID);
 
     verify(eventLogger)
-            .logCaseEvent(
-                    eq(caze),
-                    any(),
-                    eq("Non Compliance"),
-                    eq(EventType.SELECTED_FOR_NON_COMPLIANCE),
-                    any(),
-                    any(),
-                    eq(expectedDateTime));
+        .logCaseEvent(
+            eq(caze),
+            any(),
+            eq("Non Compliance"),
+            eq(EventType.SELECTED_FOR_NON_COMPLIANCE),
+            any(),
+            any(),
+            eq(expectedDateTime));
   }
 }
