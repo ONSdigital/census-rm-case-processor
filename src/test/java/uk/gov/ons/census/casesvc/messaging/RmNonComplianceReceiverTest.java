@@ -127,7 +127,51 @@ public class RmNonComplianceReceiverTest {
   }
 
   @Test
-  public void testFieldCordAndOfficerIdsUpdated() {
+  public void testReceiveMessageWithNoFieldOfficerOrCordUpdatesNCFW() {
+    // Given
+    ResponseManagementEvent managementEvent = new ResponseManagementEvent();
+    CollectionCase collectionCase = new CollectionCase();
+    collectionCase.setId(UUID.randomUUID());
+    collectionCase.setNonComplianceStatus(NonComplianceTypeDTO.NCFW);
+    PayloadDTO payloadDTO = new PayloadDTO();
+    payloadDTO.setCollectionCase(collectionCase);
+    managementEvent.setPayload(payloadDTO);
+
+    EventDTO eventDTO = new EventDTO();
+    eventDTO.setDateTime(OffsetDateTime.now());
+    managementEvent.setEvent(eventDTO);
+
+    Message<ResponseManagementEvent> message = constructMessageWithValidTimeStamp(managementEvent);
+    OffsetDateTime expectedDateTime = MsgDateHelper.getMsgTimeStamp(message);
+
+    Case caze = new Case();
+    caze.setCaseId(collectionCase.getId());
+    when(caseService.getCaseByCaseId(any())).thenReturn(caze);
+
+    // When
+    underTest.receiveMessage(message);
+
+    // Then
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseService).saveCaseAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture(), isNull());
+    Case savedCase = caseArgumentCaptor.getValue();
+
+    assertThat(savedCase.getCaseId()).isEqualTo(collectionCase.getId());
+    assertThat(savedCase.getMetadata().getNonCompliance()).isEqualTo(NonComplianceType.NCFW);
+
+    verify(eventLogger)
+        .logCaseEvent(
+            eq(caze),
+            any(),
+            eq("Non Compliance"),
+            eq(EventType.SELECTED_FOR_NON_COMPLIANCE),
+            any(),
+            any(),
+            eq(expectedDateTime));
+  }
+
+  @Test
+  public void testFieldCordAndOfficerIdsUpdatedForFirstLetter() {
     // Given
     ResponseManagementEvent managementEvent = new ResponseManagementEvent();
     CollectionCase collectionCase = new CollectionCase();
@@ -161,6 +205,55 @@ public class RmNonComplianceReceiverTest {
 
     assertThat(savedCase.getCaseId()).isEqualTo(collectionCase.getId());
     assertThat(savedCase.getMetadata().getNonCompliance()).isEqualTo(NonComplianceType.NCL);
+    assertThat(savedCase.getFieldOfficerId()).isEqualTo(FIELD_OFFICER_ID);
+    assertThat(savedCase.getFieldCoordinatorId()).isEqualTo(FIELD_CORDINATOR_ID);
+
+    verify(eventLogger)
+        .logCaseEvent(
+            eq(caze),
+            any(),
+            eq("Non Compliance"),
+            eq(EventType.SELECTED_FOR_NON_COMPLIANCE),
+            any(),
+            any(),
+            eq(expectedDateTime));
+  }
+
+  @Test
+  public void testFieldCordAndOfficerIdsUpdatedForFinalWarningLetter() {
+    // Given
+    ResponseManagementEvent managementEvent = new ResponseManagementEvent();
+    CollectionCase collectionCase = new CollectionCase();
+    collectionCase.setId(UUID.randomUUID());
+    collectionCase.setNonComplianceStatus(NonComplianceTypeDTO.NCFW);
+    collectionCase.setFieldOfficerId(FIELD_OFFICER_ID);
+    collectionCase.setFieldCoordinatorId(FIELD_CORDINATOR_ID);
+
+    PayloadDTO payloadDTO = new PayloadDTO();
+    payloadDTO.setCollectionCase(collectionCase);
+    managementEvent.setPayload(payloadDTO);
+
+    EventDTO eventDTO = new EventDTO();
+    eventDTO.setDateTime(OffsetDateTime.now());
+    managementEvent.setEvent(eventDTO);
+
+    Message<ResponseManagementEvent> message = constructMessageWithValidTimeStamp(managementEvent);
+    OffsetDateTime expectedDateTime = MsgDateHelper.getMsgTimeStamp(message);
+
+    Case caze = new Case();
+    caze.setCaseId(collectionCase.getId());
+    when(caseService.getCaseByCaseId(any())).thenReturn(caze);
+
+    // When
+    underTest.receiveMessage(message);
+
+    // Then
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseService).saveCaseAndEmitCaseUpdatedEvent(caseArgumentCaptor.capture(), isNull());
+    Case savedCase = caseArgumentCaptor.getValue();
+
+    assertThat(savedCase.getCaseId()).isEqualTo(collectionCase.getId());
+    assertThat(savedCase.getMetadata().getNonCompliance()).isEqualTo(NonComplianceType.NCFW);
     assertThat(savedCase.getFieldOfficerId()).isEqualTo(FIELD_OFFICER_ID);
     assertThat(savedCase.getFieldCoordinatorId()).isEqualTo(FIELD_CORDINATOR_ID);
 
