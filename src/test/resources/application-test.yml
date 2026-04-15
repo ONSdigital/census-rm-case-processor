@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:16432/rm
+
+  cloud:
+    gcp:
+      pubsub:
+        emulator-host: localhost:18538
+        project-id: our-project
+
+uacservice:
+  connection:
+    port: 18164
+
+  uacqid-cache-min: 5
+  uacqid-fetch-count: 10
+  uacqid-get-timeout: 1   #seconds
+
+caserefgeneratorkey: rPr3qsjlU42hsDX5npfuCzlyF4UYfDTO

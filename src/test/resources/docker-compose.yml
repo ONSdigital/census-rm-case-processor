@@ -1,0 +1,54 @@
+version: '2.1'
+services:
+  postgres-case-it:
+    container_name: postgres-case-it
+    image: europe-west2-docker.pkg.dev/ssdc-rm-ci/docker/ssdc-rm-dev-common-postgres:latest
+    command: ["-c", "shared_buffers=256MB", "-c", "max_connections=500" ]
+    ports:
+      - "16432:5432"
+
+  uac-qid-case-it:
+    container_name: uac-qid-case-it
+    image: europe-west2-docker.pkg.dev/ssdc-rm-ci/docker/ssdc-rm-uac-qid-service:latest
+    ports:
+      - "18164:8164"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-case-it:5432/rm?sslmode=disable
+      - SPRING_DATASOURCE_USERNAME=appuser
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_PROFILES_ACTIVE=dev
+    volumes:
+      - ./java_healthcheck:/opt/healthcheck/
+    healthcheck:
+      test: [ "CMD", "java", "-jar", "/opt/healthcheck/HealthCheck.jar", "http://localhost:8164/actuator/health" ]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+
+  pubsub-emulator-case-it:
+    container_name: pubsub-emulator-case-it
+    image: europe-west2-docker.pkg.dev/ssdc-rm-ci/docker/gcloud-pubsub-emulator:latest
+    ports:
+      - "18538:8538"
+
+  setup-pubsub-emulator-case-it:
+    container_name: setup-pubsub-emulator-case-it
+    image: europe-west2-docker.pkg.dev/ssdc-rm-ci/docker/gcloud-pubsub-emulator:latest
+    environment:
+      - PUBSUB_SETUP_HOST=pubsub-emulator-case-it:8538
+    volumes:
+      - ./setup_pubsub.sh:/setup_pubsub.sh
+    depends_on:
+      - pubsub-emulator-case-it
+    entrypoint: sh -c "/setup_pubsub.sh"
+
+  start_dependencies:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      uac-qid-case-it:
+        condition: service_healthy
+
+networks:
+  default:
+    external:
+      name: ssdcrmdockerdev_default
