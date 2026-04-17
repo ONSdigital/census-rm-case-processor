@@ -1,6 +1,6 @@
-# ssdc-rm-caseprocessor
+# census-rm-case-processor
 
-Social (and Strategic) Survey Data Collection (SDC) Response Management (RM) Case Processor.
+Census Response Management (RM) Case Processor.
 
 ## Introduction
 

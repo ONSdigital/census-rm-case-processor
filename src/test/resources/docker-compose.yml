@@ -51,4 +51,4 @@ services:
 networks:
   default:
     external:
-      name: ssdcrmdockerdev_default
+      name: censusrmdockerdev_default
