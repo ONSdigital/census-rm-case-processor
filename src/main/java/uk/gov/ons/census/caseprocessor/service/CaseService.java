@@ -15,7 +15,7 @@ import uk.gov.ons.census.caseprocessor.model.dto.RefusalTypeDTO;
 import uk.gov.ons.census.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.census.caseprocessor.utils.EventHelper;
 import uk.gov.ons.census.caseprocessor.utils.RedactHelper;
-import uk.gov.ons.ssdc.common.model.entity.Case;
+import uk.gov.ons.census.common.model.entity.Case;
 
 @Service
 public class CaseService {

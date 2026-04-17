@@ -20,10 +20,10 @@ import uk.gov.ons.census.caseprocessor.model.repository.CaseRepository;
 import uk.gov.ons.census.caseprocessor.model.repository.CollectionExerciseRepository;
 import uk.gov.ons.census.caseprocessor.service.CaseService;
 import uk.gov.ons.census.caseprocessor.utils.CaseRefGenerator;
-import uk.gov.ons.ssdc.common.model.entity.Case;
-import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
-import uk.gov.ons.ssdc.common.model.entity.EventType;
-import uk.gov.ons.ssdc.common.validation.ColumnValidator;
+import uk.gov.ons.census.common.model.entity.Case;
+import uk.gov.ons.census.common.model.entity.CollectionExercise;
+import uk.gov.ons.census.common.model.entity.EventType;
+import uk.gov.ons.census.common.validation.ColumnValidator;
 
 @MessageEndpoint
 public class NewCaseReceiver {

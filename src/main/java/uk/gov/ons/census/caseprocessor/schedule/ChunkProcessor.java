@@ -11,8 +11,8 @@ import uk.gov.ons.census.caseprocessor.model.repository.CaseToProcessRepository;
 import uk.gov.ons.census.caseprocessor.model.repository.FulfilmentToProcessRepository;
 import uk.gov.ons.census.caseprocessor.service.CaseToProcessProcessor;
 import uk.gov.ons.census.caseprocessor.service.ExportFileProcessor;
-import uk.gov.ons.ssdc.common.model.entity.CaseToProcess;
-import uk.gov.ons.ssdc.common.model.entity.FulfilmentToProcess;
+import uk.gov.ons.census.common.model.entity.CaseToProcess;
+import uk.gov.ons.census.common.model.entity.FulfilmentToProcess;
 
 @Component
 public class ChunkProcessor {

@@ -22,7 +22,7 @@ spring:
       ddl-auto: validate
     properties:
       hibernate:
-        default_schema: casev3
+        default_schema: cases
         jdbc:
           batch_size: 1000
           order_inserts: true

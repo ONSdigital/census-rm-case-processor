@@ -9,8 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.caseprocessor.logging.EventLogger;
 import uk.gov.ons.census.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.census.caseprocessor.service.UacService;
-import uk.gov.ons.ssdc.common.model.entity.EventType;
-import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
+import uk.gov.ons.census.common.model.entity.EventType;
+import uk.gov.ons.census.common.model.entity.UacQidLink;
 
 @MessageEndpoint
 public class EqLaunchReceiver {

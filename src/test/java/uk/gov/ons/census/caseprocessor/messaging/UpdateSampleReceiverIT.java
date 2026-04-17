@@ -30,13 +30,13 @@ import uk.gov.ons.census.caseprocessor.testutils.EventsNotFoundException;
 import uk.gov.ons.census.caseprocessor.testutils.JunkDataHelper;
 import uk.gov.ons.census.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.census.caseprocessor.utils.ObjectMapperFactory;
-import uk.gov.ons.ssdc.common.model.entity.Case;
-import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
-import uk.gov.ons.ssdc.common.model.entity.Event;
-import uk.gov.ons.ssdc.common.model.entity.EventType;
-import uk.gov.ons.ssdc.common.validation.ColumnValidator;
-import uk.gov.ons.ssdc.common.validation.MandatoryRule;
-import uk.gov.ons.ssdc.common.validation.Rule;
+import uk.gov.ons.census.common.model.entity.Case;
+import uk.gov.ons.census.common.model.entity.CollectionExercise;
+import uk.gov.ons.census.common.model.entity.Event;
+import uk.gov.ons.census.common.model.entity.EventType;
+import uk.gov.ons.census.common.validation.ColumnValidator;
+import uk.gov.ons.census.common.validation.MandatoryRule;
+import uk.gov.ons.census.common.validation.Rule;
 
 @ContextConfiguration
 @ActiveProfiles("test")

@@ -8,10 +8,10 @@ import static org.mockito.Mockito.verify;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
-import uk.gov.ons.ssdc.common.model.entity.ActionRule;
-import uk.gov.ons.ssdc.common.model.entity.ActionRuleType;
-import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
-import uk.gov.ons.ssdc.common.model.entity.Survey;
+import uk.gov.ons.census.common.model.entity.ActionRule;
+import uk.gov.ons.census.common.model.entity.ActionRuleType;
+import uk.gov.ons.census.common.model.entity.CollectionExercise;
+import uk.gov.ons.census.common.model.entity.Survey;
 
 class CaseClassifierTest {
   @Test
@@ -37,10 +37,10 @@ class CaseClassifierTest {
 
     // Then
     StringBuilder expectedSql = new StringBuilder();
-    expectedSql.append("INSERT INTO casev3.case_to_process (batch_id, batch_quantity,");
+    expectedSql.append("INSERT INTO cases.case_to_process (batch_id, batch_quantity,");
     expectedSql.append(" action_rule_id, caze_id)");
     expectedSql.append(" SELECT ?, COUNT(*) OVER (), ?, id");
-    expectedSql.append(" FROM casev3.cases WHERE collection_exercise_id=");
+    expectedSql.append(" FROM cases.cases WHERE collection_exercise_id=");
     expectedSql.append("'" + collectionExercise.getId().toString() + "'");
     expectedSql.append(" AND foo IN ('bar')");
     verify(jdbcTemplate)

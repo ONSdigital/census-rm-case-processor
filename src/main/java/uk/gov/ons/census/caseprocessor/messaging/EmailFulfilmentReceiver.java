@@ -11,9 +11,9 @@ import uk.gov.ons.census.caseprocessor.model.dto.EmailConfirmation;
 import uk.gov.ons.census.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.census.caseprocessor.service.CaseService;
 import uk.gov.ons.census.caseprocessor.service.UacService;
-import uk.gov.ons.ssdc.common.model.entity.Case;
-import uk.gov.ons.ssdc.common.model.entity.EventType;
-import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
+import uk.gov.ons.census.common.model.entity.Case;
+import uk.gov.ons.census.common.model.entity.EventType;
+import uk.gov.ons.census.common.model.entity.UacQidLink;
 
 @MessageEndpoint
 public class EmailFulfilmentReceiver {

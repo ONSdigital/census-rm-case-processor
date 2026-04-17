@@ -19,9 +19,9 @@ import uk.gov.ons.census.caseprocessor.messaging.MessageSender;
 import uk.gov.ons.census.caseprocessor.model.dto.CloudTaskMessage;
 import uk.gov.ons.census.caseprocessor.model.dto.CloudTaskType;
 import uk.gov.ons.census.caseprocessor.model.dto.EqFlushTaskPayload;
-import uk.gov.ons.ssdc.common.model.entity.ActionRule;
-import uk.gov.ons.ssdc.common.model.entity.Case;
-import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
+import uk.gov.ons.census.common.model.entity.ActionRule;
+import uk.gov.ons.census.common.model.entity.Case;
+import uk.gov.ons.census.common.model.entity.UacQidLink;
 
 @ExtendWith(MockitoExtension.class)
 class EqFlushProcessorTest {

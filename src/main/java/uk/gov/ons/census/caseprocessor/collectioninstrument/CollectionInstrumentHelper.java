@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
-import uk.gov.ons.ssdc.common.model.entity.Case;
+import uk.gov.ons.census.common.model.entity.Case;
 
 @Component
 public class CollectionInstrumentHelper {

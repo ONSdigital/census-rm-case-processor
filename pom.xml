@@ -55,41 +55,41 @@
     </dependencies>
   </dependencyManagement>
 
-  <repositories>
-    <repository>
-      <id>artifact-registry</id>
-      <url>artifactregistry://europe-west2-maven.pkg.dev/ssdc-rm-ci/rm-snapshots</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-        <updatePolicy>always</updatePolicy>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>artifact-registry-prod</id>
-      <url>artifactregistry://europe-west2-maven.pkg.dev/ons-ci-rm/rm-releases</url>
-      <releases>
-        <enabled>true</enabled>
-        <updatePolicy>always</updatePolicy>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
+<!--  <repositories>-->
+<!--    <repository>-->
+<!--      <id>artifact-registry</id>-->
+<!--      <url>artifactregistry://europe-west2-maven.pkg.dev/ssdc-rm-ci/rm-snapshots</url>-->
+<!--      <releases>-->
+<!--        <enabled>false</enabled>-->
+<!--      </releases>-->
+<!--      <snapshots>-->
+<!--        <enabled>true</enabled>-->
+<!--        <updatePolicy>always</updatePolicy>-->
+<!--      </snapshots>-->
+<!--    </repository>-->
+<!--    <repository>-->
+<!--      <id>artifact-registry-prod</id>-->
+<!--      <url>artifactregistry://europe-west2-maven.pkg.dev/ons-ci-rm/rm-releases</url>-->
+<!--      <releases>-->
+<!--        <enabled>true</enabled>-->
+<!--        <updatePolicy>always</updatePolicy>-->
+<!--      </releases>-->
+<!--      <snapshots>-->
+<!--        <enabled>false</enabled>-->
+<!--      </snapshots>-->
+<!--    </repository>-->
+<!--  </repositories>-->
 
   <dependencies>
     <dependency>
-      <groupId>uk.gov.ons.ssdc</groupId>
-      <artifactId>ssdc-rm-common-entity-model</artifactId>
-      <version>4.23.2</version>
+      <groupId>uk.gov.ons.census</groupId>
+      <artifactId>census-rm-common-entity-model</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>uk.gov.ons.ssdc</groupId>
-      <artifactId>ssdc-shared-sample-validation</artifactId>
-      <version>1.6.3</version>
+      <groupId>uk.gov.ons.census</groupId>
+      <artifactId>census-rm-shared-sample-validation</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>

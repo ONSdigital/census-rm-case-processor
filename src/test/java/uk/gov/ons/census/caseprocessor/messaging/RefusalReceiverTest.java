@@ -27,9 +27,9 @@ import uk.gov.ons.census.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.census.caseprocessor.model.dto.RefusalDTO;
 import uk.gov.ons.census.caseprocessor.model.dto.RefusalTypeDTO;
 import uk.gov.ons.census.caseprocessor.service.CaseService;
-import uk.gov.ons.ssdc.common.model.entity.Case;
-import uk.gov.ons.ssdc.common.model.entity.EventType;
-import uk.gov.ons.ssdc.common.model.entity.RefusalType;
+import uk.gov.ons.census.common.model.entity.Case;
+import uk.gov.ons.census.common.model.entity.EventType;
+import uk.gov.ons.census.common.model.entity.RefusalType;
 
 @ExtendWith(MockitoExtension.class)
 public class RefusalReceiverTest {

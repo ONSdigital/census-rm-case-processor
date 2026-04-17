@@ -8,10 +8,10 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import uk.gov.ons.census.caseprocessor.model.repository.ActionRuleRepository;
-import uk.gov.ons.ssdc.common.model.entity.ActionRule;
-import uk.gov.ons.ssdc.common.model.entity.ActionRuleStatus;
-import uk.gov.ons.ssdc.common.model.entity.ActionRuleType;
-import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
+import uk.gov.ons.census.common.model.entity.ActionRule;
+import uk.gov.ons.census.common.model.entity.ActionRuleStatus;
+import uk.gov.ons.census.common.model.entity.ActionRuleType;
+import uk.gov.ons.census.common.model.entity.CollectionExercise;
 
 class ActionRuleProcessorTest {
   private final ActionRuleRepository actionRuleRepository = mock(ActionRuleRepository.class);

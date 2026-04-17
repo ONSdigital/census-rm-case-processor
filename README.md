@@ -117,7 +117,7 @@ filtered out. Receipted, refused and invalid cases are always filtered out.
 The SQL to create an action rule is as follows:
 
 ```sql
-insert into casev3.action_rule
+insert into cases.action_rule
 values ('f2af7113-eb93-4946-930d-3775e81a2666', -- action rule ID
         'left(sample ->> ''REGION'',1) = ''W''', -- classifier (e.g. only Wales region cases)
         'f', -- always false, meaning not triggered

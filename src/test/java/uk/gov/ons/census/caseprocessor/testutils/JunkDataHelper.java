@@ -14,15 +14,15 @@ import uk.gov.ons.census.caseprocessor.model.repository.CollectionExerciseReposi
 import uk.gov.ons.census.caseprocessor.model.repository.ExportFileTemplateRepository;
 import uk.gov.ons.census.caseprocessor.model.repository.FulfilmentSurveyExportFileTemplateRepository;
 import uk.gov.ons.census.caseprocessor.model.repository.SurveyRepository;
-import uk.gov.ons.ssdc.common.model.entity.Case;
-import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
-import uk.gov.ons.ssdc.common.model.entity.CollectionInstrumentSelectionRule;
-import uk.gov.ons.ssdc.common.model.entity.ExportFileTemplate;
-import uk.gov.ons.ssdc.common.model.entity.FulfilmentSurveyExportFileTemplate;
-import uk.gov.ons.ssdc.common.model.entity.Survey;
-import uk.gov.ons.ssdc.common.validation.ColumnValidator;
-import uk.gov.ons.ssdc.common.validation.MandatoryRule;
-import uk.gov.ons.ssdc.common.validation.Rule;
+import uk.gov.ons.census.common.model.entity.Case;
+import uk.gov.ons.census.common.model.entity.CollectionExercise;
+import uk.gov.ons.census.common.model.entity.CollectionInstrumentSelectionRule;
+import uk.gov.ons.census.common.model.entity.ExportFileTemplate;
+import uk.gov.ons.census.common.model.entity.FulfilmentSurveyExportFileTemplate;
+import uk.gov.ons.census.common.model.entity.Survey;
+import uk.gov.ons.census.common.validation.ColumnValidator;
+import uk.gov.ons.census.common.validation.MandatoryRule;
+import uk.gov.ons.census.common.validation.Rule;
 
 @Component
 @ActiveProfiles("test")

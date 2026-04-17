@@ -11,8 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.ons.census.caseprocessor.model.repository.CollectionExerciseRepository;
-import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
-import uk.gov.ons.ssdc.common.model.entity.CollectionInstrumentSelectionRule;
+import uk.gov.ons.census.common.model.entity.CollectionExercise;
+import uk.gov.ons.census.common.model.entity.CollectionInstrumentSelectionRule;
 
 @ExtendWith(MockitoExtension.class)
 class RulesCacheTest {

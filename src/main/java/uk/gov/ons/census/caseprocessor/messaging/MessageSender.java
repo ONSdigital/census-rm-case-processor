@@ -4,7 +4,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.caseprocessor.model.repository.MessageToSendRepository;
 import uk.gov.ons.census.caseprocessor.utils.JsonHelper;
-import uk.gov.ons.ssdc.common.model.entity.MessageToSend;
+import uk.gov.ons.census.common.model.entity.MessageToSend;
 
 @Component
 public class MessageSender {

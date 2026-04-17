@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import uk.gov.ons.ssdc.common.model.entity.MessageToSend;
+import uk.gov.ons.census.common.model.entity.MessageToSend;
 
 @Component
 public class MessageToSendSender {

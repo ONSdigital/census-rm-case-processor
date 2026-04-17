@@ -4,7 +4,7 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ActiveProfiles;
-import uk.gov.ons.ssdc.common.model.entity.Survey;
+import uk.gov.ons.census.common.model.entity.Survey;
 
 @Component
 @ActiveProfiles("test")

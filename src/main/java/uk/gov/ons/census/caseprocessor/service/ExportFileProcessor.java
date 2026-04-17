@@ -18,7 +18,7 @@ import uk.gov.ons.census.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.census.caseprocessor.model.repository.ExportFileRowRepository;
 import uk.gov.ons.census.caseprocessor.utils.EventHelper;
 import uk.gov.ons.census.caseprocessor.utils.HashHelper;
-import uk.gov.ons.ssdc.common.model.entity.*;
+import uk.gov.ons.census.common.model.entity.*;
 
 @Component
 public class ExportFileProcessor {

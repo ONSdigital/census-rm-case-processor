@@ -37,14 +37,14 @@ import uk.gov.ons.census.caseprocessor.model.repository.CollectionExerciseReposi
 import uk.gov.ons.census.caseprocessor.service.CaseService;
 import uk.gov.ons.census.caseprocessor.service.UacService;
 import uk.gov.ons.census.caseprocessor.utils.JsonHelper;
-import uk.gov.ons.ssdc.common.model.entity.Case;
-import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
-import uk.gov.ons.ssdc.common.model.entity.EventType;
-import uk.gov.ons.ssdc.common.model.entity.Survey;
-import uk.gov.ons.ssdc.common.validation.ColumnValidator;
-import uk.gov.ons.ssdc.common.validation.LengthRule;
-import uk.gov.ons.ssdc.common.validation.MandatoryRule;
-import uk.gov.ons.ssdc.common.validation.Rule;
+import uk.gov.ons.census.common.model.entity.Case;
+import uk.gov.ons.census.common.model.entity.CollectionExercise;
+import uk.gov.ons.census.common.model.entity.EventType;
+import uk.gov.ons.census.common.model.entity.Survey;
+import uk.gov.ons.census.common.validation.ColumnValidator;
+import uk.gov.ons.census.common.validation.LengthRule;
+import uk.gov.ons.census.common.validation.MandatoryRule;
+import uk.gov.ons.census.common.validation.Rule;
 
 @ExtendWith(MockitoExtension.class)
 public class NewCaseReceiverTest {

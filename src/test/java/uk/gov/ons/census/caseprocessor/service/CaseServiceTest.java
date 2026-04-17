@@ -24,10 +24,10 @@ import uk.gov.ons.census.caseprocessor.model.dto.CaseUpdateDTO;
 import uk.gov.ons.census.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.census.caseprocessor.model.dto.RefusalTypeDTO;
 import uk.gov.ons.census.caseprocessor.model.repository.CaseRepository;
-import uk.gov.ons.ssdc.common.model.entity.Case;
-import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
-import uk.gov.ons.ssdc.common.model.entity.RefusalType;
-import uk.gov.ons.ssdc.common.model.entity.Survey;
+import uk.gov.ons.census.common.model.entity.Case;
+import uk.gov.ons.census.common.model.entity.CollectionExercise;
+import uk.gov.ons.census.common.model.entity.RefusalType;
+import uk.gov.ons.census.common.model.entity.Survey;
 
 @ExtendWith(MockitoExtension.class)
 public class CaseServiceTest {

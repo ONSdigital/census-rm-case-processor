@@ -1,7 +1,7 @@
 package uk.gov.ons.census.caseprocessor.utils;
 
 import java.util.Optional;
-import uk.gov.ons.ssdc.common.validation.ColumnValidator;
+import uk.gov.ons.census.common.validation.ColumnValidator;
 
 public class SampleValidateHelper {
 

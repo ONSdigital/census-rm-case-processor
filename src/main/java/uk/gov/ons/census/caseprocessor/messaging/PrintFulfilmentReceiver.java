@@ -12,12 +12,12 @@ import uk.gov.ons.census.caseprocessor.logging.EventLogger;
 import uk.gov.ons.census.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.census.caseprocessor.model.repository.FulfilmentToProcessRepository;
 import uk.gov.ons.census.caseprocessor.service.CaseService;
-import uk.gov.ons.ssdc.common.model.entity.Case;
-import uk.gov.ons.ssdc.common.model.entity.EventType;
-import uk.gov.ons.ssdc.common.model.entity.ExportFileTemplate;
-import uk.gov.ons.ssdc.common.model.entity.FulfilmentSurveyExportFileTemplate;
-import uk.gov.ons.ssdc.common.model.entity.FulfilmentToProcess;
-import uk.gov.ons.ssdc.common.model.entity.Survey;
+import uk.gov.ons.census.common.model.entity.Case;
+import uk.gov.ons.census.common.model.entity.EventType;
+import uk.gov.ons.census.common.model.entity.ExportFileTemplate;
+import uk.gov.ons.census.common.model.entity.FulfilmentSurveyExportFileTemplate;
+import uk.gov.ons.census.common.model.entity.FulfilmentToProcess;
+import uk.gov.ons.census.common.model.entity.Survey;
 
 @MessageEndpoint
 public class PrintFulfilmentReceiver {

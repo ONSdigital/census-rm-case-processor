@@ -29,11 +29,11 @@ import uk.gov.ons.census.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.census.caseprocessor.testutils.JunkDataHelper;
 import uk.gov.ons.census.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.census.caseprocessor.testutils.QueueSpy;
-import uk.gov.ons.ssdc.common.model.entity.Case;
-import uk.gov.ons.ssdc.common.model.entity.ExportFileRow;
-import uk.gov.ons.ssdc.common.model.entity.ExportFileTemplate;
-import uk.gov.ons.ssdc.common.model.entity.FulfilmentNextTrigger;
-import uk.gov.ons.ssdc.common.model.entity.FulfilmentSurveyExportFileTemplate;
+import uk.gov.ons.census.common.model.entity.Case;
+import uk.gov.ons.census.common.model.entity.ExportFileRow;
+import uk.gov.ons.census.common.model.entity.ExportFileTemplate;
+import uk.gov.ons.census.common.model.entity.FulfilmentNextTrigger;
+import uk.gov.ons.census.common.model.entity.FulfilmentSurveyExportFileTemplate;
 
 @ContextConfiguration
 @SpringBootTest

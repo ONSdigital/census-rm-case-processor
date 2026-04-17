@@ -4,9 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
-import uk.gov.ons.ssdc.common.validation.ColumnValidator;
-import uk.gov.ons.ssdc.common.validation.LengthRule;
-import uk.gov.ons.ssdc.common.validation.Rule;
+import uk.gov.ons.census.common.validation.ColumnValidator;
+import uk.gov.ons.census.common.validation.LengthRule;
+import uk.gov.ons.census.common.validation.Rule;
 
 class SampleValidateHelperTest {
 

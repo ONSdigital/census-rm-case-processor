@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.caseprocessor.model.repository.MessageToSendRepository;
-import uk.gov.ons.ssdc.common.model.entity.MessageToSend;
+import uk.gov.ons.census.common.model.entity.MessageToSend;
 
 @Component
 public class MessageToSendProcessor {

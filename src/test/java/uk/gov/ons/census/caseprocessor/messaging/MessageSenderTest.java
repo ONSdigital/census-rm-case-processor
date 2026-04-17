@@ -13,7 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.ons.census.caseprocessor.model.dto.CaseUpdateDTO;
 import uk.gov.ons.census.caseprocessor.model.repository.MessageToSendRepository;
 import uk.gov.ons.census.caseprocessor.utils.JsonHelper;
-import uk.gov.ons.ssdc.common.model.entity.MessageToSend;
+import uk.gov.ons.census.common.model.entity.MessageToSend;
 
 @ExtendWith(MockitoExtension.class)
 public class MessageSenderTest {

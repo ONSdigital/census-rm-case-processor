@@ -15,8 +15,8 @@ import uk.gov.ons.census.caseprocessor.model.dto.UacUpdateDTO;
 import uk.gov.ons.census.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.census.caseprocessor.utils.EventHelper;
 import uk.gov.ons.census.caseprocessor.utils.HashHelper;
-import uk.gov.ons.ssdc.common.model.entity.Case;
-import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
+import uk.gov.ons.census.common.model.entity.Case;
+import uk.gov.ons.census.common.model.entity.UacQidLink;
 
 @Service
 public class UacService {

@@ -7,7 +7,7 @@ import org.springframework.integration.annotation.IntegrationComponentScan;
 
 @SpringBootApplication
 @IntegrationComponentScan
-@EntityScan("uk.gov.ons.ssdc.common.model.entity")
+@EntityScan("uk.gov.ons.census.common.model.entity")
 public class Application {
   public static void main(String[] args) {
     SpringApplication.run(Application.class);

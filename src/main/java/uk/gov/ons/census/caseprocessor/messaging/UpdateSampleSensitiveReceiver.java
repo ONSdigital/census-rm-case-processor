@@ -17,8 +17,8 @@ import uk.gov.ons.census.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.census.caseprocessor.model.dto.UpdateSampleSensitive;
 import uk.gov.ons.census.caseprocessor.service.CaseService;
 import uk.gov.ons.census.caseprocessor.utils.SampleValidateHelper;
-import uk.gov.ons.ssdc.common.model.entity.*;
-import uk.gov.ons.ssdc.common.validation.ColumnValidator;
+import uk.gov.ons.census.common.model.entity.*;
+import uk.gov.ons.census.common.validation.ColumnValidator;
 
 @MessageEndpoint
 public class UpdateSampleSensitiveReceiver {

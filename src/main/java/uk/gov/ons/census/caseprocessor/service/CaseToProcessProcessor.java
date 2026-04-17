@@ -2,9 +2,9 @@ package uk.gov.ons.census.caseprocessor.service;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Component;
-import uk.gov.ons.ssdc.common.model.entity.ActionRuleType;
-import uk.gov.ons.ssdc.common.model.entity.CaseToProcess;
-import uk.gov.ons.ssdc.common.model.entity.ExportFileTemplate;
+import uk.gov.ons.census.common.model.entity.ActionRuleType;
+import uk.gov.ons.census.common.model.entity.CaseToProcess;
+import uk.gov.ons.census.common.model.entity.ExportFileTemplate;
 
 @Component
 public class CaseToProcessProcessor {

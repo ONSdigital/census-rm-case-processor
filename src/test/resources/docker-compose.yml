@@ -2,14 +2,14 @@ version: '2.1'
 services:
   postgres-case-it:
     container_name: postgres-case-it
-    image: europe-west2-docker.pkg.dev/ssdc-rm-ci/docker/ssdc-rm-dev-common-postgres:latest
+    image: census-rm-dev-common-postgres:latest
     command: ["-c", "shared_buffers=256MB", "-c", "max_connections=500" ]
     ports:
       - "16432:5432"
 
   uac-qid-case-it:
     container_name: uac-qid-case-it
-    image: europe-west2-docker.pkg.dev/ssdc-rm-ci/docker/ssdc-rm-uac-qid-service:latest
+    image: census-rm-uac-qid-service:latest
     ports:
       - "18164:8164"
     environment:
@@ -27,13 +27,13 @@ services:
 
   pubsub-emulator-case-it:
     container_name: pubsub-emulator-case-it
-    image: europe-west2-docker.pkg.dev/ssdc-rm-ci/docker/gcloud-pubsub-emulator:latest
+    image: gcloud-pubsub-emulator:latest
     ports:
       - "18538:8538"
 
   setup-pubsub-emulator-case-it:
     container_name: setup-pubsub-emulator-case-it
-    image: europe-west2-docker.pkg.dev/ssdc-rm-ci/docker/gcloud-pubsub-emulator:latest
+    image: gcloud-pubsub-emulator:latest
     environment:
       - PUBSUB_SETUP_HOST=pubsub-emulator-case-it:8538
     volumes:

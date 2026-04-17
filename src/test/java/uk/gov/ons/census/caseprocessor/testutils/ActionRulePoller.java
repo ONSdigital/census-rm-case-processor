@@ -6,7 +6,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.ons.census.caseprocessor.model.repository.ActionRuleRepository;
-import uk.gov.ons.ssdc.common.model.entity.ActionRule;
+import uk.gov.ons.census.common.model.entity.ActionRule;
 
 @Component
 @ActiveProfiles("test")

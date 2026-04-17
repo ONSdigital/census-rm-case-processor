@@ -26,10 +26,10 @@ import uk.gov.ons.census.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.census.caseprocessor.model.dto.UacUpdateDTO;
 import uk.gov.ons.census.caseprocessor.model.repository.UacQidLinkRepository;
 import uk.gov.ons.census.caseprocessor.utils.HashHelper;
-import uk.gov.ons.ssdc.common.model.entity.Case;
-import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
-import uk.gov.ons.ssdc.common.model.entity.Survey;
-import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
+import uk.gov.ons.census.common.model.entity.Case;
+import uk.gov.ons.census.common.model.entity.CollectionExercise;
+import uk.gov.ons.census.common.model.entity.Survey;
+import uk.gov.ons.census.common.model.entity.UacQidLink;
 
 @ExtendWith(MockitoExtension.class)
 public class UacServiceTest {

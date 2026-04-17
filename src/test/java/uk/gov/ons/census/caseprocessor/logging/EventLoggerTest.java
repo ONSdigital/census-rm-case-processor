@@ -23,10 +23,10 @@ import uk.gov.ons.census.caseprocessor.model.dto.NewCase;
 import uk.gov.ons.census.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.census.caseprocessor.model.repository.EventRepository;
 import uk.gov.ons.census.caseprocessor.utils.EventHelper;
-import uk.gov.ons.ssdc.common.model.entity.Case;
-import uk.gov.ons.ssdc.common.model.entity.Event;
-import uk.gov.ons.ssdc.common.model.entity.EventType;
-import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
+import uk.gov.ons.census.common.model.entity.Case;
+import uk.gov.ons.census.common.model.entity.Event;
+import uk.gov.ons.census.common.model.entity.EventType;
+import uk.gov.ons.census.common.model.entity.UacQidLink;
 
 @ExtendWith(MockitoExtension.class)
 public class EventLoggerTest {

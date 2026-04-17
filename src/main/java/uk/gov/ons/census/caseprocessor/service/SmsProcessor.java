@@ -11,9 +11,9 @@ import uk.gov.ons.census.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.census.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.census.caseprocessor.model.dto.SmsRequest;
 import uk.gov.ons.census.caseprocessor.utils.EventHelper;
-import uk.gov.ons.ssdc.common.model.entity.ActionRule;
-import uk.gov.ons.ssdc.common.model.entity.Case;
-import uk.gov.ons.ssdc.common.model.entity.EventType;
+import uk.gov.ons.census.common.model.entity.ActionRule;
+import uk.gov.ons.census.common.model.entity.Case;
+import uk.gov.ons.census.common.model.entity.EventType;
 
 @Component
 public class SmsProcessor {

@@ -10,8 +10,8 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.caseprocessor.model.repository.CollectionExerciseRepository;
-import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
-import uk.gov.ons.ssdc.common.model.entity.CollectionInstrumentSelectionRule;
+import uk.gov.ons.census.common.model.entity.CollectionExercise;
+import uk.gov.ons.census.common.model.entity.CollectionInstrumentSelectionRule;
 
 @Component
 public class RulesCache {

@@ -29,8 +29,8 @@ import uk.gov.ons.census.caseprocessor.testutils.JunkDataHelper;
 import uk.gov.ons.census.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.census.caseprocessor.testutils.QueueSpy;
 import uk.gov.ons.census.caseprocessor.utils.HashHelper;
-import uk.gov.ons.ssdc.common.model.entity.Case;
-import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
+import uk.gov.ons.census.common.model.entity.Case;
+import uk.gov.ons.census.common.model.entity.UacQidLink;
 
 @ContextConfiguration
 @ActiveProfiles("test")

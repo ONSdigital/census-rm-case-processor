@@ -28,9 +28,9 @@ import uk.gov.ons.census.caseprocessor.model.repository.FulfilmentToProcessRepos
 import uk.gov.ons.census.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.census.caseprocessor.testutils.JunkDataHelper;
 import uk.gov.ons.census.caseprocessor.testutils.PubsubHelper;
-import uk.gov.ons.ssdc.common.model.entity.Case;
-import uk.gov.ons.ssdc.common.model.entity.ExportFileTemplate;
-import uk.gov.ons.ssdc.common.model.entity.FulfilmentToProcess;
+import uk.gov.ons.census.common.model.entity.Case;
+import uk.gov.ons.census.common.model.entity.ExportFileTemplate;
+import uk.gov.ons.census.common.model.entity.FulfilmentToProcess;
 
 @ContextConfiguration
 @ActiveProfiles("test")

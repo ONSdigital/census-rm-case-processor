@@ -32,13 +32,13 @@ import uk.gov.ons.census.caseprocessor.model.dto.PayloadDTO;
 import uk.gov.ons.census.caseprocessor.model.dto.PrintFulfilmentDTO;
 import uk.gov.ons.census.caseprocessor.model.repository.FulfilmentToProcessRepository;
 import uk.gov.ons.census.caseprocessor.service.CaseService;
-import uk.gov.ons.ssdc.common.model.entity.Case;
-import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
-import uk.gov.ons.ssdc.common.model.entity.EventType;
-import uk.gov.ons.ssdc.common.model.entity.ExportFileTemplate;
-import uk.gov.ons.ssdc.common.model.entity.FulfilmentSurveyExportFileTemplate;
-import uk.gov.ons.ssdc.common.model.entity.FulfilmentToProcess;
-import uk.gov.ons.ssdc.common.model.entity.Survey;
+import uk.gov.ons.census.common.model.entity.Case;
+import uk.gov.ons.census.common.model.entity.CollectionExercise;
+import uk.gov.ons.census.common.model.entity.EventType;
+import uk.gov.ons.census.common.model.entity.ExportFileTemplate;
+import uk.gov.ons.census.common.model.entity.FulfilmentSurveyExportFileTemplate;
+import uk.gov.ons.census.common.model.entity.FulfilmentToProcess;
+import uk.gov.ons.census.common.model.entity.Survey;
 
 @ExtendWith(MockitoExtension.class)
 class PrintFulfilmentReceiverTest {

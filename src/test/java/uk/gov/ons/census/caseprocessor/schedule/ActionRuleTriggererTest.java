@@ -14,8 +14,8 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.BadSqlGrammarException;
 import uk.gov.ons.census.caseprocessor.model.repository.ActionRuleRepository;
-import uk.gov.ons.ssdc.common.model.entity.ActionRule;
-import uk.gov.ons.ssdc.common.model.entity.ActionRuleStatus;
+import uk.gov.ons.census.common.model.entity.ActionRule;
+import uk.gov.ons.census.common.model.entity.ActionRuleStatus;
 
 class ActionRuleTriggererTest {
   private final ActionRuleRepository actionRuleRepository = mock(ActionRuleRepository.class);

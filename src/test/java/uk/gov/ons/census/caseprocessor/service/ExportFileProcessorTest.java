@@ -25,7 +25,7 @@ import uk.gov.ons.census.caseprocessor.model.dto.EventDTO;
 import uk.gov.ons.census.caseprocessor.model.dto.EventHeaderDTO;
 import uk.gov.ons.census.caseprocessor.model.dto.UacQidDTO;
 import uk.gov.ons.census.caseprocessor.model.repository.ExportFileRowRepository;
-import uk.gov.ons.ssdc.common.model.entity.*;
+import uk.gov.ons.census.common.model.entity.*;
 
 @ExtendWith(MockitoExtension.class)
 class ExportFileProcessorTest {

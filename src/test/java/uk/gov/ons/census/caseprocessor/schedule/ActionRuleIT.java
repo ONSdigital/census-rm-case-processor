@@ -36,18 +36,18 @@ import uk.gov.ons.census.caseprocessor.testutils.JsonHelper;
 import uk.gov.ons.census.caseprocessor.testutils.JunkDataHelper;
 import uk.gov.ons.census.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.census.caseprocessor.testutils.QueueSpy;
-import uk.gov.ons.ssdc.common.model.entity.ActionRule;
-import uk.gov.ons.ssdc.common.model.entity.ActionRuleStatus;
-import uk.gov.ons.ssdc.common.model.entity.ActionRuleType;
-import uk.gov.ons.ssdc.common.model.entity.Case;
-import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
-import uk.gov.ons.ssdc.common.model.entity.EmailTemplate;
-import uk.gov.ons.ssdc.common.model.entity.Event;
-import uk.gov.ons.ssdc.common.model.entity.EventType;
-import uk.gov.ons.ssdc.common.model.entity.ExportFileRow;
-import uk.gov.ons.ssdc.common.model.entity.ExportFileTemplate;
-import uk.gov.ons.ssdc.common.model.entity.SmsTemplate;
-import uk.gov.ons.ssdc.common.model.entity.UacQidLink;
+import uk.gov.ons.census.common.model.entity.ActionRule;
+import uk.gov.ons.census.common.model.entity.ActionRuleStatus;
+import uk.gov.ons.census.common.model.entity.ActionRuleType;
+import uk.gov.ons.census.common.model.entity.Case;
+import uk.gov.ons.census.common.model.entity.CollectionExercise;
+import uk.gov.ons.census.common.model.entity.EmailTemplate;
+import uk.gov.ons.census.common.model.entity.Event;
+import uk.gov.ons.census.common.model.entity.EventType;
+import uk.gov.ons.census.common.model.entity.ExportFileRow;
+import uk.gov.ons.census.common.model.entity.ExportFileTemplate;
+import uk.gov.ons.census.common.model.entity.SmsTemplate;
+import uk.gov.ons.census.common.model.entity.UacQidLink;
 
 @ContextConfiguration
 @SpringBootTest

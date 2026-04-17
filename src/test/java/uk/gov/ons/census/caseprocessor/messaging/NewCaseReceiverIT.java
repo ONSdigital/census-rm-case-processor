@@ -30,10 +30,10 @@ import uk.gov.ons.census.caseprocessor.testutils.DeleteDataHelper;
 import uk.gov.ons.census.caseprocessor.testutils.JunkDataHelper;
 import uk.gov.ons.census.caseprocessor.testutils.PubsubHelper;
 import uk.gov.ons.census.caseprocessor.testutils.QueueSpy;
-import uk.gov.ons.ssdc.common.model.entity.Case;
-import uk.gov.ons.ssdc.common.model.entity.CollectionExercise;
-import uk.gov.ons.ssdc.common.model.entity.Event;
-import uk.gov.ons.ssdc.common.model.entity.EventType;
+import uk.gov.ons.census.common.model.entity.Case;
+import uk.gov.ons.census.common.model.entity.CollectionExercise;
+import uk.gov.ons.census.common.model.entity.Event;
+import uk.gov.ons.census.common.model.entity.EventType;
 
 @ContextConfiguration
 @ActiveProfiles("test")
