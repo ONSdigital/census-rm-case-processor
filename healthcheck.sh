@@ -1,0 +1,1 @@
+find /tmp/case-processor-healthy -mmin -1 | egrep '.*'
