@@ -55,7 +55,7 @@ public class FulfilmentRequestReceiver {
       return;
     }
 
-    Case eventCase;
+    Case individualCase = null;
     Case caze;
     UUID caseId;
     String packCode = event.getPayload().getFulfilmentRequest().getFulfilmentCode();
@@ -70,7 +70,7 @@ public class FulfilmentRequestReceiver {
     FulfilmentRequest fulfilmentRequest = event.getPayload().getFulfilmentRequest();
     caseId = fulfilmentRequest.getCaseId();
     caze = caseService.getCase(caseId);
-    eventCase = caze;
+
     UUID individualCaseId = fulfilmentRequest.getIndividualCaseId();
 
     if (individualCaseId != null
@@ -80,10 +80,9 @@ public class FulfilmentRequestReceiver {
               "Received an individualCaseId on fulfilment request for non-individual fulfilment request with pack_code %s, for case Id  %s",
               fulfilmentRequest.getFulfilmentCode(), fulfilmentRequest.getCaseId()));
     }
-
     // Flow for child case if required for fulfilment and parentCase should be HH
     if (checkIndividualCaseRequired(fulfilmentRequest.getFulfilmentCode())
-        && checkParentCaseIsHH(eventCase)) {
+        && checkParentCaseIsHH(caze)) {
 
       if (individualCaseId != null
           && fulfilmentRequestService.isCaseAlreadyExists(individualCaseId)) {
@@ -91,32 +90,37 @@ public class FulfilmentRequestReceiver {
             "Case already exists in the DB for the given individual case id");
       }
 
-      Case individualCase =
+      individualCase =
           fulfilmentRequestService.processFulfilmentForIndividual(
-              event, eventCase, caserefgeneratorkey, individualCaseId);
+              event, caze, caserefgeneratorkey, individualCaseId);
 
-      eventLogger.logCaseEvent(
-          individualCase, "New case created", EventType.NEW_CASE, event, message);
       if (individualCase != null) {
         isIndividualCase = true;
-        caze = individualCase;
       }
     }
 
     // Flow for Fulfilment
     if (isPrintFulfilment) {
-      caze = fulfilmentRequestService.processPrintFulfilmentReceiver(event, caze);
 
-      // logEvents
       if (isIndividualCase) {
-        if (caze != null && eventCase != null && eventCase.getId() != caze.getId()) {
+        individualCase =
+            fulfilmentRequestService.processPrintFulfilmentReceiver(event, individualCase);
+        if (caze != null && individualCase != null && individualCase.getId() != caze.getId()) {
           eventLogger.logCaseEvent(
-              eventCase, PRINT_FULFILMENT_DESCRIPTION, EventType.PRINT_FULFILMENT, event, message);
+              caze, PRINT_FULFILMENT_DESCRIPTION, EventType.PRINT_FULFILMENT, event, message);
+          eventLogger.logCaseEvent(
+              individualCase,
+              PRINT_FULFILMENT_DESCRIPTION,
+              EventType.PRINT_FULFILMENT,
+              event,
+              message);
         }
-      }
-      if (caze != null) {
-        eventLogger.logCaseEvent(
-            caze, PRINT_FULFILMENT_DESCRIPTION, EventType.PRINT_FULFILMENT, event, message);
+      } else {
+        caze = fulfilmentRequestService.processPrintFulfilmentReceiver(event, caze);
+        if (caze != null) {
+          eventLogger.logCaseEvent(
+              caze, PRINT_FULFILMENT_DESCRIPTION, EventType.PRINT_FULFILMENT, event, message);
+        }
       }
 
     } else if (isSMSFulfilment) {
@@ -126,31 +130,45 @@ public class FulfilmentRequestReceiver {
               fulfilmentRequest.getContact().getTelNo())) {
         throw new RuntimeException("Invalid phone number on SMS request message");
       }
-
-      EventDTO smsRequestEnrichedEvent =
-          fulfilmentRequestService.processSMSRequestReceiver(
-              event, smsRequestEnrichedTopic, caze.getId());
-
-      caze =
-          fulfilmentRequestService.processSMSFulfilmentService(
-              smsRequestEnrichedEvent, smsRequestEnrichedTopic, caze);
-
-      // logEvents
       if (isIndividualCase) {
-        if (caze != null && eventCase != null && eventCase.getId() != caze.getId()) {
+        EventDTO smsRequestEnrichedEvent =
+            fulfilmentRequestService.processSMSRequestReceiver(
+                event, smsRequestEnrichedTopic, individualCase.getId());
+
+        individualCase =
+            fulfilmentRequestService.processSMSFulfilmentService(
+                smsRequestEnrichedEvent, smsRequestEnrichedTopic, individualCase);
+
+        if (caze != null && individualCase != null && individualCase.getId() != caze.getId()) {
           eventLogger.logCaseEvent(
-              eventCase, SMS_FULFILMENT_DESCRIPTION, EventType.SMS_FULFILMENT, event, message);
+              caze, SMS_FULFILMENT_DESCRIPTION, EventType.SMS_FULFILMENT, event, message);
+
+          eventLogger.logCaseEvent(
+              individualCase,
+              SMS_FULFILMENT_DESCRIPTION,
+              EventType.SMS_FULFILMENT,
+              smsRequestEnrichedEvent,
+              message);
+        }
+
+      } else {
+        EventDTO smsRequestEnrichedEvent =
+            fulfilmentRequestService.processSMSRequestReceiver(
+                event, smsRequestEnrichedTopic, caze.getId());
+
+        caze =
+            fulfilmentRequestService.processSMSFulfilmentService(
+                smsRequestEnrichedEvent, smsRequestEnrichedTopic, caze);
+        if (caze != null) {
+
+          eventLogger.logCaseEvent(
+              caze,
+              SMS_FULFILMENT_DESCRIPTION,
+              EventType.SMS_FULFILMENT,
+              smsRequestEnrichedEvent,
+              message);
         }
       }
-      if (caze != null) {
-        eventLogger.logCaseEvent(
-            caze,
-            SMS_FULFILMENT_DESCRIPTION,
-            EventType.SMS_FULFILMENT,
-            smsRequestEnrichedEvent,
-            message);
-      }
-
     } else {
       throw new RuntimeException("Invalid pack code on fulfilment request message");
     }

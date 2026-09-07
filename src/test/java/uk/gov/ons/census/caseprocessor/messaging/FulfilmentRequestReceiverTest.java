@@ -200,14 +200,6 @@ public class FulfilmentRequestReceiverTest {
     verify(eventLogger)
         .logCaseEvent(
             eq(childCase),
-            eq("New case created"),
-            eq(EventType.NEW_CASE),
-            any(EventDTO.class),
-            eq(msg));
-
-    verify(eventLogger)
-        .logCaseEvent(
-            eq(childCase),
             eq("Print fulfilment requested"),
             eq(EventType.PRINT_FULFILMENT),
             any(EventDTO.class),
@@ -270,14 +262,6 @@ public class FulfilmentRequestReceiverTest {
     verify(eventLogger)
         .logCaseEvent(
             eq(childCase),
-            eq("New case created"),
-            eq(EventType.NEW_CASE),
-            any(EventDTO.class),
-            eq(msg));
-
-    verify(eventLogger)
-        .logCaseEvent(
-            eq(childCase),
             eq("SMS fulfilment request received"),
             eq(EventType.SMS_FULFILMENT),
             any(EventDTO.class),
@@ -329,14 +313,6 @@ public class FulfilmentRequestReceiverTest {
     verify(eventLogger)
         .logCaseEvent(
             eq(childCase),
-            eq("New case created"),
-            eq(EventType.NEW_CASE),
-            any(EventDTO.class),
-            eq(msg));
-
-    verify(eventLogger)
-        .logCaseEvent(
-            eq(childCase),
             eq("Print fulfilment requested"),
             eq(EventType.PRINT_FULFILMENT),
             any(EventDTO.class),
@@ -368,7 +344,8 @@ public class FulfilmentRequestReceiverTest {
 
     assertTrue(
         ex.getMessage()
-            .contains("does not belongs to Individual Fulfilment request for the case Id"));
+            .contains(
+                "Received an individualCaseId on fulfilment request for non-individual fulfilment request"));
 
     verify(fulfilmentRequestService, never()).processPrintFulfilmentReceiver(any(), any());
     verify(fulfilmentRequestService, never()).processSMSRequestReceiver(any(), any(), any());
