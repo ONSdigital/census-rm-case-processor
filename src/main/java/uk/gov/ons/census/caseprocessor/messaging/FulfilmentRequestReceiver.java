@@ -77,7 +77,7 @@ public class FulfilmentRequestReceiver {
         && !checkIndividualCaseRequired(fulfilmentRequest.getFulfilmentCode())) {
       throw new RuntimeException(
           String.format(
-              "Given pack_code %s does not belongs to Individual Fulfilment request for the case Id %s",
+              "Received an individualCaseId on fulfilment request for non-individual fulfilment request with pack_code %s, for case Id  %s",
               fulfilmentRequest.getFulfilmentCode(), fulfilmentRequest.getCaseId()));
     }
 
