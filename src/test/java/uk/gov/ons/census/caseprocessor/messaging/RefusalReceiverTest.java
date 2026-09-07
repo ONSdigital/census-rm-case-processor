@@ -20,11 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import uk.gov.ons.census.caseprocessor.logging.EventLogger;
-import uk.gov.ons.census.caseprocessor.model.dto.EventDTO;
-import uk.gov.ons.census.caseprocessor.model.dto.EventHeaderDTO;
-import uk.gov.ons.census.caseprocessor.model.dto.PayloadDTO;
-import uk.gov.ons.census.caseprocessor.model.dto.RefusalDTO;
-import uk.gov.ons.census.caseprocessor.model.dto.RefusalTypeDTO;
+import uk.gov.ons.census.caseprocessor.model.dto.*;
 import uk.gov.ons.census.caseprocessor.service.CaseService;
 import uk.gov.ons.census.common.model.entity.Case;
 import uk.gov.ons.census.common.model.entity.EventType;
@@ -75,7 +71,10 @@ class RefusalReceiverTest {
     ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
     verify(caseService)
         .saveCaseAndEmitCaseUpdate(
-            caseArgumentCaptor.capture(), eq(TEST_CORRELATION_ID), eq(TEST_ORIGINATING_USER));
+            caseArgumentCaptor.capture(),
+            eq(TEST_CORRELATION_ID),
+            eq(TEST_ORIGINATING_USER),
+            eq(FieldActionInstruction.CANCEL));
     Case actualCase = caseArgumentCaptor.getValue();
 
     assertThat(actualCase.getId()).isEqualTo(CASE_ID);

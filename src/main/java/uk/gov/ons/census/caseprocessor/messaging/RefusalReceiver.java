@@ -8,6 +8,7 @@ import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.census.caseprocessor.logging.EventLogger;
 import uk.gov.ons.census.caseprocessor.model.dto.EventDTO;
+import uk.gov.ons.census.caseprocessor.model.dto.FieldActionInstruction;
 import uk.gov.ons.census.caseprocessor.model.dto.RefusalDTO;
 import uk.gov.ons.census.caseprocessor.service.CaseService;
 import uk.gov.ons.census.common.model.entity.Case;
@@ -34,7 +35,10 @@ public class RefusalReceiver {
     refusedCase.setRefusalReceived(RefusalType.valueOf(refusal.getType().name()));
 
     caseService.saveCaseAndEmitCaseUpdate(
-        refusedCase, event.getHeader().getCorrelationId(), event.getHeader().getOriginatingUser());
+        refusedCase,
+        event.getHeader().getCorrelationId(),
+        event.getHeader().getOriginatingUser(),
+        FieldActionInstruction.CANCEL);
 
     eventLogger.logCaseEvent(refusedCase, "Refusal Received", EventType.REFUSAL, event, message);
   }
