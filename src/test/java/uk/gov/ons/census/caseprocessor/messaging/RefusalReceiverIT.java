@@ -33,7 +33,7 @@ import uk.gov.ons.census.common.model.entity.EventType;
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 class RefusalReceiverIT {
-  private static final String INBOUND_REFUSAL_TOPIC = "event_refusal";
+  private static final String INBOUND_REFUSAL_TOPIC = "event_refusal-received";
 
   @Value("${queueconfig.case-update-topic}")
   private String caseUpdateTopic;
