@@ -27,13 +27,13 @@ services:
 
   pubsub-emulator-case-it:
     container_name: pubsub-emulator-case-it
-    image: gcloud-pubsub-emulator:latest
+    image: europe-west2-docker.pkg.dev/c31-rm-ci-prod/rm-docker-snapshot/gcloud-pubsub-emulator:latest
     ports:
       - "18538:8538"
 
   setup-pubsub-emulator-case-it:
     container_name: setup-pubsub-emulator-case-it
-    image: gcloud-pubsub-emulator:latest
+    image: europe-west2-docker.pkg.dev/c31-rm-ci-prod/rm-docker-snapshot/gcloud-pubsub-emulator:latest
     environment:
       - PUBSUB_SETUP_HOST=pubsub-emulator-case-it:8538
     volumes:
