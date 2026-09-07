@@ -34,12 +34,19 @@ public class RefusalReceiver {
     Case refusedCase = caseService.getCase(refusal.getCaseId());
     refusedCase.setRefusalReceived(RefusalType.valueOf(refusal.getType().name()));
 
-    caseService.saveCaseAndEmitCaseUpdate(
-        refusedCase,
-        event.getHeader().getCorrelationId(),
-        event.getHeader().getOriginatingUser(),
-        FieldActionInstruction.CANCEL);
-
+    if (!"FIELD".equals(event.getHeader().getChannel())) {
+      caseService.saveCaseAndEmitCaseUpdate(
+          refusedCase,
+          event.getHeader().getCorrelationId(),
+          event.getHeader().getOriginatingUser(),
+          FieldActionInstruction.CANCEL);
+    } else {
+      caseService.saveCaseAndEmitCaseUpdate(
+          refusedCase,
+          event.getHeader().getCorrelationId(),
+          event.getHeader().getOriginatingUser(),
+          null);
+    }
     eventLogger.logCaseEvent(refusedCase, "Refusal Received", EventType.REFUSAL, event, message);
   }
 }

@@ -42,6 +42,8 @@ class RefusalReceiverTest {
     RefusalDTO refusalDTO = new RefusalDTO();
     refusalDTO.setCaseId(CASE_ID);
     refusalDTO.setType(RefusalTypeDTO.HARD_REFUSAL);
+    refusalDTO.setAgentId("0001");
+    refusalDTO.setCallId("0002");
 
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setRefusal(refusalDTO);
@@ -75,6 +77,56 @@ class RefusalReceiverTest {
             eq(TEST_CORRELATION_ID),
             eq(TEST_ORIGINATING_USER),
             eq(FieldActionInstruction.CANCEL));
+    Case actualCase = caseArgumentCaptor.getValue();
+
+    assertThat(actualCase.getId()).isEqualTo(CASE_ID);
+    assertThat(actualCase.getRefusalReceived()).isEqualTo(RefusalType.HARD_REFUSAL);
+
+    verify(eventLogger)
+        .logCaseEvent(
+            eq(caze), eq("Refusal Received"), eq(EventType.REFUSAL), eq(event), eq(message));
+  }
+
+  @Test
+  void testRefusalFromField() {
+    // Given
+    RefusalDTO refusalDTO = new RefusalDTO();
+    refusalDTO.setCaseId(CASE_ID);
+    refusalDTO.setType(RefusalTypeDTO.HARD_REFUSAL);
+
+    PayloadDTO payloadDTO = new PayloadDTO();
+    payloadDTO.setRefusal(refusalDTO);
+
+    EventHeaderDTO eventHeader = new EventHeaderDTO();
+    eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
+    eventHeader.setCorrelationId(TEST_CORRELATION_ID);
+    eventHeader.setOriginatingUser(TEST_ORIGINATING_USER);
+    eventHeader.setChannel("FIELD");
+    eventHeader.setTopic("Test topic");
+    eventHeader.setDateTime(OffsetDateTime.now(ZoneId.of("UTC")));
+
+    EventDTO event = new EventDTO();
+    event.setPayload(payloadDTO);
+    event.setHeader(eventHeader);
+    Message<byte[]> message = constructMessage(event);
+
+    Case caze = new Case();
+    caze.setId(CASE_ID);
+    caze.setRefusalReceived(null);
+
+    when(caseService.getCase(CASE_ID)).thenReturn(caze);
+
+    // When
+    underTest.receiveMessage(message);
+
+    // Then
+    ArgumentCaptor<Case> caseArgumentCaptor = ArgumentCaptor.forClass(Case.class);
+    verify(caseService)
+        .saveCaseAndEmitCaseUpdate(
+            caseArgumentCaptor.capture(),
+            eq(TEST_CORRELATION_ID),
+            eq(TEST_ORIGINATING_USER),
+            eq(null));
     Case actualCase = caseArgumentCaptor.getValue();
 
     assertThat(actualCase.getId()).isEqualTo(CASE_ID);
