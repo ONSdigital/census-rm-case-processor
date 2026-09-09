@@ -78,8 +78,6 @@ class UacServiceTest {
     assertThat(uacUpdateDto.getUacHash()).isEqualTo("test hash");
     assertThat(uacUpdateDto.getQuestionnaireId()).isEqualTo("01234");
     assertThat(uacUpdateDto.getCaseId()).isEqualTo(caze.getId());
-    // assertThat(uacUpdateDto.getSurveyId()).isEqualTo(survey.getId());
-    // assertThat(uacUpdateDto.getCollectionExerciseId()).isEqualTo(collectionExercise.getId());
     assertThat(uacUpdateDto.getFormType()).isEqualTo("H");
   }
 
