@@ -13,7 +13,7 @@
         <maven.compiler.release>${java.version}</maven.compiler.release>
 
         <census-rm-common-entity-model.version>1.0.0-SNAPSHOT</census-rm-common-entity-model.version>
-        <ensus-rm-shared-sample-validation.version>1.0.0-SNAPSHOT</ensus-rm-shared-sample-validation.version>
+        <census-rm-shared-sample-validation.version>1.0.0-SNAPSHOT</census-rm-shared-sample-validation.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <container.cli>docker</container.cli>
 
@@ -121,7 +121,7 @@
         <dependency>
             <groupId>uk.gov.ons.census</groupId>
             <artifactId>census-rm-shared-sample-validation</artifactId>
-            <version>${ensus-rm-shared-sample-validation.version}</version>
+            <version>${census-rm-shared-sample-validation.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
