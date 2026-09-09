@@ -85,7 +85,11 @@ class RefusalReceiverTest {
 
     verify(eventLogger)
         .logCaseEvent(
-            eq(caze), eq("Refusal Received"), eq(EventType.REFUSAL), eq(event), eq(message));
+            eq(caze),
+            eq("Refusal Received"),
+            eq(EventType.REFUSAL_RECEIVED),
+            eq(event),
+            eq(message));
   }
 
   @Test
@@ -135,6 +139,10 @@ class RefusalReceiverTest {
 
     verify(eventLogger)
         .logCaseEvent(
-            eq(caze), eq("Refusal Received"), eq(EventType.REFUSAL), eq(event), eq(message));
+            eq(caze),
+            eq("Refusal Received"),
+            eq(EventType.REFUSAL_RECEIVED),
+            eq(event),
+            eq(message));
   }
 }

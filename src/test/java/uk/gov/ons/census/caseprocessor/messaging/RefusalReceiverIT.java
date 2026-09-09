@@ -67,7 +67,7 @@ class RefusalReceiverIT {
       EventHeaderDTO eventHeader = new EventHeaderDTO();
       eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
       eventHeader.setTopic(INBOUND_REFUSAL_TOPIC);
-      eventHeader.setMessageType(EventType.REFUSAL);
+      eventHeader.setMessageType(EventType.REFUSAL_RECEIVED);
       junkDataHelper.junkify(eventHeader);
       event.setHeader(eventHeader);
 
@@ -89,7 +89,7 @@ class RefusalReceiverIT {
       assertThat(eventRepository.findAll().size()).isEqualTo(1);
       Event databaseEvent = eventRepository.findAll().get(0);
       assertThat(databaseEvent.getCaze().getId()).isEqualTo(caze.getId());
-      assertThat(databaseEvent.getType()).isEqualTo(EventType.REFUSAL);
+      assertThat(databaseEvent.getType()).isEqualTo(EventType.REFUSAL_RECEIVED);
 
       PayloadDTO returnedPayloadDTO =
           convertJsonBytesToObject(databaseEvent.getPayload().getBytes(), PayloadDTO.class);
@@ -118,7 +118,7 @@ class RefusalReceiverIT {
       EventHeaderDTO eventHeader = new EventHeaderDTO();
       eventHeader.setVersion(OUTBOUND_EVENT_SCHEMA_VERSION);
       eventHeader.setTopic(INBOUND_REFUSAL_TOPIC);
-      eventHeader.setMessageType(EventType.REFUSAL);
+      eventHeader.setMessageType(EventType.REFUSAL_RECEIVED);
       eventHeader.setChannel("FIELD");
       junkDataHelper.junkify(eventHeader);
       event.setHeader(eventHeader);
@@ -139,7 +139,7 @@ class RefusalReceiverIT {
       assertThat(eventRepository.findAll().size()).isEqualTo(1);
       Event databaseEvent = eventRepository.findAll().get(0);
       assertThat(databaseEvent.getCaze().getId()).isEqualTo(caze.getId());
-      assertThat(databaseEvent.getType()).isEqualTo(EventType.REFUSAL);
+      assertThat(databaseEvent.getType()).isEqualTo(EventType.REFUSAL_RECEIVED);
       assertThat(databaseEvent.getChannel()).isEqualTo("FIELD");
     }
   }

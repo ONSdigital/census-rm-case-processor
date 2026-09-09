@@ -43,6 +43,7 @@ public class RefusalReceiver {
         event.getHeader().getOriginatingUser(),
         fieldActionInstruction);
 
-    eventLogger.logCaseEvent(refusedCase, "Refusal Received", EventType.REFUSAL, event, message);
+    eventLogger.logCaseEvent(
+        refusedCase, "Refusal Received", EventType.REFUSAL_RECEIVED, event, message);
   }
 }
