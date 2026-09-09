@@ -6,13 +6,14 @@
 
     <groupId>uk.gov.ons.census</groupId>
     <artifactId>census-rm-caseprocessor</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
 
     <properties>
         <java.version>21</java.version>
         <maven.compiler.release>${java.version}</maven.compiler.release>
 
-        <census-rm-shared.version>1.0-SNAPSHOT</census-rm-shared.version>
+        <census-rm-common-entity-model.version>1.0.0-SNAPSHOT</census-rm-common-entity-model.version>
+        <ensus-rm-shared-sample-validation.version>1.0.0-SNAPSHOT</ensus-rm-shared-sample-validation.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <container.cli>docker</container.cli>
 
@@ -115,12 +116,12 @@
         <dependency>
             <groupId>uk.gov.ons.census</groupId>
             <artifactId>census-rm-common-entity-model</artifactId>
-            <version>${census-rm-shared.version}</version>
+            <version>${census-rm-common-entity-model.version}</version>
         </dependency>
         <dependency>
             <groupId>uk.gov.ons.census</groupId>
             <artifactId>census-rm-shared-sample-validation</artifactId>
-            <version>${census-rm-shared.version}</version>
+            <version>${ensus-rm-shared-sample-validation.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -196,13 +197,6 @@
             <version>${spring-retry.version}</version>
         </dependency>
 
-        <!-- TEMPORARY - remove once the upgrade is proven.
-             Logs every renamed/removed configuration property at startup. -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-properties-migrator</artifactId>
-            <scope>runtime</scope>
-        </dependency>
     </dependencies>
 
     <build>
@@ -221,16 +215,6 @@
                     <dependency>
                         <groupId>net.sourceforge.pmd</groupId>
                         <artifactId>pmd-java</artifactId>
-                        <version>${pmd.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>net.sourceforge.pmd</groupId>
-                        <artifactId>pmd-javascript</artifactId>
-                        <version>${pmd.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>net.sourceforge.pmd</groupId>
-                        <artifactId>pmd-jsp</artifactId>
                         <version>${pmd.version}</version>
                     </dependency>
                 </dependencies>
