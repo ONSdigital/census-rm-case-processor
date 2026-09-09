@@ -127,7 +127,7 @@ class RefusalReceiverIT {
 
       //  THEN
       EventDTO actualEvent = outboundCaseQueueSpy.checkExpectedMessageReceived();
-      assertThat(actualEvent.getHeader().getFieldActionInstruction()).isEqualTo(null);
+      assertThat(actualEvent.getHeader().getFieldActionInstruction()).isNull();
 
       CaseUpdateDTO emittedCase = actualEvent.getPayload().getCaseUpdate();
       assertThat(emittedCase.getCaseId()).isEqualTo(caze.getId());

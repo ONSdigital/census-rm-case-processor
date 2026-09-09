@@ -2,6 +2,7 @@ package uk.gov.ons.census.caseprocessor.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.census.caseprocessor.testutils.MessageConstructor.constructMessage;
@@ -126,7 +127,7 @@ class RefusalReceiverTest {
             caseArgumentCaptor.capture(),
             eq(TEST_CORRELATION_ID),
             eq(TEST_ORIGINATING_USER),
-            eq(null));
+            isNull());
     Case actualCase = caseArgumentCaptor.getValue();
 
     assertThat(actualCase.getId()).isEqualTo(CASE_ID);
