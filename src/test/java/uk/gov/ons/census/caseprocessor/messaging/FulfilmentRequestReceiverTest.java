@@ -1,11 +1,11 @@
 package uk.gov.ons.census.caseprocessor.messaging;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -15,6 +15,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import uk.gov.ons.census.caseprocessor.logging.EventLogger;
 import uk.gov.ons.census.caseprocessor.model.dto.*;
 import uk.gov.ons.census.caseprocessor.model.repository.FulfilmentToProcessRepository;
@@ -489,7 +491,7 @@ public class FulfilmentRequestReceiverTest {
             eq(msg)); // TODO: Check warning and fix it.
   }
 
-  private Message<byte[]> buildMessage(EventDTO event) throws JsonProcessingException {
+  private Message<byte[]> buildMessage(EventDTO event) throws JacksonException {
     ObjectMapper mapper = new ObjectMapper();
     byte[] payload = mapper.writeValueAsBytes(event);
     return MessageBuilder.withPayload(payload).build();
