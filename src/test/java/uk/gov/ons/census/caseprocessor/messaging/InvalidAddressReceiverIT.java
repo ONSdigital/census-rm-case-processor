@@ -33,7 +33,7 @@ import uk.gov.ons.census.common.model.entity.EventType;
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 public class InvalidAddressReceiverIT {
-  private static final String INBOUND_INVALID_CASE_TOPIC = "event_invalid-case";
+  private static final String INBOUND_INVALID_CASE_TOPIC = "event_address-not-valid";
 
   @Value("${queueconfig.case-update-topic}")
   private String caseUpdateTopic;

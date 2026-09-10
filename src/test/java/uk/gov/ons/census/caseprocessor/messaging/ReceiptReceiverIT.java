@@ -38,7 +38,7 @@ import uk.gov.ons.census.common.model.entity.UacQidLink;
 public class ReceiptReceiverIT {
   private static final String TEST_QID = "010000";
   private static final UUID TEST_UACLINK_ID = UUID.randomUUID();
-  private static final String INBOUND_RECEIPT_TOPIC = "event_receipt";
+  private static final String INBOUND_RECEIPT_TOPIC = "event_response-received";
 
   @Value("${queueconfig.uac-update-topic}")
   private String uacUpdateTopic;
